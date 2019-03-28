@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# Copyright (c) 2017-2019, Intel Corporation
+
+[Unit]
+Description=Multipath TCP service
+Documentation=man:mptcpd(8)
+
+
+[Service]
+Type=simple
+DynamicUser=yes
+Environment=LD_LIBRARY_PATH=@libdir@
+ExecStart=@libexecdir@/mptcpd --log=journal
+CapabilityBoundingSet=CAP_NET_ADMIN
+LimitNPROC=1
+
+[Install]
+WantedBy=sockets.target

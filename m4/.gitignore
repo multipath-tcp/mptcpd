@@ -1,0 +1,6 @@
+# Ignore everything in this directory
+*
+# Except these files
+!.gitignore
+!ax*.m4
+!mptcpd_flags.m4

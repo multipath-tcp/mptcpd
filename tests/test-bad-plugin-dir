@@ -1,0 +1,11 @@
+#! /bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Test bad mptcpd "--plugin-dir" command line option.
+#
+# Copyright (c) 2019, Intel Corporation
+
+
+set -e
+
+../src/mptcpd --plugin-dir=

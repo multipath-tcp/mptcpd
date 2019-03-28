@@ -1,0 +1,18 @@
+#! /bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Minimal mptcpd start/stop test.
+#
+# Copyright (c) 2018, 2019, Intel Corporation
+
+
+set -e
+
+../src/mptcpd --plugin-dir=$TEST_PLUGIN_DIR &
+
+# @todo It would be better to have some sort of indication that
+#       mptcpd is fully up and running rather than sleep a fixed
+#       amount of time like this.
+sleep 1
+
+kill $!

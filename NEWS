@@ -1,0 +1,29 @@
+27 March 2019 - mptcpd 0.1a
+
+- This is the initial (alpha) release of the Multipath TCP Daemon
+  "mptcpd".  It implements MPTCP path management in the user space by
+  providing a framework that bridges user defined path management
+  strategies - i.e. mptcpd plugins - with the Linux kernel side MPTCP
+  implementation over a generic netlink interface.
+
+- The generic netlink interface employed by the Multipath TCP Daemon
+  is based on an early proposal, and will be superseded by the
+  interface available in the MPTCP development kernel, i.e.:
+        https://github.com/multipath-tcp/mptcp/commit/4ea5dee
+
+- In addition to the kernel/user space path management bridging, the
+  Multipath TCP Daemon also monitors changes to local network
+  interfaces and addresses that path management strategies may choose
+  to leverage.  Currently, network interfaces and addresses may be
+  queried (pulled).  A network event notification mechanism for
+  plugins is currently a work-in-progress.
+
+- A single-subflow-per-interface - "sspi" - plugin is included in the
+  source distribution as a reference.   It enforces a single subflow
+  per network interface per MPTCP connection policy.  Available local
+  addresses are also sent to the kernel so that they may be advertised
+  to the peer through a MPTCP ADD_ADDR option.  The current
+  implementation depends on the remote peer to initiate subflows,
+  which may then be allowed or closed per this plugin's policy.
+  Explicitly adding new subflows through this plugin is currently
+  unsupported, but is expected to be implemented in the future.

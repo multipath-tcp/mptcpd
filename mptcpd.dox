@@ -1,0 +1,42 @@
+/**
+ * @mainpage Mptcpd - Multipath TCP Daemon
+ *
+ *
+ *
+ * @section mptcpd_main_sec mptcpd
+ *
+ *
+ * @subsection config_sec Configuration
+ *
+ *
+ * @note Command line parameters have precedence over their
+ *       configuration file counterparts.
+ *
+ * @section plugins_sec Writing Mptcpd Plugins
+ *
+ * All mptcpd plugins must implement two functions with C linkage:
+ *
+ * @code
+ * @endcode
+ *
+ * Both functions must be exported from the plugin if compile- or
+ * link-time symbol hiding is enabled.
+ *
+ * @subsection make_path_manager make_path_manager()
+ *
+ * The @c make_path_manager() function is a factory function that
+ * returns a pointer to ...
+ *
+ * @subsection destroy_path_manager destroy_path_manager()
+ *
+ * The @c destroy_path_manager() function will be called by the mptcpd
+ * plugin framework when it no longer needs the path manager in
+ * question.
+ *
+ * @subsection linking Link-time Dependencies
+ *
+ * Mptcpd plugins must link against the mptcpd library, @e e.g.
+ * @c libmptcpd on Unix-like platforms.
+ *
+ * @author Ossama Othman @<ossama.othman@@intel.com@>
+ */

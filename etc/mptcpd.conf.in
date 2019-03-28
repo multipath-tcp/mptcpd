@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# Copyright (c) 2018, 2019, Intel Corporation
+
+# ------------------------------------------------------------------
+#                     mptcpd Configuration File
+# ------------------------------------------------------------------
+
+[core]
+# -------------------------
+# Default logging mechanism
+# -------------------------
+#   stderr  - standard unbuffered I/O stream
+#   syslog  - POSIX based system logger
+#   journal - systemd Journal
+#   null    - disable logging
+log=@mptcpd_logger@
+
+# ----------------
+# Plugin directory
+# ----------------
+plugin-dir=@pkglibdir@
+
+# -------------------
+# Path manager plugin
+# ---------------------
+# The plugin found with the most favorable (lowest) priority will be
+# used if one is not specified.
+path-manager=@mptcpd_default_pm@

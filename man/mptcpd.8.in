@@ -1,0 +1,93 @@
+.\" SPDX-License-Identifier: BSD-3-Clause
+.\"
+.\" Copyright (c) 2017-2019, Intel Corporation
+
+.\" Process this file with
+.\" groff -man -Tascii mptcpd.8
+.\"
+.TH MPTCPD 8 "2018-09-13" "Multipath TCP Daemon" "System Management Commands"
+.SH NAME
+mptcpd \- multipath TCP daemon
+.SH SYNOPSIS
+.SY mptcpd
+.OP \-d?V
+.OP \-l DEST
+.OP \-\-debug
+.BI [\-\-plugin\-dir= DIR ]
+.BI [\-\-path\-manager= PLUGIN ]
+.OP \-\-help
+.OP \-\-usage
+.BI [\-\-log= DEST ]
+.OP --version
+.YS
+
+.SH DESCRIPTION
+.B mptcpd
+is a daemon for Linux based operating systems that performs multipath
+TCP (see IETF RFC 6824) path management related operations in the user
+space.  It interacts with the Linux kernel through a generic netlink
+connection to track per-connection information, available network
+interfaces, request new MPTCP subflows, handle requests for subflows,
+etc.
+.SH OPTIONS
+.B mptcpd
+accepts the following command line options:
+
+.TP
+.BR \-d , \-\-debug
+enable debug log messages
+
+.TP
+.BR \-? , \-\-help
+display
+.B mptcpd
+help information
+
+.TP
+.B \-\-usage
+display brief
+.B mptcpd
+usage information
+
+.TP
+.BI \-l \ DEST ,\ \-\-log= DEST
+log output to
+.IR DEST ,
+where
+.I DEST
+can be
+.IR stderr ,
+.I syslog
+or
+.I journal
+
+.TP
+.BI \-\-plugin\-dir= DIR
+set plugin directory to
+.I DIR
+
+.TP
+.BI \-\-path\-manager= PLUGIN
+set default path manager plugin to
+.IR PLUGIN ,
+overriding plugin priorities
+
+.TP
+.BR \-V , \-\-version
+display
+.B mptcpd
+version information
+
+.SH FILES
+.TP
+.I @pkgsysconfdir@/mptcpd.conf
+Location of the mptcpd system configuration file.
+.\" TODO: Describe systemd unit file
+
+.SH BUGS
+Report bugs to
+.MT @PACKAGE_BUGREPORT@
+.ME .
+
+.SH SEE ALSO
+genl(8)

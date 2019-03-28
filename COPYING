@@ -1,0 +1,12 @@
+The Multipath TCP Daemon program and library sources are licensed
+under the 3-Clause BSD License.  The full terms of the license are
+available under:
+
+	  LICENSES/COPYING.BSD
+
+The `include/linux/mptcp_genl.h' header file is licensed under the GPL
+2.0 license with the Linux system call exception.  Full terms are
+available under:
+
+	  LICENSES/COPYING.GPL
+	  LICENSES/Linux-syscall-note

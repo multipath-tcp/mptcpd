@@ -1,0 +1,35 @@
+#! /bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# Copyright (c) 2018, 2019, Intel Corporation
+
+# Mptcpd expects key installation directories and files to only be
+# writable by the owner and group.  This script verifies that the
+# write mode for "other" is not set.
+
+usage()
+{
+    echo "Usage: $0 file|directory ... "
+    exit 1
+}
+
+test -z "$1" && usage
+
+exit_status=0
+
+for p in $@; do
+    # Access rights in human readable form (e.g. "drwxrwxr-x")
+    perms=`stat --dereference --format=%A $p`
+
+    # The write mode for "others".
+    other_write=`echo $perms | sed -e 's/.*\(.\).$/\1/'`
+
+    # Check if the file or directory is writable by "other".
+    if test $other_write != "-"; then
+       echo "ERROR: incorrect permissions ($perms) for '$p'"
+       echo "ERROR: '$p' should only be owner/group writable"
+       exit_status=1
+    fi
+done
+
+exit $exit_status

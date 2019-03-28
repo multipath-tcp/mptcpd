@@ -1,0 +1,11 @@
+#! /bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Test empty mptcpd "--log" command line option.
+#
+# Copyright (c) 2019, Intel Corporation
+
+
+set -e
+
+../src/mptcpd --log=
