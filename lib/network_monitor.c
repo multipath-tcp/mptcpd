@@ -868,10 +868,7 @@ struct mptcpd_nm *mptcpd_nm_create(void)
 {
         struct mptcpd_nm *const nm = l_new(struct mptcpd_nm, 1);
 
-        /**
-         * @note No need to check for @c NULL.  @c l_new() @c abort()s
-         *       on failure.
-         */
+        // No need to check for NULL.  l_new() abort()s on failure.
 
         nm->rtnl = l_netlink_new(NETLINK_ROUTE);
 

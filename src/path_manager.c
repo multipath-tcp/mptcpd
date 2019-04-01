@@ -641,10 +641,7 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 
         struct mptcpd_pm *const pm = l_new(struct mptcpd_pm, 1);
 
-        /**
-         * @note No need to check for @c NULL.  @c l_new() @c abort()s
-         *       on failure.
-         */
+        // No need to check for NULL.  l_new() abort()s on failure.
 
         pm->genl = l_genl_new_default();
         if (pm->genl == NULL) {

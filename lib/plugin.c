@@ -172,11 +172,11 @@ bool mptcpd_plugin_load(char const *dir, char const *default_name)
                                   default_name,
                                   L_ARRAY_SIZE(_default_name));
 
-                /**
-                 * @note No need to check for @c NULL since
-                 *       @c l_hashmap_string_new() @c abort()s on
-                 *       memory allocation failure.
-                 */
+                /*
+                  No need to check for NULL since
+                  l_hashmap_string_new() abort()s on memory allocation
+                  failure.
+                */
 
                 char *const pattern = l_strdup_printf("%s/*.so", dir);
 

@@ -27,18 +27,26 @@
 # include <mptcpd/config-private.h>
 #endif
 
-/*
-  Preprocessor concatentation that expands preprocessor tokens as
-  needed by leveraging the usual indirection technique.
-*/
+/**
+ * @name Preprocessor Based String Concatenation
+ *
+ * Preprocessor concatentation that expands preprocessor tokens as
+ * needed by leveraging the usual indirection technique.
+ */
+//@{
+/// Underlying string concatenation macro.
 #define MPTCPD_CONCAT_IMPL(x, ...) x ## __VA_ARGS__
+
+/// Concatenate strings using the preprocessor.
 #define MPTCPD_CONCAT(x, ...) MPTCPD_CONCAT_IMPL(x, __VA_ARGS__)
+//@}
 
 // Compile-time default logging choice
 #ifndef MPTCPD_LOGGER
 // This should never occur!
 # error Problem configuring default log message destination.
 #endif
+/// Name of the default logging function determined at compile-time.
 #define MPTCPD_SET_LOG_FUNCTION MPTCPD_CONCAT(l_log_set_, MPTCPD_LOGGER)
 
 /**
@@ -81,9 +89,18 @@ static mptcpd_set_log_func_t get_log_set_function(char const *l)
 // ---------------------------------------------------------------
 static char const doc[] = "Start the Multipath TCP daemon.";
 
-// Non-ASCII key values for options without a short option (e.g. -d).
+/**
+ * @name Command Line Option Key Values
+ *
+ * Non-ASCII key values for options without a short option (e.g. -d).
+ */
+//@{
+/// Command line option key for "--plugin-dir".
 #define MPTCPD_PLUGIN_DIR_KEY 0x100
+
+/// Command line option key for "--path-manager".
 #define MPTCPD_PATH_MANAGER_KEY 0x101
+//@}
 
 static struct argp_option const options[] = {
         { "debug", 'd', 0, 0, "Enable debug log messages", 0 },
@@ -109,6 +126,7 @@ static struct argp_option const options[] = {
         { 0 }
 };
 
+/// argp parser function.
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
         struct mptcpd_config *const config = state->input;
@@ -148,11 +166,21 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         return 0;
 }
 
+/// mptcpd argp parser configuration.
 static struct argp const argp = { options, parse_opt, 0, doc, 0, 0, 0 };
 
-// Parse command line arguments.
+/**
+ * @brief Parse command line arguments.
+
+ * @param[in,out] config Mptcpd configuration.
+ * @param[in]     argc   Command line argument count.
+ * @param[in]     argv   Command line argument vector.
+ *
+ * @return @c true on successful command line option parse, and
+ *         @c false otherwise.
+ */
 static bool
-parse_options(int argc, char *argv[], struct mptcpd_config *config)
+parse_options(struct mptcpd_config *config, int argc, char *argv[])
 {
         assert(config != NULL);
 
@@ -161,6 +189,10 @@ parse_options(int argc, char *argv[], struct mptcpd_config *config)
 
         return argp_parse(&argp, argc, argv, 0, NULL, config) == 0;
 }
+
+// ---------------------------------------------------------------
+// Configuration files
+// ---------------------------------------------------------------
 
 /**
  * @brief Verify file permissions are secure.
@@ -201,10 +233,15 @@ static bool check_file_perms(char const *f)
         return perms_ok;
 }
 
-// ---------------------------------------------------------------
-// Configuration files
-// ---------------------------------------------------------------
-
+/**
+ * @brief Parse configuration file.
+ *
+ * @param[in,out] config   Mptcpd configuration.
+ * @param[in]     filename Configuration file name.
+ *
+ * @return @c true on successful configuration file parse, and
+ *         @c false otherwise.
+ */
 static bool parse_config_file(struct mptcpd_config *config,
                               char const *filename)
 {
@@ -263,6 +300,18 @@ static bool parse_config_file(struct mptcpd_config *config,
         return parsed;
 }
 
+/**
+ * @brief Parse configuration files.
+ *
+ * Parse known configuration files, such as the mptcpd system
+ * configuration, those defined by the XDG base directory
+ * specification, etc.
+ *
+ * @param[in,out] config Mptcpd configuration.
+ *
+ * @return @c true on successful configuration file parse, and
+ *         @c false otherwise.
+ */
 static bool parse_config_files(struct mptcpd_config *config)
 {
         assert(config != NULL);
@@ -289,6 +338,8 @@ static bool parse_config_files(struct mptcpd_config *config)
 }
 
 // ---------------------------------------------------------------
+// Public Mptcpd Configuration API
+// ---------------------------------------------------------------
 
 struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
 {
@@ -297,10 +348,7 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
         struct mptcpd_config *const config =
                 l_new(struct mptcpd_config, 1);
 
-        /**
-         * @note No need to check for @c NULL.  @c l_new() @c abort()s
-         *       on failure.
-         */
+        // No need to check for NULL.  l_new() abort()s on failure.
 
         /*
           Configuration priority:
@@ -309,7 +357,7 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
                   3) Compile-time (configure script choice)
          */
         if (!parse_config_files(config)
-            || !parse_options(argc, argv, config)) {
+            || !parse_options(config, argc, argv)) {
                 // Failed to parse configuration.
                 mptcpd_config_destroy(config);
 
