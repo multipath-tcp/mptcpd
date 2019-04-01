@@ -126,6 +126,7 @@ static struct argp_option const options[] = {
         { 0 }
 };
 
+/// argp parser function.
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
         struct mptcpd_config *const config = state->input;
@@ -165,20 +166,21 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
         return 0;
 }
 
+/// mptcpd argp parser configuration.
 static struct argp const argp = { options, parse_opt, 0, doc, 0, 0, 0 };
 
 /**
  * @brief Parse command line arguments.
 
- * @param[in] argc   Command line argument count.
- * @param[in] argv   Command line argument vector.
- * @param[in] config Mptcpd configuration.
+ * @param[in,out] config Mptcpd configuration.
+ * @param[in]     argc   Command line argument count.
+ * @param[in]     argv   Command line argument vector.
  *
  * @return @c true on successful command line option parse, and
  *         @c false otherwise.
  */
 static bool
-parse_options(int argc, char *argv[], struct mptcpd_config *config)
+parse_options(struct mptcpd_config *config, int argc, char *argv[])
 {
         assert(config != NULL);
 
@@ -187,6 +189,10 @@ parse_options(int argc, char *argv[], struct mptcpd_config *config)
 
         return argp_parse(&argp, argc, argv, 0, NULL, config) == 0;
 }
+
+// ---------------------------------------------------------------
+// Configuration files
+// ---------------------------------------------------------------
 
 /**
  * @brief Verify file permissions are secure.
@@ -227,15 +233,11 @@ static bool check_file_perms(char const *f)
         return perms_ok;
 }
 
-// ---------------------------------------------------------------
-// Configuration files
-// ---------------------------------------------------------------
-
 /**
  * @brief Parse configuration file.
  *
- * @param[in] config   Mptcpd configuration.
- * @param[in] filename Configuration file name.
+ * @param[in,out] config   Mptcpd configuration.
+ * @param[in]     filename Configuration file name.
  *
  * @return @c true on successful configuration file parse, and
  *         @c false otherwise.
@@ -298,6 +300,18 @@ static bool parse_config_file(struct mptcpd_config *config,
         return parsed;
 }
 
+/**
+ * @brief Parse configuration files.
+ *
+ * Parse known configuration files, such as the mptcpd system
+ * configuration, those defined by the XDG base directory
+ * specification, etc.
+ *
+ * @param[in,out] config Mptcpd configuration.
+ *
+ * @return @c true on successful configuration file parse, and
+ *         @c false otherwise.
+ */
 static bool parse_config_files(struct mptcpd_config *config)
 {
         assert(config != NULL);
@@ -323,6 +337,8 @@ static bool parse_config_files(struct mptcpd_config *config)
         return parsed;
 }
 
+// ---------------------------------------------------------------
+// Public Mptcpd Configuration API
 // ---------------------------------------------------------------
 
 struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
