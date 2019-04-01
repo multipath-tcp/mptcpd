@@ -27,18 +27,26 @@
 # include <mptcpd/config-private.h>
 #endif
 
-/*
-  Preprocessor concatentation that expands preprocessor tokens as
-  needed by leveraging the usual indirection technique.
-*/
+/**
+ * @name Preprocessor Based String Concatenation
+ *
+ * Preprocessor concatentation that expands preprocessor tokens as
+ * needed by leveraging the usual indirection technique.
+ */
+//@{
+/// Underlying string concatenation macro.
 #define MPTCPD_CONCAT_IMPL(x, ...) x ## __VA_ARGS__
+
+/// Concatenate strings using the preprocessor.
 #define MPTCPD_CONCAT(x, ...) MPTCPD_CONCAT_IMPL(x, __VA_ARGS__)
+//@}
 
 // Compile-time default logging choice
 #ifndef MPTCPD_LOGGER
 // This should never occur!
 # error Problem configuring default log message destination.
 #endif
+/// Name of the default logging function determined at compile-time.
 #define MPTCPD_SET_LOG_FUNCTION MPTCPD_CONCAT(l_log_set_, MPTCPD_LOGGER)
 
 /**
@@ -81,9 +89,18 @@ static mptcpd_set_log_func_t get_log_set_function(char const *l)
 // ---------------------------------------------------------------
 static char const doc[] = "Start the Multipath TCP daemon.";
 
-// Non-ASCII key values for options without a short option (e.g. -d).
+/**
+ * @name Command Line Option Key Values
+ *
+ * Non-ASCII key values for options without a short option (e.g. -d).
+ */
+//@{
+/// Command line option key for "--plugin-dir".
 #define MPTCPD_PLUGIN_DIR_KEY 0x100
+
+/// Command line option key for "--path-manager".
 #define MPTCPD_PATH_MANAGER_KEY 0x101
+//@}
 
 static struct argp_option const options[] = {
         { "debug", 'd', 0, 0, "Enable debug log messages", 0 },
@@ -150,7 +167,16 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
 static struct argp const argp = { options, parse_opt, 0, doc, 0, 0, 0 };
 
-// Parse command line arguments.
+/**
+ * @brief Parse command line arguments.
+
+ * @param[in] argc   Command line argument count.
+ * @param[in] argv   Command line argument vector.
+ * @param[in] config Mptcpd configuration.
+ *
+ * @return @c true on successful command line option parse, and
+ *         @c false otherwise.
+ */
 static bool
 parse_options(int argc, char *argv[], struct mptcpd_config *config)
 {
@@ -205,6 +231,15 @@ static bool check_file_perms(char const *f)
 // Configuration files
 // ---------------------------------------------------------------
 
+/**
+ * @brief Parse configuration file.
+ *
+ * @param[in] config   Mptcpd configuration.
+ * @param[in] filename Configuration file name.
+ *
+ * @return @c true on successful configuration file parse, and
+ *         @c false otherwise.
+ */
 static bool parse_config_file(struct mptcpd_config *config,
                               char const *filename)
 {
