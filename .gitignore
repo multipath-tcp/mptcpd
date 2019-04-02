@@ -33,6 +33,7 @@ config-private.h*
 mptcpd-*/
 *.tar.*
 core*
+doc/
 etc/*.conf
 src/mptcpd
 src/mptcp.service
