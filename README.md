@@ -188,11 +188,11 @@ changed using the following `configure` script command line option.
 
 ## Execution
 `mptcpd` may be started in a number of ways depending on whether or
-not `systemd` is used to run installed binares, or if it is run
-directly from the source distribution (e.g. when debugging development
+not `systemd` is used to run installed binaries, or if it is run
+directly from the source tree (e.g. when debugging development
 versions) without installation.
 
-### Installed Binaries
+### Executing an Installed `mptcpd`
 #### Without `systemd`
 For now, `mptcpd` does not provide a traditional System V "init
 scripts".  In general the `mptcpd` program may be run directly from
@@ -210,8 +210,28 @@ installed in a set of directories unknown to the dynamic linker, e.g.:
 LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH /usr/local/bin/mptcpd
 ```
 
-Alternatively, set and export the `LD_LIBRARY_PATH` environment
-variable once before running `mptcpd`.
+or:
+
+```sh
+# Assumes Bourne shell style environment variable assignment.
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+/usr/local/bin/mptcpd
+```
+
+Alternatively, update the dynamic linker run-time bindings by running
+[`ldconfig`](https://linux.die.net/man/8/ldconfig) after installation
+of `mptcpd`.
+
+*NOTE:* `mptcpd` requires the `CAP_NET_ADMIN`
+[capability](https://linux.die.net/man/7/capabilities) to be fully
+functional.  If not using the provided `systemd` service file
+[`mptcp.service`](src/mptcp.service), the necessary capability may be
+granted to `mptcpd` by any of the following:
+   * Run as `root` (generally not desirable)
+   * Run with a wrapper such as,
+     [`capsh`](https://linux.die.net/man/1/capsh)
+   * Attach the required capabilities to the installed `mptcpd`
+     executable through [`setcap`](https://linux.die.net/man/8/setcap)
 
 #### With `systemd`
 To start `mptcpd` immediately after installation using `systemd` run
@@ -225,7 +245,7 @@ systemctl start mptcp.service
 These steps are not be necessary if the system is rebooted after
 installation of `mptcpd`.
 
-### Uninstalled Binaries
+### Execution of `mptcpd` in the Source Distribution
 Since `mptcpd` is built with `libtool` support it is generally best to
 execute `mptcpd` using `libtool`.  For example, to run `mptcpd` under
 the `gdb` debugger one could do the following, assuming `mptcpd` was
