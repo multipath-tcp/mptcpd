@@ -116,7 +116,7 @@ int main(void)
 
         static int argc = L_ARRAY_SIZE(argv);
 
-        struct test_info info = { NULL };
+        struct test_info info = { .config = NULL };
 
         info.config = mptcpd_config_create(argc, argv);
         assert(info.config);
