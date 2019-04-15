@@ -251,7 +251,7 @@ struct mptcpd_addr const test_raddr_4 = {
 /**
  * @brief Compare equality of two @c mptcpd_addr objects.
  */
-inline bool mptcpd_addr_is_equal(struct mptcpd_addr const *lhs,
+extern bool mptcpd_addr_is_equal(struct mptcpd_addr const *lhs,
                                  struct mptcpd_addr const *rhs)
 {
         if (lhs->address.family == rhs->address.family
@@ -275,7 +275,7 @@ inline bool mptcpd_addr_is_equal(struct mptcpd_addr const *lhs,
         return false;
 }
 
-inline void call_plugin_ops(struct plugin_call_count const *count,
+extern void call_plugin_ops(struct plugin_call_count const *count,
                             char const *name,
                             mptcpd_cid_t connection_id,
                             mptcpd_aid_t laddr_id,
