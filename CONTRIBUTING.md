@@ -116,13 +116,36 @@ LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH make installcheck
 ```
 
 #### Code Style
-mention Clang format
+The Multipath TCP Daemon follows a specific coding style documented
+below through various examples.
+
+[ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) may also
+be used to automatically format code to a close approximation of the
+`mptcpd` code style by running the `clang-format` command with the
+style file [`.clang-format`](.clang-format) in the top-level source
+directory, e.g.:
+```sh
+clang-format -i -style=file file_to_be_formatted.c
+```
+Additional formatting changes may be necessary after running
+`clang-format` to bring the code in compliance with the `mptcpd` code
+style documented below.
 
 ##### Naming Convention
-snake_case
-MACRO_CASE
+Except for preprocessor macros and symbols, all symbols should use
+[`snake_case`](https://en.wikipedia.org/wiki/Snake_case).  Preprocessor
+macros and symbols should use `MACRO_CASE`:
+```c
+#define DOPPLER_EFFECT "Doppler Effect"
+
+static bool is_doppler_effect(char const *str);
+{
+        return strcmp(str, DOPPLER_EFFECT) == 0;
+}
+```
 
 ##### Indentation
+Use an eight space indentation per code block level _without_ tabs, e.g.:
 ```c
 #define MPTCP_GET_NL_ATTR(data, len, attr)                  \
         do {                                                \
@@ -144,7 +167,9 @@ void foo(void)
         }
 }
 ```
+
 ##### Line length
+Whenever possible, lines should not be wider than 74 columns:
 ```c
 void fnord(struct mptcpd_nm const *network_monitor,
            mptcpd_nm_callback callback,
@@ -170,9 +195,26 @@ void fnord(struct mptcpd_nm const *network_monitor,
 }
 ```
 ##### Parameter Alignment
+Function parameters should be aligned on column immediately after the
+opening paranethesis, or split one per line if they cannot all fit on
+a 74 column line.  If after splitting across multiple lines any of the
+parameters extends beyone column 74 shift all parameters down one line
+to the next indentation level:
+```c
+bool hyperbolic_parabaloid_equal(struct hyperbolic_paraboloid const *lhs,
+                                 struct hyperbolic_paraboloid const *rhs);
+
+struct hyperbolic_paraboloid const *get_hyperbolic_parabaloid(
+       struct topology const *t,
+       int *error);
+```
+The same alignment applies to arguments in function calls, control
+statements, etc.
+
 ##### Brace Placement
 ##### Variable Declaration and Initialization
 All C99 features are
+* Declare only one variable declaration per line.
 * Declare variables as close to their first use as possible
   * Mixed Declarations
   * Proximity
@@ -210,6 +252,7 @@ const void *const *const baz;
 void fnord(const long *a);
 ```
 ##### Avoid Hardcoded Values
+Symbolic constants ...
 ##### `const` Correctness
 ##### Parenthesis Space
 ##### Comments
@@ -261,8 +304,8 @@ bool is_valid(int n)
 ```
 ##### Exported Symbols
 ##### Code Documentation
-Mptcpd uses [Doxygen](http://www.doxygen.nl/) as its code
-documentation generation tool, e.g.:
+Document all code using [Doxygen](http://www.doxygen.nl/)
+documentation comments, e.g.:
 ```c
 /**
  * @struct foo
@@ -283,6 +326,9 @@ struct foo
         int baz;
 };
 ```
+Refer to the Doxygen [Special
+Commands](http://www.doxygen.nl/manual/commands.html) documentation
+for details on commands like `@struct` used above.
 #### Patch Submission
 Please submit patches through a [pull
 request](https://help.github.com/en/articles/about-pull-requests).
