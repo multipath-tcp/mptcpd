@@ -31,6 +31,7 @@ archive or from a cloned Git `mptcpd` repository, for example.
     [built-in](https://www.gnu.org/software/libc/manual/html_node/Argp.html)
     or [standalone](http://www.lysator.liu.se/~nisse/misc/))
   * Linux kernel MPTCP user API headers
+  * [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 * Additional Build Dependencies for Maintainers, and `mptcpd` Git
   Repository Clones
   * [GNU Autoconf](https://www.gnu.org/software/autoconf/)
