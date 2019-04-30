@@ -12,7 +12,7 @@
 
 #include <netinet/in.h>
 #include <linux/netlink.h>  // For NLA_* macros.
-#include <linux/mptcp_genl.h>
+#include <linux/mptcp.h>
 
 #include <ell/genl.h>
 #include <ell/log.h>
@@ -55,25 +55,25 @@ struct pm_mcast_group
         char const *const name;
 };
 
-static void new_connection_callback(struct l_genl_msg *msg,
+static void handle_connection_created(struct l_genl_msg *msg,
+                                      void *user_data);
+static void handle_connection_established(struct l_genl_msg *msg,
+                                          void *user_data);
+static void handle_connection_closed(struct l_genl_msg *msg,
+                                     void *user_data);
+static void handle_new_addr(struct l_genl_msg *msg, void *user_data);
+static void handle_addr_removed(struct l_genl_msg *msg, void *user_data);
+static void handle_new_subflow(struct l_genl_msg *msg, void *user_data);
+static void handle_subflow_closed(struct l_genl_msg *msg,
+                                  void *user_data);
+static void handle_priority_changed(struct l_genl_msg *msg,
                                     void *user_data);
-static void new_addr_callback(struct l_genl_msg *msg, void *user_data);
-static void new_subflow_callback(struct l_genl_msg *msg, void *user_data);
-static void subflow_closed_callback(struct l_genl_msg *msg,
-                                    void *user_data);
-static void conn_closed_callback(struct l_genl_msg *msg, void *user_data);
+
+static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data);
 
 static struct pm_mcast_group const pm_mcast_group_map[] = {
-        { .callback = new_connection_callback,
-          .name     = MPTCP_MULTICAST_GROUP_NEW_CONNECTION },
-        { .callback = new_addr_callback,
-          .name     = MPTCP_MULTICAST_GROUP_NEW_ADDR },
-        { .callback = new_subflow_callback,
-          .name     = MPTCP_MULTICAST_GROUP_NEW_SUBFLOW },
-        { .callback = subflow_closed_callback,
-          .name     = MPTCP_MULTICAST_GROUP_SUBFLOW_CLOSED },
-        { .callback = conn_closed_callback,
-          .name     = MPTCP_MULTICAST_GROUP_CONNECTION_CLOSED }
+        { .callback = handle_mptcp_event,
+          .name     = MPTCP_GENL_EV_GRP_NAME }
 };
 
 /**
@@ -115,6 +115,7 @@ static bool validate_attr_len(size_t actual, size_t expected)
                         attr = data;                        \
         } while(0)
 
+#ifdef MPTCPD_ENABLE_PM_NAME
 static char const *get_pm_name(void const *data, size_t len)
 {
         char const *pm_name = NULL;
@@ -132,6 +133,7 @@ static char const *get_pm_name(void const *data, size_t len)
 
         return pm_name;
 }
+#endif // MPTCPD_ENABLE_PM_NAME
 
 static void get_mptcpd_addr(struct in_addr const *addr4,
                             struct in6_addr const *addr6,
@@ -154,8 +156,8 @@ static void get_mptcpd_addr(struct in_addr const *addr4,
         addr->port = port;
 }
 
-static void new_connection_callback(struct l_genl_msg *msg,
-                                    void *user_data)
+static void handle_connection_created(struct l_genl_msg *msg,
+                                      void *user_data)
 {
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
@@ -190,31 +192,33 @@ static void new_connection_callback(struct l_genl_msg *msg,
 
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
-                case MPTCP_GENL_ATTR_CONNECTION_ID:
+                case MPTCP_ATTR_TOKEN:
                         MPTCP_GET_NL_ATTR(data, len, connection_id);
                         break;
-                case MPTCP_GENL_ATTR_LOCAL_IPV4_ADDR:
+                case MPTCP_ATTR_SADDR4:
                         MPTCP_GET_NL_ATTR(data, len, laddr4);
                         break;
-                case MPTCP_GENL_ATTR_LOCAL_IPV6_ADDR:
+                case MPTCP_ATTR_SADDR6:
                         MPTCP_GET_NL_ATTR(data, len, laddr6);
                         break;
-                case MPTCP_GENL_ATTR_LOCAL_PORT:
+                case MPTCP_ATTR_SPORT:
                         MPTCP_GET_NL_ATTR(data, len, local_port);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_IPV4_ADDR:
+                case MPTCP_ATTR_DADDR4:
                         MPTCP_GET_NL_ATTR(data, len, raddr4);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_IPV6_ADDR:
+                case MPTCP_ATTR_DADDR6:
                         MPTCP_GET_NL_ATTR(data, len, raddr6);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_PORT:
+                case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
                         break;
-                case MPTCP_GENL_ATTR_PATH_MANAGER:
+#ifdef MPTCPD_ENABLE_PM_NAME
+                case MPTCP_ATTR_PATH_MANAGER:
                         pm_name = get_pm_name(data, len);
                         break;
-                case MPTCP_GENL_ATTR_BACKUP:
+#endif  // MPTCPD_ENABLE_PM_NAME
+                case MPTCP_ATTR_BACKUP:
                         /*
                           The backup attribute is a NLA_FLAG,
                           meaning its existence *is* the flag.  No
@@ -225,9 +229,8 @@ static void new_connection_callback(struct l_genl_msg *msg,
                         backup = true;
                         break;
                 default:
-                        l_warn("Unknown "
-                               MPTCP_MULTICAST_GROUP_NEW_CONNECTION
-                               " attribute: %d",
+                        l_warn("Unknown MPTCP_EVENT_CREATED "
+                               "attribute: %d",
                                type);
                         break;
                 }
@@ -238,8 +241,8 @@ static void new_connection_callback(struct l_genl_msg *msg,
             || !local_port
             || !(raddr4 || raddr6)
             || !remote_port) {
-                l_error("Required " MPTCP_MULTICAST_GROUP_NEW_CONNECTION
-                        " message attributes are missing.");
+                l_error("Required MPTCP_EVENT_CREATED "
+                        "message attributes are missing.");
 
                 return;
         }
@@ -261,7 +264,63 @@ static void new_connection_callback(struct l_genl_msg *msg,
                                      pm);
 }
 
-static void new_addr_callback(struct l_genl_msg *msg, void *user_data)
+static void handle_connection_established(struct l_genl_msg *msg,
+                                          void *user_data)
+{
+        (void) msg;
+        (void) user_data;
+
+        l_error("%s is currently unimplemented", __func__);
+}
+
+static void handle_connection_closed(struct l_genl_msg *msg,
+                                     void *user_data)
+{
+        struct l_genl_attr attr;
+        if (!l_genl_attr_init(&attr, msg)) {
+                l_error("Unable to initialize genl attribute");
+                return;
+        }
+
+        /*
+          Payload:
+              Connection ID
+         */
+
+        mptcpd_cid_t const *connection_id = NULL;
+
+        uint16_t type;
+        uint16_t len;
+        void const *data = NULL;
+
+        while (l_genl_attr_next(&attr, &type, &len, &data)) {
+                switch (type) {
+                case MPTCP_ATTR_TOKEN:
+                        MPTCP_GET_NL_ATTR(data, len, connection_id);
+                        break;
+                default:
+                        l_warn("Unknown MPTCP_EVENT_CLOSED "
+                               "attribute: %d",
+                               type);
+                        break;
+                }
+        }
+
+        if (!connection_id) {
+                l_error("Required MPTCP_EVENT_CLOSED "
+                        "message attributes are missing.");
+
+                return;
+        }
+
+        l_debug("connection_id: 0x%" MPTCPD_PRIxCID, *connection_id);
+
+        struct mptcpd_pm *const pm = user_data;
+
+        mptcpd_plugin_connection_closed(*connection_id, pm);
+}
+
+static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
 {
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
@@ -289,24 +348,24 @@ static void new_addr_callback(struct l_genl_msg *msg, void *user_data)
 
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
-                case MPTCP_GENL_ATTR_CONNECTION_ID:
+                case MPTCP_ATTR_TOKEN:
                         MPTCP_GET_NL_ATTR(data, len, connection_id);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_ADDRESS_ID:
+                case MPTCP_ATTR_REM_ID:
                         MPTCP_GET_NL_ATTR(data, len, address_id);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_IPV4_ADDR:
+                case MPTCP_ATTR_DADDR4:
                         MPTCP_GET_NL_ATTR(data, len, addr4);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_IPV6_ADDR:
+                case MPTCP_ATTR_DADDR6:
                         MPTCP_GET_NL_ATTR(data, len, addr6);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_PORT:
+                case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, port);
                         break;
                 default:
-                        l_warn("Unknown " MPTCP_MULTICAST_GROUP_NEW_ADDR
-                               " attribute: %d",
+                        l_warn("Unknown MPTCP_EVENT_ANNOUNCED "
+                               "attribute: %d",
                                type);
                         break;
                 }
@@ -316,8 +375,8 @@ static void new_addr_callback(struct l_genl_msg *msg, void *user_data)
             || !address_id
             || !(addr4 || addr6)
             || !port) {
-                l_error("Required " MPTCP_MULTICAST_GROUP_NEW_ADDR
-                        " message attributes are missing.");
+                l_error("Required MPTCP_EVENT_ANNOUNCED "
+                        "message attributes are missing.");
 
                 return;
         }
@@ -332,7 +391,15 @@ static void new_addr_callback(struct l_genl_msg *msg, void *user_data)
         mptcpd_plugin_new_address(*connection_id, *address_id, &addr, pm);
 }
 
-static void new_subflow_callback(struct l_genl_msg *msg, void *user_data)
+static void handle_addr_removed(struct l_genl_msg *msg, void *user_data)
+{
+        (void) msg;
+        (void) user_data;
+
+        l_error("%s is currently unimplemented", __func__);
+}
+
+static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
 {
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
@@ -367,37 +434,36 @@ static void new_subflow_callback(struct l_genl_msg *msg, void *user_data)
 
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
-                case MPTCP_GENL_ATTR_CONNECTION_ID:
+                case MPTCP_ATTR_TOKEN:
                         MPTCP_GET_NL_ATTR(data, len, connection_id);
                         break;
-                case MPTCP_GENL_ATTR_LOCAL_ADDRESS_ID:
+                case MPTCP_ATTR_LOC_ID:
                         MPTCP_GET_NL_ATTR(data, len, laddr_id);
                         break;
-                case MPTCP_GENL_ATTR_LOCAL_IPV4_ADDR:
+                case MPTCP_ATTR_SADDR4:
                         MPTCP_GET_NL_ATTR(data, len, laddr4);
                         break;
-                case MPTCP_GENL_ATTR_LOCAL_IPV6_ADDR:
+                case MPTCP_ATTR_SADDR6:
                         MPTCP_GET_NL_ATTR(data, len, laddr6);
                         break;
-                case MPTCP_GENL_ATTR_LOCAL_PORT:
+                case MPTCP_ATTR_SPORT:
                         MPTCP_GET_NL_ATTR(data, len, local_port);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_ADDRESS_ID:
+                case MPTCP_ATTR_REM_ID:
                         MPTCP_GET_NL_ATTR(data, len, raddr_id);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_IPV4_ADDR:
+                case MPTCP_ATTR_DADDR4:
                         MPTCP_GET_NL_ATTR(data, len, raddr4);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_IPV6_ADDR:
+                case MPTCP_ATTR_DADDR6:
                         MPTCP_GET_NL_ATTR(data, len, raddr6);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_PORT:
+                case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
                         break;
                 default:
-                        l_warn("Unknown "
-                               MPTCP_MULTICAST_GROUP_NEW_SUBFLOW
-                               " attribute: %d",
+                        l_warn("Unknown MPTCP_EVENT_SUB_ESTABLISHED "
+                               "attribute: %d",
                                type);
                         break;
                 }
@@ -410,8 +476,8 @@ static void new_subflow_callback(struct l_genl_msg *msg, void *user_data)
             || !raddr_id
             || !(raddr4 || raddr6)
             || !remote_port) {
-                l_error("Required " MPTCP_MULTICAST_GROUP_NEW_SUBFLOW
-                        " message attributes are missing.");
+                l_error("Required MPTCP_EVENT_SUB_ESTABLISHED "
+                        "message attributes are missing.");
 
                 return;
         }
@@ -432,8 +498,7 @@ static void new_subflow_callback(struct l_genl_msg *msg, void *user_data)
                                   pm);
 }
 
-static void subflow_closed_callback(struct l_genl_msg *msg,
-                                    void *user_data)
+static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
 {
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
@@ -464,31 +529,30 @@ static void subflow_closed_callback(struct l_genl_msg *msg,
 
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
-                case MPTCP_GENL_ATTR_CONNECTION_ID:
+                case MPTCP_ATTR_TOKEN:
                         MPTCP_GET_NL_ATTR(data, len, connection_id);
                         break;
-                case MPTCP_GENL_ATTR_LOCAL_IPV4_ADDR:
+                case MPTCP_ATTR_SADDR4:
                         MPTCP_GET_NL_ATTR(data, len, laddr4);
                         break;
-                case MPTCP_GENL_ATTR_LOCAL_IPV6_ADDR:
+                case MPTCP_ATTR_SADDR6:
                         MPTCP_GET_NL_ATTR(data, len, laddr6);
                         break;
-                case MPTCP_GENL_ATTR_LOCAL_PORT:
+                case MPTCP_ATTR_SPORT:
                         MPTCP_GET_NL_ATTR(data, len, local_port);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_IPV4_ADDR:
+                case MPTCP_ATTR_DADDR4:
                         MPTCP_GET_NL_ATTR(data, len, raddr4);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_IPV6_ADDR:
+                case MPTCP_ATTR_DADDR6:
                         MPTCP_GET_NL_ATTR(data, len, raddr6);
                         break;
-                case MPTCP_GENL_ATTR_REMOTE_PORT:
+                case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
                         break;
                 default:
-                        l_warn("Unknown "
-                               MPTCP_MULTICAST_GROUP_SUBFLOW_CLOSED
-                               " attribute: %d",
+                        l_warn("Unknown MPTCP_EVENT_SUB_CLOSED "
+                               "attribute: %d",
                                type);
                         break;
                 }
@@ -499,8 +563,8 @@ static void subflow_closed_callback(struct l_genl_msg *msg,
             || !local_port
             || !(raddr4 || raddr6)
             || !remote_port) {
-                l_error("Required " MPTCP_MULTICAST_GROUP_SUBFLOW_CLOSED
-                        " message attributes are missing.");
+                l_error("Required MPTCP_EVENT_SUB_CLOSED "
+                        "message attributes are missing.");
 
                 return;
         }
@@ -516,52 +580,58 @@ static void subflow_closed_callback(struct l_genl_msg *msg,
         mptcpd_plugin_subflow_closed(*connection_id, &laddr, &raddr, pm);
 }
 
-static void conn_closed_callback(struct l_genl_msg *msg, void *user_data)
+static void handle_priority_changed(struct l_genl_msg *msg,
+                                    void *user_data)
 {
-        struct l_genl_attr attr;
-        if (!l_genl_attr_init(&attr, msg)) {
-                l_error("Unable to initialize genl attribute");
-                return;
-        }
+        (void) msg;
+        (void) user_data;
 
-        /*
-          Payload:
-              Connection ID
-         */
+        l_error("%s is currently unimplemented", __func__);
+}
 
-        mptcpd_cid_t const *connection_id = NULL;
+static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
+{
+        int const cmd = l_genl_msg_get_command(msg);
 
-        uint16_t type;
-        uint16_t len;
-        void const *data = NULL;
+        assert(cmd != 0);
 
-        while (l_genl_attr_next(&attr, &type, &len, &data)) {
-                switch (type) {
-                case MPTCP_GENL_ATTR_CONNECTION_ID:
-                        MPTCP_GET_NL_ATTR(data, len, connection_id);
-                        break;
-                default:
-                        l_warn("Unknown "
-                               MPTCP_MULTICAST_GROUP_CONNECTION_CLOSED
-                               " attribute: %d",
-                               type);
-                        break;
-                }
-        }
+        switch(cmd) {
+        case MPTCP_EVENT_CREATED:
+                handle_connection_created(msg, user_data);
+                break;
 
-        if (!connection_id) {
-                l_error("Required "
-                        MPTCP_MULTICAST_GROUP_CONNECTION_CLOSED
-                        " message attributes are missing.");
+        case MPTCP_EVENT_ESTABLISHED:
+                handle_connection_established(msg, user_data);
+                break;
 
-                return;
-        }
+        case MPTCP_EVENT_CLOSED:
+                handle_connection_closed(msg, user_data);
+                break;
 
-        l_debug("connection_id: 0x%" MPTCPD_PRIxCID, *connection_id);
+        case MPTCP_EVENT_ANNOUNCED:
+                handle_new_addr(msg, user_data);
+                break;
 
-        struct mptcpd_pm *const pm = user_data;
+        case MPTCP_EVENT_REMOVED:
+                handle_addr_removed(msg, user_data);
+                break;
 
-        mptcpd_plugin_connection_closed(*connection_id, pm);
+        case MPTCP_EVENT_SUB_ESTABLISHED:
+                handle_new_subflow(msg, user_data);
+                break;
+
+        case MPTCP_EVENT_SUB_CLOSED:
+                handle_subflow_closed(msg, user_data);
+                break;
+
+        case MPTCP_EVENT_SUB_PRIORITY:
+                handle_priority_changed(msg, user_data);
+                break;
+
+        default:
+                l_error("Unhandled MPTCP event: %d", cmd);
+                break;
+        };
 }
 
 /**

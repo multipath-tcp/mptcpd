@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 
 #include <linux/netlink.h>
-#include <linux/mptcp_genl.h>
+#include <linux/mptcp.h>
 
 #include <ell/genl.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
@@ -53,11 +53,11 @@ static bool append_addr_attr(struct l_genl_msg *msg,
         uint16_t ipv4_type, ipv6_type;
 
         if (local) {
-                ipv4_type = MPTCP_GENL_ATTR_LOCAL_IPV4_ADDR;
-                ipv6_type = MPTCP_GENL_ATTR_LOCAL_IPV6_ADDR;
+                ipv4_type = MPTCP_ATTR_SADDR4;
+                ipv6_type = MPTCP_ATTR_SADDR6;
         } else {
-                ipv4_type = MPTCP_GENL_ATTR_REMOTE_IPV4_ADDR;
-                ipv6_type = MPTCP_GENL_ATTR_REMOTE_IPV6_ADDR;
+                ipv4_type = MPTCP_ATTR_DADDR4;
+                ipv6_type = MPTCP_ATTR_DADDR6;
         }
 
         return addr->family == AF_INET
@@ -99,7 +99,7 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
 
         /*
           Payload:
-              Connection ID
+              Token
               Address ID
               Local address
               Local port (optional)
@@ -117,23 +117,23 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(addr->port));
 
         struct l_genl_msg *const msg =
-                l_genl_msg_new_sized(MPTCP_GENL_CMD_SEND_ADDR,
+                l_genl_msg_new_sized(MPTCP_CMD_ANNOUNCE,
                                      payload_size);
 
         bool const appended =
                 l_genl_msg_append_attr(msg,
-                                       MPTCP_GENL_ATTR_CONNECTION_ID,
+                                       MPTCP_ATTR_TOKEN,
                                        sizeof(connection_id),
                                        &connection_id)
                 && l_genl_msg_append_attr(
                         msg,
-                        MPTCP_GENL_ATTR_LOCAL_ADDRESS_ID,
+                        MPTCP_ATTR_LOC_ID,
                         sizeof(address_id),
                         &address_id)
                 && append_local_addr_attr(msg, &addr->address)
                 && (addr->port == 0 ||
                     l_genl_msg_append_attr(msg,
-                                           MPTCP_GENL_ATTR_LOCAL_PORT,
+                                           MPTCP_ATTR_SPORT,
                                            sizeof(addr->port),
                                            &addr->port));
 
@@ -164,7 +164,7 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
 
         /*
           Payload:
-              Connection ID
+              Token
               Local address ID
               Local address
               Local port
@@ -192,37 +192,37 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                 + (backup ? NLA_HDRLEN : 0);
 
         struct l_genl_msg *const msg =
-                l_genl_msg_new_sized(MPTCP_GENL_CMD_ADD_SUBFLOW,
+                l_genl_msg_new_sized(MPTCP_CMD_SUB_CREATE,
                                      payload_size);
 
         bool const appended =
                 l_genl_msg_append_attr(msg,
-                                       MPTCP_GENL_ATTR_CONNECTION_ID,
+                                       MPTCP_ATTR_TOKEN,
                                        sizeof(connection_id),
                                        &connection_id)
                 && l_genl_msg_append_attr(
                         msg,
-                        MPTCP_GENL_ATTR_LOCAL_ADDRESS_ID,
+                        MPTCP_ATTR_LOC_ID,
                         sizeof(local_address_id),
                         &local_address_id)
                 && append_local_addr_attr(msg, &local_addr->address)
                 && l_genl_msg_append_attr(msg,
-                                          MPTCP_GENL_ATTR_LOCAL_PORT,
+                                          MPTCP_ATTR_SPORT,
                                           sizeof(local_addr->port),
                                           &local_addr->port)
                 && l_genl_msg_append_attr(
                         msg,
-                        MPTCP_GENL_ATTR_REMOTE_ADDRESS_ID,
+                        MPTCP_ATTR_REM_ID,
                         sizeof(remote_address_id),
                         &remote_address_id)
                 && append_remote_addr_attr(msg, &remote_addr->address)
                 && l_genl_msg_append_attr(msg,
-                                          MPTCP_GENL_ATTR_REMOTE_PORT,
+                                          MPTCP_ATTR_DPORT,
                                           sizeof(remote_addr->port),
                                           &remote_addr->port)
                 && (!backup
                     || l_genl_msg_append_attr(msg,
-                                              MPTCP_GENL_ATTR_BACKUP,
+                                              MPTCP_ATTR_BACKUP,
                                               0,
                                               NULL));  // NLA_FLAG
 
@@ -251,7 +251,7 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
 
         /*
           Payload:
-              Connection ID
+              Token
               Local address
               Local port
               Remote address
@@ -275,27 +275,27 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
                 + (backup ? NLA_HDRLEN : 0);
 
         struct l_genl_msg *const msg =
-                l_genl_msg_new_sized(MPTCP_GENL_CMD_SET_BACKUP,
+                l_genl_msg_new_sized(MPTCP_CMD_SUB_PRIORITY,
                                      payload_size);
 
         bool const appended =
                 l_genl_msg_append_attr(msg,
-                                       MPTCP_GENL_ATTR_CONNECTION_ID,
+                                       MPTCP_ATTR_TOKEN,
                                        sizeof(connection_id),
                                        &connection_id)
                 && append_local_addr_attr(msg, &local_addr->address)
                 && l_genl_msg_append_attr(msg,
-                                          MPTCP_GENL_ATTR_LOCAL_PORT,
+                                          MPTCP_ATTR_SPORT,
                                           sizeof(local_addr->port),
                                           &local_addr->port)
                 && append_remote_addr_attr(msg, &remote_addr->address)
                 && l_genl_msg_append_attr(msg,
-                                          MPTCP_GENL_ATTR_REMOTE_PORT,
+                                          MPTCP_ATTR_DPORT,
                                           sizeof(remote_addr->port),
                                           &remote_addr->port)
                 && (!backup
                     || l_genl_msg_append_attr(msg,
-                                              MPTCP_GENL_ATTR_BACKUP,
+                                              MPTCP_ATTR_BACKUP,
                                               0,
                                               NULL));  // NLA_FLAG
 
@@ -323,7 +323,7 @@ bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
 
         /*
           Payload:
-              Connection ID
+              Token
               Local address
               Local port
               Remote address
@@ -345,22 +345,22 @@ bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(remote_addr->port));
 
         struct l_genl_msg *const msg =
-                l_genl_msg_new_sized(MPTCP_GENL_CMD_REMOVE_SUBFLOW,
+                l_genl_msg_new_sized(MPTCP_CMD_SUB_DESTROY,
                                      payload_size);
 
         bool const appended =
                 l_genl_msg_append_attr(msg,
-                                       MPTCP_GENL_ATTR_CONNECTION_ID,
+                                       MPTCP_ATTR_TOKEN,
                                        sizeof(connection_id),
                                        &connection_id)
                 && append_local_addr_attr(msg, &local_addr->address)
                 && l_genl_msg_append_attr(msg,
-                                          MPTCP_GENL_ATTR_LOCAL_PORT,
+                                          MPTCP_ATTR_SPORT,
                                           sizeof(local_addr->port),
                                           &local_addr->port)
                 && append_remote_addr_attr(msg, &remote_addr->address)
                 && l_genl_msg_append_attr(msg,
-                                          MPTCP_GENL_ATTR_REMOTE_PORT,
+                                          MPTCP_ATTR_DPORT,
                                           sizeof(remote_addr->port),
                                           &remote_addr->port);
 

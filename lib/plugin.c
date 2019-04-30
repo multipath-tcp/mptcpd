@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <linux/mptcp_genl.h>
+#include <linux/mptcp.h>
 
 #include <ell/hashmap.h>
 #include <ell/plugin.h>
@@ -57,6 +57,14 @@ static struct l_hashmap *_pm_plugins;
  */
 static struct l_hashmap *_cid_to_ops;
 
+/**
+ * @todo Remove this preprocessor symbol definition once support for
+ *       path managemnent strategy names are supported in the new
+ *       generic netlink API.
+ */
+#ifndef MPTCPD_ENABLE_PM_NAME
+#define MPTCP_PM_NAME_LEN 16   // Maximum path manager name length
+#endif  // MPTCPD_ENABLE_PM_NAME
 /**
  * @brief Name of default plugin.
  *

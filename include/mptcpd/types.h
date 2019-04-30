@@ -21,7 +21,7 @@ extern "C" {
 /**
  * @todo These rely on MPTCP genl related implementation details in
  *        the kernel. Should we move these typedefs to
- *        <linux/mptcp_genl.h>, e.g. 'typedef uint32_t mptcp_cid_t'?
+ *        @c <linux/mptcp.h>, e.g. 'typedef uint32_t mptcp_cid_t'?
  */
 /// MPTCP connection ID type.
 typedef uint32_t mptcpd_cid_t;
