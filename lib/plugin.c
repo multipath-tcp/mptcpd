@@ -180,10 +180,20 @@ bool mptcpd_plugin_load(char const *dir, char const *default_name)
         if (_pm_plugins == NULL) {
                 _pm_plugins = l_hashmap_string_new();
 
-                if (default_name != NULL)
-                        l_strlcpy(_default_name,
-                                  default_name,
-                                  L_ARRAY_SIZE(_default_name));
+                if (default_name != NULL) {
+                        size_t const len = L_ARRAY_SIZE(_default_name);
+
+                        size_t const src_len =
+                                l_strlcpy(_default_name,
+                                          default_name,
+                                          len);
+
+                        if (src_len > len)
+                                l_warn("Default plugin name length truncated "
+                                       "from %zu to %zu.",
+                                       src_len,
+                                       len);
+                }
 
                 /*
                   No need to check for NULL since
