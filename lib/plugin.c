@@ -24,6 +24,19 @@
 
 #include <mptcpd/plugin.h>
 
+/**
+ * @todo Remove this preprocessor symbol definition once support for
+ *       path managemnent strategy names are supported in the new
+ *       generic netlink API.
+ *
+ * @note @c GENL_NAMSIZ is used as the size since the path manager
+ *       name attribute in the deprecated MPTCP generic netlink API
+ *       contained a fixed length string of that size.
+ */
+#ifndef MPTCP_PM_NAME_LEN
+# include <linux/genetlink.h>  // For GENL_NAMSIZ
+# define MPTCP_PM_NAME_LEN GENL_NAMSIZ
+#endif
 
 // ----------------------------------------------------------------
 //                         Global variables
@@ -57,14 +70,6 @@ static struct l_hashmap *_pm_plugins;
  */
 static struct l_hashmap *_cid_to_ops;
 
-/**
- * @todo Remove this preprocessor symbol definition once support for
- *       path managemnent strategy names are supported in the new
- *       generic netlink API.
- */
-#ifndef MPTCPD_ENABLE_PM_NAME
-#define MPTCP_PM_NAME_LEN 16   // Maximum path manager name length
-#endif  // MPTCPD_ENABLE_PM_NAME
 /**
  * @brief Name of default plugin.
  *
