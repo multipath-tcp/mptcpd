@@ -153,7 +153,7 @@ static void handle_connection_created(struct l_genl_msg *msg,
 
         /*
           Payload:
-              Connection ID
+              Token
               Local address
               Local port
               Remote address
@@ -162,15 +162,15 @@ static void handle_connection_created(struct l_genl_msg *msg,
               Path management strategy (optional)
         */
 
-        mptcpd_cid_t    const *connection_id = NULL;
-        struct in_addr  const *laddr4        = NULL;
-        struct in_addr  const *raddr4        = NULL;
-        struct in6_addr const *laddr6        = NULL;
-        struct in6_addr const *raddr6        = NULL;
-        in_port_t       const *local_port    = NULL;
-        in_port_t       const *remote_port   = NULL;
-        char            const *pm_name       = NULL;
-        bool backup                          = false;
+        mptcpd_token_t  const *token       = NULL;
+        struct in_addr  const *laddr4      = NULL;
+        struct in_addr  const *raddr4      = NULL;
+        struct in6_addr const *laddr6      = NULL;
+        struct in6_addr const *raddr6      = NULL;
+        in_port_t       const *local_port  = NULL;
+        in_port_t       const *remote_port = NULL;
+        char            const *pm_name     = NULL;
+        bool backup                        = false;
 
         uint16_t type;
         uint16_t len;
@@ -179,7 +179,7 @@ static void handle_connection_created(struct l_genl_msg *msg,
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
                 case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, connection_id);
+                        MPTCP_GET_NL_ATTR(data, len, token);
                         break;
                 case MPTCP_ATTR_SADDR4:
                         MPTCP_GET_NL_ATTR(data, len, laddr4);
@@ -222,7 +222,7 @@ static void handle_connection_created(struct l_genl_msg *msg,
                 }
         }
 
-        if (!connection_id
+        if (!token
             || !(laddr4 || laddr6)
             || !local_port
             || !(raddr4 || raddr6)
@@ -233,7 +233,7 @@ static void handle_connection_created(struct l_genl_msg *msg,
                 return;
         }
 
-        l_debug("connection_id: 0x%" MPTCPD_PRIxCID, *connection_id);
+        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
         l_debug("backup: %d", backup);
 
         struct mptcpd_pm *const pm = user_data;
@@ -243,7 +243,7 @@ static void handle_connection_created(struct l_genl_msg *msg,
         get_mptcpd_addr(raddr4, raddr6, *remote_port, &raddr);
 
         mptcpd_plugin_new_connection(pm_name,
-                                     *connection_id,
+                                     *token,
                                      &laddr,
                                      &raddr,
                                      backup,
@@ -270,10 +270,10 @@ static void handle_connection_closed(struct l_genl_msg *msg,
 
         /*
           Payload:
-              Connection ID
+              Token
          */
 
-        mptcpd_cid_t const *connection_id = NULL;
+        mptcpd_token_t const *token = NULL;
 
         uint16_t type;
         uint16_t len;
@@ -282,7 +282,7 @@ static void handle_connection_closed(struct l_genl_msg *msg,
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
                 case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, connection_id);
+                        MPTCP_GET_NL_ATTR(data, len, token);
                         break;
                 default:
                         l_warn("Unknown MPTCP_EVENT_CLOSED "
@@ -292,18 +292,18 @@ static void handle_connection_closed(struct l_genl_msg *msg,
                 }
         }
 
-        if (!connection_id) {
+        if (!token) {
                 l_error("Required MPTCP_EVENT_CLOSED "
                         "message attributes are missing.");
 
                 return;
         }
 
-        l_debug("connection_id: 0x%" MPTCPD_PRIxCID, *connection_id);
+        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_connection_closed(*connection_id, pm);
+        mptcpd_plugin_connection_closed(*token, pm);
 }
 
 static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
@@ -316,17 +316,17 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
 
         /*
           Payload:
-              Connection ID
+              Token
               Remote address ID
               Remote address
               Remote port
         */
 
-        mptcpd_cid_t    const *connection_id = NULL;
-        mptcpd_aid_t    const *address_id    = NULL;
-        struct in_addr  const *addr4         = NULL;
-        struct in6_addr const *addr6         = NULL;
-        in_port_t       const *port          = NULL;
+        mptcpd_token_t  const *token      = NULL;
+        mptcpd_aid_t    const *address_id = NULL;
+        struct in_addr  const *addr4      = NULL;
+        struct in6_addr const *addr6      = NULL;
+        in_port_t       const *port       = NULL;
 
         uint16_t type;
         uint16_t len;
@@ -335,7 +335,7 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
                 case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, connection_id);
+                        MPTCP_GET_NL_ATTR(data, len, token);
                         break;
                 case MPTCP_ATTR_REM_ID:
                         MPTCP_GET_NL_ATTR(data, len, address_id);
@@ -357,7 +357,7 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
                 }
         }
 
-        if (!connection_id
+        if (!token
             || !address_id
             || !(addr4 || addr6)
             || !port) {
@@ -367,14 +367,14 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
                 return;
         }
 
-        l_debug("connection_id: 0x%" MPTCPD_PRIxCID, *connection_id);
+        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
 
         struct mptcpd_addr addr;
         get_mptcpd_addr(addr4, addr6, *port, &addr);
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_new_address(*connection_id, *address_id, &addr, pm);
+        mptcpd_plugin_new_address(*token, *address_id, &addr, pm);
 }
 
 static void handle_addr_removed(struct l_genl_msg *msg, void *user_data)
@@ -395,7 +395,7 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
 
         /*
           Payload:
-              Connection ID
+              Token
               Local address ID
               Local address
               Local port
@@ -404,15 +404,15 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
               Remote port
          */
 
-        mptcpd_cid_t    const *connection_id = NULL;
-        mptcpd_aid_t    const *laddr_id      = NULL;
-        mptcpd_aid_t    const *raddr_id      = NULL;
-        struct in_addr  const *laddr4        = NULL;
-        struct in_addr  const *raddr4        = NULL;
-        struct in6_addr const *laddr6        = NULL;
-        struct in6_addr const *raddr6        = NULL;
-        in_port_t       const *local_port    = NULL;
-        in_port_t       const *remote_port   = NULL;
+        mptcpd_token_t  const *token       = NULL;
+        mptcpd_aid_t    const *laddr_id    = NULL;
+        mptcpd_aid_t    const *raddr_id    = NULL;
+        struct in_addr  const *laddr4      = NULL;
+        struct in_addr  const *raddr4      = NULL;
+        struct in6_addr const *laddr6      = NULL;
+        struct in6_addr const *raddr6      = NULL;
+        in_port_t       const *local_port  = NULL;
+        in_port_t       const *remote_port = NULL;
 
         uint16_t type;
         uint16_t len;
@@ -421,7 +421,7 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
                 case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, connection_id);
+                        MPTCP_GET_NL_ATTR(data, len, token);
                         break;
                 case MPTCP_ATTR_LOC_ID:
                         MPTCP_GET_NL_ATTR(data, len, laddr_id);
@@ -455,7 +455,7 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
                 }
         }
 
-        if (!connection_id
+        if (!token
             || !laddr_id
             || !(laddr4 || laddr6)
             || !local_port
@@ -468,7 +468,7 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
                 return;
         }
 
-        l_debug("connection_id: 0x%" MPTCPD_PRIxCID, *connection_id);
+        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
 
         struct mptcpd_addr laddr, raddr;
         get_mptcpd_addr(laddr4, laddr6, *local_port,  &laddr);
@@ -476,7 +476,7 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_new_subflow(*connection_id,
+        mptcpd_plugin_new_subflow(*token,
                                   *laddr_id,
                                   &laddr,
                                   *raddr_id,
@@ -494,14 +494,14 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
 
         /*
           Payload:
-              Connection ID
+              Token
               Local address
               Local port
               Remote address
               Remote port
          */
 
-        mptcpd_cid_t const *connection_id  = NULL;
+        mptcpd_token_t  const *token       = NULL;
         struct in_addr  const *laddr4      = NULL;
         struct in_addr  const *raddr4      = NULL;
         struct in6_addr const *laddr6      = NULL;
@@ -516,7 +516,7 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
                 case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, connection_id);
+                        MPTCP_GET_NL_ATTR(data, len, token);
                         break;
                 case MPTCP_ATTR_SADDR4:
                         MPTCP_GET_NL_ATTR(data, len, laddr4);
@@ -544,7 +544,7 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
                 }
         }
 
-        if (!connection_id
+        if (!token
             || !(laddr4 || laddr6)
             || !local_port
             || !(raddr4 || raddr6)
@@ -555,7 +555,7 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
                 return;
         }
 
-        l_debug("connection_id: 0x%" MPTCPD_PRIxCID, *connection_id);
+        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
 
         struct mptcpd_addr laddr, raddr;
         get_mptcpd_addr(laddr4, laddr6, *local_port,  &laddr);
@@ -563,7 +563,7 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_subflow_closed(*connection_id, &laddr, &raddr, pm);
+        mptcpd_plugin_subflow_closed(*token, &laddr, &raddr, pm);
 }
 
 static void handle_priority_changed(struct l_genl_msg *msg,

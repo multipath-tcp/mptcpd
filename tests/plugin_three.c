@@ -29,13 +29,13 @@ static struct plugin_call_count call_count;
 
 // ----------------------------------------------------------------
 
-static void plugin_three_new_connection(mptcpd_cid_t connection_id,
+static void plugin_three_new_connection(mptcpd_token_t token,
                                         struct mptcpd_addr const *laddr,
                                         struct mptcpd_addr const *raddr,
                                         bool backup,
                                         struct mptcpd_pm *pm)
 {
-        (void) connection_id;
+        (void) token;
         (void) laddr;
         (void) raddr;
         (void) backup;
@@ -44,12 +44,12 @@ static void plugin_three_new_connection(mptcpd_cid_t connection_id,
         ++call_count.new_connection;
 }
 
-static void plugin_three_new_address(mptcpd_cid_t connection_id,
+static void plugin_three_new_address(mptcpd_token_t token,
                                      mptcpd_aid_t addr_id,
                                      struct mptcpd_addr const *addr,
                                      struct mptcpd_pm *pm)
 {
-        (void) connection_id;
+        (void) token;
         (void) addr_id;
         (void) addr;
         (void) pm;
@@ -57,14 +57,14 @@ static void plugin_three_new_address(mptcpd_cid_t connection_id,
         ++call_count.new_address;
 }
 
-static void plugin_three_new_subflow(mptcpd_cid_t connection_id,
+static void plugin_three_new_subflow(mptcpd_token_t token,
                                      mptcpd_aid_t laddr_id,
                                      struct mptcpd_addr const *laddr,
                                      mptcpd_aid_t raddr_id,
                                      struct mptcpd_addr const *raddr,
                                      struct mptcpd_pm *pm)
 {
-        (void) connection_id;
+        (void) token;
         (void) laddr_id;
         (void) laddr;
         (void) raddr_id;
@@ -74,12 +74,12 @@ static void plugin_three_new_subflow(mptcpd_cid_t connection_id,
         ++call_count.new_subflow;
 }
 
-static void plugin_three_subflow_closed(mptcpd_cid_t connection_id,
+static void plugin_three_subflow_closed(mptcpd_token_t token,
                                         struct mptcpd_addr const *laddr,
                                         struct mptcpd_addr const *raddr,
                                         struct mptcpd_pm *pm)
 {
-        (void) connection_id;
+        (void) token;
         (void) laddr;
         (void) raddr;
         (void) pm;
@@ -87,10 +87,10 @@ static void plugin_three_subflow_closed(mptcpd_cid_t connection_id,
         ++call_count.subflow_closed;
 }
 
-static void plugin_three_connection_closed(mptcpd_cid_t connection_id,
+static void plugin_three_connection_closed(mptcpd_token_t token,
                                            struct mptcpd_pm *pm)
 {
-        (void) connection_id;
+        (void) token;
         (void) pm;
 
         ++call_count.connection_closed;

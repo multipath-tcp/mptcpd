@@ -57,7 +57,7 @@
 static struct l_hashmap *_pm_plugins;
 
 /**
- * @brief Connection ID to path manager plugin operations map.
+ * @brief Connection token to path manager plugin operations map.
  *
  * @todo Determine if use of a hashmap scales well, in terms
  *       of both performance and resource usage, in the
@@ -147,17 +147,16 @@ static struct mptcpd_plugin_ops const *name_to_ops(char const *name)
         return ops;
 }
 
-static struct mptcpd_plugin_ops const *cid_to_ops(
-        mptcpd_cid_t connection_id)
+static struct mptcpd_plugin_ops const *cid_to_ops(mptcpd_token_t token)
 {
         struct mptcpd_plugin_ops const *const ops =
                 l_hashmap_lookup(_cid_to_ops,
-                                 L_UINT_TO_PTR(connection_id));
+                                 L_UINT_TO_PTR(token));
 
         if (unlikely(ops == NULL))
                 l_error("Unable to find plugin operations for "
-                        "connection ID 0x%"MPTCPD_PRIxCID ".",
-                        connection_id);
+                        "connection token 0x%" MPTCPD_PRIxTOKEN ".",
+                        token);
 
         return ops;
 }
@@ -223,7 +222,7 @@ bool mptcpd_plugin_load(char const *dir, char const *default_name)
                 }
 
                 /**
-                 * Create map of connection ID to path manager
+                 * Create map of connection token to path manager
                  * plugin.
                  *
                  * @note We use the default ELL direct hash function that
@@ -300,7 +299,7 @@ bool mptcpd_plugin_register_ops(char const *name,
 // ----------------------------------------------------------------
 
 void mptcpd_plugin_new_connection(char const *name,
-                                  mptcpd_cid_t connection_id,
+                                  mptcpd_token_t token,
                                   struct mptcpd_addr const *laddr,
                                   struct mptcpd_addr const *raddr,
                                   bool backup,
@@ -308,41 +307,39 @@ void mptcpd_plugin_new_connection(char const *name,
 {
         struct mptcpd_plugin_ops const *const ops = name_to_ops(name);
 
-        // Map connection ID to the path manager plugin operations.
+        // Map connection token to the path manager plugin operations.
         if (!l_hashmap_insert(_cid_to_ops,
-                              L_UINT_TO_PTR(connection_id),
+                              L_UINT_TO_PTR(token),
                               (void *) ops))
-                l_error("Unable to map connection ID (0x%"MPTCPD_PRIxCID
-                        ") to plugin operations.",
-                        connection_id);
+                l_error("Unable to map connection token (0x%"
+                        MPTCPD_PRIxTOKEN ") to plugin operations.",
+                        token);
 
-        ops->new_connection(connection_id, laddr, raddr, backup, pm);
+        ops->new_connection(token, laddr, raddr, backup, pm);
 }
 
-void mptcpd_plugin_new_address(mptcpd_cid_t connection_id,
+void mptcpd_plugin_new_address(mptcpd_token_t token,
                                mptcpd_aid_t addr_id,
                                struct mptcpd_addr const *addr,
                                struct mptcpd_pm *pm)
 {
-        struct mptcpd_plugin_ops const *const ops =
-                cid_to_ops(connection_id);
+        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
 
         if (ops)
-                ops->new_address(connection_id, addr_id, addr, pm);
+                ops->new_address(token, addr_id, addr, pm);
 }
 
-void mptcpd_plugin_new_subflow(mptcpd_cid_t connection_id,
+void mptcpd_plugin_new_subflow(mptcpd_token_t token,
                                mptcpd_aid_t laddr_id,
                                struct mptcpd_addr const *laddr,
                                mptcpd_aid_t raddr_id,
                                struct mptcpd_addr const *raddr,
                                struct mptcpd_pm *pm)
 {
-        struct mptcpd_plugin_ops const *const ops =
-                cid_to_ops(connection_id);
+        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
 
         if (ops)
-                ops->new_subflow(connection_id,
+                ops->new_subflow(token,
                                  laddr_id,
                                  laddr,
                                  raddr_id,
@@ -350,27 +347,25 @@ void mptcpd_plugin_new_subflow(mptcpd_cid_t connection_id,
                                  pm);
 }
 
-void mptcpd_plugin_subflow_closed(mptcpd_cid_t connection_id,
+void mptcpd_plugin_subflow_closed(mptcpd_token_t token,
                                   struct mptcpd_addr const *laddr,
                                   struct mptcpd_addr const *raddr,
                                   struct mptcpd_pm *pm)
 {
-        struct mptcpd_plugin_ops const *const ops =
-                cid_to_ops(connection_id);
+        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
 
         if (ops)
-                ops->subflow_closed(connection_id, laddr, raddr, pm);
+                ops->subflow_closed(token, laddr, raddr, pm);
 
 }
 
-void mptcpd_plugin_connection_closed(mptcpd_cid_t connection_id,
+void mptcpd_plugin_connection_closed(mptcpd_token_t token,
                                      struct mptcpd_pm *pm)
 {
-        struct mptcpd_plugin_ops const *const ops =
-                cid_to_ops(connection_id);
+        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
 
         if (ops)
-                ops->connection_closed(connection_id, pm);
+                ops->connection_closed(token, pm);
 }
 
 

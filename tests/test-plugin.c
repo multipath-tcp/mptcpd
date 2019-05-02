@@ -39,7 +39,7 @@ static bool run_plugin_load(mode_t mode)
         if (loaded) {
                 call_plugin_ops(&test_count_4,
                                 NULL,
-                                test_cid_4,
+                                test_token_4,
                                 test_laddr_id_4,
                                 test_raddr_id_4,
                                 &test_laddr_4,
@@ -130,7 +130,7 @@ static void test_plugin_dispatch(void const *test_data)
         // Plugin 1
         call_plugin_ops(&test_count_1,
                         TEST_PLUGIN_ONE,
-                        test_cid_1,
+                        test_token_1,
                         test_laddr_id_1,
                         test_raddr_id_1,
                         &test_laddr_1,
@@ -140,7 +140,7 @@ static void test_plugin_dispatch(void const *test_data)
         // Plugin 1 as default
         call_plugin_ops(&test_count_1,
                         NULL,
-                        test_cid_1,
+                        test_token_1,
                         test_laddr_id_1,
                         test_raddr_id_1,
                         &test_laddr_1,
@@ -150,7 +150,7 @@ static void test_plugin_dispatch(void const *test_data)
         // Plugin 2
         call_plugin_ops(&test_count_2,
                         TEST_PLUGIN_TWO,
-                        test_cid_2,
+                        test_token_2,
                         test_laddr_id_2,
                         test_raddr_id_2,
                         &test_laddr_2,

@@ -133,20 +133,20 @@ struct plugin_call_count const test_count_4 = {
  * types of values they correspond to.
  */
 //@{
-mptcpd_cid_t const test_cid_1      = 0x12345678;
-mptcpd_aid_t const test_laddr_id_1 = 0x34;
-mptcpd_aid_t const test_raddr_id_1 = 0x56;
-bool         const test_backup_1   = true;
+mptcpd_token_t const test_token_1    = 0x12345678;
+mptcpd_aid_t   const test_laddr_id_1 = 0x34;
+mptcpd_aid_t   const test_raddr_id_1 = 0x56;
+bool           const test_backup_1   = true;
 
-mptcpd_cid_t const test_cid_2      = 0x23456789;
-mptcpd_aid_t const test_laddr_id_2 = 0x23;
-mptcpd_aid_t const test_raddr_id_2 = 0x45;
-bool         const test_backup_2   = false;
+mptcpd_token_t const test_token_2    = 0x23456789;
+mptcpd_aid_t   const test_laddr_id_2 = 0x23;
+mptcpd_aid_t   const test_raddr_id_2 = 0x45;
+bool           const test_backup_2   = false;
 
-mptcpd_cid_t const test_cid_4      = 0x34567890;
-mptcpd_aid_t const test_laddr_id_4 = 0x90;
-mptcpd_aid_t const test_raddr_id_4 = 0x01;
-bool         const test_backup_4   = true;
+mptcpd_token_t const test_token_4    = 0x34567890;
+mptcpd_aid_t   const test_laddr_id_4 = 0x90;
+mptcpd_aid_t   const test_raddr_id_4 = 0x01;
+bool           const test_backup_4   = true;
 
 struct mptcpd_addr const test_laddr_1 = {
         .address = { .family = AF_INET,
@@ -277,7 +277,7 @@ extern bool mptcpd_addr_is_equal(struct mptcpd_addr const *lhs,
 
 extern void call_plugin_ops(struct plugin_call_count const *count,
                             char const *name,
-                            mptcpd_cid_t connection_id,
+                            mptcpd_token_t token,
                             mptcpd_aid_t laddr_id,
                             mptcpd_aid_t raddr_id,
                             struct mptcpd_addr const *laddr,
@@ -288,20 +288,20 @@ extern void call_plugin_ops(struct plugin_call_count const *count,
 
         for (int i = 0; i < count->new_connection; ++i)
                 mptcpd_plugin_new_connection(name,
-                                             connection_id,
+                                             token,
                                              laddr,
                                              raddr,
                                              backup,
                                              NULL);
 
         for (int i = 0; i < count->new_address; ++i)
-                mptcpd_plugin_new_address(connection_id,
+                mptcpd_plugin_new_address(token,
                                           raddr_id,
                                           raddr,
                                           NULL);
 
         for (int i = 0; i < count->new_subflow; ++i)
-                mptcpd_plugin_new_subflow(connection_id,
+                mptcpd_plugin_new_subflow(token,
                                           laddr_id,
                                           laddr,
                                           raddr_id,
@@ -309,13 +309,13 @@ extern void call_plugin_ops(struct plugin_call_count const *count,
                                           NULL);
 
         for (int i = 0; i < count->subflow_closed; ++i)
-                mptcpd_plugin_subflow_closed(connection_id,
+                mptcpd_plugin_subflow_closed(token,
                                              laddr,
                                              raddr,
                                              NULL);
 
         for (int i = 0; i < count->connection_closed; ++i)
-                mptcpd_plugin_connection_closed(connection_id, NULL);
+                mptcpd_plugin_connection_closed(token, NULL);
 }
 
 

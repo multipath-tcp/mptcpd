@@ -90,7 +90,7 @@ static bool append_remote_addr_attr(struct l_genl_msg *msg,
 // ---------------------------------------------------------------------
 
 bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
-                         mptcpd_cid_t connection_id,
+                         mptcpd_token_t token,
                          mptcpd_aid_t address_id,
                          struct mptcpd_addr const *addr)
 {
@@ -111,7 +111,7 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
          *       quite right.
          */
         size_t const payload_size =
-                NLA_HDRLEN + NLA_ALIGN(sizeof(connection_id))
+                NLA_HDRLEN + NLA_ALIGN(sizeof(token))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(address_id))
                 + NLA_HDRLEN + NLA_ALIGN(get_addr_size(&addr->address))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(addr->port));
@@ -123,8 +123,8 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
         bool const appended =
                 l_genl_msg_append_attr(msg,
                                        MPTCP_ATTR_TOKEN,
-                                       sizeof(connection_id),
-                                       &connection_id)
+                                       sizeof(token),
+                                       &token)
                 && l_genl_msg_append_attr(
                         msg,
                         MPTCP_ATTR_LOC_ID,
@@ -152,7 +152,7 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
 }
 
 bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
-                           mptcpd_cid_t connection_id,
+                           mptcpd_token_t token,
                            mptcpd_aid_t local_address_id,
                            mptcpd_aid_t remote_address_id,
                            struct mptcpd_addr const *local_addr,
@@ -180,7 +180,7 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
          *       quite right.
          */
         size_t const payload_size =
-                NLA_HDRLEN + NLA_ALIGN(sizeof(connection_id))
+                NLA_HDRLEN + NLA_ALIGN(sizeof(token))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(local_address_id))
                 + NLA_HDRLEN + NLA_ALIGN(
                         get_addr_size(&local_addr->address))
@@ -198,8 +198,8 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
         bool const appended =
                 l_genl_msg_append_attr(msg,
                                        MPTCP_ATTR_TOKEN,
-                                       sizeof(connection_id),
-                                       &connection_id)
+                                       sizeof(token),
+                                       &token)
                 && l_genl_msg_append_attr(
                         msg,
                         MPTCP_ATTR_LOC_ID,
@@ -241,7 +241,7 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
 }
 
 bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
-                          mptcpd_cid_t connection_id,
+                          mptcpd_token_t token,
                           struct mptcpd_addr const *local_addr,
                           struct mptcpd_addr const *remote_addr,
                           bool backup)
@@ -265,7 +265,7 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
          *       quite right.
          */
         size_t const payload_size =
-                NLA_HDRLEN + NLA_ALIGN(sizeof(connection_id))
+                NLA_HDRLEN + NLA_ALIGN(sizeof(token))
                 + NLA_HDRLEN + NLA_ALIGN(
                         get_addr_size(&local_addr->address))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(local_addr->port))
@@ -281,8 +281,8 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
         bool const appended =
                 l_genl_msg_append_attr(msg,
                                        MPTCP_ATTR_TOKEN,
-                                       sizeof(connection_id),
-                                       &connection_id)
+                                       sizeof(token),
+                                       &token)
                 && append_local_addr_attr(msg, &local_addr->address)
                 && l_genl_msg_append_attr(msg,
                                           MPTCP_ATTR_SPORT,
@@ -314,7 +314,7 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
 }
 
 bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
-                              mptcpd_cid_t connection_id,
+                              mptcpd_token_t token,
                               struct mptcpd_addr const *local_addr,
                               struct mptcpd_addr const *remote_addr)
 {
@@ -336,7 +336,7 @@ bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
          *       quite right.
          */
         size_t const payload_size =
-                NLA_HDRLEN + NLA_ALIGN(sizeof(connection_id))
+                NLA_HDRLEN + NLA_ALIGN(sizeof(token))
                 + NLA_HDRLEN + NLA_ALIGN(
                         get_addr_size(&local_addr->address))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(local_addr->port))
@@ -351,8 +351,8 @@ bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
         bool const appended =
                 l_genl_msg_append_attr(msg,
                                        MPTCP_ATTR_TOKEN,
-                                       sizeof(connection_id),
-                                       &connection_id)
+                                       sizeof(token),
+                                       &token)
                 && append_local_addr_attr(msg, &local_addr->address)
                 && l_genl_msg_append_attr(msg,
                                           MPTCP_ATTR_SPORT,
