@@ -55,20 +55,6 @@ struct pm_mcast_group
         char const *const name;
 };
 
-static void handle_connection_created(struct l_genl_msg *msg,
-                                      void *user_data);
-static void handle_connection_established(struct l_genl_msg *msg,
-                                          void *user_data);
-static void handle_connection_closed(struct l_genl_msg *msg,
-                                     void *user_data);
-static void handle_new_addr(struct l_genl_msg *msg, void *user_data);
-static void handle_addr_removed(struct l_genl_msg *msg, void *user_data);
-static void handle_new_subflow(struct l_genl_msg *msg, void *user_data);
-static void handle_subflow_closed(struct l_genl_msg *msg,
-                                  void *user_data);
-static void handle_priority_changed(struct l_genl_msg *msg,
-                                    void *user_data);
-
 static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data);
 
 static struct pm_mcast_group const pm_mcast_group_map[] = {
