@@ -6,6 +6,7 @@
  *
  * Copyright (c) 2017-2019, Intel Corporation
  */
+
 #include <assert.h>
 
 #include <netinet/in.h>
@@ -117,8 +118,7 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(addr->port));
 
         struct l_genl_msg *const msg =
-                l_genl_msg_new_sized(MPTCP_CMD_ANNOUNCE,
-                                     payload_size);
+                l_genl_msg_new_sized(MPTCP_CMD_ANNOUNCE, payload_size);
 
         bool const appended =
                 l_genl_msg_append_attr(msg,
@@ -192,8 +192,7 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                 + (backup ? NLA_HDRLEN : 0);
 
         struct l_genl_msg *const msg =
-                l_genl_msg_new_sized(MPTCP_CMD_SUB_CREATE,
-                                     payload_size);
+                l_genl_msg_new_sized(MPTCP_CMD_SUB_CREATE, payload_size);
 
         bool const appended =
                 l_genl_msg_append_attr(msg,
@@ -345,8 +344,7 @@ bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(remote_addr->port));
 
         struct l_genl_msg *const msg =
-                l_genl_msg_new_sized(MPTCP_CMD_SUB_DESTROY,
-                                     payload_size);
+                l_genl_msg_new_sized(MPTCP_CMD_SUB_DESTROY, payload_size);
 
         bool const appended =
                 l_genl_msg_append_attr(msg,
