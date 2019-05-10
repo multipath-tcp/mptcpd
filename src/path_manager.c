@@ -627,12 +627,17 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
  * generic netlink family has appeared since some data is only
  * available after that has happened.  Such data includes multicast
  * groups exposed by the generic netlink family, etc.
+ *
+ * @param[in,out] user_data Pointer @c mptcp_pm object to which the
+ *                          @c l_genl_family watch belongs.
  */
 static void family_appeared(void *user_data)
 {
         struct mptcpd_pm *const pm = user_data;
 
-        l_debug("MPTCP generic netlink family appeared");
+        l_debug(MPTCP_GENL_NAME " generic netlink family appeared");
+
+        pm->id = l_new(unsigned int, L_ARRAY_SIZE(pm_mcast_group_map));
 
         /*
           Register callbacks for MPTCP generic netlink multicast
@@ -665,17 +670,38 @@ static void family_appeared(void *user_data)
 
 /**
  * @brief Handle MPTCP generic netlink family disappearing on us.
+ *
+ * @param[in,out] user_data Pointer @c mptcp_pm object to which the
+ *                          @c l_genl_family watch belongs.
  */
 static void family_vanished(void *user_data)
 {
-        (void) user_data;
+        struct mptcpd_pm *const pm = user_data;
 
-        l_debug("%s generic netlink family not found", MPTCP_GENL_NAME);
+        l_debug(MPTCP_GENL_NAME " generic netlink family vanished");
 
-        /**
-         * @todo Decide what to do if the MPTCP generic netlink family
-         *       isn't available.
-         */
+        if (pm->id == NULL)
+                return;     // Nothing to do.
+
+        /*
+          Unregister callbacks for MPTCP generic netlink multicast
+          notifications.
+        */
+        for (size_t i = 0; i < L_ARRAY_SIZE(pm_mcast_group_map); ++i) {
+                if (pm->id[i] != 0
+                    && !l_genl_family_unregister(pm->family, pm->id[i]))
+                        l_warn("%s multicast handler deregistration "
+                               "failed.",
+                               pm_mcast_group_map[i].name);
+        }
+
+        l_free(pm->id);
+
+        /*
+          In case family_vanished() is called again without a prior
+          call to family_appeared().
+        */
+        pm->id = NULL;
 }
 
 struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
@@ -698,6 +724,8 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         struct mptcpd_pm *const pm = l_new(struct mptcpd_pm, 1);
 
         // No need to check for NULL.  l_new() abort()s on failure.
+
+        assert(pm->id == NULL);
 
         pm->genl = l_genl_new_default();
         if (pm->genl == NULL) {
@@ -725,8 +753,6 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
-        pm->id = l_new(unsigned int, L_ARRAY_SIZE(pm_mcast_group_map));
-
         // Listen for network device changes.
         pm->nm = mptcpd_nm_create();
 
@@ -746,15 +772,6 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
 
         mptcpd_nm_destroy(pm->nm);
 
-        for (size_t i = 0; i < L_ARRAY_SIZE(pm_mcast_group_map); ++i) {
-                if (pm->id[i] != 0
-                    && !l_genl_family_unregister(pm->family, pm->id[i]))
-                        l_warn("%s multicast handler deregistration "
-                               "failed.",
-                               pm_mcast_group_map[i].name);
-        }
-
-        l_free(pm->id);
         l_genl_family_unref(pm->family);
         l_genl_unref(pm->genl);
         l_free(pm);
