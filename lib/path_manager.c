@@ -7,6 +7,8 @@
  * Copyright (c) 2017-2019, Intel Corporation
  */
 
+#define _POSIX_C_SOURCE 200112L  ///< For XSI-compliant strerror_r().
+
 #include <assert.h>
 
 #include <netinet/in.h>
@@ -30,7 +32,14 @@ static void family_send_callback(struct l_genl_msg *msg, void *user_data)
 
         if (error < 0) {
                 // Error during send.  Likely insufficient perms.
-                l_error("Error during genl message send.");
+
+                char errmsg[80];
+                int const r = strerror_r(-error,
+                                         errmsg,
+                                         L_ARRAY_SIZE(errmsg));
+
+                l_error("Path manager command error: %s",
+                        r == 0 ? errmsg : "<unknown error>");
         }
 }
 
