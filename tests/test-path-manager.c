@@ -40,7 +40,6 @@ void test_pm_create(void const *test_data)
         assert(info->pm         != NULL);
         assert(info->pm->genl   != NULL);
         assert(info->pm->family != NULL);
-        assert(info->pm->family != NULL);
         assert(info->pm->id     != NULL);
         assert(info->pm->nm     != NULL);
 }
