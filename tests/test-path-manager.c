@@ -39,15 +39,9 @@ void test_pm_create(void const *test_data)
 
         assert(info->pm         != NULL);
         assert(info->pm->genl   != NULL);
+        assert(info->pm->id     != NULL);
         assert(info->pm->family != NULL);
         assert(info->pm->nm     != NULL);
-
-        /*
-          info->pm->id may be populated during a subsequent main event
-          loop iteration, but it should be NULL immediately after
-          mptcpd_pm_create() returns.
-         */
-        assert(info->pm->id == NULL);
 }
 
 void test_pm_destroy(void const *test_data)
@@ -55,8 +49,6 @@ void test_pm_destroy(void const *test_data)
         struct test_info *const info = (struct test_info *) test_data;
 
         mptcpd_pm_destroy(info->pm);
-
-        assert(info->pm->id == NULL);
 }
 
 // -------------------------------------------------------------------

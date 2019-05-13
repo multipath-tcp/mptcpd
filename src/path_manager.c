@@ -57,6 +57,11 @@ struct pm_mcast_group
 
 static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data);
 
+/**
+ * @todo It is unlikely that we'll ever need to support more than one
+ *       generic netlink multicast group.  Consider dropping this
+ *       array.
+ */
 static struct pm_mcast_group const pm_mcast_group_map[] = {
         { .callback = handle_mptcp_event,
           .name     = MPTCP_GENL_EV_GRP_NAME }
@@ -637,8 +642,6 @@ static void family_appeared(void *user_data)
 
         l_debug(MPTCP_GENL_NAME " generic netlink family appeared");
 
-        pm->id = l_new(unsigned int, L_ARRAY_SIZE(pm_mcast_group_map));
-
         /*
           Register callbacks for MPTCP generic netlink multicast
           notifications.
@@ -680,28 +683,21 @@ static void family_vanished(void *user_data)
 
         l_debug(MPTCP_GENL_NAME " generic netlink family vanished");
 
-        if (pm->id == NULL)
-                return;     // Nothing to do.
-
         /*
           Unregister callbacks for MPTCP generic netlink multicast
           notifications.
         */
         for (size_t i = 0; i < L_ARRAY_SIZE(pm_mcast_group_map); ++i) {
-                if (pm->id[i] != 0
-                    && !l_genl_family_unregister(pm->family, pm->id[i]))
-                        l_warn("%s multicast handler deregistration "
-                               "failed.",
-                               pm_mcast_group_map[i].name);
+                if (pm->id[i] != 0) {
+                        if (!l_genl_family_unregister(pm->family,
+                                                      pm->id[i]))
+                                l_warn("%s multicast handler "
+                                       "deregistration failed.",
+                                       pm_mcast_group_map[i].name);
+
+                        pm->id[i] = 0;
+                }
         }
-
-        l_free(pm->id);
-
-        /*
-          In case family_vanished() is called again without a prior
-          call to family_appeared().
-        */
-        pm->id = NULL;
 }
 
 struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
@@ -725,14 +721,14 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 
         // No need to check for NULL.  l_new() abort()s on failure.
 
-        assert(pm->id == NULL);
-
         pm->genl = l_genl_new_default();
         if (pm->genl == NULL) {
                 mptcpd_pm_destroy(pm);
                 l_error("Unable to initialize Generic Netlink system.");
                 return NULL;
         }
+
+        pm->id = l_new(unsigned int, L_ARRAY_SIZE(pm_mcast_group_map));
 
         pm->family = l_genl_family_new(pm->genl, MPTCP_GENL_NAME);
         if (pm->family == NULL) {
@@ -773,6 +769,7 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
         mptcpd_nm_destroy(pm->nm);
 
         l_genl_family_unref(pm->family);
+        l_free(pm->id);
         l_genl_unref(pm->genl);
         l_free(pm);
 
