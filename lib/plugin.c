@@ -302,7 +302,6 @@ void mptcpd_plugin_new_connection(char const *name,
                                   mptcpd_token_t token,
                                   struct mptcpd_addr const *laddr,
                                   struct mptcpd_addr const *raddr,
-                                  bool backup,
                                   struct mptcpd_pm *pm)
 {
         struct mptcpd_plugin_ops const *const ops = name_to_ops(name);
@@ -315,48 +314,18 @@ void mptcpd_plugin_new_connection(char const *name,
                         MPTCPD_PRIxTOKEN ") to plugin operations.",
                         token);
 
-        ops->new_connection(token, laddr, raddr, backup, pm);
+        ops->new_connection(token, laddr, raddr, pm);
 }
 
-void mptcpd_plugin_new_address(mptcpd_token_t token,
-                               mptcpd_aid_t addr_id,
-                               struct mptcpd_addr const *addr,
-                               struct mptcpd_pm *pm)
+void mptcpd_plugin_connection_established(mptcpd_token_t token,
+                                          struct mptcpd_addr const *laddr,
+                                          struct mptcpd_addr const *raddr,
+                                          struct mptcpd_pm *pm)
 {
         struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
 
         if (ops)
-                ops->new_address(token, addr_id, addr, pm);
-}
-
-void mptcpd_plugin_new_subflow(mptcpd_token_t token,
-                               mptcpd_aid_t laddr_id,
-                               struct mptcpd_addr const *laddr,
-                               mptcpd_aid_t raddr_id,
-                               struct mptcpd_addr const *raddr,
-                               struct mptcpd_pm *pm)
-{
-        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
-
-        if (ops)
-                ops->new_subflow(token,
-                                 laddr_id,
-                                 laddr,
-                                 raddr_id,
-                                 raddr,
-                                 pm);
-}
-
-void mptcpd_plugin_subflow_closed(mptcpd_token_t token,
-                                  struct mptcpd_addr const *laddr,
-                                  struct mptcpd_addr const *raddr,
-                                  struct mptcpd_pm *pm)
-{
-        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
-
-        if (ops)
-                ops->subflow_closed(token, laddr, raddr, pm);
-
+                ops->connection_established(token, laddr, raddr, pm);
 }
 
 void mptcpd_plugin_connection_closed(mptcpd_token_t token,
@@ -366,6 +335,65 @@ void mptcpd_plugin_connection_closed(mptcpd_token_t token,
 
         if (ops)
                 ops->connection_closed(token, pm);
+}
+
+void mptcpd_plugin_new_address(mptcpd_token_t token,
+                               mptcpd_aid_t id,
+                               struct mptcpd_addr const *addr,
+                               struct mptcpd_pm *pm)
+{
+        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
+
+        if (ops)
+                ops->new_address(token, id, addr, pm);
+}
+
+void mptcpd_plugin_address_removed(mptcpd_token_t token,
+                                   mptcpd_aid_t id,
+                                   struct mptcpd_pm *pm)
+{
+        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
+
+        if (ops)
+                ops->address_removed(token, id, pm);
+}
+
+void mptcpd_plugin_new_subflow(mptcpd_token_t token,
+                               struct mptcpd_addr const *laddr,
+                               struct mptcpd_addr const *raddr,
+                               bool backup,
+                               struct mptcpd_pm *pm)
+{
+        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
+
+        if (ops)
+                ops->new_subflow(token, laddr, raddr, backup, pm);
+}
+
+void mptcpd_plugin_subflow_closed(mptcpd_token_t token,
+                                  struct mptcpd_addr const *laddr,
+                                  struct mptcpd_addr const *raddr,
+                                  bool backup,
+                                  struct mptcpd_pm *pm)
+{
+        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
+
+        if (ops)
+                ops->subflow_closed(token, laddr, raddr, backup, pm);
+
+}
+
+void mptcpd_plugin_subflow_priority(mptcpd_token_t token,
+                                    struct mptcpd_addr const *laddr,
+                                    struct mptcpd_addr const *raddr,
+                                    bool backup,
+                                    struct mptcpd_pm *pm)
+{
+        struct mptcpd_plugin_ops const *const ops = cid_to_ops(token);
+
+        if (ops)
+                ops->subflow_priority(token, laddr, raddr, backup, pm);
+
 }
 
 

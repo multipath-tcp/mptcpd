@@ -523,11 +523,9 @@ static void sspi_send_addrs(struct mptcpd_interface const *i, void *data)
 static void sspi_new_connection(mptcpd_token_t token,
                                 struct mptcpd_addr const *laddr,
                                 struct mptcpd_addr const *raddr,
-                                bool backup,
                                 struct mptcpd_pm *pm)
 {
         (void) raddr;
-        (void) backup;
 
         /**
          * @note Because we directly store connection tokens in a
@@ -584,13 +582,46 @@ static void sspi_new_connection(mptcpd_token_t token,
                                     &connection_info);
 }
 
+static void sspi_connection_established(mptcpd_token_t token,
+                                        struct mptcpd_addr const *laddr,
+                                        struct mptcpd_addr const *raddr,
+                                        struct mptcpd_pm *pm)
+{
+        (void) token;
+        (void) laddr;
+        (void) raddr;
+        (void) pm;
+
+        /**
+         * @todo Implement this function.
+         */
+        l_warn("%s is unimplemented.", __func__);
+}
+
+static void sspi_connection_closed(mptcpd_token_t token,
+                                   struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        /*
+          Remove all sspi_interface_info objects associated with the
+          given connection token.
+        */
+        if (l_queue_foreach_remove(sspi_interfaces,
+                                   sspi_remove_cid,
+                                   L_UINT_TO_PTR(token)) == 0)
+                l_error("No tracked connection with token 0x%"
+                        MPTCPD_PRIxTOKEN,
+                        token);
+}
+
 static void sspi_new_address(mptcpd_token_t token,
-                             mptcpd_aid_t addr_id,
+                             mptcpd_aid_t id,
                              struct mptcpd_addr const *addr,
                              struct mptcpd_pm *pm)
 {
         (void) token;
-        (void) addr_id;
+        (void) id;
         (void) addr;
         (void) pm;
 
@@ -600,15 +631,27 @@ static void sspi_new_address(mptcpd_token_t token,
         */
 }
 
+static void sspi_address_removed(mptcpd_token_t token,
+                                 mptcpd_aid_t id,
+                                 struct mptcpd_pm *pm)
+{
+        (void) token;
+        (void) id;
+        (void) pm;
+
+        /*
+          The sspi plugin doesn't do anything with addresses that are
+          no longer advertised.
+        */
+}
+
 static void sspi_new_subflow(mptcpd_token_t token,
-                             mptcpd_aid_t laddr_id,
                              struct mptcpd_addr const *laddr,
-                             mptcpd_aid_t raddr_id,
                              struct mptcpd_addr const *raddr,
+                             bool backup,
                              struct mptcpd_pm *pm)
 {
-        (void) laddr_id;
-        (void) raddr_id;
+        (void) backup;
 
         /*
           1. Check if the new subflow local IP address corresponds to
@@ -665,9 +708,11 @@ static void sspi_new_subflow(mptcpd_token_t token,
 static void sspi_subflow_closed(mptcpd_token_t token,
                                 struct mptcpd_addr const *laddr,
                                 struct mptcpd_addr const *raddr,
+                                bool backup,
                                 struct mptcpd_pm *pm)
 {
         (void) raddr;
+        (void) backup;
 
         /*
           1. Retrieve the subflow list associated with the connection
@@ -701,29 +746,33 @@ static void sspi_subflow_closed(mptcpd_token_t token,
                         info->index);
 }
 
-static void sspi_connection_closed(mptcpd_token_t token,
-                                   struct mptcpd_pm *pm)
+static void sspi_subflow_priority(mptcpd_token_t token,
+                                  struct mptcpd_addr const *laddr,
+                                  struct mptcpd_addr const *raddr,
+                                  bool backup,
+                                  struct mptcpd_pm *pm)
 {
+        (void) token;
+        (void) laddr;
+        (void) raddr;
+        (void) backup;
         (void) pm;
 
         /*
-          Remove all sspi_interface_info objects associated with the
-          given connection token.
+          The sspi plugin doesn't do anything with changes in subflow
+          priority.
         */
-        if (l_queue_foreach_remove(sspi_interfaces,
-                                   sspi_remove_cid,
-                                   L_UINT_TO_PTR(token)) == 0)
-                l_error("No tracked connection with token 0x%"
-                        MPTCPD_PRIxTOKEN,
-                        token);
 }
 
 static struct mptcpd_plugin_ops const pm_ops = {
-        .new_connection    = sspi_new_connection,
-        .new_address       = sspi_new_address,
-        .new_subflow       = sspi_new_subflow,
-        .subflow_closed    = sspi_subflow_closed,
-        .connection_closed = sspi_connection_closed
+        .new_connection         = sspi_new_connection,
+        .connection_established = sspi_connection_established,
+        .connection_closed      = sspi_connection_closed,
+        .new_address            = sspi_new_address,
+        .address_removed        = sspi_address_removed,
+        .new_subflow            = sspi_new_subflow,
+        .subflow_closed         = sspi_subflow_closed,
+        .subflow_priority       = sspi_subflow_priority
 };
 
 static int sspi_init(void)

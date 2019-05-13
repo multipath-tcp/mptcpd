@@ -21,46 +21,19 @@
 static void plugin_noop_new_connection(mptcpd_token_t token,
                                        struct mptcpd_addr const *laddr,
                                        struct mptcpd_addr const *raddr,
-                                       bool backup,
                                        struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
-        (void) backup;
         (void) pm;
 }
 
-static void plugin_noop_new_address(mptcpd_token_t token,
-                                    mptcpd_aid_t addr_id,
-                                    struct mptcpd_addr const *addr,
-                                    struct mptcpd_pm *pm)
-{
-        (void) token;
-        (void) addr_id;
-        (void) addr;
-        (void) pm;
-}
-
-static void plugin_noop_new_subflow(mptcpd_token_t token,
-                                    mptcpd_aid_t laddr_id,
-                                    struct mptcpd_addr const *laddr,
-                                    mptcpd_aid_t raddr_id,
-                                    struct mptcpd_addr const *raddr,
-                                    struct mptcpd_pm *pm)
-{
-        (void) token;
-        (void) laddr_id;
-        (void) laddr;
-        (void) raddr_id;
-        (void) raddr;
-        (void) pm;
-}
-
-static void plugin_noop_subflow_closed(mptcpd_token_t token,
-                                       struct mptcpd_addr const *laddr,
-                                       struct mptcpd_addr const *raddr,
-                                       struct mptcpd_pm *pm)
+static void plugin_noop_connection_established(
+        mptcpd_token_t token,
+        struct mptcpd_addr const *laddr,
+        struct mptcpd_addr const *raddr,
+        struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
@@ -75,12 +48,74 @@ static void plugin_noop_connection_closed(mptcpd_token_t token,
         (void) pm;
 }
 
+static void plugin_noop_new_address(mptcpd_token_t token,
+                                    mptcpd_aid_t addr_id,
+                                    struct mptcpd_addr const *addr,
+                                    struct mptcpd_pm *pm)
+{
+        (void) token;
+        (void) addr_id;
+        (void) addr;
+        (void) pm;
+}
+
+static void plugin_noop_address_removed(mptcpd_token_t token,
+                                         mptcpd_aid_t addr_id,
+                                         struct mptcpd_pm *pm)
+{
+        (void) token;
+        (void) addr_id;
+        (void) pm;
+}
+
+static void plugin_noop_new_subflow(mptcpd_token_t token,
+                                    struct mptcpd_addr const *laddr,
+                                    struct mptcpd_addr const *raddr,
+                                    bool backup,
+                                    struct mptcpd_pm *pm)
+{
+        (void) token;
+        (void) laddr;
+        (void) raddr;
+        (void) backup;
+        (void) pm;
+}
+
+static void plugin_noop_subflow_closed(mptcpd_token_t token,
+                                       struct mptcpd_addr const *laddr,
+                                       struct mptcpd_addr const *raddr,
+                                       bool backup,
+                                       struct mptcpd_pm *pm)
+{
+        (void) token;
+        (void) laddr;
+        (void) raddr;
+        (void) backup;
+        (void) pm;
+}
+
+static void plugin_noop_subflow_priority(mptcpd_token_t token,
+                                         struct mptcpd_addr const *laddr,
+                                         struct mptcpd_addr const *raddr,
+                                         bool backup,
+                                         struct mptcpd_pm *pm)
+{
+        (void) token;
+        (void) laddr;
+        (void) raddr;
+        (void) backup;
+        (void) pm;
+}
+
 static struct mptcpd_plugin_ops const pm_ops = {
-        .new_connection    = plugin_noop_new_connection,
-        .new_address       = plugin_noop_new_address,
-        .new_subflow       = plugin_noop_new_subflow,
-        .subflow_closed    = plugin_noop_subflow_closed,
-        .connection_closed = plugin_noop_connection_closed
+        .new_connection         = plugin_noop_new_connection,
+        .connection_established = plugin_noop_connection_established,
+        .connection_closed      = plugin_noop_connection_closed,
+        .new_address            = plugin_noop_new_address,
+        .address_removed        = plugin_noop_address_removed,
+        .new_subflow            = plugin_noop_new_subflow,
+        .subflow_closed         = plugin_noop_subflow_closed,
+        .subflow_priority       = plugin_noop_subflow_priority
 };
 
 static int plugin_noop_init(void)

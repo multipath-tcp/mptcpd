@@ -163,7 +163,6 @@ static void handle_connection_created(struct l_genl_msg *msg,
               Local port
               Remote address
               Remote port
-              Backup priority (optional)
               Path management strategy (optional)
         */
 
@@ -175,7 +174,6 @@ static void handle_connection_created(struct l_genl_msg *msg,
         in_port_t       const *local_port  = NULL;
         in_port_t       const *remote_port = NULL;
         char            const *pm_name     = NULL;
-        bool backup                        = false;
 
         uint16_t type;
         uint16_t len;
@@ -209,16 +207,6 @@ static void handle_connection_created(struct l_genl_msg *msg,
                         pm_name = get_pm_name(data, len);
                         break;
 #endif  // MPTCPD_ENABLE_PM_NAME
-                case MPTCP_ATTR_BACKUP:
-                        /*
-                          The backup attribute is a NLA_FLAG,
-                          meaning its existence *is* the flag.  No
-                          payload data exists in such an attribute.
-                         */
-                        assert(validate_attr_len(len, 0));
-                        assert(data == NULL);
-                        backup = true;
-                        break;
                 default:
                         l_warn("Unknown MPTCP_EVENT_CREATED "
                                "attribute: %d",
@@ -239,7 +227,6 @@ static void handle_connection_created(struct l_genl_msg *msg,
         }
 
         l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
-        l_debug("backup: %d", backup);
 
         struct mptcpd_pm *const pm = user_data;
 
@@ -247,21 +234,90 @@ static void handle_connection_created(struct l_genl_msg *msg,
         get_mptcpd_addr(laddr4, laddr6, *local_port, &laddr);
         get_mptcpd_addr(raddr4, raddr6, *remote_port, &raddr);
 
-        mptcpd_plugin_new_connection(pm_name,
-                                     *token,
-                                     &laddr,
-                                     &raddr,
-                                     backup,
-                                     pm);
+        mptcpd_plugin_new_connection(pm_name, *token, &laddr, &raddr, pm);
 }
 
 static void handle_connection_established(struct l_genl_msg *msg,
                                           void *user_data)
 {
-        (void) msg;
-        (void) user_data;
+        struct l_genl_attr attr;
+        if (!l_genl_attr_init(&attr, msg)) {
+                l_error("Unable to initialize genl attribute");
+                return;
+        }
 
-        l_error("%s is currently unimplemented", __func__);
+        /*
+          Payload:
+              Token
+              Local address
+              Local port
+              Remote address
+              Remote port
+        */
+
+        mptcpd_token_t  const *token       = NULL;
+        struct in_addr  const *laddr4      = NULL;
+        struct in_addr  const *raddr4      = NULL;
+        struct in6_addr const *laddr6      = NULL;
+        struct in6_addr const *raddr6      = NULL;
+        in_port_t       const *local_port  = NULL;
+        in_port_t       const *remote_port = NULL;
+
+        uint16_t type;
+        uint16_t len;
+        void const *data = NULL;
+
+        while (l_genl_attr_next(&attr, &type, &len, &data)) {
+                switch (type) {
+                case MPTCP_ATTR_TOKEN:
+                        MPTCP_GET_NL_ATTR(data, len, token);
+                        break;
+                case MPTCP_ATTR_SADDR4:
+                        MPTCP_GET_NL_ATTR(data, len, laddr4);
+                        break;
+                case MPTCP_ATTR_SADDR6:
+                        MPTCP_GET_NL_ATTR(data, len, laddr6);
+                        break;
+                case MPTCP_ATTR_SPORT:
+                        MPTCP_GET_NL_ATTR(data, len, local_port);
+                        break;
+                case MPTCP_ATTR_DADDR4:
+                        MPTCP_GET_NL_ATTR(data, len, raddr4);
+                        break;
+                case MPTCP_ATTR_DADDR6:
+                        MPTCP_GET_NL_ATTR(data, len, raddr6);
+                        break;
+                case MPTCP_ATTR_DPORT:
+                        MPTCP_GET_NL_ATTR(data, len, remote_port);
+                        break;
+                default:
+                        l_warn("Unknown MPTCP_EVENT_ESTABLISHED "
+                               "attribute: %d",
+                               type);
+                        break;
+                }
+        }
+
+        if (!token
+            || !(laddr4 || laddr6)
+            || !local_port
+            || !(raddr4 || raddr6)
+            || !remote_port) {
+                l_error("Required MPTCP_EVENT_ESTABLISHED "
+                        "message attributes are missing.");
+
+                return;
+        }
+
+        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
+
+        struct mptcpd_pm *const pm = user_data;
+
+        struct mptcpd_addr laddr, raddr;
+        get_mptcpd_addr(laddr4, laddr6, *local_port, &laddr);
+        get_mptcpd_addr(raddr4, raddr6, *remote_port, &raddr);
+
+        mptcpd_plugin_connection_established(*token, &laddr, &raddr, pm);
 }
 
 static void handle_connection_closed(struct l_genl_msg *msg,
@@ -324,7 +380,7 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
               Token
               Remote address ID
               Remote address
-              Remote port
+              Remote port (optional)
         */
 
         mptcpd_token_t  const *token      = NULL;
@@ -362,10 +418,7 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
                 }
         }
 
-        if (!token
-            || !address_id
-            || !(addr4 || addr6)
-            || !port) {
+        if (!token || !address_id || !(addr4 || addr6)) {
                 l_error("Required MPTCP_EVENT_ANNOUNCED "
                         "message attributes are missing.");
 
@@ -384,10 +437,55 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
 
 static void handle_addr_removed(struct l_genl_msg *msg, void *user_data)
 {
-        (void) msg;
-        (void) user_data;
+        struct l_genl_attr attr;
+        if (!l_genl_attr_init(&attr, msg)) {
+                l_error("Unable to initialize genl attribute");
+                return;
+        }
 
-        l_error("%s is currently unimplemented", __func__);
+        /*
+          Payload:
+              Token
+              Remote address ID
+              Remote address
+              Remote port (optional)
+        */
+
+        mptcpd_token_t  const *token      = NULL;
+        mptcpd_aid_t    const *address_id = NULL;
+
+        uint16_t type;
+        uint16_t len;
+        void const *data = NULL;
+
+        while (l_genl_attr_next(&attr, &type, &len, &data)) {
+                switch (type) {
+                case MPTCP_ATTR_TOKEN:
+                        MPTCP_GET_NL_ATTR(data, len, token);
+                        break;
+                case MPTCP_ATTR_REM_ID:
+                        MPTCP_GET_NL_ATTR(data, len, address_id);
+                        break;
+                default:
+                        l_warn("Unknown MPTCP_EVENT_REMOVED "
+                               "attribute: %d",
+                               type);
+                        break;
+                }
+        }
+
+        if (!token || !address_id) {
+                l_error("Required MPTCP_EVENT_REMOVED "
+                        "message attributes are missing.");
+
+                return;
+        }
+
+        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
+
+        struct mptcpd_pm *const pm = user_data;
+
+        mptcpd_plugin_address_removed(*token, *address_id, pm);
 }
 
 static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
@@ -401,23 +499,24 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
         /*
           Payload:
               Token
-              Local address ID
+              Address family
               Local address
               Local port
-              Remote address ID
               Remote address
               Remote port
+              Backup priority
+              Network interface index
+              Error (optional)
          */
 
         mptcpd_token_t  const *token       = NULL;
-        mptcpd_aid_t    const *laddr_id    = NULL;
-        mptcpd_aid_t    const *raddr_id    = NULL;
         struct in_addr  const *laddr4      = NULL;
         struct in_addr  const *raddr4      = NULL;
         struct in6_addr const *laddr6      = NULL;
         struct in6_addr const *raddr6      = NULL;
         in_port_t       const *local_port  = NULL;
         in_port_t       const *remote_port = NULL;
+        bool backup                        = false;
 
         uint16_t type;
         uint16_t len;
@@ -428,9 +527,6 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
                 case MPTCP_ATTR_TOKEN:
                         MPTCP_GET_NL_ATTR(data, len, token);
                         break;
-                case MPTCP_ATTR_LOC_ID:
-                        MPTCP_GET_NL_ATTR(data, len, laddr_id);
-                        break;
                 case MPTCP_ATTR_SADDR4:
                         MPTCP_GET_NL_ATTR(data, len, laddr4);
                         break;
@@ -439,9 +535,6 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
                         break;
                 case MPTCP_ATTR_SPORT:
                         MPTCP_GET_NL_ATTR(data, len, local_port);
-                        break;
-                case MPTCP_ATTR_REM_ID:
-                        MPTCP_GET_NL_ATTR(data, len, raddr_id);
                         break;
                 case MPTCP_ATTR_DADDR4:
                         MPTCP_GET_NL_ATTR(data, len, raddr4);
@@ -452,6 +545,16 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
                 case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
                         break;
+                case MPTCP_ATTR_BACKUP:
+                        /*
+                          The backup attribute is a NLA_FLAG,
+                          meaning its existence *is* the flag.  No
+                          payload data exists in such an attribute.
+                         */
+                        assert(validate_attr_len(len, 0));
+                        assert(data == NULL);
+                        backup = true;
+                        break;
                 default:
                         l_warn("Unknown MPTCP_EVENT_SUB_ESTABLISHED "
                                "attribute: %d",
@@ -461,10 +564,8 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
         }
 
         if (!token
-            || !laddr_id
             || !(laddr4 || laddr6)
             || !local_port
-            || !raddr_id
             || !(raddr4 || raddr6)
             || !remote_port) {
                 l_error("Required MPTCP_EVENT_SUB_ESTABLISHED "
@@ -481,16 +582,16 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_new_subflow(*token,
-                                  *laddr_id,
-                                  &laddr,
-                                  *raddr_id,
-                                  &raddr,
-                                  pm);
+        mptcpd_plugin_new_subflow(*token, &laddr, &raddr, backup, pm);
 }
 
 static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
 {
+        /**
+         * @todo Refactor duplicate code in the handle_subflow_*()
+         *       functions.
+         */
+
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
                 l_error("Unable to initialize genl attribute");
@@ -500,10 +601,14 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
         /*
           Payload:
               Token
+              Address family
               Local address
               Local port
               Remote address
               Remote port
+              Backup
+              Network interface index
+              Error (optional)
          */
 
         mptcpd_token_t  const *token       = NULL;
@@ -513,6 +618,7 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
         struct in6_addr const *raddr6      = NULL;
         in_port_t       const *local_port  = NULL;
         in_port_t       const *remote_port = NULL;
+        bool backup                        = false;
 
         uint16_t type;
         uint16_t len;
@@ -540,6 +646,16 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
                         break;
                 case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
+                        break;
+                case MPTCP_ATTR_BACKUP:
+                        /*
+                          The backup attribute is a NLA_FLAG,
+                          meaning its existence *is* the flag.  No
+                          payload data exists in such an attribute.
+                         */
+                        assert(validate_attr_len(len, 0));
+                        assert(data == NULL);
+                        backup = true;
                         break;
                 default:
                         l_warn("Unknown MPTCP_EVENT_SUB_CLOSED "
@@ -568,16 +684,105 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_subflow_closed(*token, &laddr, &raddr, pm);
+        mptcpd_plugin_subflow_closed(*token, &laddr, &raddr, backup, pm);
 }
 
 static void handle_priority_changed(struct l_genl_msg *msg,
                                     void *user_data)
 {
-        (void) msg;
-        (void) user_data;
+        struct l_genl_attr attr;
+        if (!l_genl_attr_init(&attr, msg)) {
+                l_error("Unable to initialize genl attribute");
+                return;
+        }
 
-        l_error("%s is currently unimplemented", __func__);
+        /*
+          Payload:
+              Token
+              Address family
+              Local address
+              Local port
+              Remote address
+              Remote port
+              Backup
+              Network interface index
+              Error (optional)
+         */
+
+        mptcpd_token_t  const *token       = NULL;
+        struct in_addr  const *laddr4      = NULL;
+        struct in_addr  const *raddr4      = NULL;
+        struct in6_addr const *laddr6      = NULL;
+        struct in6_addr const *raddr6      = NULL;
+        in_port_t       const *local_port  = NULL;
+        in_port_t       const *remote_port = NULL;
+        bool backup                        = false;
+
+        uint16_t type;
+        uint16_t len;
+        void const *data = NULL;
+
+        while (l_genl_attr_next(&attr, &type, &len, &data)) {
+                switch (type) {
+                case MPTCP_ATTR_TOKEN:
+                        MPTCP_GET_NL_ATTR(data, len, token);
+                        break;
+                case MPTCP_ATTR_SADDR4:
+                        MPTCP_GET_NL_ATTR(data, len, laddr4);
+                        break;
+                case MPTCP_ATTR_SADDR6:
+                        MPTCP_GET_NL_ATTR(data, len, laddr6);
+                        break;
+                case MPTCP_ATTR_SPORT:
+                        MPTCP_GET_NL_ATTR(data, len, local_port);
+                        break;
+                case MPTCP_ATTR_DADDR4:
+                        MPTCP_GET_NL_ATTR(data, len, raddr4);
+                        break;
+                case MPTCP_ATTR_DADDR6:
+                        MPTCP_GET_NL_ATTR(data, len, raddr6);
+                        break;
+                case MPTCP_ATTR_DPORT:
+                        MPTCP_GET_NL_ATTR(data, len, remote_port);
+                        break;
+                case MPTCP_ATTR_BACKUP:
+                        /*
+                          The backup attribute is a NLA_FLAG,
+                          meaning its existence *is* the flag.  No
+                          payload data exists in such an attribute.
+                         */
+                        assert(validate_attr_len(len, 0));
+                        assert(data == NULL);
+                        backup = true;
+                        break;
+                default:
+                        l_warn("Unknown MPTCP_EVENT_SUB_PRIORITY "
+                               "attribute: %d",
+                               type);
+                        break;
+                }
+        }
+
+        if (!token
+            || !(laddr4 || laddr6)
+            || !local_port
+            || !(raddr4 || raddr6)
+            || !remote_port) {
+                l_error("Required MPTCP_EVENT_SUB_PRIORITY "
+                        "message attributes are missing.");
+
+                return;
+        }
+
+        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
+
+        struct mptcpd_addr laddr, raddr;
+        get_mptcpd_addr(laddr4, laddr6, *local_port,  &laddr);
+        get_mptcpd_addr(raddr4, raddr6, *remote_port, &raddr);
+
+        struct mptcpd_pm *const pm = user_data;
+
+        mptcpd_plugin_subflow_priority(*token, &laddr, &raddr, backup, pm);
 }
 
 static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)

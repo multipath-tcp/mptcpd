@@ -41,50 +41,66 @@ struct plugin_call_count
          */
         //@{
         int new_connection;
+        int connection_established;
+        int connection_closed;
         int new_address;
+        int address_removed;
         int new_subflow;
         int subflow_closed;
-        int connection_closed;
+        int subflow_priority;
         //@}
 };
 
 inline void plugin_call_count_reset(struct plugin_call_count *p)
 {
-        p->new_connection    = 0;
-        p->new_address       = 0;
-        p->new_subflow       = 0;
-        p->subflow_closed    = 0;
-        p->connection_closed = 0;
+        p->new_connection         = 0;
+        p->connection_established = 0;
+        p->connection_closed      = 0;
+        p->new_address            = 0;
+        p->address_removed        = 0;
+        p->new_subflow            = 0;
+        p->subflow_closed         = 0;
+        p->subflow_priority       = 0;
 }
 
-inline bool plugin_call_count_is_sane(struct plugin_call_count const *lhs,
-                                      struct plugin_call_count const *rhs)
+inline bool plugin_call_counts_are_pos(struct plugin_call_count const *p)
 {
-        return     lhs->new_connection >= 0
-                && lhs->new_address >= 0
-                && lhs->new_subflow >= 0
-                && lhs->subflow_closed >= 0
-                && lhs->connection_closed >= 0
+        return     p->new_connection >= 0
+                && p->connection_established >= 0
+                && p->connection_closed >= 0
+                && p->new_address >= 0
+                && p->new_subflow >= 0
+                && p->subflow_closed >= 0
+                && p->subflow_priority >= 0;
+}
 
-                && rhs->new_connection >= 0
-                && rhs->new_address >= 0
-                && rhs->new_subflow >= 0
-                && rhs->subflow_closed >= 0
-                && rhs->connection_closed >= 0
+inline bool plugin_call_count_is_sane(struct plugin_call_count const *p)
+{
+        return  // non-negative counts
+                plugin_call_counts_are_pos(p)
 
-                && lhs->connection_closed <= rhs->new_connection
-                && lhs->subflow_closed <= rhs->new_subflow;
+                /*
+                  Some callbacks should not be called more than
+                  others.
+                */
+                && p->connection_established <= p->new_connection
+                && p->connection_closed <= p->new_connection
+                && p->subflow_closed    <= p->new_subflow;
 }
 
 inline bool plugin_call_count_is_equal(
         struct plugin_call_count const *lhs,
         struct plugin_call_count const *rhs)
 {
-        return     lhs->new_connection    == rhs->new_connection
-                && lhs->new_address       == rhs->new_address
-                && lhs->new_subflow       == rhs->new_subflow
-                && lhs->subflow_closed    == rhs->subflow_closed
-                && lhs->connection_closed == rhs->connection_closed;
+        return lhs->new_connection         == rhs->new_connection
+            && lhs->connection_established == rhs->connection_established
+            && lhs->connection_closed      == rhs->connection_closed
+            && lhs->new_address            == rhs->new_address
+            && lhs->address_removed        == rhs->address_removed
+            && lhs->new_subflow            == rhs->new_subflow
+            && lhs->subflow_closed         == rhs->subflow_closed
+            && lhs->subflow_priority       == rhs->subflow_priority;
+
 }
 
 // ------------------------------------------------------------------
@@ -98,27 +114,36 @@ inline bool plugin_call_count_is_equal(
  */
 //@{
 struct plugin_call_count const test_count_1 = {
-        .new_connection    = 1,
-        .new_address       = 1,
-        .new_subflow       = 0,
-        .subflow_closed    = 0,
-        .connection_closed = 1
+        .new_connection         = 1,
+        .connection_established = 1,
+        .connection_closed      = 1,
+        .new_address            = 1,
+        .address_removed        = 0,
+        .new_subflow            = 0,
+        .subflow_closed         = 0,
+        .subflow_priority       = 0
 };
 
 struct plugin_call_count const test_count_2 = {
-        .new_connection    = 1,
-        .new_address       = 0,
-        .new_subflow       = 1,
-        .subflow_closed    = 1,
-        .connection_closed = 1
+        .new_connection         = 1,
+        .connection_established = 1,
+        .connection_closed      = 1,
+        .new_address            = 0,
+        .address_removed        = 1,
+        .new_subflow            = 1,
+        .subflow_closed         = 1,
+        .subflow_priority       = 1
 };
 
 struct plugin_call_count const test_count_4 = {
-        .new_connection    = 1,
-        .new_address       = 0,
-        .new_subflow       = 0,
-        .subflow_closed    = 0,
-        .connection_closed = 1
+        .new_connection         = 1,
+        .connection_established = 1,
+        .connection_closed      = 1,
+        .new_address            = 1,
+        .address_removed        = 1,
+        .new_subflow            = 0,
+        .subflow_closed         = 0,
+        .subflow_priority       = 0
 };
 //@}
 
@@ -278,7 +303,6 @@ extern bool mptcpd_addr_is_equal(struct mptcpd_addr const *lhs,
 extern void call_plugin_ops(struct plugin_call_count const *count,
                             char const *name,
                             mptcpd_token_t token,
-                            mptcpd_aid_t laddr_id,
                             mptcpd_aid_t raddr_id,
                             struct mptcpd_addr const *laddr,
                             struct mptcpd_addr const *raddr,
@@ -291,8 +315,13 @@ extern void call_plugin_ops(struct plugin_call_count const *count,
                                              token,
                                              laddr,
                                              raddr,
-                                             backup,
                                              NULL);
+
+        for (int i = 0; i < count->connection_established; ++i)
+                mptcpd_plugin_connection_established(token,
+                                                     laddr,
+                                                     raddr,
+                                                     NULL);
 
         for (int i = 0; i < count->new_address; ++i)
                 mptcpd_plugin_new_address(token,
@@ -300,19 +329,31 @@ extern void call_plugin_ops(struct plugin_call_count const *count,
                                           raddr,
                                           NULL);
 
+        for (int i = 0; i < count->address_removed; ++i)
+                mptcpd_plugin_address_removed(token,
+                                              raddr_id,
+                                              NULL);
+
         for (int i = 0; i < count->new_subflow; ++i)
                 mptcpd_plugin_new_subflow(token,
-                                          laddr_id,
                                           laddr,
-                                          raddr_id,
                                           raddr,
+                                          backup,
                                           NULL);
 
         for (int i = 0; i < count->subflow_closed; ++i)
                 mptcpd_plugin_subflow_closed(token,
                                              laddr,
                                              raddr,
+                                             backup,
                                              NULL);
+
+        for (int i = 0; i < count->subflow_priority; ++i)
+                mptcpd_plugin_subflow_priority(token,
+                                               laddr,
+                                               raddr,
+                                               backup,
+                                               NULL);
 
         for (int i = 0; i < count->connection_closed; ++i)
                 mptcpd_plugin_connection_closed(token, NULL);

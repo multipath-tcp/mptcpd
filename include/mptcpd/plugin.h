@@ -39,74 +39,35 @@ struct mptcpd_pm;
 struct mptcpd_plugin_ops
 {
         /**
-         * @brief New MPTCP-capable connection has been established.
+         * @brief New MPTCP-capable connection has been created.
+         *
+         * A new MPTCP connection has been created, and pending
+         * completion.
          *
          * @param[in] token  MPTCP connection token.
          * @param[in] laddr  Local address information.
          * @param[in] raddr  Remote address information.
-         * @param[in] backup Backup priority flag.
          * @param[in] pm     Opaque pointer to mptcpd path manager
          *                   object.
          */
         void (*new_connection)(mptcpd_token_t token,
                                struct mptcpd_addr const *laddr,
                                struct mptcpd_addr const *raddr,
-                               bool backup,
                                struct mptcpd_pm *pm);
 
         /**
-         * @brief New address has been advertised by a peer.
+         * @brief New MPTCP-capable connection has been established.
          *
-         * @param[in] token   MPTCP connection token.
-         * @param[in] addr_id Remote address identifier.
-         * @param[in] addr    Remote address information.
-         * @param[in] pm      Opaque pointer to mptcpd path manager
-         *                    object.
-         *
-         * Called when an address has been advertised by a peer
-         * through an @c ADD_ADDR MPTCP option.
-         *
-         * @todo Why don't we have an @c address_removed() operation
-         *       for the @c REMOVE_ADDR case?
+         * @param[in] token  MPTCP connection token.
+         * @param[in] laddr  Local address information.
+         * @param[in] raddr  Remote address information.
+         * @param[in] pm     Opaque pointer to mptcpd path manager
+         *                   object.
          */
-        void (*new_address)(mptcpd_token_t token,
-                            mptcpd_aid_t addr_id,
-                            struct mptcpd_addr const *addr,
-                            struct mptcpd_pm *pm);
-
-        /**
-         * @brief A peer has joined the MPTCP connection.
-         *
-         * @param[in] token    MPTCP connection token.
-         * @param[in] laddr_id Local address identifier.
-         * @param[in] laddr    Local address information.
-         * @param[in] raddr_id Remote address identifier.
-         * @param[in] raddr    Remote address information.
-         * @param[in] pm       Opaque pointer to mptcpd path manager
-         *                     object.
-         *
-         * @note Called after a @c MP_JOIN @c ACK has been @c ACKed.
-         */
-        void (*new_subflow)(mptcpd_token_t token,
-                            mptcpd_aid_t laddr_id,
-                            struct mptcpd_addr const *laddr,
-                            mptcpd_aid_t raddr_id,
-                            struct mptcpd_addr const *raddr,
-                            struct mptcpd_pm *pm);
-
-        /**
-         * @brief A single MPTCP subflow was closed.
-         *
-         * @param[in] token MPTCP connection token.
-         * @param[in] laddr Local address information.
-         * @param[in] raddr Remote address information
-         * @param[in] pm    Opaque pointer to mptcpd path manager
-         *                  object.
-         */
-        void (*subflow_closed)(mptcpd_token_t token,
-                               struct mptcpd_addr const *laddr,
-                               struct mptcpd_addr const *raddr,
-                               struct mptcpd_pm *pm);
+        void (*connection_established)(mptcpd_token_t token,
+                                       struct mptcpd_addr const *laddr,
+                                       struct mptcpd_addr const *raddr,
+                                       struct mptcpd_pm *pm);
 
         /**
          * @brief MPTCP connection as a whole was closed.
@@ -117,6 +78,91 @@ struct mptcpd_plugin_ops
          */
         void (*connection_closed)(mptcpd_token_t token,
                                   struct mptcpd_pm *pm);
+
+        /**
+         * @brief New address has been advertised by a peer.
+         *
+         * @param[in] token MPTCP connection token.
+         * @param[in] id    Remote address identifier.
+         * @param[in] addr  Remote address information.
+         * @param[in] pm    Opaque pointer to mptcpd path manager
+         *                  object.
+         *
+         * Called when an address has been advertised by a peer
+         * through an @c ADD_ADDR MPTCP option.
+         *
+         * @todo Why don't we have an @c address_removed() operation
+         *       for the @c REMOVE_ADDR case?
+         */
+        void (*new_address)(mptcpd_token_t token,
+                            mptcpd_aid_t id,
+                            struct mptcpd_addr const *addr,
+                            struct mptcpd_pm *pm);
+
+        /**
+         * @brief Address is no longer advertised by a peer.
+         *
+         * @param[in] token MPTCP connection token.
+         * @param[in] id    Remote address identifier.
+         * @param[in] pm    Opaque pointer to mptcpd path manager
+         *                  object.
+         *
+         * Called when an address is no longer advertised by a peer
+         * through an @c REMOVE_ADDR MPTCP option.
+         */
+        void (*address_removed)(mptcpd_token_t token,
+                                mptcpd_aid_t id,
+                                struct mptcpd_pm *pm);
+
+        /**
+         * @brief A peer has joined the MPTCP connection.
+         *
+         * @param[in] token  MPTCP connection token.
+         * @param[in] laddr  Local address information.
+         * @param[in] raddr  Remote address information.
+         * @param[in] backup Backup priority flag.
+         * @param[in] pm     Opaque pointer to mptcpd path manager
+         *                   object.
+         *
+         * @note Called after a @c MP_JOIN @c ACK has been @c ACKed.
+         */
+        void (*new_subflow)(mptcpd_token_t token,
+                            struct mptcpd_addr const *laddr,
+                            struct mptcpd_addr const *raddr,
+                            bool backup,
+                            struct mptcpd_pm *pm);
+
+        /**
+         * @brief A single MPTCP subflow was closed.
+         *
+         * @param[in] token  MPTCP connection token.
+         * @param[in] laddr  Local address information.
+         * @param[in] raddr  Remote address information.
+         * @param[in] backup Backup priority flag.
+         * @param[in] pm     Opaque pointer to mptcpd path manager
+         *                   object.
+         */
+        void (*subflow_closed)(mptcpd_token_t token,
+                               struct mptcpd_addr const *laddr,
+                               struct mptcpd_addr const *raddr,
+                               bool backup,
+                               struct mptcpd_pm *pm);
+
+        /**
+         * @brief MPTCP subflow priority changed.
+         *
+         * @param[in] token  MPTCP connection token.
+         * @param[in] laddr  Local address information.
+         * @param[in] raddr  Remote address information
+         * @param[in] backup Backup priority flag.
+         * @param[in] pm     Opaque pointer to mptcpd path manager
+         *                   object.
+         */
+        void (*subflow_priority)(mptcpd_token_t token,
+                                 struct mptcpd_addr const *laddr,
+                                 struct mptcpd_addr const *raddr,
+                                 bool backup,
+                                 struct mptcpd_pm *pm);
 };
 
 /**
@@ -154,13 +200,12 @@ MPTCPD_API bool mptcpd_plugin_register_ops(
         struct mptcpd_plugin_ops const *ops);
 
 /**
- * @brief Notify plugin of new MPTCP connection.
+ * @brief Notify plugin of new MPTCP connection pending completion.
  *
  * @param[in] name   Plugin name.
  * @param[in] token  MPTCP connection token.
  * @param[in] laddr  Local address information.
  * @param[in] raddr  Remote address information.
- * @param[in] backup Backup priority flag.
  * @param[in] pm     Opaque pointer to mptcpd path manager object.
  */
 MPTCPD_API void mptcpd_plugin_new_connection(
@@ -168,49 +213,17 @@ MPTCPD_API void mptcpd_plugin_new_connection(
         mptcpd_token_t token,
         struct mptcpd_addr const *laddr,
         struct mptcpd_addr const *raddr,
-        bool backup,
         struct mptcpd_pm *pm);
 
 /**
- * @brief Notify plugin of new address advertised by a peer.
+ * @brief Notify plugin of MPTCP connection completion.
  *
- * @param[in] token   MPTCP connection token.
- * @param[in] addr_id Remote address identifier.
- * @param[in] addr    Remote address information.
- * @param[in] pm      Opaque pointer to mptcpd path manager object.
+ * @param[in] token  MPTCP connection token.
+ * @param[in] laddr  Local address information.
+ * @param[in] raddr  Remote address information.
+ * @param[in] pm     Opaque pointer to mptcpd path manager object.
  */
-MPTCPD_API void mptcpd_plugin_new_address(mptcpd_token_t token,
-                                          mptcpd_aid_t addr_id,
-                                          struct mptcpd_addr const *addr,
-                                          struct mptcpd_pm *pm);
-
-/**
- * @brief Notify plugin that a peer has joined the MPTCP connection.
- *
- * @param[in] token    MPTCP connection token.
- * @param[in] laddr_id Local address identifier.
- * @param[in] laddr    Local address information.
- * @param[in] raddr_id Remote address identifier.
- * @param[in] raddr    Remote address information.
- * @param[in] pm       Opaque pointer to mptcpd path manager object.
- */
-MPTCPD_API void mptcpd_plugin_new_subflow(
-        mptcpd_token_t token,
-        mptcpd_aid_t laddr_id,
-        struct mptcpd_addr const *laddr,
-        mptcpd_aid_t raddr_id,
-        struct mptcpd_addr const *raddr,
-        struct mptcpd_pm *pm);
-
-/**
- * @brief Notify plugin of MPTCP subflow closure.
- *
- * @param[in] token MPTCP connection token.
- * @param[in] laddr Local address information.
- * @param[in] raddr Remote address information.
- * @param[in] pm    Opaque pointer to mptcpd path manager object.
- */
-MPTCPD_API void mptcpd_plugin_subflow_closed(
+MPTCPD_API void mptcpd_plugin_connection_established(
         mptcpd_token_t token,
         struct mptcpd_addr const *laddr,
         struct mptcpd_addr const *raddr,
@@ -224,6 +237,78 @@ MPTCPD_API void mptcpd_plugin_subflow_closed(
  */
 MPTCPD_API void mptcpd_plugin_connection_closed(
         mptcpd_token_t token,
+        struct mptcpd_pm *pm);
+
+/**
+ * @brief Notify plugin of new address advertised by a peer.
+ *
+ * @param[in] token MPTCP connection token.
+ * @param[in] id    Remote address identifier.
+ * @param[in] addr  Remote address information.
+ * @param[in] pm    Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_new_address(mptcpd_token_t token,
+                                          mptcpd_aid_t id,
+                                          struct mptcpd_addr const *addr,
+                                          struct mptcpd_pm *pm);
+
+/**
+ * @brief Notify plugin of address no longer advertised by a peer.
+ *
+ * @param[in] token MPTCP connection token.
+ * @param[in] id    Remote address identifier.
+ * @param[in] pm    Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_address_removed(mptcpd_token_t token,
+                                              mptcpd_aid_t id,
+                                              struct mptcpd_pm *pm);
+
+/**
+ * @brief Notify plugin that a peer has joined the MPTCP connection.
+ *
+ * @param[in] token  MPTCP connection token.
+ * @param[in] laddr  Local address information.
+ * @param[in] raddr  Remote address information.
+ * @param[in] backup Backup priority flag.
+ * @param[in] pm     Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_new_subflow(
+        mptcpd_token_t token,
+        struct mptcpd_addr const *laddr,
+        struct mptcpd_addr const *raddr,
+        bool backup,
+        struct mptcpd_pm *pm);
+
+/**
+ * @brief Notify plugin of MPTCP subflow closure.
+ *
+ * @param[in] token  MPTCP connection token.
+ * @param[in] laddr  Local address information.
+ * @param[in] raddr  Remote address information.
+ * @param[in] backup Backup priority flag.
+ * @param[in] pm     Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_subflow_closed(
+        mptcpd_token_t token,
+        struct mptcpd_addr const *laddr,
+        struct mptcpd_addr const *raddr,
+        bool backup,
+        struct mptcpd_pm *pm);
+
+/**
+ * @brief Notify plugin of MPTCP subflow priority change.
+ *
+ * @param[in] token  MPTCP connection token.
+ * @param[in] laddr  Local address information.
+ * @param[in] raddr  Remote address information.
+ * @param[in] backup Backup priority flag.
+ * @param[in] pm     Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_subflow_priority(
+        mptcpd_token_t token,
+        struct mptcpd_addr const *laddr,
+        struct mptcpd_addr const *raddr,
+        bool backup,
         struct mptcpd_pm *pm);
 
 #ifdef __cplusplus
