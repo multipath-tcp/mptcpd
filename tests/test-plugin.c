@@ -153,6 +153,25 @@ static void test_plugin_dispatch(void const *test_data)
                         &test_raddr_2,
                         test_backup_2);
 
+        /*
+          Invalid MPTCP token - no plugin dispatch should occur.
+
+          This should be the case for all operations corresponding to
+          MPTCP genl API events that are triggered after the initial
+          new connection (MPTCP_CONNECTION_CREATED) event,
+          i.e. connection_established, connection_closed,
+          new_address, address_removed, new_subflow, subflow_closed,
+          and subflow_priority.
+
+          We do not call call_plugin_ops() like above since that would
+          cause the token to be associated with a plugin, which is not
+          what we want in this case.
+        */
+        mptcpd_plugin_connection_established(test_bad_token,
+                                             &test_laddr_2,
+                                             &test_raddr_2,
+                                             NULL);
+
         // Test assertions will be triggered during plugin unload.
         mptcpd_plugin_unload();
 }

@@ -173,6 +173,9 @@ mptcpd_aid_t   const test_laddr_id_4 = 0x90;
 mptcpd_aid_t   const test_raddr_id_4 = 0x01;
 bool           const test_backup_4   = true;
 
+// For verifying that a plugin will not be dispatched.
+mptcpd_token_t const test_bad_token  = 0xFFFFFFFF;
+
 struct mptcpd_addr const test_laddr_1 = {
         .address = { .family = AF_INET,
                      .addr   = { .addr4 = { .s_addr = 0x34567890 } } },
