@@ -429,7 +429,7 @@ static bool sspi_token_match(void const *a, void const *b)
  *
  * @see l_queue_foreach_remove()
  */
-static bool sspi_remove_cid(void *data, void *user_data)
+static bool sspi_remove_token(void *data, void *user_data)
 {
         assert(data);
         assert(user_data);
@@ -608,7 +608,7 @@ static void sspi_connection_closed(mptcpd_token_t token,
           given connection token.
         */
         if (l_queue_foreach_remove(sspi_interfaces,
-                                   sspi_remove_cid,
+                                   sspi_remove_token,
                                    L_UINT_TO_PTR(token)) == 0)
                 l_error("No tracked connection with token 0x%"
                         MPTCPD_PRIxTOKEN,
