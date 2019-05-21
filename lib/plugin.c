@@ -26,7 +26,7 @@
 
 /**
  * @todo Remove this preprocessor symbol definition once support for
- *       path managemnent strategy names are supported in the new
+ *       path management strategy names are supported in the new
  *       generic netlink API.
  *
  * @note @c GENL_NAMSIZ is used as the size since the path manager
