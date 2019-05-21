@@ -590,7 +590,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
             || !local_port
             || !(raddr4 || raddr6)
             || !remote_port) {
-                l_error("Required MPTCP_EVENT_SUB_ESTABLISHED "
+                l_error("Required MPTCP_EVENT_SUB_* "
                         "message attributes are missing.");
 
                 return false;
