@@ -69,6 +69,7 @@ inline bool plugin_call_counts_are_pos(struct plugin_call_count const *p)
                 && p->connection_established >= 0
                 && p->connection_closed >= 0
                 && p->new_address >= 0
+                && p->address_removed >= 0
                 && p->new_subflow >= 0
                 && p->subflow_closed >= 0
                 && p->subflow_priority >= 0;
