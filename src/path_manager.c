@@ -791,7 +791,7 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
 
         assert(cmd != 0);
 
-        switch(cmd) {
+        switch (cmd) {
         case MPTCP_EVENT_CREATED:
                 handle_connection_created(msg, user_data);
                 break;
