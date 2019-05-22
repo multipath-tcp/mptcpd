@@ -31,7 +31,7 @@ void test_send_addr(void const *test_data)
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
 
         assert(mptcpd_pm_send_addr(pm,
-                                   test_cid_1,
+                                   test_token_1,
                                    test_laddr_id_1,
                                    &test_laddr_1));
 }
@@ -41,7 +41,7 @@ void test_add_subflow(void const *test_data)
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
 
         assert(mptcpd_pm_add_subflow(pm,
-                                     test_cid_2,
+                                     test_token_2,
                                      test_laddr_id_2,
                                      test_raddr_id_2,
                                      &test_laddr_2,
@@ -54,7 +54,7 @@ void test_set_backup(void const *test_data)
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
 
         assert(mptcpd_pm_set_backup(pm,
-                                    test_cid_1,
+                                    test_token_1,
                                     &test_laddr_1,
                                     &test_raddr_1,
                                     test_backup_1));
@@ -65,7 +65,7 @@ void test_remove_subflow(void const *test_data)
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
 
         assert(mptcpd_pm_remove_subflow(pm,
-                                        test_cid_1,
+                                        test_token_1,
                                         &test_laddr_1,
                                         &test_raddr_1));
 }

@@ -23,18 +23,18 @@ struct mptcpd_pm;
 /**
  * @brief Send @c MPTCP_GENL_CMD_SEND_ADDR genl command to kernel.
  *
- * @param[in] pm            The mptcpd path manager object.
- * @param[in] connection_id MPTCP connection ID.
- * @param[in] address_id    MPTCP local address ID
- * @param[in] addr          MPTCP local IP address and port
- *                          to be advertised through the MPTCP
- *                          protocol @c ADD_ADDR option.  The port is
- *                          optional, and is ignored if it is zero.
+ * @param[in] pm         The mptcpd path manager object.
+ * @param[in] token      MPTCP connection token.
+ * @param[in] address_id MPTCP local address ID
+ * @param[in] addr       MPTCP local IP address and port to be
+ *                       advertised through the MPTCP protocol
+ *                       @c ADD_ADDR option.  The port is optional,
+ *                       and is ignored if it is zero.
  *
  * @return @c true if operation was successful. @c false otherwise.
  */
 MPTCPD_API bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
-                                    mptcpd_cid_t connection_id,
+                                    mptcpd_token_t token,
                                     mptcpd_aid_t address_id,
                                     struct mptcpd_addr const *addr);
 
@@ -42,7 +42,7 @@ MPTCPD_API bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
  * @brief Send @c MPTCP_GENL_CMD_ADD_SUBFLOW genl command to kernel.
  *
  * @param[in] pm                The mptcpd path manager object.
- * @param[in] connection_id     MPTCP connection ID.
+ * @param[in] token             MPTCP connection token.
  * @param[in] local_address_id  MPTCP local address ID.
  * @param[in] remote_address_id MPTCP remote address ID.
  * @param[in] local_addr        MPTCP subflow local address
@@ -58,7 +58,7 @@ MPTCPD_API bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
  */
 MPTCPD_API bool
 mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
-                      mptcpd_cid_t connection_id,
+                      mptcpd_token_t token,
                       mptcpd_aid_t local_address_id,
                       mptcpd_aid_t remote_address_id,
                       struct mptcpd_addr const *local_addr,
@@ -69,7 +69,7 @@ mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
  * @brief Send @c MPTCP_GENL_CMD_SET_BACKUP genl command to kernel.
  *
  * @param[in] pm                The mptcpd path manager object.
- * @param[in] connection_id     MPTCP connection ID.
+ * @param[in] token             MPTCP connection token.
  * @param[in] local_addr        MPTCP subflow local address
  *                              information, including the port.
  * @param[in] remote_addr       MPTCP subflow remote address
@@ -81,7 +81,7 @@ mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
  */
 MPTCPD_API bool mptcpd_pm_set_backup(
         struct mptcpd_pm *pm,
-        mptcpd_cid_t connection_id,
+        mptcpd_token_t token,
         struct mptcpd_addr const *local_addr,
         struct mptcpd_addr const *remote_addr,
         bool backup);
@@ -90,7 +90,7 @@ MPTCPD_API bool mptcpd_pm_set_backup(
  * @brief Send @c MPTCP_GENL_CMD_REMOVE_SUBFLOW genl command to kernel.
  *
  * @param[in] pm                The mptcpd path manager object.
- * @param[in] connection_id     MPTCP connection ID.
+ * @param[in] token             MPTCP connection token.
  * @param[in] local_addr        MPTCP subflow local address
  *                              information, including the port.
  * @param[in] remote_addr       MPTCP subflow remote address
@@ -100,7 +100,7 @@ MPTCPD_API bool mptcpd_pm_set_backup(
  */
 MPTCPD_API bool mptcpd_pm_remove_subflow(
         struct mptcpd_pm *pm,
-        mptcpd_cid_t connection_id,
+        mptcpd_token_t token,
         struct mptcpd_addr const *local_addr,
         struct mptcpd_addr const *remote_addr);
 

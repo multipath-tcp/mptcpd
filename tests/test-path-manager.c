@@ -39,9 +39,8 @@ void test_pm_create(void const *test_data)
 
         assert(info->pm         != NULL);
         assert(info->pm->genl   != NULL);
-        assert(info->pm->family != NULL);
-        assert(info->pm->family != NULL);
         assert(info->pm->id     != NULL);
+        assert(info->pm->family != NULL);
         assert(info->pm->nm     != NULL);
 }
 
@@ -83,11 +82,6 @@ static void idle_callback(struct l_idle *idle, void *user_data)
 
         assert(max_count > trigger_count);  // Sanity check.
 
-        /*
-          The mptcpd network monitor interface list should now be
-          populated.  Iterate through the list, and verify that the
-          monitored interfaces are what we expect.
-         */
         if (count > trigger_count && !tests_called) {
                 l_test_run();
                 tests_called = true;

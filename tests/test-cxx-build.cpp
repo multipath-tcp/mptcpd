@@ -72,8 +72,7 @@ public:
 
                 call_plugin_ops(&test_count_4,
                                 NULL,
-                                test_cid_4,
-                                test_laddr_id_4,
+                                test_token_4,
                                 test_raddr_id_4,
                                 &test_laddr_4,
                                 &test_raddr_4,

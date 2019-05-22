@@ -2,4 +2,4 @@
 ##
 ## Copyright (c) 2018, Intel Corporation
 
-noinst_HEADERS = mptcp_genl.h
+noinst_HEADERS = mptcp.h

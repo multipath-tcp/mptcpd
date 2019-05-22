@@ -8,11 +8,10 @@
 
 set -e
 
-../src/mptcpd --plugin-dir=$TEST_PLUGIN_DIR &
-
 # @todo It would be better to have some sort of indication that
-#       mptcpd is fully up and running rather than sleep a fixed
-#       amount of time like this.
-sleep 1
-
-kill $!
+#       mptcpd is fully up and running rather than timeout after a
+#       fixed amount of time like this.
+timeout --preserve-status \
+	--signal=TERM     \
+	--kill-after=5s   \
+         1s ../src/mptcpd --plugin-dir=$TEST_PLUGIN_DIR
