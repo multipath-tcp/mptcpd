@@ -31,10 +31,10 @@
 
 /**
  * List of @c sspi_interface_info objects that contain MPTCP
- * connection IDs on each network interface.
+ * connection tokens on each network interface.
  *
  * @note We could use a map, like @c l_hashmap to map network
- *       interface to the list of connection IDs, but a map seems like
+ *       interface to the list of tokens, but a map seems like
  *       overkill since most platforms will have very few network
  *       interfaces.
  */
@@ -45,13 +45,13 @@ static struct l_queue *sspi_interfaces;
  *
  * @brief Network interface information.
  *
- * This plugin tracks MPTCP subflow connection IDs on each network
+ * This plugin tracks MPTCP connection tokens on each network
  * interface.  A network interface is represented by its kernel
  * assigned index value, which is based on the local address of the
  * subflow.  Once the network interface corresponding to the subflow
- * local address is determined, the subflow connection ID is then
- * associated with the network interface as means to denote that the
- * MPTCP connection has a subflow on that network interface.
+ * local address is determined, the connection token for that subflow
+ * is then associated with the network interface as a means to denote
+ * that the MPTCP connection has a subflow on that network interface.
  */
 struct sspi_interface_info
 {
@@ -59,14 +59,13 @@ struct sspi_interface_info
         int index;
 
         /**
-         * @brief List of MPTCP connection IDs.
+         * @brief List of MPTCP connection tokens.
          *
-         * A single network interface should have no duplicate
-         * connection IDs, enforcing the single subflow (per
-         * connection) per network interface requirement of this
-         * plugin.
+         * A single network interface should have no duplicate tokens,
+         * enforcing the single subflow (per connection) per network
+         * interface requirement of this plugin.
          */
-        struct l_queue *connection_ids;
+        struct l_queue *tokens;
 };
 
 /**
@@ -80,11 +79,11 @@ struct sspi_interface_info
  */
 struct sspi_new_connection_info
 {
-        /// Network interface index
+        /// Network interface index.
         int index;
 
-        /// MPTCP connection ID
-        mptcpd_cid_t const connection_id;
+        /// MPTCP connection token.
+        mptcpd_token_t const token;
 
         /// Pointer to path manager.
         struct mptcpd_pm *const pm;
@@ -286,7 +285,7 @@ static void sspi_interface_info_destroy(void *p)
 
         struct sspi_interface_info *const info = p;
 
-        l_queue_destroy(info->connection_ids, NULL);
+        l_queue_destroy(info->tokens, NULL);
         l_free(info);
 }
 
@@ -295,7 +294,7 @@ static void sspi_interface_info_destroy(void *p)
  *
  * @param[in] index Network interface index.
  *
- * @return @c sspi_interface_info object with empty connection ID
+ * @return @c sspi_interface_info object with empty token
  *         queue.
  */
 static struct sspi_interface_info *sspi_interface_info_create(int index)
@@ -303,8 +302,8 @@ static struct sspi_interface_info *sspi_interface_info_create(int index)
         struct sspi_interface_info *const info =
                 l_new(struct sspi_interface_info, 1);
 
-        info->index          = index;
-        info->connection_ids = l_queue_new();
+        info->index  = index;
+        info->tokens = l_queue_new();
 
         return info;
 }
@@ -376,10 +375,10 @@ static struct sspi_interface_info *sspi_interface_info_lookup(
 // ----------------------------------------------------------------
 
 /**
- * @brief Compare two connection ID values.
+ * @brief Compare two token values.
  *
- * Compare connection IDs to determine where in the connection ID list
- * the first ID, @a a, will be inserted relative to the second ID,
+ * Compare connection tokens to determine where in the token list the
+ * first token, @a a, will be inserted relative to the second token,
  * @a b.
  *
  * @return Always returns 1 to make insertions append to the queue
@@ -387,7 +386,9 @@ static struct sspi_interface_info *sspi_interface_info_lookup(
  *
  * @see l_queue_insert()
  */
-static int sspi_cid_compare(void const *a, void const *b, void *user_data)
+static int sspi_token_compare(void const *a,
+                              void const *b,
+                              void *user_data)
 {
         (void) a;
         (void) b;
@@ -398,45 +399,44 @@ static int sspi_cid_compare(void const *a, void const *b, void *user_data)
 }
 
 /**
- * @brief Match MPTCP connection IDs.
+ * @brief Match MPTCP connection tokens.
  *
- * @param[in] a Connection ID (via @c L_UINT_TO_PTR()).
- * @param[in] b Connection ID (via @c L_UINT_TO_PTR()).
+ * @param[in] a token (via @c L_UINT_TO_PTR()).
+ * @param[in] b token (via @c L_UINT_TO_PTR()).
  *
- * @return @c true if the connection IDs, @a a and @b, are equal, and
+ * @return @c true if the tokens, @a a and @b, are equal, and
  *         @c false otherwise.
  *
  * @see l_queue_find()
  * @see l_queue_remove_if()
  */
-static bool sspi_cid_match(void const *a, void const *b)
+static bool sspi_token_match(void const *a, void const *b)
 {
-        mptcpd_cid_t const lhs = L_PTR_TO_UINT(a);
-        mptcpd_cid_t const rhs = L_PTR_TO_UINT(b);
+        mptcpd_token_t const lhs = L_PTR_TO_UINT(a);
+        mptcpd_token_t const rhs = L_PTR_TO_UINT(b);
 
         return lhs == rhs;
 }
 
 /**
- * @brief Remove connection ID from tracked network interfaces.
+ * @brief Remove token from tracked network interfaces.
  *
  * @param[in] data      @c sspi_interface_info object.
- * @param[in] user_data Connection ID (via @c L_UINT_TO_PTR()).
+ * @param[in] user_data Connection token (via @c L_UINT_TO_PTR()).
  *
  * @return @c true if @c sspi_interface_info object containing the
- *         given connection ID was removed, and @c false otherwise.
+ *         given token was removed, and @c false otherwise.
  *
  * @see l_queue_foreach_remove()
  */
-static bool sspi_remove_cid(void *data, void *user_data)
+static bool sspi_remove_token(void *data, void *user_data)
 {
         assert(data);
         assert(user_data);
 
         struct sspi_interface_info *const info = data;
 
-        return l_queue_remove(info->connection_ids,
-                              user_data);
+        return l_queue_remove(info->tokens, user_data);
 }
 
 // ----------------------------------------------------------------
@@ -470,7 +470,7 @@ static void sspi_send_addr(void *data, void *user_data)
         memcpy(&addr.address, ip_addr, sizeof(*ip_addr));
 
                 mptcpd_pm_send_addr(info->pm,
-                                    info->connection_id,
+                                    info->token,
                                     address_id,
                                     &addr);
 }
@@ -520,27 +520,24 @@ static void sspi_send_addrs(struct mptcpd_interface const *i, void *data)
 // ----------------------------------------------------------------
 //                     Mptcpd Plugin Operations
 // ----------------------------------------------------------------
-static void sspi_new_connection(mptcpd_cid_t connection_id,
+static void sspi_new_connection(mptcpd_token_t token,
                                 struct mptcpd_addr const *laddr,
                                 struct mptcpd_addr const *raddr,
-                                bool backup,
                                 struct mptcpd_pm *pm)
 {
         (void) raddr;
-        (void) backup;
 
         /**
-         * @note Because we directly store connection IDs in an
+         * @note Because we directly store connection tokens in a
          *       @c l_queue by converting them to pointers via
-         *       @c L_UINT_TO_PTR(), the connection ID cannot be zero
+         *       @c L_UINT_TO_PTR(), the token cannot be zero
          *       since @c l_queue_find() returning a @c NULL pointer
-         *       would be an ambiguous result.  Was     a match found
-         *       (zero connection ID) or was it not found (@c NULL
-         *       pointer)?  The connection ID cannot be zero as
-         *       implemented in the kernel where it is derived from
-         *       the connection token.
+         *       would be an ambiguous result.  Was a match found
+         *       (zero token) or was it not found (@c NULL pointer)?
+         *       The kernel always provides non-zero MPTCP connection
+         *       tokens.
         */
-        assert(connection_id != 0);
+        assert(token != 0);
 
         struct mptcpd_nm const *const nm = mptcpd_pm_get_nm(pm);
 
@@ -549,8 +546,8 @@ static void sspi_new_connection(mptcpd_cid_t connection_id,
 
         if (interface_info == NULL) {
                 l_error("Unable to track new connection (0x%"
-                        MPTCPD_PRIxCID ")",
-                        connection_id);
+                        MPTCPD_PRIxTOKEN ")",
+                        token);
 
                 return;
         }
@@ -559,11 +556,11 @@ static void sspi_new_connection(mptcpd_cid_t connection_id,
           Associate the MPTCP connection with network interface
           corresponding to the local address.
          */
-        if (!l_queue_insert(interface_info->connection_ids,
-                            L_UINT_TO_PTR(connection_id),
-                            sspi_cid_compare,
+        if (!l_queue_insert(interface_info->tokens,
+                            L_UINT_TO_PTR(token),
+                            sspi_token_compare,
                             NULL)) {
-                l_error("Unable to associate new connection ID "
+                l_error("Unable to associate new token "
                         "with network interface %d",
                         interface_info->index);
 
@@ -575,9 +572,9 @@ static void sspi_new_connection(mptcpd_cid_t connection_id,
           for subflows, e.g. for MP_JOIN purposes.
          */
         struct sspi_new_connection_info connection_info = {
-                .index         = interface_info->index,
-                .connection_id = connection_id,
-                .pm            = pm
+                .index = interface_info->index,
+                .token = token,
+                .pm    = pm
         };
 
         mptcpd_nm_foreach_interface(nm,
@@ -585,13 +582,46 @@ static void sspi_new_connection(mptcpd_cid_t connection_id,
                                     &connection_info);
 }
 
-static void sspi_new_address(mptcpd_cid_t connection_id,
-                             mptcpd_aid_t addr_id,
+static void sspi_connection_established(mptcpd_token_t token,
+                                        struct mptcpd_addr const *laddr,
+                                        struct mptcpd_addr const *raddr,
+                                        struct mptcpd_pm *pm)
+{
+        (void) token;
+        (void) laddr;
+        (void) raddr;
+        (void) pm;
+
+        /**
+         * @todo Implement this function.
+         */
+        l_warn("%s is unimplemented.", __func__);
+}
+
+static void sspi_connection_closed(mptcpd_token_t token,
+                                   struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        /*
+          Remove all sspi_interface_info objects associated with the
+          given connection token.
+        */
+        if (l_queue_foreach_remove(sspi_interfaces,
+                                   sspi_remove_token,
+                                   L_UINT_TO_PTR(token)) == 0)
+                l_error("No tracked connection with token 0x%"
+                        MPTCPD_PRIxTOKEN,
+                        token);
+}
+
+static void sspi_new_address(mptcpd_token_t token,
+                             mptcpd_aid_t id,
                              struct mptcpd_addr const *addr,
                              struct mptcpd_pm *pm)
 {
-        (void) connection_id;
-        (void) addr_id;
+        (void) token;
+        (void) id;
         (void) addr;
         (void) pm;
 
@@ -601,15 +631,27 @@ static void sspi_new_address(mptcpd_cid_t connection_id,
         */
 }
 
-static void sspi_new_subflow(mptcpd_cid_t connection_id,
-                             mptcpd_aid_t laddr_id,
+static void sspi_address_removed(mptcpd_token_t token,
+                                 mptcpd_aid_t id,
+                                 struct mptcpd_pm *pm)
+{
+        (void) token;
+        (void) id;
+        (void) pm;
+
+        /*
+          The sspi plugin doesn't do anything with addresses that are
+          no longer advertised.
+        */
+}
+
+static void sspi_new_subflow(mptcpd_token_t token,
                              struct mptcpd_addr const *laddr,
-                             mptcpd_aid_t raddr_id,
                              struct mptcpd_addr const *raddr,
+                             bool backup,
                              struct mptcpd_pm *pm)
 {
-        (void) laddr_id;
-        (void) raddr_id;
+        (void) backup;
 
         /*
           1. Check if the new subflow local IP address corresponds to
@@ -617,8 +659,8 @@ static void sspi_new_subflow(mptcpd_cid_t connection_id,
              through it, being aware that multiple IP addresses may be
              associated with a given a network interface.
           2. If the network interface corresponding to the local
-             address has no subflow running on it add it to the
-             connection ID to the list.  Otherwise, close the subflow.
+             address has no subflow running on it add its connection
+             token to the token list.  Otherwise, close the subflow.
          */
 
         struct mptcpd_nm const *const nm = mptcpd_pm_get_nm(pm);
@@ -628,22 +670,22 @@ static void sspi_new_subflow(mptcpd_cid_t connection_id,
 
         if (info == NULL) {
                 l_error("Unable to track new subflow "
-                        "(connection ID: 0x%" MPTCPD_PRIxCID ")",
-                        connection_id);
+                        "(token: 0x%" MPTCPD_PRIxTOKEN ")",
+                        token);
 
                 return;
         }
 
-        if (l_queue_find(info->connection_ids,
-                         sspi_cid_match,
-                         L_UINT_TO_PTR(connection_id)) != NULL) {
+        if (l_queue_find(info->tokens,
+                         sspi_token_match,
+                         L_UINT_TO_PTR(token)) != NULL) {
                 l_warn("Subflow already exists on network "
                        "interface (%d). "
                        "Closing new subflow.",
                         info->index);
 
                 mptcpd_pm_remove_subflow(pm,
-                                         connection_id,
+                                         token,
                                          laddr,
                                          raddr);
 
@@ -654,26 +696,28 @@ static void sspi_new_subflow(mptcpd_cid_t connection_id,
           Associate the MPTCP subflow with network interface
           corresponding to the local address.
          */
-        if (!l_queue_insert(info->connection_ids,
-                            L_UINT_TO_PTR(connection_id),
-                            sspi_cid_compare,
+        if (!l_queue_insert(info->tokens,
+                            L_UINT_TO_PTR(token),
+                            sspi_token_compare,
                             NULL))
-                l_error("Unable to associate new subflow connection ID "
+                l_error("Unable to associate new subflow token "
                         "with network interface %d",
                         info->index);
 }
 
-static void sspi_subflow_closed(mptcpd_cid_t connection_id,
+static void sspi_subflow_closed(mptcpd_token_t token,
                                 struct mptcpd_addr const *laddr,
                                 struct mptcpd_addr const *raddr,
+                                bool backup,
                                 struct mptcpd_pm *pm)
 {
         (void) raddr;
+        (void) backup;
 
         /*
           1. Retrieve the subflow list associated with the connection
-             ID.  Return immediately if no such connection ID exists,
-             and log an error.
+             token.  Return immediately if no such token exists, and
+             log an error.
           2. Remove the subflow information associated with the given
              local IP address from the subflow list.  Return
              immediately if no subflow corresponding to the local
@@ -687,49 +731,53 @@ static void sspi_subflow_closed(mptcpd_cid_t connection_id,
 
         if (info == NULL) {
                 l_error("Unable to remove subflow "
-                        "(connection ID: 0x%" MPTCPD_PRIxCID ")",
-                        connection_id);
+                        "(token: 0x%" MPTCPD_PRIxTOKEN ")",
+                        token);
 
                 return;
         }
 
-        if (!l_queue_remove(info->connection_ids,
-                            L_UINT_TO_PTR(connection_id)))
-                l_error("No subflow with connection ID "
-                        "0x%" MPTCPD_PRIxCID
+        if (!l_queue_remove(info->tokens,
+                            L_UINT_TO_PTR(token)))
+                l_error("No subflow with token "
+                        "0x%" MPTCPD_PRIxTOKEN
                         " exists on network interface %d.",
-                        connection_id,
+                        token,
                         info->index);
 }
 
-static void sspi_connection_closed(mptcpd_cid_t connection_id,
-                                   struct mptcpd_pm *pm)
+static void sspi_subflow_priority(mptcpd_token_t token,
+                                  struct mptcpd_addr const *laddr,
+                                  struct mptcpd_addr const *raddr,
+                                  bool backup,
+                                  struct mptcpd_pm *pm)
 {
+        (void) token;
+        (void) laddr;
+        (void) raddr;
+        (void) backup;
         (void) pm;
 
         /*
-          Remove all sspi_interface_info objects associated with the
-          given connection ID.
+          The sspi plugin doesn't do anything with changes in subflow
+          priority.
         */
-        if (l_queue_foreach_remove(sspi_interfaces,
-                                   sspi_remove_cid,
-                                   L_UINT_TO_PTR(connection_id)) == 0)
-                l_error("No tracked connection with ID 0x%"
-                        MPTCPD_PRIxCID,
-                        connection_id);
 }
 
 static struct mptcpd_plugin_ops const pm_ops = {
-        .new_connection    = sspi_new_connection,
-        .new_address       = sspi_new_address,
-        .new_subflow       = sspi_new_subflow,
-        .subflow_closed    = sspi_subflow_closed,
-        .connection_closed = sspi_connection_closed
+        .new_connection         = sspi_new_connection,
+        .connection_established = sspi_connection_established,
+        .connection_closed      = sspi_connection_closed,
+        .new_address            = sspi_new_address,
+        .address_removed        = sspi_address_removed,
+        .new_subflow            = sspi_new_subflow,
+        .subflow_closed         = sspi_subflow_closed,
+        .subflow_priority       = sspi_subflow_priority
 };
 
 static int sspi_init(void)
 {
-        // Create list of connection IDs on each network interface.
+        // Create list of connection tokens on each network interface.
         sspi_interfaces = l_queue_new();
 
         static char const name[] = "sspi";

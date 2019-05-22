@@ -29,7 +29,93 @@ static struct plugin_call_count call_count;
 
 // ----------------------------------------------------------------
 
-static void plugin_one_new_connection(mptcpd_cid_t connection_id,
+static void plugin_one_new_connection(mptcpd_token_t token,
+                                      struct mptcpd_addr const *laddr,
+                                      struct mptcpd_addr const *raddr,
+                                      struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        assert(token == test_token_1);
+        assert(laddr != NULL && raddr != NULL);
+        assert(!mptcpd_addr_is_equal(laddr, raddr));
+        assert(mptcpd_addr_is_equal(laddr, &test_laddr_1));
+        assert(mptcpd_addr_is_equal(raddr, &test_raddr_1));
+
+        ++call_count.new_connection;
+}
+
+static void plugin_one_connection_established(
+        mptcpd_token_t token,
+        struct mptcpd_addr const *laddr,
+        struct mptcpd_addr const *raddr,
+        struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        assert(token == test_token_1);
+        assert(laddr != NULL && raddr != NULL);
+        assert(!mptcpd_addr_is_equal(laddr, raddr));
+        assert(mptcpd_addr_is_equal(laddr, &test_laddr_1));
+        assert(mptcpd_addr_is_equal(raddr, &test_raddr_1));
+
+        ++call_count.connection_established;
+}
+
+static void plugin_one_connection_closed(mptcpd_token_t token,
+                                         struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        assert(token == test_token_1);
+
+        ++call_count.connection_closed;
+}
+
+static void plugin_one_new_address(mptcpd_token_t token,
+                                   mptcpd_aid_t addr_id,
+                                   struct mptcpd_addr const *addr,
+                                   struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        assert(token == test_token_1);
+        assert(addr_id == test_raddr_id_1);
+        assert(mptcpd_addr_is_equal(addr, &test_raddr_1));
+
+        ++call_count.new_address;
+}
+
+static void plugin_one_address_removed(mptcpd_token_t token,
+                                       mptcpd_aid_t addr_id,
+                                       struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        assert(token == test_token_1);
+        assert(addr_id == test_raddr_id_1);
+
+        ++call_count.new_address;
+}
+
+static void plugin_one_new_subflow(mptcpd_token_t token,
+                                   struct mptcpd_addr const *laddr,
+                                   struct mptcpd_addr const *raddr,
+                                   bool backup,
+                                   struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        assert(token == test_token_1);
+        assert(!mptcpd_addr_is_equal(laddr, raddr));
+        assert(mptcpd_addr_is_equal(laddr, &test_laddr_1));
+        assert(mptcpd_addr_is_equal(raddr, &test_raddr_1));
+        assert(backup == test_backup_1);
+
+        ++call_count.new_subflow;
+}
+
+static void plugin_one_subflow_closed(mptcpd_token_t token,
                                       struct mptcpd_addr const *laddr,
                                       struct mptcpd_addr const *raddr,
                                       bool backup,
@@ -37,80 +123,39 @@ static void plugin_one_new_connection(mptcpd_cid_t connection_id,
 {
         (void) pm;
 
-        assert(connection_id == test_cid_1);
-        assert(laddr != NULL && raddr != NULL);
-        assert(!mptcpd_addr_is_equal(laddr, raddr));
+        assert(token == test_token_1);
         assert(mptcpd_addr_is_equal(laddr, &test_laddr_1));
         assert(mptcpd_addr_is_equal(raddr, &test_raddr_1));
         assert(backup == test_backup_1);
 
-        ++call_count.new_connection;
-}
-
-static void plugin_one_new_address(mptcpd_cid_t connection_id,
-                                   mptcpd_aid_t addr_id,
-                                   struct mptcpd_addr const *addr,
-                                   struct mptcpd_pm *pm)
-{
-        (void) pm;
-
-        assert(connection_id == test_cid_1);
-        assert(addr_id == test_raddr_id_1);
-        assert(mptcpd_addr_is_equal(addr, &test_raddr_1));
-
-        ++call_count.new_address;
-}
-
-static void plugin_one_new_subflow(mptcpd_cid_t connection_id,
-                                   mptcpd_aid_t laddr_id,
-                                   struct mptcpd_addr const *laddr,
-                                   mptcpd_aid_t raddr_id,
-                                   struct mptcpd_addr const *raddr,
-                                   struct mptcpd_pm *pm)
-{
-        (void) pm;
-
-        assert(connection_id == test_cid_1);
-        assert(laddr_id != raddr_id);
-        assert(laddr_id == test_laddr_id_1);
-        assert(raddr_id == test_raddr_id_1);
-        assert(!mptcpd_addr_is_equal(laddr, raddr));
-        assert(mptcpd_addr_is_equal(laddr, &test_laddr_1));
-        assert(mptcpd_addr_is_equal(raddr, &test_raddr_1));
-
-        ++call_count.new_subflow;
-}
-
-static void plugin_one_subflow_closed(mptcpd_cid_t connection_id,
-                                      struct mptcpd_addr const *laddr,
-                                      struct mptcpd_addr const *raddr,
-                                      struct mptcpd_pm *pm)
-{
-        (void) pm;
-
-        assert(connection_id == test_cid_1);
-        assert(mptcpd_addr_is_equal(laddr, &test_laddr_1));
-        assert(mptcpd_addr_is_equal(raddr, &test_raddr_1));
-
         ++call_count.subflow_closed;
 }
 
-static void plugin_one_connection_closed(mptcpd_cid_t connection_id,
-                                         struct mptcpd_pm *pm)
+static void plugin_one_subflow_priority(mptcpd_token_t token,
+                                        struct mptcpd_addr const *laddr,
+                                        struct mptcpd_addr const *raddr,
+                                        bool backup,
+                                        struct mptcpd_pm *pm)
 {
         (void) pm;
 
-        assert(connection_id == test_cid_1);
+        assert(token == test_token_1);
+        assert(mptcpd_addr_is_equal(laddr, &test_laddr_1));
+        assert(mptcpd_addr_is_equal(raddr, &test_raddr_1));
+        assert(backup == test_backup_1);
 
-        ++call_count.connection_closed;
+        ++call_count.subflow_priority;
 }
 
 static struct mptcpd_plugin_ops const pm_ops = {
-        .new_connection    = plugin_one_new_connection,
-        .new_address       = plugin_one_new_address,
-        .new_subflow       = plugin_one_new_subflow,
-        .subflow_closed    = plugin_one_subflow_closed,
-        .connection_closed = plugin_one_connection_closed
+        .new_connection         = plugin_one_new_connection,
+        .connection_established = plugin_one_connection_established,
+        .connection_closed      = plugin_one_connection_closed,
+        .new_address            = plugin_one_new_address,
+        .address_removed        = plugin_one_address_removed,
+        .new_subflow            = plugin_one_new_subflow,
+        .subflow_closed         = plugin_one_subflow_closed,
+        .subflow_priority       = plugin_one_subflow_priority
 };
 
 static int plugin_one_init(void)
@@ -131,18 +176,22 @@ static void plugin_one_exit(void)
 {
         /*
           This plugin should be called twice, once with the plugin name
-          explicitly specified, and once with as the default plugin
-          with no name specified.
+          explicitly specified, and once as the default plugin with no
+          name specified.
         */
         struct plugin_call_count const count = {
                 .new_connection    = test_count_1.new_connection    * 2,
+                .connection_established =
+                        test_count_1.connection_established * 2,
+                .connection_closed = test_count_1.connection_closed * 2,
                 .new_address       = test_count_1.new_address       * 2,
+                .address_removed   = test_count_1.address_removed   * 2,
                 .new_subflow       = test_count_1.new_subflow       * 2,
                 .subflow_closed    = test_count_1.subflow_closed    * 2,
-                .connection_closed = test_count_1.connection_closed * 2
+                .subflow_priority  = test_count_1.subflow_priority  * 2,
         };
 
-        assert(plugin_call_count_is_sane(&call_count, &count));
+        assert(plugin_call_count_is_sane(&call_count));
         assert(plugin_call_count_is_equal(&call_count, &count));
 
         plugin_call_count_reset(&call_count);

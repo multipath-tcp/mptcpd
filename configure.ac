@@ -165,14 +165,14 @@ PKG_CHECK_MODULES([ELL], [ell >= 0.17])
 # ---------------------------------------------------------------
 # Checks for header files.
 # ---------------------------------------------------------------
-# @todo mptcpd ships with a copy of <linux/mptcp_genl.h>.  Ideally it
+# @todo mptcpd ships with a copy of <linux/mptcp.h>.  Ideally it
 #       should not.  Consider removing it from mptcpd, and
 #       reintroducing this check once the kernel ships with that
 #       header.
 #AC_CHECK_HEADER(
-#   [linux/mptcp_genl.h],
+#   [linux/mptcp.h],
 #   [],
-#   [AC_MSG_ERROR([<linux/mptcp_genl.h> header could not be found])])
+#   [AC_MSG_ERROR([<linux/mptcp.h> header could not be found])])
 
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.

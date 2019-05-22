@@ -29,27 +29,48 @@ static struct plugin_call_count call_count;
 
 // ----------------------------------------------------------------
 
-static void plugin_four_new_connection(mptcpd_cid_t connection_id,
-                                       struct mptcpd_addr const *laddr,
-                                       struct mptcpd_addr const *raddr,
-                                       bool backup,
-                                       struct mptcpd_pm *pm)
+static void plugin_four_new_connection(mptcpd_token_t token,
+                                        struct mptcpd_addr const *laddr,
+                                        struct mptcpd_addr const *raddr,
+                                        struct mptcpd_pm *pm)
 {
-        (void) connection_id;
+        (void) token;
         (void) laddr;
         (void) raddr;
-        (void) backup;
         (void) pm;
 
         ++call_count.new_connection;
 }
 
-static void plugin_four_new_address(mptcpd_cid_t connection_id,
-                                    mptcpd_aid_t addr_id,
-                                    struct mptcpd_addr const *addr,
-                                    struct mptcpd_pm *pm)
+static void plugin_four_connection_established(
+        mptcpd_token_t token,
+        struct mptcpd_addr const *laddr,
+        struct mptcpd_addr const *raddr,
+        struct mptcpd_pm *pm)
 {
-        (void) connection_id;
+        (void) token;
+        (void) laddr;
+        (void) raddr;
+        (void) pm;
+
+        ++call_count.connection_established;
+}
+
+static void plugin_four_connection_closed(mptcpd_token_t token,
+                                           struct mptcpd_pm *pm)
+{
+        (void) token;
+        (void) pm;
+
+        ++call_count.connection_closed;
+}
+
+static void plugin_four_new_address(mptcpd_token_t token,
+                                     mptcpd_aid_t addr_id,
+                                     struct mptcpd_addr const *addr,
+                                     struct mptcpd_pm *pm)
+{
+        (void) token;
         (void) addr_id;
         (void) addr;
         (void) pm;
@@ -57,51 +78,71 @@ static void plugin_four_new_address(mptcpd_cid_t connection_id,
         ++call_count.new_address;
 }
 
-static void plugin_four_new_subflow(mptcpd_cid_t connection_id,
-                                    mptcpd_aid_t laddr_id,
-                                    struct mptcpd_addr const *laddr,
-                                    mptcpd_aid_t raddr_id,
-                                    struct mptcpd_addr const *raddr,
-                                    struct mptcpd_pm *pm)
+static void plugin_four_address_removed(mptcpd_token_t token,
+                                         mptcpd_aid_t addr_id,
+                                         struct mptcpd_pm *pm)
 {
-        (void) connection_id;
-        (void) laddr_id;
+        (void) token;
+        (void) addr_id;
+        (void) pm;
+
+        ++call_count.address_removed;
+}
+
+static void plugin_four_new_subflow(mptcpd_token_t token,
+                                     struct mptcpd_addr const *laddr,
+                                     struct mptcpd_addr const *raddr,
+                                     bool backup,
+                                     struct mptcpd_pm *pm)
+{
+        (void) token;
         (void) laddr;
-        (void) raddr_id;
         (void) raddr;
+        (void) backup;
         (void) pm;
 
         ++call_count.new_subflow;
 }
 
-static void plugin_four_subflow_closed(mptcpd_cid_t connection_id,
-                                       struct mptcpd_addr const *laddr,
-                                       struct mptcpd_addr const *raddr,
-                                       struct mptcpd_pm *pm)
+static void plugin_four_subflow_closed(mptcpd_token_t token,
+                                        struct mptcpd_addr const *laddr,
+                                        struct mptcpd_addr const *raddr,
+                                        bool backup,
+                                        struct mptcpd_pm *pm)
 {
-        (void) connection_id;
+        (void) token;
         (void) laddr;
         (void) raddr;
+        (void) backup;
         (void) pm;
 
         ++call_count.subflow_closed;
 }
 
-static void plugin_four_connection_closed(mptcpd_cid_t connection_id,
-                                          struct mptcpd_pm *pm)
+static void plugin_four_subflow_priority(mptcpd_token_t token,
+                                         struct mptcpd_addr const *laddr,
+                                         struct mptcpd_addr const *raddr,
+                                         bool backup,
+                                         struct mptcpd_pm *pm)
 {
-        (void) connection_id;
+        (void) token;
+        (void) laddr;
+        (void) raddr;
+        (void) backup;
         (void) pm;
 
-        ++call_count.connection_closed;
+        ++call_count.subflow_priority;
 }
 
 static struct mptcpd_plugin_ops const pm_ops = {
-        .new_connection    = plugin_four_new_connection,
-        .new_address       = plugin_four_new_address,
-        .new_subflow       = plugin_four_new_subflow,
-        .subflow_closed    = plugin_four_subflow_closed,
-        .connection_closed = plugin_four_connection_closed
+        .new_connection         = plugin_four_new_connection,
+        .connection_established = plugin_four_connection_established,
+        .connection_closed      = plugin_four_connection_closed,
+        .new_address            = plugin_four_new_address,
+        .address_removed        = plugin_four_address_removed,
+        .new_subflow            = plugin_four_new_subflow,
+        .subflow_closed         = plugin_four_subflow_closed,
+        .subflow_priority       = plugin_four_subflow_priority,
 };
 
 static int plugin_four_init(void)
@@ -120,7 +161,7 @@ static int plugin_four_init(void)
 
 static void plugin_four_exit(void)
 {
-        assert(plugin_call_count_is_sane(&call_count, &test_count_4));
+        assert(plugin_call_count_is_sane(&call_count));
         assert(plugin_call_count_is_equal(&call_count, &test_count_4));
 
         plugin_call_count_reset(&call_count);
