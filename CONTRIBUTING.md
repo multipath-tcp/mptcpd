@@ -26,13 +26,8 @@ Multipath TCP Daemon bugs are categorized in two high level cases,
 way described below.
 
 #### Security Bugs
-Please report all security related issues through the private e-mail
-mptcp-owner@lists.01.org.  Include the following information:
-  * Description of the security problem
-  * Steps to reproduce
-  * Expected behavior
-  * Linux kernel, compiler, and mptcpd versions
-  * Any additional information that may be relevant
+Please see the Multipath TCP Daemon [Security Policy](SECURITY.md) for
+details on how to report security related bugs.
 
 #### General Bugs
 Please report all general bugs unrelated to security through a GitHub
