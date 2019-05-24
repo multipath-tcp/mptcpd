@@ -538,7 +538,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
         struct in6_addr const *raddr6      = NULL;
         in_port_t       const *local_port  = NULL;
         in_port_t       const *remote_port = NULL;
-        *backup                            = false;
+        uint8_t         const *bkup        = NULL;
 
         uint16_t type;
         uint16_t len;
@@ -568,14 +568,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
                         break;
                 case MPTCP_ATTR_BACKUP:
-                        /*
-                          The backup attribute is a NLA_FLAG,
-                          meaning its existence *is* the flag.  No
-                          payload data exists in such an attribute.
-                         */
-                        assert(validate_attr_len(len, 0));
-                        assert(data == NULL);
-                        *backup = true;
+                        MPTCP_GET_NL_ATTR(data, len, bkup);
                         break;
                 default:
                         l_warn("Unknown MPTCP_EVENT_SUB_* "
@@ -589,7 +582,8 @@ static bool handle_subflow(struct l_genl_msg *msg,
             || !(laddr4 || laddr6)
             || !local_port
             || !(raddr4 || raddr6)
-            || !remote_port) {
+            || !remote_port
+            || !backup) {
                 l_error("Required MPTCP_EVENT_SUB_* "
                         "message attributes are missing.");
 
@@ -600,6 +594,8 @@ static bool handle_subflow(struct l_genl_msg *msg,
 
         get_mptcpd_addr(laddr4, laddr6, *local_port,  laddr);
         get_mptcpd_addr(raddr4, raddr6, *remote_port, raddr);
+
+        *backup = *bkup;
 
         return true;
 }

@@ -226,7 +226,7 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                               get_addr_size(&remote_addr->address))
                       + NLA_HDRLEN
                       + NLA_ALIGN(sizeof(remote_addr->port))))
-                + (backup ? NLA_HDRLEN : 0);
+                + NLA_HDRLEN + NLA_ALIGN(sizeof(backup));
 
         struct l_genl_msg *const msg =
                 l_genl_msg_new_sized(MPTCP_CMD_SUB_CREATE, payload_size);
@@ -265,11 +265,10 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                                                   MPTCP_ATTR_DPORT,
                                                   sizeof(remote_addr->port),
                                                   &remote_addr->port)))
-                && (!backup
-                    || l_genl_msg_append_attr(msg,
-                                              MPTCP_ATTR_BACKUP,
-                                              0,
-                                              NULL));  // NLA_FLAG
+                && l_genl_msg_append_attr(msg,
+                                          MPTCP_ATTR_BACKUP,
+                                          sizeof(backup),
+                                          &backup);
 
         if (!appended) {
                 l_genl_msg_unref(msg);
@@ -319,7 +318,7 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
                 + NLA_HDRLEN + NLA_ALIGN(
                         get_addr_size(&remote_addr->address))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(remote_addr->port))
-                + (backup ? NLA_HDRLEN : 0);
+                + NLA_HDRLEN + NLA_ALIGN(sizeof(backup));
 
         struct l_genl_msg *const msg =
                 l_genl_msg_new_sized(MPTCP_CMD_SUB_PRIORITY,
@@ -351,11 +350,10 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
                                           MPTCP_ATTR_DPORT,
                                           sizeof(remote_addr->port),
                                           &remote_addr->port)
-                && (!backup
-                    || l_genl_msg_append_attr(msg,
-                                              MPTCP_ATTR_BACKUP,
-                                              0,
-                                              NULL));  // NLA_FLAG
+                && l_genl_msg_append_attr(msg,
+                                          MPTCP_ATTR_BACKUP,
+                                          sizeof(backup),
+                                          &backup);
 
         if (!appended) {
                 l_genl_msg_unref(msg);
@@ -395,7 +393,7 @@ bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
          *       quite right.
          */
         size_t const payload_size =
-                NLA_HDRLEN + NLA_ALIGN(sizeof(token)) 
+                NLA_HDRLEN + NLA_ALIGN(sizeof(token))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(local_addr->address.family))
                 + NLA_HDRLEN + NLA_ALIGN(
                         get_addr_size(&local_addr->address))
