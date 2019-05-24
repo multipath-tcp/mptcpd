@@ -107,10 +107,13 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
         if (pm == NULL || addr == NULL)
                 return false;
 
+        assert(sizeof(addr->address.family) == sizeof(uint16_t));
+
         /*
           Payload:
               Token
-              Address ID
+              Local address ID
+              Local address family
               Local address
               Local port (optional)
          */
@@ -123,8 +126,11 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
         size_t const payload_size =
                 NLA_HDRLEN + NLA_ALIGN(sizeof(token))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(address_id))
+                + NLA_HDRLEN + NLA_ALIGN(sizeof(addr->address.family))
                 + NLA_HDRLEN + NLA_ALIGN(get_addr_size(&addr->address))
-                + NLA_HDRLEN + NLA_ALIGN(sizeof(addr->port));
+                + (addr->port == 0
+                   ? 0
+                   : NLA_HDRLEN + NLA_ALIGN(sizeof(addr->port)));
 
         struct l_genl_msg *const msg =
                 l_genl_msg_new_sized(MPTCP_CMD_ANNOUNCE, payload_size);
@@ -139,6 +145,11 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
                         MPTCP_ATTR_LOC_ID,
                         sizeof(address_id),
                         &address_id)
+                && l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_ATTR_FAMILY,
+                        sizeof(addr->address.family),  // sizeof(uint16_t)
+                        &addr->address.family)
                 && append_local_addr_attr(msg, &addr->address)
                 && (addr->port == 0 ||
                     l_genl_msg_append_attr(msg,
@@ -168,22 +179,29 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                            struct mptcpd_addr const *remote_addr,
                            bool backup)
 {
-        if (pm == NULL || local_addr == NULL)
+        if (pm == NULL)
                 return false;
 
         /*
           Payload:
               Token
+              Address family
               Local address ID
-              Local address
-              Local port
               Remote address ID
-              Remote address
-              Remote port
-              Backup priority flag
+
+              Optional attributes:
+                  Local address
+                  Local port
+                  Remote address
+                  Remote port    (required if remote address is specified)
+                  Backup priority flag
+                  Network interface index
          */
 
         /**
+         * @bug The address family is required but we currently base
+         *      it on the optional remote address.
+         *
          * @todo Verify that this payload size calculation is
          *       correct.  The alignment, in particular, doesn't look
          *       quite right.
@@ -191,13 +209,23 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
         size_t const payload_size =
                 NLA_HDRLEN + NLA_ALIGN(sizeof(token))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(local_address_id))
-                + NLA_HDRLEN + NLA_ALIGN(
-                        get_addr_size(&local_addr->address))
-                + NLA_HDRLEN + NLA_ALIGN(sizeof(local_addr->port))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(remote_address_id))
-                + NLA_HDRLEN + NLA_ALIGN(
-                        get_addr_size(&remote_addr->address))
-                + NLA_HDRLEN + NLA_ALIGN(sizeof(remote_addr->port))
+                + (local_addr == NULL
+                   ? 0
+                   : (NLA_HDRLEN
+                      + NLA_ALIGN(get_addr_size(&local_addr->address))
+                      + (local_addr->port == 0
+                         ? 0
+                         : (NLA_HDRLEN
+                            + NLA_ALIGN(sizeof(local_addr->port))))))
+                + (remote_addr == NULL
+                   ? 0
+                   : (NLA_HDRLEN
+                      + NLA_ALIGN(sizeof(remote_addr->address.family))
+                      + NLA_HDRLEN + NLA_ALIGN(
+                              get_addr_size(&remote_addr->address))
+                      + NLA_HDRLEN
+                      + NLA_ALIGN(sizeof(remote_addr->port))))
                 + (backup ? NLA_HDRLEN : 0);
 
         struct l_genl_msg *const msg =
@@ -213,21 +241,30 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                         MPTCP_ATTR_LOC_ID,
                         sizeof(local_address_id),
                         &local_address_id)
-                && append_local_addr_attr(msg, &local_addr->address)
-                && l_genl_msg_append_attr(msg,
-                                          MPTCP_ATTR_SPORT,
-                                          sizeof(local_addr->port),
-                                          &local_addr->port)
                 && l_genl_msg_append_attr(
                         msg,
                         MPTCP_ATTR_REM_ID,
                         sizeof(remote_address_id),
                         &remote_address_id)
-                && append_remote_addr_attr(msg, &remote_addr->address)
-                && l_genl_msg_append_attr(msg,
-                                          MPTCP_ATTR_DPORT,
-                                          sizeof(remote_addr->port),
-                                          &remote_addr->port)
+                && (local_addr == NULL
+                    || (append_local_addr_attr(msg, &local_addr->address)
+                        && (local_addr->port == 0
+                            || l_genl_msg_append_attr(msg,
+                                                      MPTCP_ATTR_SPORT,
+                                                      sizeof(local_addr->port),
+                                                      &local_addr->port))))
+                && (remote_addr == NULL
+                    || (l_genl_msg_append_attr(
+                                msg,
+                                MPTCP_ATTR_FAMILY,
+                                sizeof(remote_addr->address.family),
+                                &remote_addr->address.family)
+                        && append_remote_addr_attr(msg, &remote_addr->address)
+                        && remote_addr->port != 0
+                        && l_genl_msg_append_attr(msg,
+                                                  MPTCP_ATTR_DPORT,
+                                                  sizeof(remote_addr->port),
+                                                  &remote_addr->port)))
                 && (!backup
                     || l_genl_msg_append_attr(msg,
                                               MPTCP_ATTR_BACKUP,
@@ -254,12 +291,13 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
                           struct mptcpd_addr const *remote_addr,
                           bool backup)
 {
-        if (pm == NULL)
+        if (pm == NULL || local_addr == NULL || remote_addr == NULL)
                 return false;
 
         /*
           Payload:
               Token
+              Address family
               Local address
               Local port
               Remote address
@@ -274,6 +312,7 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
          */
         size_t const payload_size =
                 NLA_HDRLEN + NLA_ALIGN(sizeof(token))
+                + NLA_HDRLEN + NLA_ALIGN(sizeof(local_addr->address.family))
                 + NLA_HDRLEN + NLA_ALIGN(
                         get_addr_size(&local_addr->address))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(local_addr->port))
@@ -286,11 +325,22 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
                 l_genl_msg_new_sized(MPTCP_CMD_SUB_PRIORITY,
                                      payload_size);
 
+        /**
+         * @todo Should we verify that the local and remote address
+         *       families match?  The kernel already does that, but we
+         *       currently don't propagate any kernel initiated errors
+         *       to the caller.
+         */
         bool const appended =
                 l_genl_msg_append_attr(msg,
                                        MPTCP_ATTR_TOKEN,
                                        sizeof(token),
                                        &token)
+                && l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_ATTR_FAMILY,
+                        sizeof(local_addr->address.family),
+                        &local_addr->address.family)
                 && append_local_addr_attr(msg, &local_addr->address)
                 && l_genl_msg_append_attr(msg,
                                           MPTCP_ATTR_SPORT,
@@ -326,12 +376,13 @@ bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
                               struct mptcpd_addr const *local_addr,
                               struct mptcpd_addr const *remote_addr)
 {
-        if (pm == NULL)
+        if (pm == NULL || local_addr == NULL || remote_addr == NULL)
                 return false;
 
         /*
           Payload:
               Token
+              Address family
               Local address
               Local port
               Remote address
@@ -344,7 +395,8 @@ bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
          *       quite right.
          */
         size_t const payload_size =
-                NLA_HDRLEN + NLA_ALIGN(sizeof(token))
+                NLA_HDRLEN + NLA_ALIGN(sizeof(token)) 
+                + NLA_HDRLEN + NLA_ALIGN(sizeof(local_addr->address.family))
                 + NLA_HDRLEN + NLA_ALIGN(
                         get_addr_size(&local_addr->address))
                 + NLA_HDRLEN + NLA_ALIGN(sizeof(local_addr->port))
@@ -355,11 +407,22 @@ bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
         struct l_genl_msg *const msg =
                 l_genl_msg_new_sized(MPTCP_CMD_SUB_DESTROY, payload_size);
 
+        /**
+         * @todo Should we verify that the local and remote address
+         *       families match?  The kernel already does that, but we
+         *       currently don't propagate any kernel initiated errors
+         *       to the caller.
+         */
         bool const appended =
                 l_genl_msg_append_attr(msg,
                                        MPTCP_ATTR_TOKEN,
                                        sizeof(token),
                                        &token)
+                && l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_ATTR_FAMILY,
+                        sizeof(local_addr->address.family),
+                        &local_addr->address.family)
                 && append_local_addr_attr(msg, &local_addr->address)
                 && l_genl_msg_append_attr(msg,
                                           MPTCP_ATTR_SPORT,
