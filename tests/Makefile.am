@@ -7,6 +7,17 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
 AM_CFLAGS   = $(ELL_CFLAGS) $(EXECUTABLE_CFLAGS)
 AM_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
 
+## Convenience library that contains utility functions used by the
+## mptcpd tests.
+noinst_LTLIBRARIES = libmptcpd_test.la
+
+libmptcpd_test_la_SOURCES = call_count.c call_plugin.c mptcpd_addr.c
+libmptcpd_test_la_CPPFLAGS =					\
+	-I$(top_srcdir)/include -I$(top_builddir)/include	\
+	$(CODE_COVERAGE_CPPFLAGS) $(AM_CPPFLAGS)
+libmptcpd_test_la_CFLAGS = $(ELL_CFLAGS) $(CODE_COVERAGE_CFLAGS)
+libmptcpd_test_la_LIBADD = $(ELL_LIBS) $(CODE_COVERAGE_LIBS)
+
 ## Build a test mptcpd plugin.
 ##
 ## "check_LTLIBRARIES" can't be used here since a dynamically loadable
@@ -60,7 +71,7 @@ plugin_one_la_CPPFLAGS = \
 	-I$(top_srcdir)/include
 plugin_one_la_CFLAGS   = $(ELL_CFLAGS)
 plugin_one_la_LDFLAGS  = -no-undefined -module -avoid-version $(ELL_LIBS)
-plugin_one_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS)
+plugin_one_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
 
 plugin_two_la_SOURCES  = plugin_two.c
 plugin_two_la_CPPFLAGS = \
@@ -68,7 +79,7 @@ plugin_two_la_CPPFLAGS = \
 	-I$(top_srcdir)/include
 plugin_two_la_CFLAGS   = $(ELL_CFLAGS)
 plugin_two_la_LDFLAGS  = -no-undefined -module -avoid-version $(ELL_LIBS)
-plugin_two_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS)
+plugin_two_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
 
 plugin_three_la_SOURCES  = plugin_three.c
 plugin_three_la_CPPFLAGS = \
@@ -76,7 +87,7 @@ plugin_three_la_CPPFLAGS = \
 	-I$(top_srcdir)/include
 plugin_three_la_CFLAGS   = $(ELL_CFLAGS)
 plugin_three_la_LDFLAGS  = -no-undefined -module -avoid-version $(ELL_LIBS)
-plugin_three_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS)
+plugin_three_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
 
 plugin_four_la_SOURCES  = plugin_four.c
 plugin_four_la_CPPFLAGS = \
@@ -85,7 +96,7 @@ plugin_four_la_CPPFLAGS = \
 plugin_four_la_CFLAGS   = $(ELL_CFLAGS)
 plugin_four_la_LDFLAGS  = \
 	-no-undefined -module -avoid-version $(ELL_LIBS)
-plugin_four_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS)
+plugin_four_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
 
 plugin_noop_la_SOURCES  = plugin_noop.c
 plugin_noop_la_CPPFLAGS = \
@@ -135,7 +146,10 @@ test_plugin_CPPFLAGS =					\
 	-DTEST_PLUGIN_ONE=\"$(TEST_PLUGIN_ONE)\"	\
 	-DTEST_PLUGIN_TWO=\"$(TEST_PLUGIN_TWO)\"	\
 	-DTEST_PLUGIN_FOUR=\"$(TEST_PLUGIN_FOUR)\"
-test_plugin_LDADD = $(top_builddir)/lib/libmptcpd.la $(ELL_LIBS)
+test_plugin_LDADD =				\
+	$(top_builddir)/lib/libmptcpd.la	\
+	libmptcpd_test.la			\
+	$(ELL_LIBS)
 
 test_network_monitor_SOURCES = test-network-monitor.c
 test_network_monitor_LDADD = $(top_builddir)/lib/libmptcpd.la $(ELL_LIBS)
@@ -159,7 +173,7 @@ test_commands_LDADD =				\
 	$(ELL_LIBS)
 
 test_configuration_SOURCES = test-configuration.c
-test_configuration_LDADD =				\
+test_configuration_LDADD =			\
 	$(top_builddir)/src/libpath_manager.la	\
 	$(top_builddir)/lib/libmptcpd.la	\
 	$(ELL_LIBS)
@@ -172,7 +186,10 @@ test_cxx_build_CPPFLAGS =				\
 	-DTEST_PLUGIN_DIR=\"$(TEST_PLUGIN_DIR_A)\"	\
 	-DTEST_PLUGIN_FOUR=\"$(TEST_PLUGIN_FOUR)\"
 test_cxx_build_CXXFLAGS = $(AM_CFLAGS)
-test_cxx_build_LDADD = $(top_builddir)/lib/libmptcpd.la $(ELL_LIBS)
+test_cxx_build_LDADD =				\
+	$(top_builddir)/lib/libmptcpd.la	\
+	libmptcpd_test.la			\
+	$(ELL_LIBS)
 endif
 
 ## "Install" test plugins, as needed, prior to running the tests.

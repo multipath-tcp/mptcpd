@@ -191,10 +191,10 @@ static void plugin_one_exit(void)
                 .subflow_priority  = test_count_1.subflow_priority  * 2,
         };
 
-        assert(plugin_call_count_is_sane(&call_count));
-        assert(plugin_call_count_is_equal(&call_count, &count));
+        assert(call_count_is_sane(&call_count));
+        assert(call_count_is_equal(&call_count, &count));
 
-        plugin_call_count_reset(&call_count);
+        call_count_reset(&call_count);
 }
 
 L_PLUGIN_DEFINE(MPTCPD_PLUGIN_DESC,
