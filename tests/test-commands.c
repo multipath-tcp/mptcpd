@@ -70,6 +70,13 @@ void test_remove_subflow(void const *test_data)
                                         &test_raddr_1));
 }
 
+void test_get_nm(void const *test_data)
+{
+        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        assert(mptcpd_pm_get_nm(pm) != NULL);
+}
+
 // -------------------------------------------------------------------
 
 static void idle_callback(struct l_idle *idle, void *user_data)
@@ -150,6 +157,7 @@ int main(void)
         l_test_add("add_subflow",    test_add_subflow,    pm);
         l_test_add("set_backup",     test_set_backup,     pm);
         l_test_add("remove_subflow", test_remove_subflow, pm);
+        l_test_add("get_nm",         test_get_nm,         pm);
 
         /*
           Prepare to run the path management generic netlink command
