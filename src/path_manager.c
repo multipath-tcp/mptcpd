@@ -503,7 +503,7 @@ static void handle_addr_removed(struct l_genl_msg *msg, void *user_data)
  * @return @c true on success, @c false otherwise.
  */
 static bool handle_subflow(struct l_genl_msg *msg,
-                           mptcpd_token_t const **token,
+                           mptcpd_token_t const *token,
                            struct mptcpd_addr *laddr,
                            struct mptcpd_addr *raddr,
                            bool *backup)
@@ -547,7 +547,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
                 case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, *token);
+                        MPTCP_GET_NL_ATTR(data, len, token);
                         break;
                 case MPTCP_ATTR_SADDR4:
                         MPTCP_GET_NL_ATTR(data, len, laddr4);
@@ -615,7 +615,7 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
               Error (optional)
          */
 
-        mptcpd_token_t const *token  = NULL;
+        mptcpd_token_t token = 0;
         struct mptcpd_addr laddr;
         struct mptcpd_addr raddr;
         bool backup = false;
@@ -625,7 +625,7 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_new_subflow(*token, &laddr, &raddr, backup, pm);
+        mptcpd_plugin_new_subflow(token, &laddr, &raddr, backup, pm);
 }
 
 static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
@@ -643,7 +643,7 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
               Error (optional)
          */
 
-        mptcpd_token_t const *token  = NULL;
+        mptcpd_token_t token = 0;
         struct mptcpd_addr laddr;
         struct mptcpd_addr raddr;
         bool backup = false;
@@ -653,7 +653,7 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_subflow_closed(*token, &laddr, &raddr, backup, pm);
+        mptcpd_plugin_subflow_closed(token, &laddr, &raddr, backup, pm);
 }
 
 static void handle_priority_changed(struct l_genl_msg *msg,
@@ -672,7 +672,7 @@ static void handle_priority_changed(struct l_genl_msg *msg,
               Error (optional)
          */
 
-        mptcpd_token_t const *token  = NULL;
+        mptcpd_token_t token = 0;
         struct mptcpd_addr laddr;
         struct mptcpd_addr raddr;
         bool backup = false;
@@ -682,7 +682,7 @@ static void handle_priority_changed(struct l_genl_msg *msg,
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_subflow_priority(*token,
+        mptcpd_plugin_subflow_priority(token,
                                        &laddr,
                                        &raddr,
                                        backup,
