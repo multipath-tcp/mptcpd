@@ -175,10 +175,10 @@ static int plugin_two_init(void)
 
 static void plugin_two_exit(void)
 {
-        assert(plugin_call_count_is_sane(&call_count));
-        assert(plugin_call_count_is_equal(&call_count, &test_count_2));
+        assert(call_count_is_sane(&call_count));
+        assert(call_count_is_equal(&call_count, &test_count_2));
 
-        plugin_call_count_reset(&call_count);
+        call_count_reset(&call_count);
 }
 
 L_PLUGIN_DEFINE(MPTCPD_PLUGIN_DESC,

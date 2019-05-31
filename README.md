@@ -38,7 +38,7 @@ archive or from a cloned Git `mptcpd` repository, for example.
   * [GNU Automake](https://www.gnu.org/software/automake/)
   * [GNU Libtool](https://www.gnu.org/software/libtool/)
   * [GNU Autoconf Archive](https://www.gnu.org/software/autoconf-archive/)
-  * [Pandoc](https://pandoc.org/) (needed to convert `README.md`
+  * [Pandoc](https://pandoc.org/) >= 2.2.1 (needed to convert `README.md`
     contents from the GitHub markdown format content to plain text)
   * [Doxygen](http://www.doxygen.nl/) (only needed to build
     documentation)

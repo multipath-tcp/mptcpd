@@ -163,10 +163,10 @@ static void plugin_three_exit(void)
 {
         struct plugin_call_count const count = { .new_connection = 0 };
 
-        assert(plugin_call_count_is_sane(&call_count));
-        assert(plugin_call_count_is_equal(&call_count, &count));
+        assert(call_count_is_sane(&call_count));
+        assert(call_count_is_equal(&call_count, &count));
 
-        plugin_call_count_reset(&call_count);
+        call_count_reset(&call_count);
 }
 
 L_PLUGIN_DEFINE(MPTCPD_PLUGIN_DESC,

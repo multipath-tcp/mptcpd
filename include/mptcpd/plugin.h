@@ -10,6 +10,8 @@
 #ifndef MPTCPD_PLUGIN_H
 #define MPTCPD_PLUGIN_H
 
+#include <stdbool.h>
+
 #include <mptcpd/export.h>
 #include <mptcpd/types.h>
 

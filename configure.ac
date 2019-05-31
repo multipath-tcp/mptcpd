@@ -137,7 +137,8 @@ AS_IF([test "x$ax_enable_debug" != "xyes"],
        dnl Explicitly add compile-time optimization flag since
        dnl AX_ENABLE_DEBUG macro disables the autoconf default of
        dnl implicitly adding it.
-       MPTCPD_ADD_COMPILE_FLAG([-O2])
+       AS_IF([test "x$enable_code_coverage" != "xyes"],
+             [MPTCPD_ADD_COMPILE_FLAG([-O2])])
 
        dnl AX_CODE_COVERAGE will define NDEBUG on the command line,
        dnl equivalent to #define NDEBUG 1, if code coverage is
