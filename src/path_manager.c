@@ -532,6 +532,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
               Error (optional)
          */
 
+        *token                             = NULL;
         struct in_addr  const *laddr4      = NULL;
         struct in_addr  const *raddr4      = NULL;
         struct in6_addr const *laddr6      = NULL;
@@ -578,7 +579,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
                 }
         }
 
-        if (!token
+        if (!*token
             || !(laddr4 || laddr6)
             || !local_port
             || !(raddr4 || raddr6)
@@ -590,7 +591,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
                 return false;
         }
 
-        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
+        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, **token);
 
         get_mptcpd_addr(laddr4, laddr6, *local_port,  laddr);
         get_mptcpd_addr(raddr4, raddr6, *remote_port, raddr);
