@@ -54,36 +54,63 @@ struct mptcpd_nm
 // -------------------------------------------------------------------
 
 /**
+ * @struct mptcpd_rtm_addr
+ *
+ * @brief Encapsulate network address information.
+ *
+ * This is a convenience structure that encapsulates rtnetlink
+ * @c RTM_NEWADDR, @c RTM_DELADDR, and @c RTM_GETADDR message data for
+ * a given network address.
+ */
+struct mptcpd_rtm_addr
+{
+        /**
+         * @c RTM_NEWADDR, @c RTM_DELADDR, and @c RTM_GETADDR message
+         * data.
+         */
+        struct ifaddrmsg const *ifa;
+
+        /**
+         * Network address retrieved from @c IFA_ADDRESS rtnetlink
+         * attribute.
+         */
+        void const *const addr;
+};
+
+/**
  * @brief Create an object that contains internet network
  *        address-specific information.
  *
- * @param[in] ifa Network address-specific information retrieved
- *                from the @c RTM_NEWADDR message.
- * @param[in] len Length of the @C RTM_NEWADDR Netlink message,
- *                potentially including @c rtattr attributes.
+ * @param[in] info Network address-specific information retrieved from
+ *                 the @c RTM_NEWADDR message.
  */
 static struct mptcpd_in_addr *
-mptcpd_in_addr_create(struct ifaddrmsg const *ifa, void const *data)
+mptcpd_in_addr_create(struct mptcpd_rtm_addr const *info)
 {
-        assert(ifa != NULL);
+        assert(info != NULL);
+
+        sa_family_t const family = info->ifa->ifa_family;
+
+        if (family != AF_INET && family != AF_INET6)
+                return NULL;
 
         struct mptcpd_in_addr *const address =
                 l_new(struct mptcpd_in_addr, 1);
 
-        address->family = ifa->ifa_family;
+        address->family = family;
 
-        if (ifa->ifa_family == AF_INET) {
+        if (family == AF_INET) {
                 /*
                   Kernel nla_put_in_addr() inserts a big endian 32
                   bit unsigned integer, not struct in_addr.
                 */
                 in_addr_t const sa =
-                        *(uint32_t const*) data;
+                        *(uint32_t const*) info->addr;
 
                 address->addr.addr4.s_addr = sa;
         } else {
                 struct in6_addr const *const sa =
-                        (struct in6_addr const*) data;
+                        (struct in6_addr const*) info->addr;
 
                 memcpy(&address->addr.addr6,
                        sa,
@@ -132,32 +159,45 @@ mptcpd_in_addr_compare(void const *a, void const *b, void *user_data)
  *
  * A network address represented by @a a (@c struct
  * @c mptcpd_in_addr) matches if its @c family and @c addr members
- * match those in the @a b.
+ * match those in @a b.
+ *
+ * @param[in] a Currently monitored network address of type @c struct
+ *              @c mptcpd_in_addr*.
+ * @param[in] b Network address information of type @c struct
+ *              @c mptcpd_rtm_addr* to be compared against network
+ *              address @a a.
  *
  * @return @c true if the network address represented by @a a matches
- *         the user supplied address @a b, and @c false
- *         otherwise.
+ *         the address @a b, and @c false otherwise.
  *
  * @see l_queue_find()
  * @see l_queue_remove_if()
  */
 static bool mptcpd_in_addr_match(void const *a, void const *b)
 {
-        struct mptcpd_in_addr const *const lhs = a;
-        struct mptcpd_in_addr const *const rhs = b;
+        struct mptcpd_in_addr  const *const lhs = a;
+        struct mptcpd_rtm_addr const *const rhs = b;
 
         assert(lhs);
         assert(rhs);
         assert(lhs->family == AF_INET || lhs->family == AF_INET6);
-        assert(rhs->family == AF_INET || rhs->family == AF_INET6);
 
-        bool matched = lhs->family == rhs->family;
+        bool matched = lhs->family == rhs->ifa->ifa_family;
 
         if (matched) {
-                if (lhs->family == AF_INET)
-                        matched = (lhs->addr.addr4.s_addr
-                                   == rhs->addr.addr4.s_addr);
-                else
+                if (lhs->family == AF_INET) {
+                        /*
+                          Kernel nla_put_in_addr() inserts a big
+                          endian 32 bit unsigned integer, not struct
+                          in_addr.
+                        */
+                        in_addr_t const sa = *(uint32_t const*) rhs->addr;
+
+                        matched = (lhs->addr.addr4.s_addr == sa);
+                } else {
+                        struct in6_addr const *const sa =
+                                (struct in6_addr const*) rhs->addr;
+
                         /**
                          * @todo Is memcmp() suitable in this case?
                          *       Do we need to worry about the
@@ -165,9 +205,10 @@ static bool mptcpd_in_addr_match(void const *a, void const *b)
                          *       the IPv6 address byte array.
                          */
                         matched = (memcmp(&lhs->addr.addr6.s6_addr,
-                                          &rhs->addr.addr6.s6_addr,
+                                          sa,
                                           sizeof(lhs->addr.addr6.s6_addr))
                                    == 0);
+                }
         }
 
         return matched;
@@ -530,8 +571,13 @@ static void insert_addr(struct ifaddrmsg const *ifa,
              RTA_OK(rta, bytes);
              rta = RTA_NEXT(rta, bytes)) {
                 if (rta->rta_type == IFA_ADDRESS) {
+                        struct mptcpd_rtm_addr const info = {
+                                .ifa  = ifa,
+                                .addr = RTA_DATA(rta)
+                        };
+
                         struct mptcpd_in_addr *const addr =
-                                mptcpd_in_addr_create(ifa, RTA_DATA(rta));
+                                mptcpd_in_addr_create(&info);
 
                         if (!l_queue_insert(i->addrs,
                                             addr,
@@ -567,9 +613,14 @@ static void remove_addr(struct ifaddrmsg const *ifa,
              RTA_OK(rta, bytes);
              rta = RTA_NEXT(rta, bytes)) {
                 if (rta->rta_type == IFA_ADDRESS) {
+                        struct mptcpd_rtm_addr const addr = {
+                                .ifa  = ifa,
+                                .addr = RTA_DATA(rta)
+                        };
+
                         if (l_queue_remove_if(i->addrs,
                                               mptcpd_in_addr_match,
-                                              RTA_DATA(rta)) == NULL)
+                                              &addr) == NULL)
                                 l_debug("Network address not monitored. "
                                         "Ignoring monitoring removal "
                                         "failure.");
@@ -690,8 +741,13 @@ static void handle_ifaddr(uint16_t type,
              RTA_OK(rta, bytes);
              rta = RTA_NEXT(rta, bytes)) {
                 if (rta->rta_type == IFA_ADDRESS) {
+                        struct mptcpd_rtm_addr const info = {
+                                .ifa  = ifa,
+                                .addr = RTA_DATA(rta)
+                        };
+
                         struct mptcpd_in_addr *const addr =
-                                mptcpd_in_addr_create(ifa, RTA_DATA(rta));
+                                mptcpd_in_addr_create(&info);
 
                         l_queue_insert(interface->addrs,
                                        addr,
