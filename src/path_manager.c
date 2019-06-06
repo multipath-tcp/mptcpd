@@ -202,6 +202,13 @@ static void handle_connection_created(struct l_genl_msg *msg,
                 case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
                         break;
+                case MPTCP_ATTR_FAMILY:
+                case MPTCP_ATTR_LOC_ID:
+                case MPTCP_ATTR_REM_ID:
+                case MPTCP_ATTR_BACKUP:
+                case MPTCP_ATTR_IF_IDX:
+                        // Unused and ignored, at least for now.
+                        break;
 #ifdef MPTCPD_ENABLE_PM_NAME
                 case MPTCP_ATTR_PATH_MANAGER:
                         pm_name = get_pm_name(data, len);
@@ -289,6 +296,13 @@ static void handle_connection_established(struct l_genl_msg *msg,
                         break;
                 case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
+                        break;
+                case MPTCP_ATTR_FAMILY:
+                case MPTCP_ATTR_LOC_ID:
+                case MPTCP_ATTR_REM_ID:
+                case MPTCP_ATTR_BACKUP:
+                case MPTCP_ATTR_IF_IDX:
+                        // Unused and ignored, at least for now.
                         break;
                 default:
                         l_warn("Unknown MPTCP_EVENT_ESTABLISHED "
