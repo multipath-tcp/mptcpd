@@ -98,13 +98,13 @@ struct sspi_new_connection_info
  * @c mptcpd_in_addr) matches if its @c family and @c addr members
  * match those in the @a b.
  *
- * @return @c true if the network address represented by @a a matches
- *         the user supplied address @a b, and @c false
- *         otherwise.
+ * @param[in] a Currently monitored network address of type @c struct
+ *              @c mptcpd_in_addr*.
+ * @param[in] b Network address of type @c struct @c mptcpd_in_addr*
+ *              to be compared against network address @a a.
  *
- * @todo This is a copy of the private @c mptcpd_in_addr_match()
- *       function.  Consider refactoring, and exposing that function
- *       through the mptcpd_nm API.
+ * @return @c true if the network address represented by @a a matches
+ *         the address @a b, and @c false otherwise.
  *
  * @see l_queue_find()
  * @see l_queue_remove_if()
@@ -117,7 +117,6 @@ static bool sspi_in_addr_match(void const *a, void const *b)
         assert(lhs);
         assert(rhs);
         assert(lhs->family == AF_INET || lhs->family == AF_INET6);
-        assert(rhs->family == AF_INET || rhs->family == AF_INET6);
 
         bool matched = lhs->family == rhs->family;
 
@@ -195,6 +194,13 @@ static void sspi_get_index(struct mptcpd_interface const *interface,
         struct sspi_nm_callback_data *const callback_data = data;
 
         /*
+          Check if the network interface index was found during an
+          earlier iteration.
+        */
+        if (callback_data->index != SSPI_BAD_INDEX)
+                return;
+
+        /*
           Iterate through the network interface IP address list to
           determine which of them corresponds to the given IP address.
         */
@@ -227,6 +233,8 @@ static bool sspi_addr_to_index(struct mptcpd_nm const *nm,
                                struct mptcpd_addr const *addr,
                                int *index)
 {
+        assert(index != NULL);
+
         struct sspi_nm_callback_data data = {
                 .addr = addr,
                 .index = SSPI_BAD_INDEX
@@ -364,12 +372,10 @@ static struct sspi_interface_info *sspi_interface_info_lookup(
                                     NULL)) {
                         sspi_interface_info_destroy(info);
                         info = NULL;
-
-
                 }
         }
 
-        return NULL;
+        return info;
 }
 
 // ----------------------------------------------------------------

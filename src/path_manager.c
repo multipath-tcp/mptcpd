@@ -202,6 +202,13 @@ static void handle_connection_created(struct l_genl_msg *msg,
                 case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
                         break;
+                case MPTCP_ATTR_FAMILY:
+                case MPTCP_ATTR_LOC_ID:
+                case MPTCP_ATTR_REM_ID:
+                case MPTCP_ATTR_BACKUP:
+                case MPTCP_ATTR_IF_IDX:
+                        // Unused and ignored, at least for now.
+                        break;
 #ifdef MPTCPD_ENABLE_PM_NAME
                 case MPTCP_ATTR_PATH_MANAGER:
                         pm_name = get_pm_name(data, len);
@@ -289,6 +296,13 @@ static void handle_connection_established(struct l_genl_msg *msg,
                         break;
                 case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
+                        break;
+                case MPTCP_ATTR_FAMILY:
+                case MPTCP_ATTR_LOC_ID:
+                case MPTCP_ATTR_REM_ID:
+                case MPTCP_ATTR_BACKUP:
+                case MPTCP_ATTR_IF_IDX:
+                        // Unused and ignored, at least for now.
                         break;
                 default:
                         l_warn("Unknown MPTCP_EVENT_ESTABLISHED "
@@ -503,7 +517,7 @@ static void handle_addr_removed(struct l_genl_msg *msg, void *user_data)
  * @return @c true on success, @c false otherwise.
  */
 static bool handle_subflow(struct l_genl_msg *msg,
-                           mptcpd_token_t const **token,
+                           mptcpd_token_t *token,
                            struct mptcpd_addr *laddr,
                            struct mptcpd_addr *raddr,
                            bool *backup)
@@ -532,13 +546,14 @@ static bool handle_subflow(struct l_genl_msg *msg,
               Error (optional)
          */
 
+        mptcpd_token_t  const *tok         = NULL;
         struct in_addr  const *laddr4      = NULL;
         struct in_addr  const *raddr4      = NULL;
         struct in6_addr const *laddr6      = NULL;
         struct in6_addr const *raddr6      = NULL;
         in_port_t       const *local_port  = NULL;
         in_port_t       const *remote_port = NULL;
-        *backup                            = false;
+        uint8_t         const *bkup        = NULL;
 
         uint16_t type;
         uint16_t len;
@@ -547,7 +562,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 switch (type) {
                 case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, *token);
+                        MPTCP_GET_NL_ATTR(data, len, tok);
                         break;
                 case MPTCP_ATTR_SADDR4:
                         MPTCP_GET_NL_ATTR(data, len, laddr4);
@@ -568,14 +583,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
                         MPTCP_GET_NL_ATTR(data, len, remote_port);
                         break;
                 case MPTCP_ATTR_BACKUP:
-                        /*
-                          The backup attribute is a NLA_FLAG,
-                          meaning its existence *is* the flag.  No
-                          payload data exists in such an attribute.
-                         */
-                        assert(validate_attr_len(len, 0));
-                        assert(data == NULL);
-                        *backup = true;
+                        MPTCP_GET_NL_ATTR(data, len, bkup);
                         break;
                 default:
                         l_warn("Unknown MPTCP_EVENT_SUB_* "
@@ -585,21 +593,26 @@ static bool handle_subflow(struct l_genl_msg *msg,
                 }
         }
 
-        if (!token
+        if (!tok
             || !(laddr4 || laddr6)
             || !local_port
             || !(raddr4 || raddr6)
-            || !remote_port) {
+            || !remote_port
+            || !backup) {
                 l_error("Required MPTCP_EVENT_SUB_* "
                         "message attributes are missing.");
 
                 return false;
         }
 
+        *token = *tok;
+
         l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
 
         get_mptcpd_addr(laddr4, laddr6, *local_port,  laddr);
         get_mptcpd_addr(raddr4, raddr6, *remote_port, raddr);
+
+        *backup = *bkup;
 
         return true;
 }
@@ -619,7 +632,7 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
               Error (optional)
          */
 
-        mptcpd_token_t const *token  = NULL;
+        mptcpd_token_t token = 0;
         struct mptcpd_addr laddr;
         struct mptcpd_addr raddr;
         bool backup = false;
@@ -629,7 +642,7 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_new_subflow(*token, &laddr, &raddr, backup, pm);
+        mptcpd_plugin_new_subflow(token, &laddr, &raddr, backup, pm);
 }
 
 static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
@@ -647,7 +660,7 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
               Error (optional)
          */
 
-        mptcpd_token_t const *token  = NULL;
+        mptcpd_token_t token = 0;
         struct mptcpd_addr laddr;
         struct mptcpd_addr raddr;
         bool backup = false;
@@ -657,7 +670,7 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_subflow_closed(*token, &laddr, &raddr, backup, pm);
+        mptcpd_plugin_subflow_closed(token, &laddr, &raddr, backup, pm);
 }
 
 static void handle_priority_changed(struct l_genl_msg *msg,
@@ -676,7 +689,7 @@ static void handle_priority_changed(struct l_genl_msg *msg,
               Error (optional)
          */
 
-        mptcpd_token_t const *token  = NULL;
+        mptcpd_token_t token = 0;
         struct mptcpd_addr laddr;
         struct mptcpd_addr raddr;
         bool backup = false;
@@ -686,11 +699,7 @@ static void handle_priority_changed(struct l_genl_msg *msg,
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_subflow_priority(*token,
-                                       &laddr,
-                                       &raddr,
-                                       backup,
-                                       pm);
+        mptcpd_plugin_subflow_priority(token, &laddr, &raddr, backup, pm);
 }
 
 static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
