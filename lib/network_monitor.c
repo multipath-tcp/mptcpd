@@ -104,8 +104,7 @@ mptcpd_in_addr_create(struct mptcpd_rtm_addr const *info)
                   Kernel nla_put_in_addr() inserts a big endian 32
                   bit unsigned integer, not struct in_addr.
                 */
-                in_addr_t const sa =
-                        *(uint32_t const*) info->addr;
+                uint32_t const sa = *(uint32_t const*) info->addr;
 
                 address->addr.addr4.s_addr = sa;
         } else {
@@ -191,7 +190,7 @@ static bool mptcpd_in_addr_match(void const *a, void const *b)
                           endian 32 bit unsigned integer, not struct
                           in_addr.
                         */
-                        in_addr_t const sa = *(uint32_t const*) rhs->addr;
+                        uint32_t const sa = *(uint32_t const*) rhs->addr;
 
                         matched = (lhs->addr.addr4.s_addr == sa);
                 } else {
