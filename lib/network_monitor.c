@@ -664,10 +664,27 @@ static struct mptcpd_interface *get_mptcpd_interface(
         return interface;
 }
 
+/**
+ * @brief Network address handler function signature.
+ */
 typedef
 void (*handle_ifaddr_func_t)(struct l_queue *addrs,
                              struct mptcpd_rtm_addr const *rtm_addr);
 
+/**
+ * @brief @c RTM_NEWADDR and @c RTM_DELADDR attribute iteration.
+ *
+ * Call @a handler for all attributes found in a @c RTM_NEWADDR or
+ * @c RTM_DELADDR event.
+ *
+ * @param[in] ifa     Network address-specific information retrieved
+ *                    from @c RTM_NEWADDR or @c RTM_DELADDR messages.
+ * @param[in] len     Length of the rtnetlink message.
+ * @param[in] addrs   List of tracked network addresses.
+ * @param[in] handler Function to be called for each @c IFA_ADDRESS
+ *                    attribute in the @c RTM_NEWADDR or
+ *                    @c RTM_DELADDR event.
+ */
 static void foreach_ifaddr(struct ifaddrmsg const *ifa,
                            uint32_t len,
                            struct l_queue *addrs,
