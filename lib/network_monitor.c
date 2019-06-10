@@ -578,10 +578,11 @@ static void insert_addr(struct ifaddrmsg const *ifa,
                         struct mptcpd_in_addr *const addr =
                                 mptcpd_in_addr_create(&info);
 
-                        if (!l_queue_insert(i->addrs,
-                                            addr,
-                                            mptcpd_in_addr_compare,
-                                            NULL)) {
+                        if (unlikely(addr == NULL)
+                            || !l_queue_insert(i->addrs,
+                                               addr,
+                                               mptcpd_in_addr_compare,
+                                               NULL)) {
                                 mptcpd_in_addr_destroy(addr);
 
                                 l_error("Unable to queue internet "
@@ -748,10 +749,12 @@ static void handle_ifaddr(uint16_t type,
                         struct mptcpd_in_addr *const addr =
                                 mptcpd_in_addr_create(&info);
 
-                        l_queue_insert(interface->addrs,
-                                       addr,
-                                       mptcpd_in_addr_compare,
-                                       NULL);
+                        if (unlikely(addr == NULL)
+                            || !l_queue_insert(interface->addrs,
+                                               addr,
+                                               mptcpd_in_addr_compare,
+                                               NULL))
+                                l_error("Unable to track new address");
                 }
         }
 
