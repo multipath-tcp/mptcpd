@@ -553,106 +553,67 @@ static void handle_link(uint16_t type,
 /**
  * @brief Register network address with network monitor.
  *
- * @param[in] ifa Network address-specific information retrieved
- *                from the @c RTM_NEWADDR messages.
- * @param[in] len Length of the Netlink message.
- * @param[in] i   Pointer to the @c mptcpd_interface object that
- *                contains the list (queue) to which network address
- *                information will be inserted.
+ * @param[in] addrs    List of tracked network addresses.
+ * @param[in] rtm_addr New network address information.
  */
-static void insert_addr(struct ifaddrmsg const *ifa,
-                        uint32_t len,
-                        struct mptcpd_interface *i)
+static void insert_addr(struct l_queue *addrs,
+                        struct mptcpd_rtm_addr const *rtm_addr)
 {
-        int bytes = len - NLMSG_ALIGN(sizeof(*ifa));
+        struct mptcpd_in_addr *const addr =
+                mptcpd_in_addr_create(rtm_addr);
 
-        for (struct rtattr const *rta = IFA_RTA(ifa);
-             RTA_OK(rta, bytes);
-             rta = RTA_NEXT(rta, bytes)) {
-                if (rta->rta_type == IFA_ADDRESS) {
-                        struct mptcpd_rtm_addr const info = {
-                                .ifa  = ifa,
-                                .addr = RTA_DATA(rta)
-                        };
+        if (unlikely(addr == NULL)
+            || !l_queue_insert(addrs,
+                               addr,
+                               mptcpd_in_addr_compare,
+                               NULL)) {
+                mptcpd_in_addr_destroy(addr);
 
-                        struct mptcpd_in_addr *const addr =
-                                mptcpd_in_addr_create(&info);
-
-                        if (unlikely(addr == NULL)
-                            || !l_queue_insert(i->addrs,
-                                               addr,
-                                               mptcpd_in_addr_compare,
-                                               NULL)) {
-                                mptcpd_in_addr_destroy(addr);
-
-                                l_error("Unable to queue internet "
-                                        "address information.");
-                        }
-                }
+                l_error("Unable to track internet address information.");
         }
 }
 
 /**
  * @brief Remove network address from the network monitor.
  *
- * @param[in] ifa Network address-specific information retrieved
- *                from @c RTM_NEWADDR (update case) or @c RTM_DELADDR
- *                messages.
- * @param[in] len Length of the Netlink message.
- * @param[in] i   Pointer to the @c mptcpd_interface object that
- *                contains the list (queue) from which network address
- *                information will be removed.
+ * @param[in] addrs    List of tracked network addresses.
+ * @param[in] rtm_addr Removed network address information.
  */
-static void remove_addr(struct ifaddrmsg const *ifa,
-                        uint32_t len,
-                        struct mptcpd_interface *i)
+static void remove_addr(struct l_queue *addrs,
+                        struct mptcpd_rtm_addr const *rtm_addr)
 {
-        int bytes = len - NLMSG_ALIGN(sizeof(*ifa));
-
-        for (struct rtattr const *rta = IFA_RTA(ifa);
-             RTA_OK(rta, bytes);
-             rta = RTA_NEXT(rta, bytes)) {
-                if (rta->rta_type == IFA_ADDRESS) {
-                        struct mptcpd_rtm_addr const addr = {
-                                .ifa  = ifa,
-                                .addr = RTA_DATA(rta)
-                        };
-
-                        if (l_queue_remove_if(i->addrs,
-                                              mptcpd_in_addr_match,
-                                              &addr) == NULL)
-                                l_debug("Network address not monitored. "
-                                        "Ignoring monitoring removal "
-                                        "failure.");
-                }
-        }
+        if (l_queue_remove_if(addrs,
+                              mptcpd_in_addr_match,
+                              rtm_addr) == NULL)
+                l_debug("Network address not monitored. "
+                        "Ignoring monitoring removal "
+                        "failure.");
 }
 
 /**
- * @brief Update monitored network address information.
+ * @brief Register or update network address with network monitor.
  *
- * @param[in] ifa Network address-specific information retrieved
- *                from the @c RTM_NEWADDR messages.
- * @param[in] len Length of the Netlink message.
- * @param[in] i   Pointer to the @c mptcpd_interface object that
- *                contains the list (queue) in which network address
- *                information will be updated.
+ * @param[in] addrs    List of tracked network addresses.
+ * @param[in] rtm_addr New or updated network address information.
  */
-static void update_addr(struct ifaddrmsg const *ifa,
-                        uint32_t len,
-                        struct mptcpd_interface *i)
+static void update_addr(struct l_queue *addrs,
+                        struct mptcpd_rtm_addr const *rtm_addr)
 {
-        (void) ifa;
-        (void) len;
-        (void) i;
+        struct mptcpd_in_addr *const addr =
+                l_queue_find(addrs, mptcpd_in_addr_match, rtm_addr);
 
-        /**
-         * @todo Will we actually care about updating information
-         *       related to an existing network address?  We only
-         *       track the address itself rather than other fields in
-         *       the ifaddrmsg structure (flags, etc).
-         */
-        l_debug("Network address information updated.");
+        if (addr == NULL) {
+                insert_addr(addrs, rtm_addr);
+        } else {
+                /**
+                 * @todo Will we actually care about updating
+                 *       information related to an existing network
+                 *       address?  We only track the address itself
+                 *       rather than other fields in the @c ifaddrmsg
+                 *       structure (flags, etc).
+                 */
+                l_debug("Network address information updated.");
+        }
 }
 
 /**
@@ -703,6 +664,36 @@ static struct mptcpd_interface *get_mptcpd_interface(
         return interface;
 }
 
+typedef
+void (*handle_ifaddr_func_t)(struct l_queue *addrs,
+                             struct mptcpd_rtm_addr const *rtm_addr);
+
+static void foreach_ifaddr(struct ifaddrmsg const *ifa,
+                           uint32_t len,
+                           struct l_queue *addrs,
+                           handle_ifaddr_func_t handler)
+{
+        assert(ifa != NULL);
+        assert(len != 0);
+        assert(addrs != NULL);
+        assert(handler != NULL);
+
+        int bytes = len - NLMSG_ALIGN(sizeof(*ifa));
+
+        for (struct rtattr const *rta = IFA_RTA(ifa);
+             RTA_OK(rta, bytes);
+             rta = RTA_NEXT(rta, bytes)) {
+                if (rta->rta_type == IFA_ADDRESS) {
+                        struct mptcpd_rtm_addr const rtm_addr = {
+                                .ifa  = ifa,
+                                .addr = RTA_DATA(rta)
+                        };
+
+                        handler(addrs, &rtm_addr);
+                }
+        }
+}
+
 /**
  * @brief Handle changes to network addresses.
  *
@@ -735,51 +726,27 @@ static void handle_ifaddr(uint16_t type,
         if (interface == NULL)
                 return;
 
-        int bytes = len - NLMSG_ALIGN(sizeof(*ifa));
-
-        for (struct rtattr const *rta = IFA_RTA(ifa);
-             RTA_OK(rta, bytes);
-             rta = RTA_NEXT(rta, bytes)) {
-                if (rta->rta_type == IFA_ADDRESS) {
-                        struct mptcpd_rtm_addr const info = {
-                                .ifa  = ifa,
-                                .addr = RTA_DATA(rta)
-                        };
-
-                        struct mptcpd_in_addr *const addr =
-                                mptcpd_in_addr_create(&info);
-
-                        if (unlikely(addr == NULL)
-                            || !l_queue_insert(interface->addrs,
-                                               addr,
-                                               mptcpd_in_addr_compare,
-                                               NULL))
-                                l_error("Unable to track new address");
-                }
-        }
+        handle_ifaddr_func_t handler = NULL;
 
         switch (type) {
         case RTM_NEWADDR:
-                /**
-                 * @todo Inform path manager plugins of network
-                 *       address change.
-                 */
-                update_addr(ifa, len, interface);
-
+                handler = update_addr;
                 break;
         case RTM_DELADDR:
-                /**
-                 * @todo Inform path manager plugins of network
-                 *       address change.
-                 */
-                remove_addr(ifa, len, interface);
-
+                handler = remove_addr;
                 break;
         default:
                 l_error("Unexpected message in RTNLGRP_IPV4/V6_IFADDR "
                         "handler");
-                break;
+                return;
         }
+
+        foreach_ifaddr(ifa, len, interface->addrs, handler);
+
+        /**
+         * @todo Inform path manager plugins of network address
+         *       change.
+         */
 }
 
 // -------------------------------------------------------------------
@@ -884,7 +851,7 @@ static void handle_rtm_getaddr(int error,
         if (interface == NULL)
                 return;
 
-        insert_addr(ifa, len, interface);
+        foreach_ifaddr(ifa, len, interface->addrs, insert_addr);
 }
 
 /**
