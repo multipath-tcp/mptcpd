@@ -195,7 +195,7 @@ versions) without installation.
 
 ### Executing an Installed `mptcpd`
 #### Without `systemd`
-For now, `mptcpd` does not provide a traditional System V "init
+`mptcpd` currently does not provide traditional System V "init
 scripts".  In general the `mptcpd` program may be run directly from
 the installed directory, e.g.:
 
@@ -243,7 +243,7 @@ systemctl daemon-reload
 systemctl start mptcp.service
 ```
 
-These steps are not be necessary if the system is rebooted after
+These steps are not necessary if the system is rebooted after
 installation of `mptcpd`.
 
 ### Execution of `mptcpd` in the Source Distribution
