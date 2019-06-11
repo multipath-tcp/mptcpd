@@ -1,3 +1,17 @@
+11 June 2019 - mptcpd 0.2a
+
+- This Multipath TCP Daemon alpha release replaces support for the
+  deprecated MPTCP generic netlink API with the one found in the
+  multipath-tcp.org kernel (0.95+), and has been verified to work with
+  that kernel.
+
+- Several actual and potential memory access violations were fixed in
+  the mptcpd network monitor, path manager, and "sspi" plugin.
+
+- The mptcp.service systemd service file now correctly grants the
+  necessary privilege (CAP_NET_ADMIN) for proper operation of the
+  mptcpd program.
+
 27 March 2019 - mptcpd 0.1a
 
 - This is the initial (alpha) release of the Multipath TCP Daemon
