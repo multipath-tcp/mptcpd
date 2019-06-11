@@ -126,6 +126,21 @@ static char const *get_pm_name(void const *data, size_t len)
 }
 #endif // MPTCPD_ENABLE_PM_NAME
 
+/**
+ * @brief Initialize @c mptcpd_addr instance.
+ *
+ * Initialize a @c mptcpd_addr instance with the provided IPv4 or IPv6
+ * address.  Only one is required and used.
+ *
+ * The port will be set to zero if a no port is provided, i.e. @a port
+ * is @c NULL.  That may be the case for MPTCP generic netlink API
+ * events where the port is optional.
+ *
+ * @param[in]     addr4 IPv4 internet address.
+ * @param[in]     addr6 IPv6 internet address.
+ * @param[in]     port  IP port.
+ * @param[in,out] addr  mptcpd network address information.
+ */
 static void get_mptcpd_addr(struct in_addr const *addr4,
                             struct in6_addr const *addr6,
                             in_port_t port,
@@ -442,7 +457,7 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
         l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
 
         struct mptcpd_addr addr;
-        get_mptcpd_addr(addr4, addr6, *port, &addr);
+        get_mptcpd_addr(addr4, addr6, port ? *port : 0, &addr);
 
         struct mptcpd_pm *const pm = user_data;
 
@@ -598,7 +613,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
             || !local_port
             || !(raddr4 || raddr6)
             || !remote_port
-            || !backup) {
+            || !bkup) {
                 l_error("Required MPTCP_EVENT_SUB_* "
                         "message attributes are missing.");
 
