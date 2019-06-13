@@ -19,6 +19,7 @@
 #include "../src/configuration.h"        // INTERNAL!
 #include "../src/path_manager.h"         // INTERNAL!
 #include <mptcpd/path_manager_private.h> // INTERNAL!
+#include <mptcpd/path_manager.h>
 
 // -------------------------------------------------------------------
 
@@ -39,14 +40,22 @@ void test_pm_create(void const *test_data)
 
         assert(info->pm         != NULL);
         assert(info->pm->genl   != NULL);
-        assert(info->pm->id     != NULL);
-        assert(info->pm->family != NULL);
         assert(info->pm->nm     != NULL);
+
+        /*
+          Other struct mptcpd_pm fields may not have been initialized
+          yet since they depend on the existence of the "mptcpd"
+          generic netlink family.
+        */
 }
 
 void test_pm_destroy(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
+
+        if (!mptcpd_pm_ready(info->pm))
+                l_warn("Path manager was not ready.  "
+                       "Test was likely limited.");
 
         mptcpd_pm_destroy(info->pm);
 }

@@ -26,9 +26,25 @@
 
 // -------------------------------------------------------------------
 
+static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
+{
+        bool const ready = mptcpd_pm_ready(pm);
+
+        if (!ready)
+                l_warn("Path manager not yet ready.  "
+                       "%s cannot be completed.", fname);
+
+        return ready;
+}
+
+// -------------------------------------------------------------------
+
 void test_send_addr(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
 
         assert(mptcpd_pm_send_addr(pm,
                                    test_token_1,
@@ -39,6 +55,9 @@ void test_send_addr(void const *test_data)
 void test_add_subflow(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
 
         assert(mptcpd_pm_add_subflow(pm,
                                      test_token_2,
@@ -53,6 +72,9 @@ void test_set_backup(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
 
+        if (!is_pm_ready(pm, __func__))
+                return;
+
         assert(mptcpd_pm_set_backup(pm,
                                     test_token_1,
                                     &test_laddr_1,
@@ -63,6 +85,9 @@ void test_set_backup(void const *test_data)
 void test_remove_subflow(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
 
         assert(mptcpd_pm_remove_subflow(pm,
                                         test_token_1,
