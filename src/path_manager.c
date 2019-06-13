@@ -789,8 +789,6 @@ static void family_appeared(struct l_genl_family_info const *info,
         assert(pm->family == NULL);
 
         pm->family = l_genl_family_new(pm->genl, MPTCP_GENL_NAME);
-        pm->id     = l_new(unsigned int,
-                           L_ARRAY_SIZE(pm_mcast_group_map));
 
         /*
           Register callbacks for MPTCP generic netlink multicast
@@ -885,6 +883,9 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 l_error("Unable to initialize Generic Netlink system.");
                 return NULL;
         }
+
+        pm->id = l_new(unsigned int, L_ARRAY_SIZE(pm_mcast_group_map));
+
 
         if (l_genl_add_family_watch(pm->genl,
                                     MPTCP_GENL_NAME,
