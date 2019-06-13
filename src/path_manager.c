@@ -773,11 +773,23 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
  * @param[in,out] user_data Pointer @c mptcp_pm object to which the
  *                          @c l_genl_family watch belongs.
  */
-static void family_appeared(void *user_data)
+static void family_appeared(struct l_genl_family_info const *info,
+                            void *user_data)
 {
+        (void) info;
+
+        assert(strcmp(l_genl_family_info_get_name(info),
+                      MPTCP_GENL_NAME) == 0);
+
         struct mptcpd_pm *const pm = user_data;
 
         l_debug(MPTCP_GENL_NAME " generic netlink family appeared");
+
+        assert(pm->family == NULL);
+
+        pm->family = l_genl_family_new(pm->genl, MPTCP_GENL_NAME);
+        pm->id     = l_new(unsigned int,
+                           L_ARRAY_SIZE(pm_mcast_group_map));
 
         /*
           Register callbacks for MPTCP generic netlink multicast
@@ -814,8 +826,12 @@ static void family_appeared(void *user_data)
  * @param[in,out] user_data Pointer @c mptcp_pm object to which the
  *                          @c l_genl_family watch belongs.
  */
-static void family_vanished(void *user_data)
+static void family_vanished(char const *name, void *user_data)
 {
+        (void) name;
+
+        assert(strcmp(name, MPTCP_GENL_NAME) == 0);
+
         struct mptcpd_pm *const pm = user_data;
 
         l_debug(MPTCP_GENL_NAME " generic netlink family vanished");
@@ -835,6 +851,9 @@ static void family_vanished(void *user_data)
                         pm->id[i] = 0;
                 }
         }
+
+        l_genl_family_free(pm->family);
+        pm->family = NULL;
 }
 
 struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
@@ -858,28 +877,19 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 
         // No need to check for NULL.  l_new() abort()s on failure.
 
-        pm->genl = l_genl_new_default();
+        pm->genl = l_genl_new();
         if (pm->genl == NULL) {
                 mptcpd_pm_destroy(pm);
                 l_error("Unable to initialize Generic Netlink system.");
                 return NULL;
         }
 
-        pm->id = l_new(unsigned int, L_ARRAY_SIZE(pm_mcast_group_map));
-
-        pm->family = l_genl_family_new(pm->genl, MPTCP_GENL_NAME);
-        if (pm->family == NULL) {
-                mptcpd_pm_destroy(pm);
-                l_error("Unable to initialize \"" MPTCP_GENL_NAME
-                        "\" Generic Netlink family.");
-                return NULL;
-        }
-
-        if (!l_genl_family_set_watches(pm->family,
-                                       family_appeared,
-                                       family_vanished,
-                                       pm,
-                                       NULL)) {
+        if (l_genl_add_family_watch(pm->genl,
+                                    MPTCP_GENL_NAME,
+                                    family_appeared,
+                                    family_vanished,
+                                    pm,
+                                    NULL) == 0) {
                 mptcpd_pm_destroy(pm);
                 l_error("Unable to set watches for \"" MPTCP_GENL_NAME
                         "\" Generic Netlink family.");
@@ -905,7 +915,7 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
 
         mptcpd_nm_destroy(pm->nm);
 
-        l_genl_family_unref(pm->family);
+        l_genl_family_free(pm->family);
         l_free(pm->id);
         l_genl_unref(pm->genl);
         l_free(pm);
