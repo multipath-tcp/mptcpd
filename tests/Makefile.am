@@ -185,7 +185,7 @@ test_cxx_build_CPPFLAGS =				\
 	-I$(top_srcdir)/include				\
 	-DTEST_PLUGIN_DIR=\"$(TEST_PLUGIN_DIR_A)\"	\
 	-DTEST_PLUGIN_FOUR=\"$(TEST_PLUGIN_FOUR)\"
-test_cxx_build_CXXFLAGS = $(AM_CFLAGS)
+test_cxx_build_CXXFLAGS = $(AM_CFLAGS) -Og
 test_cxx_build_LDADD =				\
 	$(top_builddir)/lib/libmptcpd.la	\
 	libmptcpd_test.la			\
