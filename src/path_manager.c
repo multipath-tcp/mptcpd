@@ -770,6 +770,7 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
  * available after that has happened.  Such data includes multicast
  * groups exposed by the generic netlink family, etc.
  *
+ * @param[in]     info      Generic netlink family information.
  * @param[in,out] user_data Pointer @c mptcp_pm object to which the
  *                          @c l_genl_family watch belongs.
  */
@@ -823,6 +824,7 @@ static void family_appeared(struct l_genl_family_info const *info,
 /**
  * @brief Handle MPTCP generic netlink family disappearing on us.
  *
+ * @param[in]     name      Generic netlink family name.
  * @param[in,out] user_data Pointer @c mptcp_pm object to which the
  *                          @c l_genl_family watch belongs.
  */
