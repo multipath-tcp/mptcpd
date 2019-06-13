@@ -152,7 +152,7 @@ AS_IF([test "x$ax_enable_debug" != "xyes"],
       [
        dnl Minimal optimization for the debug case.  We need this for
        dnl _FORTIFY_SOURCE support, too.
-       MPTCPD_ADD_COMPILE_FLAG([-O])
+       MPTCPD_ADD_COMPILE_FLAG([-Og])
       ])
 
 dnl Export symbols in the public API from shared libraries.
