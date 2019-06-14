@@ -172,12 +172,15 @@ int main(void)
         struct l_genl *const genl = l_genl_new();
         assert(genl != NULL);
 
-        assert(l_genl_add_family_watch(genl,
-                                       MPTCP_GENL_NAME,
-                                       run_tests,
-                                       NULL,
-                                       &tests_called,
-                                       NULL) != 0);
+        unsigned int const watch_id =
+                l_genl_add_family_watch(genl,
+                                        MPTCP_GENL_NAME,
+                                        run_tests,
+                                        NULL,
+                                        &tests_called,
+                                        NULL);
+
+        assert(watch_id != 0);
 
         // Bound the time we wait for the tests to run.
         static unsigned long const milliseconds = 500;
@@ -195,7 +198,8 @@ int main(void)
          */
         assert(tests_called);
 
-        l_free(timeout);
+        l_timeout_remove(timeout);
+        l_genl_remove_family_watch(genl, watch_id);
         l_genl_unref(genl);
         mptcpd_pm_destroy(pm);
         mptcpd_config_destroy(config);
