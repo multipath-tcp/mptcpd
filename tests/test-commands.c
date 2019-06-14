@@ -10,8 +10,11 @@
 #undef NDEBUG
 #include <assert.h>
 
+#include <linux/mptcp.h>
+
 #include <ell/main.h>
-#include <ell/idle.h>
+#include <ell/genl.h>
+#include <ell/timeout.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
 #include <ell/log.h>
 #include <ell/test.h>
@@ -26,9 +29,25 @@
 
 // -------------------------------------------------------------------
 
+static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
+{
+        bool const ready = mptcpd_pm_ready(pm);
+
+        if (!ready)
+                l_warn("Path manager not yet ready.  "
+                       "%s cannot be completed.", fname);
+
+        return ready;
+}
+
+// -------------------------------------------------------------------
+
 void test_send_addr(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
 
         assert(mptcpd_pm_send_addr(pm,
                                    test_token_1,
@@ -39,6 +58,9 @@ void test_send_addr(void const *test_data)
 void test_add_subflow(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
 
         assert(mptcpd_pm_add_subflow(pm,
                                      test_token_2,
@@ -53,6 +75,9 @@ void test_set_backup(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
 
+        if (!is_pm_ready(pm, __func__))
+                return;
+
         assert(mptcpd_pm_set_backup(pm,
                                     test_token_1,
                                     &test_laddr_1,
@@ -63,6 +88,9 @@ void test_set_backup(void const *test_data)
 void test_remove_subflow(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
 
         assert(mptcpd_pm_remove_subflow(pm,
                                         test_token_1,
@@ -79,49 +107,27 @@ void test_get_nm(void const *test_data)
 
 // -------------------------------------------------------------------
 
-static void idle_callback(struct l_idle *idle, void *user_data)
+static void run_tests(struct l_genl_family_info const *info,
+                      void *user_data)
 {
-        (void) idle;
+        assert(strcmp(l_genl_family_info_get_name(info),
+                      MPTCP_GENL_NAME) == 0);
+
+        l_test_run();
+
+        bool *const tests_called = user_data;
+        *tests_called = true;
+
+        l_main_quit();
+}
+
+static void timeout_callback(struct l_timeout *timeout,
+                             void *user_data)
+{
+        (void) timeout;
         (void) user_data;
 
-        /*
-          Number of ELL event loop iterations to go through before
-          triggering the MPTCP path management generic netlink command
-          calls.
-
-          This gives the mptcpd generic netlink API implementation
-          enough time for the "mptcp" generic netlink family to
-          "appear" over several ELL event loop iterations, as well as
-          the generic netlink commands to be sent.
-        */
-        static int const trigger_count = 10;
-
-        /*
-          Maximum number of ELL event loop iterations.
-
-          Stop the ELL event loop after this number of iterations.
-         */
-        static int const max_count = trigger_count * 2;
-
-        // ELL event loop iteration count.
-        static int count = 0;
-
-        static bool tests_called = false;
-
-        assert(max_count > trigger_count);  // Sanity check.
-
-        /*
-          The mptcpd network monitor interface list should now be
-          populated.  Iterate through the list, and verify that the
-          monitored interfaces are what we expect.
-         */
-        if (count > trigger_count && !tests_called) {
-                l_test_run();
-                tests_called = true;
-        }
-
-        if (++count > max_count)
-                l_main_quit();
+        l_main_quit();
 }
 
 // -------------------------------------------------------------------
@@ -140,7 +146,6 @@ int main(void)
                 TEST_PLUGIN_DIR
         };
         static char **args = argv;
-
 
         static int argc = L_ARRAY_SIZE(argv);
 
@@ -163,15 +168,41 @@ int main(void)
           Prepare to run the path management generic netlink command
           tests.
         */
-        struct l_idle *const idle =
-                l_idle_create(idle_callback, &pm, NULL);
+        bool tests_called = false;
+        struct l_genl *const genl = l_genl_new();
+        assert(genl != NULL);
+
+        unsigned int const watch_id =
+                l_genl_add_family_watch(genl,
+                                        MPTCP_GENL_NAME,
+                                        run_tests,
+                                        NULL,
+                                        &tests_called,
+                                        NULL);
+
+        assert(watch_id != 0);
+
+        // Bound the time we wait for the tests to run.
+        static unsigned long const milliseconds = 500;
+        struct l_timeout *const timeout =
+                l_timeout_create_ms(milliseconds,
+                                    timeout_callback,
+                                    &tests_called,
+                                    NULL);
 
         (void) l_main_run();
 
+        /*
+          The tests will have run only if the "mptcp" generic netlink
+          family appeared.
+         */
+        assert(tests_called);
+
+        l_timeout_remove(timeout);
+        l_genl_remove_family_watch(genl, watch_id);
+        l_genl_unref(genl);
         mptcpd_pm_destroy(pm);
         mptcpd_config_destroy(config);
-
-        l_idle_remove(idle);
 
         return l_main_exit() ? 0 : -1;
 }

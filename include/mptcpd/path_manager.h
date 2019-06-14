@@ -21,6 +21,21 @@ struct mptcpd_addr;
 struct mptcpd_pm;
 
 /**
+ * @brief Is mptcpd path manager ready for use?
+ *
+ * The mptcpd path manager is ready for use when the @c "mptcp"
+ * generic netlink family is available in the Linux kernel.  No
+ * path management related interaction with the kernel can occur until
+ * that family appears.
+ *
+ * @param[in] pm Mptcpd path manager.
+ *
+ * @return @c true if the mptcpd path manager is ready for use, and @c
+ *         false otherwise.
+ */
+MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
+
+/**
  * @brief Send @c MPTCP_GENL_CMD_SEND_ADDR genl command to kernel.
  *
  * @param[in] pm         The mptcpd path manager object.

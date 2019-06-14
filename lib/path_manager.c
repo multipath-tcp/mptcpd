@@ -97,7 +97,24 @@ static bool append_remote_addr_attr(struct l_genl_msg *msg,
         return append_addr_attr(msg, addr, local);
 }
 
+static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
+{
+        bool const ready = mptcpd_pm_ready(pm);
+
+        if (!ready)
+                l_warn("%s: \"" MPTCP_GENL_NAME "\" family is not "
+                       "yet available",
+                        fname);
+
+        return ready;
+}
+
 // ---------------------------------------------------------------------
+
+bool mptcpd_pm_ready(struct mptcpd_pm const *pm)
+{
+        return pm->family != NULL;
+}
 
 bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
                          mptcpd_token_t token,
@@ -105,6 +122,9 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
                          struct mptcpd_addr const *addr)
 {
         if (pm == NULL || addr == NULL)
+                return false;
+
+        if (!is_pm_ready(pm, __func__))
                 return false;
 
         assert(sizeof(addr->address.family) == sizeof(uint16_t));
@@ -180,6 +200,9 @@ bool mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                            bool backup)
 {
         if (pm == NULL)
+                return false;
+
+        if (!is_pm_ready(pm, __func__))
                 return false;
 
         /*
@@ -293,6 +316,9 @@ bool mptcpd_pm_set_backup(struct mptcpd_pm *pm,
         if (pm == NULL || local_addr == NULL || remote_addr == NULL)
                 return false;
 
+        if (!is_pm_ready(pm, __func__))
+                return false;
+
         /*
           Payload:
               Token
@@ -375,6 +401,9 @@ bool mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
                               struct mptcpd_addr const *remote_addr)
 {
         if (pm == NULL || local_addr == NULL || remote_addr == NULL)
+                return false;
+
+        if (!is_pm_ready(pm, __func__))
                 return false;
 
         /*
