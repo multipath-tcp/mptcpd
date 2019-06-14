@@ -10,8 +10,11 @@
 #undef NDEBUG
 #include <assert.h>
 
+#include <linux/mptcp.h>
+
 #include <ell/main.h>
-#include <ell/idle.h>
+#include <ell/genl.h>
+#include <ell/timeout.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
 #include <ell/log.h>
 #include <ell/test.h>
@@ -19,6 +22,7 @@
 #include "../src/configuration.h"        // INTERNAL!
 #include "../src/path_manager.h"         // INTERNAL!
 #include <mptcpd/path_manager_private.h> // INTERNAL!
+#include <mptcpd/path_manager.h>
 
 // -------------------------------------------------------------------
 
@@ -27,6 +31,8 @@ struct test_info
         struct mptcpd_config *config;
 
         struct mptcpd_pm *pm;
+
+        bool tests_called;
 };
 
 // -------------------------------------------------------------------
@@ -37,58 +43,51 @@ void test_pm_create(void const *test_data)
 
         info->pm = mptcpd_pm_create(info->config);
 
-        assert(info->pm         != NULL);
-        assert(info->pm->genl   != NULL);
-        assert(info->pm->id     != NULL);
-        assert(info->pm->family != NULL);
-        assert(info->pm->nm     != NULL);
+        assert(info->pm       != NULL);
+        assert(info->pm->genl != NULL);
+        assert(info->pm->nm   != NULL);
+
+        /*
+          Other struct mptcpd_pm fields may not have been initialized
+          yet since they depend on the existence of the "mptcp"
+          generic netlink family.
+        */
 }
 
 void test_pm_destroy(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
 
+        if (!mptcpd_pm_ready(info->pm))
+                l_warn("Path manager was not ready.  "
+                       "Test was likely limited.");
+
         mptcpd_pm_destroy(info->pm);
 }
 
 // -------------------------------------------------------------------
 
-static void idle_callback(struct l_idle *idle, void *user_data)
+static void run_tests(struct l_genl_family_info const *info,
+                      void *user_data)
 {
-        (void) idle;
+        assert(strcmp(l_genl_family_info_get_name(info),
+                      MPTCP_GENL_NAME) == 0);
+
+        l_test_run();
+
+        struct test_info *const t = user_data;
+        t->tests_called = true;
+
+        l_main_quit();
+}
+
+static void timeout_callback(struct l_timeout *timeout,
+                             void *user_data)
+{
+        (void) timeout;
         (void) user_data;
 
-        /*
-          Number of ELL event loop iterations to go through before
-          triggering the MPTCP path manager tests.
-
-          This gives the mptcpd generic netlink API implementation
-          enough time for the "mptcp" generic netlink family to
-          "appear" over several ELL event loop iterations.
-        */
-        static int const trigger_count = 10;
-
-        /*
-          Maximum number of ELL event loop iterations.
-
-          Stop the ELL event loop after this number of iterations.
-         */
-        static int const max_count = trigger_count * 2;
-
-        // ELL event loop iteration count.
-        static int count = 0;
-
-        static bool tests_called = false;
-
-        assert(max_count > trigger_count);  // Sanity check.
-
-        if (count > trigger_count && !tests_called) {
-                l_test_run();
-                tests_called = true;
-        }
-
-        if (++count > max_count)
-                l_main_quit();
+        l_main_quit();
 }
 
 // -------------------------------------------------------------------
@@ -120,15 +119,43 @@ int main(void)
         l_test_add("pm_create",  test_pm_create,  &info);
         l_test_add("pm_destroy", test_pm_destroy, &info);
 
-        // Prepare to run the path manager lifecycle tests.
-        struct l_idle *const idle =
-                l_idle_create(idle_callback, &info, NULL);
+        /*
+          Run the path manager lifecycle tests when the "mptcp"
+          generic netlink family appears.
+        */
+        struct l_genl *const genl = l_genl_new();
+        assert(genl != NULL);
+
+        unsigned int const watch_id =
+                l_genl_add_family_watch(genl,
+                                        MPTCP_GENL_NAME,
+                                        run_tests,
+                                        NULL,
+                                        &info,
+                                        NULL);
+
+        assert(watch_id != 0);
+
+        // Bound the time we wait for the tests to run.
+        static unsigned long const milliseconds = 500;
+        struct l_timeout *const timeout =
+                l_timeout_create_ms(milliseconds,
+                                    timeout_callback,
+                                    &info,
+                                    NULL);
 
         (void) l_main_run();
 
-        mptcpd_config_destroy(info.config);
+        /*
+          The tests will have run only if the "mptcp" generic netlink
+          family appeared.
+         */
+        assert(info.tests_called);
 
-        l_idle_remove(idle);
+        l_timeout_remove(timeout);
+        l_genl_remove_family_watch(genl, watch_id);
+        l_genl_unref(genl);
+        mptcpd_config_destroy(info.config);
 
         return l_main_exit() ? 0 : -1;
 }
