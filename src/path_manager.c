@@ -7,7 +7,9 @@
  * Copyright (c) 2017-2019, Intel Corporation
  */
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include <netinet/in.h>
@@ -24,6 +26,19 @@
 
 #include "path_manager.h"
 #include "configuration.h"
+
+/// Directory containing MPTCP sysctl variable entries.
+# define MPTCP_SYSCTL_BASE "/proc/sys/net/mptcp/"
+
+/**
+ * @brief Maximum path manager name length.
+ *
+ * @note @c MPTCP_PM_NAME_MAX is defined in the internal
+ *       @c <net/mptcp.h> kernel header.
+*/
+#ifndef MPTCP_PM_NAME_MAX
+#define MPTCP_PM_NAME_MAX 16
+#endif
 
 
 /**
@@ -722,6 +737,83 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
 }
 
 /**
+ * @brief Verify that MPTCP is configured as needed in the kernel.
+ *
+ * The multipath-tcp.org kernel exposes several @c sysctl variables,
+ * two of which must be configured in a manner suitable for mptcpd:
+ *
+ * @li @c net.mptcp.mptcp_enabled != 0
+ * @li @c net.mptcp.mptcp_path_manager == netlink
+ *
+ * Issue a warning if they exist, and are not set in a manner suitable
+ * for mptcpd.
+ *
+ * @note Mptcpd should not set these variables since it would need to
+ *       be run as @c root in order to gain write access to files in
+ *       @c /proc/sys/net/mptcp/ owned by @c root.  Ideally, mptcpd
+ *       should not be run as the @c root user.
+ */
+static void check_kernel_config()
+{
+        static char const mptcp_enabled[] =
+                MPTCP_SYSCTL_BASE "mptcp_enabled";
+        static char const mptcp_path_manager[] =
+                MPTCP_SYSCTL_BASE "mptcp_path_manager";
+
+        FILE *f = fopen(mptcp_enabled, "r");
+
+        if (f != NULL) {
+                int enabled = 0;
+                int const n = fscanf(f, "%d", &enabled);
+
+                if (likely(n == 1)) {
+                        // "enabled" could be 0, 1, or 2.
+                        if (enabled == 0) {
+                                l_warn("MPTCP is not enabled in "
+                                       "the kernel.");
+                                l_warn("Try 'sysctl -w "
+                                       "net.mptcp.mptcp_enabled=2'.");
+                        }
+                } else {
+                        l_error("Unable to determine if MPTCP "
+                                "is enabled.");
+                }
+
+                fclose(f);
+        }
+
+        f = fopen(mptcp_path_manager, "r");
+
+        if (f != NULL) {
+                char path_manager[MPTCP_PM_NAME_MAX + 1] = { 0 };
+                char const *const s =
+                        fgets(path_manager, sizeof(path_manager), f);
+
+                if (likely(s != NULL)) {
+                        if (strcmp(path_manager, "netlink") != 0) {
+                                /*
+                                  "netlink" could be set as the
+                                  default.  It may not appear as
+                                  "netlink", which is why "may" is
+                                  used instead of "is" in the warning
+                                  diagnostic below
+                                */
+                                l_warn("MPTCP 'netlink' path manager may "
+                                       "not be enabled in the kernel.");
+                                l_warn("Try 'sysctl -w "
+                                       "net.mptcp.mptcp_path_manager="
+                                       "netlink'.");
+                        }
+                } else {
+                        l_error("Unable to determine selected MPTCP "
+                                "path manager.");
+                }
+
+                fclose(f);
+        }
+}
+
+/**
  * @brief Handle MPTCP generic netlink family appearing on us.
  *
  * This function performs operations that must occur after the MPTCP
@@ -789,6 +881,8 @@ static void family_appeared(struct l_genl_family_info const *info,
                        MPTCP_GENL_EV_GRP_NAME
                        " multicast messages");
         }
+
+        check_kernel_config();
 }
 
 /**
