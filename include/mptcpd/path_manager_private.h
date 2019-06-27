@@ -34,15 +34,8 @@ struct mptcpd_pm
         /// Core ELL generic netlink object.
         struct l_genl *genl;
 
-        /**
-         * @brief Array of MPTCP generic netlink multicast
-         *        notification IDs.
-         *
-         * @todo It is unlikely that we'll ever need to support more than one
-         *       generic netlink multicast group.  Consider replacing
-         *       this array with single, non-pointer, integer value.
-         */
-        unsigned int *id;
+        /// MPTCP generic netlink multicast notification ID.
+        unsigned int id;
 
         /**
          * @brief MPTCP generic netlink family.
