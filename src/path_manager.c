@@ -28,7 +28,7 @@
 #include "configuration.h"
 
 /// Directory containing MPTCP sysctl variable entries.
-# define MPTCP_SYSCTL_BASE "/proc/sys/net/mptcp/"
+#define MPTCP_SYSCTL_BASE "/proc/sys/net/mptcp/"
 
 /**
  * @brief Maximum path manager name length.
@@ -737,80 +737,95 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
 }
 
 /**
- * @brief Verify that MPTCP is configured as needed in the kernel.
+ * @brief Verify that MPTCP is enabled at run-time in the kernel.
  *
- * The multipath-tcp.org kernel exposes several @c sysctl variables,
- * two of which must be configured in a manner suitable for mptcpd:
- *
- * @li @c net.mptcp.mptcp_enabled != 0
- * @li @c net.mptcp.mptcp_path_manager == netlink
- *
- * Issue a warning if they exist, and are not set in a manner suitable
- * for mptcpd.
- *
- * @note Mptcpd should not set these variables since it would need to
- *       be run as @c root in order to gain write access to files in
- *       @c /proc/sys/net/mptcp/ owned by @c root.  Ideally, mptcpd
- *       should not be run as the @c root user.
+ * Mptcpd requires MPTCP to be enabled in the kernel at run-time.
+ * Issue a warning if it is not enabled.
  */
-static void check_kernel_config()
+static void check_kernel_mptcp_enabled(void)
 {
         static char const mptcp_enabled[] =
                 MPTCP_SYSCTL_BASE "mptcp_enabled";
+
+        FILE *const f = fopen(mptcp_enabled, "r");
+
+        if (f == NULL)
+                return;  // Not using multipath-tcp.org kernel.
+
+        int enabled = 0;
+        int const n = fscanf(f, "%d", &enabled);
+
+        if (likely(n == 1)) {
+                // "enabled" could be 0, 1, or 2.
+                if (enabled == 0) {
+                        l_warn("MPTCP is not enabled in the kernel.");
+                        l_warn("Try 'sysctl -w "
+                               "net.mptcp.mptcp_enabled=2'.");
+
+                        /*
+                          Mptcpd should not set this variable since it
+                          would need to be run as root in order to
+                          gain write access to files in
+                          /proc/sys/net/mptcp/ owned by root.
+                          Ideally, mptcpd should not be run as the
+                          root user.
+                        */
+                }
+        } else {
+                l_warn("Unable to determine if MPTCP is enabled.");
+        }
+
+        fclose(f);
+}
+
+/**
+ * @brief Verify that the MPTCP "netlink" path manager is selected.
+ *
+ * Mptcpd requires MPTCP the "netlink" path manager to be selected at
+ * run-time when using the multipath-tcp.org kernel.  Issue a warning
+ * if it is not selected.
+ */
+static void check_kernel_mptcp_path_manager(void)
+{
         static char const mptcp_path_manager[] =
                 MPTCP_SYSCTL_BASE "mptcp_path_manager";
 
-        FILE *f = fopen(mptcp_enabled, "r");
+        FILE *const f = fopen(mptcp_path_manager, "r");
 
-        if (f != NULL) {
-                int enabled = 0;
-                int const n = fscanf(f, "%d", &enabled);
+        if (f == NULL)
+                return;  // Not using multipath-tcp.org kernel.
 
-                if (likely(n == 1)) {
-                        // "enabled" could be 0, 1, or 2.
-                        if (enabled == 0) {
-                                l_warn("MPTCP is not enabled in "
-                                       "the kernel.");
-                                l_warn("Try 'sysctl -w "
-                                       "net.mptcp.mptcp_enabled=2'.");
-                        }
-                } else {
-                        l_error("Unable to determine if MPTCP "
-                                "is enabled.");
+        char pm[MPTCP_PM_NAME_MAX + 1] = { 0 };
+        char const *const s = fgets(pm, sizeof(pm), f);
+
+        if (likely(s != NULL)) {
+                if (strcmp(pm, "netlink") != 0) {
+                        /*
+                          "netlink" could be set as the default.  It
+                          may not appear as "netlink", which is why
+                          "may" is used instead of "is" in the warning
+                          diagnostic below
+                        */
+                        l_warn("MPTCP 'netlink' path manager may "
+                               "not be enabled in the kernel.");
+                        l_warn("Try 'sysctl -w "
+                               "net.mptcp.mptcp_path_manager=netlink'.");
+
+                        /*
+                          Mptcpd should not set this variable since it
+                          would need to be run as root in order to
+                          gain write access to files in
+                          /proc/sys/net/mptcp/ owned by root.
+                          Ideally, mptcpd should not be run as the
+                          root user.
+                        */
                 }
-
-                fclose(f);
+        } else {
+                l_warn("Unable to determine selected MPTCP "
+                       "path manager.");
         }
 
-        f = fopen(mptcp_path_manager, "r");
-
-        if (f != NULL) {
-                char path_manager[MPTCP_PM_NAME_MAX + 1] = { 0 };
-                char const *const s =
-                        fgets(path_manager, sizeof(path_manager), f);
-
-                if (likely(s != NULL)) {
-                        if (strcmp(path_manager, "netlink") != 0) {
-                                /*
-                                  "netlink" could be set as the
-                                  default.  It may not appear as
-                                  "netlink", which is why "may" is
-                                  used instead of "is" in the warning
-                                  diagnostic below
-                                */
-                                l_warn("MPTCP 'netlink' path manager may "
-                                       "not be enabled in the kernel.");
-                                l_warn("Try 'sysctl -w "
-                                       "net.mptcp.mptcp_path_manager="
-                                       "netlink'.");
-                        }
-                } else {
-                        l_error("Unable to determine selected MPTCP "
-                                "path manager.");
-                }
-
-                fclose(f);
-        }
+        fclose(f);
 }
 
 /**
@@ -882,7 +897,8 @@ static void family_appeared(struct l_genl_family_info const *info,
                        " multicast messages");
         }
 
-        check_kernel_config();
+        check_kernel_mptcp_enabled();
+        check_kernel_mptcp_path_manager();
 }
 
 /**
