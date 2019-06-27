@@ -27,47 +27,6 @@
 
 
 /**
- * @struct pm_mcast_group
- *
- * @brief Path mananger generic netlink multicast group information.
- */
-struct pm_mcast_group
-{
-        /**
-         * @brief @c mptcp genl family multicast event handler.
-         *
-         * Generic netlink multicast event handling function for a
-         * @c mptcp family multicast group of the name included in
-         * this structure.
-         *
-         * @see @c name
-         */
-        l_genl_msg_func_t const callback;
-
-        /**
-         * @brief Name of @c mptcp genl family multicast group event.
-         *
-         * The @c mptcp generic netlink family defines several multicast
-         * groups, each corresponding to a specific MPTCP event (new
-         * connection, etc).  This field contains the name of such a
-         * multicast group.
-         */
-        char const *const name;
-};
-
-static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data);
-
-/**
- * @todo It is unlikely that we'll ever need to support more than one
- *       generic netlink multicast group.  Consider dropping this
- *       array.
- */
-static struct pm_mcast_group const pm_mcast_group_map[] = {
-        { .callback = handle_mptcp_event,
-          .name     = MPTCP_GENL_EV_GRP_NAME }
-};
-
-/**
  * @brief Validate generic netlink attribute size.
  *
  * @param[in] actual   Actual   attribute size.
@@ -794,28 +753,19 @@ static void family_appeared(struct l_genl_family_info const *info,
           Register callbacks for MPTCP generic netlink multicast
           notifications.
         */
-        for (size_t i = 0; i < L_ARRAY_SIZE(pm_mcast_group_map); ++i) {
-                struct pm_mcast_group const *const mcg =
-                        &pm_mcast_group_map[i];
+        pm->id = l_genl_family_register(pm->family,
+                                        MPTCP_GENL_EV_GRP_NAME,
+                                        handle_mptcp_event,
+                                        pm,
+                                        NULL /* destroy */);
 
-                pm->id[i] = l_genl_family_register(pm->family,
-                                                   mcg->name,
-                                                   mcg->callback,
-                                                   pm,
-                                                   NULL /* destroy */);
-
-                if (pm->id[i] == 0) {
-                        /**
-                         * @todo Should we exit with an error
-                         *       instead?  If so, we need to make sure
-                         *       the remaining array elements are set
-                         *       to zero to prevent an uninitialized
-                         *       value from being used at cleanup.
-                         */
-                        l_warn("Unable to register handler for %s "
-                               "multicast messages",
-                               mcg->name);
-                }
+        if (pm->id == 0) {
+                /**
+                 * @todo Should we exit with an error instead?
+                 */
+                l_warn("Unable to register handler for "
+                       MPTCP_GENL_EV_GRP_NAME
+                       " multicast messages");
         }
 }
 
@@ -840,16 +790,13 @@ static void family_vanished(char const *name, void *user_data)
           Unregister callbacks for MPTCP generic netlink multicast
           notifications.
         */
-        for (size_t i = 0; i < L_ARRAY_SIZE(pm_mcast_group_map); ++i) {
-                if (pm->id[i] != 0) {
-                        if (!l_genl_family_unregister(pm->family,
-                                                      pm->id[i]))
-                                l_warn("%s multicast handler "
-                                       "deregistration failed.",
-                                       pm_mcast_group_map[i].name);
+        if (pm->id != 0) {
+                if (!l_genl_family_unregister(pm->family, pm->id))
+                        l_warn(MPTCP_GENL_EV_GRP_NAME
+                               " multicast handler deregistration "
+                               "failed.");
 
-                        pm->id[i] = 0;
-                }
+                pm->id = 0;
         }
 
         l_genl_family_free(pm->family);
@@ -884,9 +831,6 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
-        pm->id = l_new(unsigned int, L_ARRAY_SIZE(pm_mcast_group_map));
-
-
         if (l_genl_add_family_watch(pm->genl,
                                     MPTCP_GENL_NAME,
                                     family_appeared,
@@ -919,7 +863,6 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
         mptcpd_nm_destroy(pm->nm);
 
         l_genl_family_free(pm->family);
-        l_free(pm->id);
         l_genl_unref(pm->genl);
         l_free(pm);
 
