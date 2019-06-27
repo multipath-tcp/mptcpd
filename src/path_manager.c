@@ -18,6 +18,7 @@
 
 #include <ell/genl.h>
 #include <ell/log.h>
+#include <ell/timeout.h>
 #include <ell/util.h>
 
 #include <mptcpd/path_manager_private.h>
@@ -40,6 +41,8 @@
 #define MPTCP_PM_NAME_MAX 16
 #endif
 
+
+static unsigned int const FAMILY_TIMEOUT_SECONDS = 10;
 
 /**
  * @brief Validate generic netlink attribute size.
@@ -933,6 +936,23 @@ static void family_vanished(char const *name, void *user_data)
 
         l_genl_family_free(pm->family);
         pm->family = NULL;
+
+        // Re-arm the "mptcp" generic netlink family timeout.
+        l_timeout_modify(pm->timeout, FAMILY_TIMEOUT_SECONDS);
+}
+
+static void family_timeout(struct l_timeout *timeout, void *user_data)
+{
+        (void) timeout;
+
+        struct mptcpd_pm *const pm =  user_data;
+
+        if (pm->family != NULL)
+                return;  // "mptcp" genl family appeared.
+
+        l_warn(MPTCP_GENL_NAME
+               " generic netlink family has not appeared.");
+        l_warn("Verify MPTCP \"netlink\" path manager kernel support.");
 }
 
 struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
@@ -981,6 +1001,22 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
+        /*
+          Warn the user if the "mptcp" generic netlink family doesn't
+          appear within a reasonable amount of time.
+        */
+        pm->timeout =
+                l_timeout_create(FAMILY_TIMEOUT_SECONDS,
+                                 family_timeout,
+                                 pm,
+                                 NULL);
+
+        if (pm->timeout == NULL) {
+                mptcpd_pm_destroy(pm);
+                l_error("Unable to create timeout handler.");
+                return NULL;
+        }
+
         // Listen for network device changes.
         pm->nm = mptcpd_nm_create();
 
@@ -999,7 +1035,7 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
                 return;
 
         mptcpd_nm_destroy(pm->nm);
-
+        l_timeout_remove(pm->timeout);
         l_genl_family_free(pm->family);
         l_genl_unref(pm->genl);
         l_free(pm);
