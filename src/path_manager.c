@@ -799,9 +799,13 @@ static void check_kernel_mptcp_path_manager(void)
                 return;  // Not using multipath-tcp.org kernel.
 
         char pm[MPTCP_PM_NAME_MAX + 1] = { 0 };
-        char const *const s = fgets(pm, sizeof(pm), f);
 
-        if (likely(s != NULL)) {
+        static char const MPTCP_PM_NAME_FMT[] =
+                "%" L_STRINGIFY(MPTCP_PM_NAME_MAX) "s";
+
+        int const n = fscanf(f, MPTCP_PM_NAME_FMT, pm);
+
+        if (likely(n == 1)) {
                 if (strcmp(pm, "netlink") != 0) {
                         /*
                           "netlink" could be set as the default.  It
