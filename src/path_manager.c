@@ -736,7 +736,19 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
 static void family_appeared(struct l_genl_family_info const *info,
                             void *user_data)
 {
-        (void) info;
+        if (info == NULL) {
+                /*
+                  Request for "mptcp" generic netlink family failed.
+                  Wait for it to appear in case it is loaded into the
+                  kernel after mptcpd has started.
+                */
+
+                l_debug("Request for \""
+                        MPTCP_GENL_NAME
+                        "\" Generic Netlink family failed.  Waiting.");
+
+                return;
+        }
 
         assert(strcmp(l_genl_family_info_get_name(info),
                       MPTCP_GENL_NAME) == 0);
@@ -831,14 +843,20 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
-        if (l_genl_add_family_watch(pm->genl,
-                                    MPTCP_GENL_NAME,
-                                    family_appeared,
-                                    family_vanished,
-                                    pm,
-                                    NULL) == 0) {
+        if (!l_genl_request_family(pm->genl,
+                                   MPTCP_GENL_NAME,
+                                   family_appeared,
+                                   pm,
+                                   NULL)
+            || l_genl_add_family_watch(pm->genl,
+                                       MPTCP_GENL_NAME,
+                                       family_appeared,
+                                       family_vanished,
+                                       pm,
+                                       NULL) == 0) {
                 mptcpd_pm_destroy(pm);
-                l_error("Unable to set watches for \"" MPTCP_GENL_NAME
+                l_error("Unable to request or watch \""
+                        MPTCP_GENL_NAME
                         "\" Generic Netlink family.");
                 return NULL;
         }

@@ -26,7 +26,6 @@
 
 #include <mptcpd/path_manager.h>
 
-
 // -------------------------------------------------------------------
 
 static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
@@ -110,6 +109,14 @@ void test_get_nm(void const *test_data)
 static void run_tests(struct l_genl_family_info const *info,
                       void *user_data)
 {
+        /*
+          Check if the initial request for the "mptcp" generic netlink
+          family failed.  A subsequent family watch will be used to
+          call this function again when it appears.
+         */
+        if (info == NULL)
+                return;
+
         assert(strcmp(l_genl_family_info_get_name(info),
                       MPTCP_GENL_NAME) == 0);
 
@@ -126,6 +133,8 @@ static void timeout_callback(struct l_timeout *timeout,
 {
         (void) timeout;
         (void) user_data;
+
+        l_debug("test timed out");
 
         l_main_quit();
 }
@@ -172,6 +181,13 @@ int main(void)
         struct l_genl *const genl = l_genl_new();
         assert(genl != NULL);
 
+        bool const requested = l_genl_request_family(genl,
+                                                     MPTCP_GENL_NAME,
+                                                     run_tests,
+                                                     &tests_called,
+                                                     NULL);
+        assert(requested);
+
         unsigned int const watch_id =
                 l_genl_add_family_watch(genl,
                                         MPTCP_GENL_NAME,
@@ -187,7 +203,7 @@ int main(void)
         struct l_timeout *const timeout =
                 l_timeout_create_ms(milliseconds,
                                     timeout_callback,
-                                    &tests_called,
+                                    NULL,
                                     NULL);
 
         (void) l_main_run();
