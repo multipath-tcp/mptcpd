@@ -757,7 +757,17 @@ static void family_appeared(struct l_genl_family_info const *info,
 
         l_debug(MPTCP_GENL_NAME " generic netlink family appeared");
 
-        assert(pm->family == NULL);
+        /*
+          This function could be called in either of two cases, (1)
+          handling the appearance of the "mptcp" generic netlink
+          family through a family watch, or (2) through an explicit
+          family request.
+
+          Do nothing if the necessary "mptcp" family registration was
+          completed as a result of a previous call to this function.
+         */
+        if (pm->family != NULL)
+                return;
 
         pm->family = l_genl_family_new(pm->genl, MPTCP_GENL_NAME);
 
@@ -843,21 +853,21 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
-        if (!l_genl_request_family(pm->genl,
-                                   MPTCP_GENL_NAME,
-                                   family_appeared,
-                                   pm,
-                                   NULL)
-            || l_genl_add_family_watch(pm->genl,
+        if (l_genl_add_family_watch(pm->genl,
                                        MPTCP_GENL_NAME,
                                        family_appeared,
                                        family_vanished,
                                        pm,
-                                       NULL) == 0) {
+                                       NULL) == 0
+            || !l_genl_request_family(pm->genl,
+                                      MPTCP_GENL_NAME,
+                                      family_appeared,
+                                      pm,
+                                      NULL)) {
                 mptcpd_pm_destroy(pm);
-                l_error("Unable to request or watch \""
+                l_error("Unable to watch or request \""
                         MPTCP_GENL_NAME
-                        "\" Generic Netlink family.");
+                        "\" generic netlink family.");
                 return NULL;
         }
 

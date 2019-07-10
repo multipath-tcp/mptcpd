@@ -181,13 +181,6 @@ int main(void)
         struct l_genl *const genl = l_genl_new();
         assert(genl != NULL);
 
-        bool const requested = l_genl_request_family(genl,
-                                                     MPTCP_GENL_NAME,
-                                                     run_tests,
-                                                     &tests_called,
-                                                     NULL);
-        assert(requested);
-
         unsigned int const watch_id =
                 l_genl_add_family_watch(genl,
                                         MPTCP_GENL_NAME,
@@ -197,6 +190,13 @@ int main(void)
                                         NULL);
 
         assert(watch_id != 0);
+
+        bool const requested = l_genl_request_family(genl,
+                                                     MPTCP_GENL_NAME,
+                                                     run_tests,
+                                                     &tests_called,
+                                                     NULL);
+        assert(requested);
 
         // Bound the time we wait for the tests to run.
         static unsigned long const milliseconds = 500;
