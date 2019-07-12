@@ -11,10 +11,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
+#include <unistd.h>
 
 #include <netinet/in.h>
 #include <linux/netlink.h>  // For NLA_* macros.
 #include <linux/mptcp.h>
+
+#include <sys/socket.h>
+#include <netinet/tcp.h>
+#include <linux/in.h>       // For IPPROTO_MPTCP
 
 #include <ell/genl.h>
 #include <ell/log.h>
@@ -24,6 +30,10 @@
 #include <mptcpd/path_manager_private.h>
 #include <mptcpd/plugin.h>
 #include <mptcpd/network_monitor.h>
+
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/config-private.h>
+#endif
 
 #include "path_manager.h"
 #include "configuration.h"
@@ -742,10 +752,34 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
 /**
  * @brief Verify that MPTCP is enabled at run-time in the kernel.
  *
- * Mptcpd requires MPTCP to be enabled in the kernel at run-time.
- * Issue a warning if it is not enabled.
+ * Check that MPTCP is supported in the kernel by opening a socket
+ * with the IPPROTO_MPTCP protocol.
  */
-static void check_kernel_mptcp_enabled(void)
+static bool check_mptcp_socket_support(void)
+{
+#if !HAVE_DECL_IPPROTO_MPTCP
+# define IPPROTO_MPTCP 262
+#endif  // !HAVE_DECL_IPPROTO_MPTCP
+
+        int const fd = socket(AF_INET, SOCK_STREAM, IPPROTO_MPTCP);
+
+        if (fd == -1
+            && errno != EPROTONOSUPPORT
+            && errno != EINVAL)
+                l_error("Unable to confirm MPTCP socket support.");
+
+        close(fd);
+
+        return fd != -1;
+}
+
+/**
+ * @brief Verify that MPTCP is enabled at run-time in the kernel.
+ *
+ * Check that MPTCP is enabled through the @c net.mptcp.mptcp_enabled
+ * @c sysctl variable if it exists.
+ */
+static bool check_kernel_mptcp_enabled(void)
 {
         static char const mptcp_enabled[] =
                 MPTCP_SYSCTL_BASE "mptcp_enabled";
@@ -753,17 +787,21 @@ static void check_kernel_mptcp_enabled(void)
         FILE *const f = fopen(mptcp_enabled, "r");
 
         if (f == NULL)
-                return;  // Not using multipath-tcp.org kernel.
+                return false;  // Not using multipath-tcp.org kernel.
 
         int enabled = 0;
         int const n = fscanf(f, "%d", &enabled);
 
+        fclose(f);
+
         if (likely(n == 1)) {
                 // "enabled" could be 0, 1, or 2.
-                if (enabled == 0) {
-                        l_warn("MPTCP is not enabled in the kernel.");
-                        l_warn("Try 'sysctl -w "
-                               "net.mptcp.mptcp_enabled=2'.");
+                enabled = (enabled == 1 || enabled == 2);
+
+                if (!enabled) {
+                        l_error("MPTCP is not enabled in the kernel.");
+                        l_error("Try 'sysctl -w "
+                                "net.mptcp.mptcp_enabled=2'.");
 
                         /*
                           Mptcpd should not set this variable since it
@@ -775,10 +813,10 @@ static void check_kernel_mptcp_enabled(void)
                         */
                 }
         } else {
-                l_warn("Unable to determine if MPTCP is enabled.");
+                l_error("Unable to determine if MPTCP is enabled.");
         }
 
-        fclose(f);
+        return enabled;
 }
 
 /**
@@ -805,6 +843,8 @@ static void check_kernel_mptcp_path_manager(void)
 
         int const n = fscanf(f, MPTCP_PM_NAME_FMT, pm);
 
+        fclose(f);
+
         if (likely(n == 1)) {
                 if (strcmp(pm, "netlink") != 0) {
                         /*
@@ -814,7 +854,7 @@ static void check_kernel_mptcp_path_manager(void)
                           diagnostic below
                         */
                         l_warn("MPTCP 'netlink' path manager may "
-                               "not be enabled in the kernel.");
+                               "not be selected in the kernel.");
                         l_warn("Try 'sysctl -w "
                                "net.mptcp.mptcp_path_manager=netlink'.");
 
@@ -831,8 +871,6 @@ static void check_kernel_mptcp_path_manager(void)
                 l_warn("Unable to determine selected MPTCP "
                        "path manager.");
         }
-
-        fclose(f);
 }
 
 /**
@@ -904,7 +942,6 @@ static void family_appeared(struct l_genl_family_info const *info,
                        " multicast messages");
         }
 
-        check_kernel_mptcp_enabled();
         check_kernel_mptcp_path_manager();
 }
 
@@ -962,6 +999,13 @@ static void family_timeout(struct l_timeout *timeout, void *user_data)
 struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 {
         assert(config != NULL);
+
+        if (!check_mptcp_socket_support()
+            && !check_kernel_mptcp_enabled()) {
+                l_error("Required kernel MPTCP support not available.");
+
+                return NULL;
+        }
 
         /**
          * @bug Mptcpd plugins should only be loaded once at process
