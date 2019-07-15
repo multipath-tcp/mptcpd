@@ -753,7 +753,7 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
  * @brief Verify that MPTCP is enabled at run-time in the kernel.
  *
  * Check that MPTCP is supported in the kernel by opening a socket
- * with the IPPROTO_MPTCP protocol.
+ * with the @c IPPROTO_MPTCP protocol.
  */
 static bool check_mptcp_socket_support(void)
 {
@@ -763,9 +763,8 @@ static bool check_mptcp_socket_support(void)
 
         int const fd = socket(AF_INET, SOCK_STREAM, IPPROTO_MPTCP);
 
-        if (fd == -1
-            && errno != EPROTONOSUPPORT
-            && errno != EINVAL)
+        // An errno other than EINVAL is unexpected.
+        if (fd == -1 && errno != EINVAL)
                 l_error("Unable to confirm MPTCP socket support.");
 
         close(fd);
