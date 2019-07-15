@@ -770,7 +770,8 @@ static bool check_mptcp_socket_support(void)
         if (fd == -1 && errno != EINVAL)
                 l_error("Unable to confirm MPTCP socket support.");
 
-        close(fd);
+        if (fd != -1)
+                close(fd);
 
         return fd != -1;
 }
