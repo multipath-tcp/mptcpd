@@ -754,6 +754,9 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
  *
  * Check that MPTCP is supported in the kernel by opening a socket
  * with the @c IPPROTO_MPTCP protocol.
+ *
+ * @note @c IPPROTO_MPTCP is supported by the "MPTCP upstream"
+ *       kernel.
  */
 static bool check_mptcp_socket_support(void)
 {
@@ -777,6 +780,9 @@ static bool check_mptcp_socket_support(void)
  *
  * Check that MPTCP is enabled through the @c net.mptcp.mptcp_enabled
  * @c sysctl variable if it exists.
+ *
+ * @note The @c net.mptcp.mptcp_enabled is supported by the
+ *       multipath-tcp.org kernel.
  */
 static bool check_kernel_mptcp_enabled(void)
 {
