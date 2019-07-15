@@ -767,11 +767,10 @@ static bool check_mptcp_socket_support(void)
         int const fd = socket(AF_INET, SOCK_STREAM, IPPROTO_MPTCP);
 
         // An errno other than EINVAL is unexpected.
-        if (fd == -1 && errno != EINVAL)
-                l_error("Unable to confirm MPTCP socket support.");
-
         if (fd != -1)
                 close(fd);
+        else if (errno != EINVAL)
+                l_error("Unable to confirm MPTCP socket support.");
 
         return fd != -1;
 }
