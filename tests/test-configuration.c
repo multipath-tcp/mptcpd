@@ -112,6 +112,7 @@ static void test_multi_arg(void const *test_data)
 
         static char          pm[] = "foo";
         static char override_pm[] = "bar";
+        assert(strcmp(pm, override_pm) != 0);
 
         static char *argv[] = {
                 TEST_PROGRAM_NAME,
