@@ -85,6 +85,61 @@ static mptcpd_set_log_func_t get_log_set_function(char const *l)
 }
 
 // ---------------------------------------------------------------
+// Set configuration values
+// ---------------------------------------------------------------
+/**
+ * @brief Reset @c mptcpd_config string typed field.
+ *
+ * String typed fields in the @c mptcpd_config structure contain
+ * dynamically allocated strings.  Deallocate such strings before
+ * resetting their value.
+ *
+ * @param[in,out] dest Pointer to memory containing string to be
+ *                     reassigned.
+ * @param[in]     src  Dynamically allocated string to assigned
+ *                     @c *dest.
+ */
+static void reset_string(char const **dest, char const *src)
+{
+        assert(dest != NULL);  // *dest may be NULL.
+
+        l_free((char *) *dest);
+        *dest = src;
+}
+
+/**
+ * @brief Set mptcpd plugin directory.
+ *
+ * Set mptcpd plugin directory in the mptcpd configuration, @a config,
+ * being careful to deallocate a previously set plugin directory.
+ *
+ * @param[in,out] config Mptcpd configuration.
+ * @param[in]     dir    Mptcpd plugin directory.  Ownership of memory
+ *                       is transferred to @a config.
+ */
+static void set_plugin_dir(struct mptcpd_config *config, char const *dir)
+{
+        reset_string(&config->plugin_dir, dir);
+}
+
+/**
+ * @brief Set default mptcpd plugin name.
+ *
+ * Set the default mptcpd plugin name in the mptcpd configuration,
+ * @a config, being careful to deallocate a previously set default
+ * plugin name.
+ *
+ * @param[in,out] config Mptcpd configuration.
+ * @param[in]     plugin Default mptcpd plugin name.  Ownership of
+ *                       memory is transferred to @a config.
+ */
+static void set_default_plugin(struct mptcpd_config *config,
+                               char const *plugin)
+{
+        reset_string(&config->default_plugin, plugin);
+}
+
+// ---------------------------------------------------------------
 // Command line options
 // ---------------------------------------------------------------
 static char const doc[] = "Start the Multipath TCP daemon.";
@@ -149,7 +204,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
                                    "Empty plugin directory command "
                                    "line option.");
 
-                config->plugin_dir = l_strdup(arg);
+                set_plugin_dir(config, l_strdup(arg));
                 break;
         case MPTCPD_PATH_MANAGER_KEY:
                 if (strlen(arg) == 0)
@@ -157,7 +212,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
                                    "Empty default path manager "
                                    "plugin command line option.");
 
-                config->default_plugin = l_strdup(arg);
+                set_default_plugin(config, l_strdup(arg));
                 break;
         default:
                 return ARGP_ERR_UNKNOWN;
@@ -273,22 +328,26 @@ static bool parse_config_file(struct mptcpd_config *config,
                 }
 
                 // Plugin directory.
-                config->plugin_dir =
+                char *const plugin_dir =
                         l_settings_get_string(settings,
                                               group,
                                               "plugin-dir");
 
-                if (config->plugin_dir == NULL) {
+                if (plugin_dir == NULL) {
                         l_error("No plugin directory set in mptcpd "
                                 "configuration.");
 
                         parsed = false;
                 } else {
+                        set_plugin_dir(config, plugin_dir);
+
                         // Default plugin name.  Can be NULL.
-                        config->default_plugin =
+                        char *const default_plugin =
                                 l_settings_get_string(settings,
                                                       group,
                                                       "path-manager");
+
+                        set_default_plugin(config, default_plugin);
                 }
         } else {
                 l_debug("Unable to mptcpd load settings from file '%s'",
