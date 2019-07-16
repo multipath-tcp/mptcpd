@@ -159,11 +159,9 @@ int main(int argc, char *argv[])
                 return -1;
 
         l_log_set_stderr();
-        l_debug_enable("*");
 
         l_test_init(&argc, &argv);
 
-        l_test_add("debug",        test_debug,        NULL);
         l_test_add("log stderr",   test_log_stderr,   NULL);
         l_test_add("log syslog",   test_log_syslog,   NULL);
         l_test_add("log journal",  test_log_journal,  NULL);
@@ -172,6 +170,7 @@ int main(int argc, char *argv[])
         l_test_add("path manager", test_path_manager, NULL);
         l_test_add("multi arg",    test_multi_arg,    NULL);
         l_test_add("config file",  test_config_file,  NULL);
+        l_test_add("debug",        test_debug,        NULL);
 
         l_test_run();
 
