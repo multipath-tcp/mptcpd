@@ -30,7 +30,7 @@
 /**
  * @name Preprocessor Based String Concatenation
  *
- * Preprocessor concatentation that expands preprocessor tokens as
+ * Preprocessor concatenation that expands preprocessor tokens as
  * needed by leveraging the usual indirection technique.
  */
 //@{
