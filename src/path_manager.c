@@ -7,24 +7,52 @@
  * Copyright (c) 2017-2019, Intel Corporation
  */
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
+#include <errno.h>
+#include <unistd.h>
 
 #include <netinet/in.h>
 #include <linux/netlink.h>  // For NLA_* macros.
 #include <linux/mptcp.h>
 
+#include <sys/socket.h>
+#include <netinet/tcp.h>
+#include <linux/in.h>       // For IPPROTO_MPTCP
+
 #include <ell/genl.h>
 #include <ell/log.h>
+#include <ell/timeout.h>
 #include <ell/util.h>
 
 #include <mptcpd/path_manager_private.h>
 #include <mptcpd/plugin.h>
 #include <mptcpd/network_monitor.h>
 
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/config-private.h>
+#endif
+
 #include "path_manager.h"
 #include "configuration.h"
 
+/// Directory containing MPTCP sysctl variable entries.
+#define MPTCP_SYSCTL_BASE "/proc/sys/net/mptcp/"
+
+/**
+ * @brief Maximum path manager name length.
+ *
+ * @note @c MPTCP_PM_NAME_MAX is defined in the internal
+ *       @c <net/mptcp.h> kernel header.
+*/
+#ifndef MPTCP_PM_NAME_MAX
+#define MPTCP_PM_NAME_MAX 16
+#endif
+
+
+static unsigned int const FAMILY_TIMEOUT_SECONDS = 10;
 
 /**
  * @brief Validate generic netlink attribute size.
@@ -722,6 +750,137 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
 }
 
 /**
+ * @brief Verify that MPTCP is enabled at run-time in the kernel.
+ *
+ * Check that MPTCP is supported in the kernel by opening a socket
+ * with the @c IPPROTO_MPTCP protocol.
+ *
+ * @note @c IPPROTO_MPTCP is supported by the "MPTCP upstream"
+ *       kernel.
+ */
+static bool check_mptcp_socket_support(void)
+{
+#if !HAVE_DECL_IPPROTO_MPTCP
+# define IPPROTO_MPTCP 262
+#endif  // !HAVE_DECL_IPPROTO_MPTCP
+
+        int const fd = socket(AF_INET, SOCK_STREAM, IPPROTO_MPTCP);
+
+        // An errno other than EINVAL is unexpected.
+        if (fd != -1) {
+                close(fd);
+                return true;
+        } else if (errno != EINVAL) {
+                l_error("Unable to confirm MPTCP socket support.");
+        }
+
+        return false;
+}
+
+/**
+ * @brief Verify that MPTCP is enabled at run-time in the kernel.
+ *
+ * Check that MPTCP is enabled through the @c net.mptcp.mptcp_enabled
+ * @c sysctl variable if it exists.
+ *
+ * @note The @c net.mptcp.mptcp_enabled is supported by the
+ *       multipath-tcp.org kernel.
+ */
+static bool check_kernel_mptcp_enabled(void)
+{
+        static char const mptcp_enabled[] =
+                MPTCP_SYSCTL_BASE "mptcp_enabled";
+
+        FILE *const f = fopen(mptcp_enabled, "r");
+
+        if (f == NULL)
+                return false;  // Not using multipath-tcp.org kernel.
+
+        int enabled = 0;
+        int const n = fscanf(f, "%d", &enabled);
+
+        fclose(f);
+
+        if (n == 1) {
+                // "enabled" could be 0, 1, or 2.
+                enabled = (enabled == 1 || enabled == 2);
+
+                if (!enabled) {
+                        l_error("MPTCP is not enabled in the kernel.");
+                        l_error("Try 'sysctl -w "
+                                "net.mptcp.mptcp_enabled=2'.");
+
+                        /*
+                          Mptcpd should not set this variable since it
+                          would need to be run as root in order to
+                          gain write access to files in
+                          /proc/sys/net/mptcp/ owned by root.
+                          Ideally, mptcpd should not be run as the
+                          root user.
+                        */
+                }
+        } else {
+                l_error("Unable to determine if MPTCP is enabled.");
+        }
+
+        return enabled;
+}
+
+/**
+ * @brief Verify that the MPTCP "netlink" path manager is selected.
+ *
+ * Mptcpd requires MPTCP the "netlink" path manager to be selected at
+ * run-time when using the multipath-tcp.org kernel.  Issue a warning
+ * if it is not selected.
+ */
+static void check_kernel_mptcp_path_manager(void)
+{
+        static char const mptcp_path_manager[] =
+                MPTCP_SYSCTL_BASE "mptcp_path_manager";
+
+        FILE *const f = fopen(mptcp_path_manager, "r");
+
+        if (f == NULL)
+                return;  // Not using multipath-tcp.org kernel.
+
+        char pm[MPTCP_PM_NAME_MAX + 1] = { 0 };
+
+        static char const MPTCP_PM_NAME_FMT[] =
+                "%" L_STRINGIFY(MPTCP_PM_NAME_MAX) "s";
+
+        int const n = fscanf(f, MPTCP_PM_NAME_FMT, pm);
+
+        fclose(f);
+
+        if (likely(n == 1)) {
+                if (strcmp(pm, "netlink") != 0) {
+                        /*
+                          "netlink" could be set as the default.  It
+                          may not appear as "netlink", which is why
+                          "may" is used instead of "is" in the warning
+                          diagnostic below
+                        */
+                        l_warn("MPTCP 'netlink' path manager may "
+                               "not be selected in the kernel.");
+                        l_warn("Try 'sysctl -w "
+                               "net.mptcp.mptcp_path_manager=netlink'.");
+
+                        /*
+                          Mptcpd should not set this variable since it
+                          would need to be run as root in order to
+                          gain write access to files in
+                          /proc/sys/net/mptcp/ owned by root.
+                          Ideally, mptcpd should not be run as the
+                          root user.
+                        */
+                }
+        } else {
+                l_warn("Unable to determine selected MPTCP "
+                       "path manager.");
+        }
+}
+
+/**
  * @brief Handle MPTCP generic netlink family appearing on us.
  *
  * This function performs operations that must occur after the MPTCP
@@ -789,6 +948,8 @@ static void family_appeared(struct l_genl_family_info const *info,
                        MPTCP_GENL_EV_GRP_NAME
                        " multicast messages");
         }
+
+        check_kernel_mptcp_path_manager();
 }
 
 /**
@@ -823,11 +984,35 @@ static void family_vanished(char const *name, void *user_data)
 
         l_genl_family_free(pm->family);
         pm->family = NULL;
+
+        // Re-arm the "mptcp" generic netlink family timeout.
+        l_timeout_modify(pm->timeout, FAMILY_TIMEOUT_SECONDS);
+}
+
+static void family_timeout(struct l_timeout *timeout, void *user_data)
+{
+        (void) timeout;
+
+        struct mptcpd_pm *const pm =  user_data;
+
+        if (pm->family != NULL)
+                return;  // "mptcp" genl family appeared.
+
+        l_warn(MPTCP_GENL_NAME
+               " generic netlink family has not appeared.");
+        l_warn("Verify MPTCP \"netlink\" path manager kernel support.");
 }
 
 struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 {
         assert(config != NULL);
+
+        if (!check_mptcp_socket_support()
+            && !check_kernel_mptcp_enabled()) {
+                l_error("Required kernel MPTCP support not available.");
+
+                return NULL;
+        }
 
         /**
          * @bug Mptcpd plugins should only be loaded once at process
@@ -871,6 +1056,22 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
+        /*
+          Warn the user if the "mptcp" generic netlink family doesn't
+          appear within a reasonable amount of time.
+        */
+        pm->timeout =
+                l_timeout_create(FAMILY_TIMEOUT_SECONDS,
+                                 family_timeout,
+                                 pm,
+                                 NULL);
+
+        if (pm->timeout == NULL) {
+                mptcpd_pm_destroy(pm);
+                l_error("Unable to create timeout handler.");
+                return NULL;
+        }
+
         // Listen for network device changes.
         pm->nm = mptcpd_nm_create();
 
@@ -889,7 +1090,7 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
                 return;
 
         mptcpd_nm_destroy(pm->nm);
-
+        l_timeout_remove(pm->timeout);
         l_genl_family_free(pm->family);
         l_genl_unref(pm->genl);
         l_free(pm);
