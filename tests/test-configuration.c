@@ -102,6 +102,40 @@ static void test_path_manager(void const *test_data)
         RUN_CONFIG(argv);
 }
 
+static void test_multi_arg(void const *test_data)
+{
+        (void) test_data;
+
+        static char   plugin_dir[] = "/tmp/foo/bar";
+        static char override_dir[] = "/tmp/foo/baz";
+        assert(strcmp(plugin_dir, override_dir) != 0);
+
+        static char          pm[] = "foo";
+        static char override_pm[] = "bar";
+        assert(strcmp(pm, override_pm) != 0);
+
+        static char *argv[] = {
+                TEST_PROGRAM_NAME,
+                "--plugin-dir",   plugin_dir,
+                "--path-manager", pm,
+                "--plugin-dir",   override_dir,
+                "--path-manager", override_pm
+        };
+
+        struct mptcpd_config *const config =
+                mptcpd_config_create(L_ARRAY_SIZE(argv), argv);
+        assert(config != NULL);
+
+        assert(config->plugin_dir != NULL);
+        assert(strcmp(config->plugin_dir, override_dir) == 0);
+
+        assert(config->default_plugin != NULL);
+        assert(strcmp(config->default_plugin, override_pm) == 0);
+
+        mptcpd_config_destroy(config);
+}
+
+
 static void test_config_file(void const *test_data)
 {
         (void) test_data;
@@ -126,18 +160,18 @@ int main(int argc, char *argv[])
                 return -1;
 
         l_log_set_stderr();
-        l_debug_enable("*");
 
         l_test_init(&argc, &argv);
 
-        l_test_add("debug",        test_debug,        NULL);
         l_test_add("log stderr",   test_log_stderr,   NULL);
         l_test_add("log syslog",   test_log_syslog,   NULL);
         l_test_add("log journal",  test_log_journal,  NULL);
         l_test_add("log null",     test_log_null,     NULL);
         l_test_add("plugin dir",   test_plugin_dir,   NULL);
         l_test_add("path manager", test_path_manager, NULL);
+        l_test_add("multi arg",    test_multi_arg,    NULL);
         l_test_add("config file",  test_config_file,  NULL);
+        l_test_add("debug",        test_debug,        NULL);
 
         l_test_run();
 
