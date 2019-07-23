@@ -16,7 +16,7 @@ extern "C" {
 
 struct l_genl;
 struct l_genl_family;
-struct l_hashmap;
+struct l_timeout;
 
 struct mptcpd_nm;
 
@@ -44,6 +44,15 @@ struct mptcpd_pm
          * MPTCP family in the kernel.
          */
         struct l_genl_family *family;
+
+        /**
+         * @brief @c "mptcp" generic netlink family timeout object.
+         *
+         * The timeout used to warn the user if the @c "mptcp" generic
+         * netlink family needed by mptcpd does not appear within a
+         * certain amount of time.
+         */
+        struct l_timeout *timeout;
 
         /**
          * @brief Network device monitor.
