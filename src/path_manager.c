@@ -801,7 +801,7 @@ static bool check_kernel_mptcp_enabled(void)
 
         fclose(f);
 
-        if (likely(n == 1)) {
+        if (n == 1) {
                 // "enabled" could be 0, 1, or 2.
                 enabled = (enabled == 1 || enabled == 2);
 
