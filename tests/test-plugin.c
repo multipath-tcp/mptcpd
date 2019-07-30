@@ -9,7 +9,9 @@
 
 #undef NDEBUG
 
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -27,11 +29,14 @@ static bool run_plugin_load(mode_t mode)
         static char const dir[]            = TEST_PLUGIN_DIR_A;
         static char const default_plugin[] = TEST_PLUGIN_FOUR;
 
+        int const fd = open(dir, O_DIRECTORY);
+        assert(fd != -1);
+
         struct stat st;
-        int const stat_ok = stat(dir, &st);
+        int const stat_ok = fstat(fd, &st);
         assert(stat_ok == 0);
 
-        int const mode_ok = chmod(dir, mode);
+        int const mode_ok = fchmod(fd, mode);
         assert(mode_ok == 0);
 
         bool const loaded = mptcpd_plugin_load(dir, default_plugin);
@@ -48,7 +53,9 @@ static bool run_plugin_load(mode_t mode)
                 mptcpd_plugin_unload();
         }
 
-        (void) chmod(dir, st.st_mode);  // Restore original perms.
+        (void) fchmod(fd, st.st_mode);  // Restore original perms.
+
+        (void) close(fd);
 
         return loaded;
 }
