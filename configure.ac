@@ -161,7 +161,7 @@ AM_CONDITIONAL([BUILDING_DLL], [test "x$enable_shared" = xyes])
 # ---------------------------------------------------------------
 # Checks for libraries.
 # ---------------------------------------------------------------
-PKG_CHECK_MODULES([ELL], [ell >= 0.17])
+PKG_CHECK_MODULES([ELL], [ell >= 0.21])
 
 # ---------------------------------------------------------------
 # Checks for header files.
