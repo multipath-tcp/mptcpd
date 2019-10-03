@@ -3,6 +3,7 @@
 
 ---
 title: Multipath TCP Daemon
+layout: default
 ---
 
 The Multipath TCP Daemon - `mptcpd` - is a daemon for Linux based
