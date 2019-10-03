@@ -1,4 +1,10 @@
-<!-- SPDX-License-Identifier: BSD-3-Clause
+<!--
+---
+title: Multipath TCP Daemon
+layout: default
+---
+
+     SPDX-License-Identifier: BSD-3-Clause
      Copyright (c) 2017-2019, Intel Corporation -->
 
 # Multipath TCP Daemon
