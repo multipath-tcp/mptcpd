@@ -1,7 +1,6 @@
 name: Multipath TCP Daemon
-markdown: kramdown
-plugins:
-  - jekyll-optional-front-matter
+optional_front_matter:
+  remove_originals: true
 include:
   - CODE_OF_CONDUCT.md
   - CONTRIBUTING.md
