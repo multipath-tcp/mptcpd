@@ -259,7 +259,7 @@ mptcpd_interface_create(struct ifinfomsg const *ifi, uint32_t len)
         interface->index  = ifi->ifi_index;
         interface->flags  = ifi->ifi_flags;
 
-        int bytes = len - NLMSG_ALIGN(sizeof(*ifi));
+        size_t bytes = len - NLMSG_ALIGN(sizeof(*ifi));
 
         /**
          * @todo Can we retrieve the IP address associated with each
@@ -695,7 +695,7 @@ static void foreach_ifaddr(struct ifaddrmsg const *ifa,
         assert(addrs != NULL);
         assert(handler != NULL);
 
-        int bytes = len - NLMSG_ALIGN(sizeof(*ifa));
+        size_t bytes = len - NLMSG_ALIGN(sizeof(*ifa));
 
         for (struct rtattr const *rta = IFA_RTA(ifa);
              RTA_OK(rta, bytes);
