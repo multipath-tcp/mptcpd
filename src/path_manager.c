@@ -87,10 +87,10 @@ static bool validate_attr_len(size_t actual, size_t expected)
  * @param[in]  len  Length (size) of attribute data.
  * @param[out] attr Pointer to attribute data destination.
  */
-#define MPTCP_GET_NL_ATTR(data, len, attr)                  \
-        do {                                                \
-                if (validate_attr_len(len, sizeof(*attr)))  \
-                        attr = data;                        \
+#define MPTCP_GET_NL_ATTR(data, len, attr)                      \
+        do {                                                    \
+                if (validate_attr_len(len, sizeof(*(attr))))    \
+                        (attr) = data;                          \
         } while(0)
 
 #ifdef MPTCPD_ENABLE_PM_NAME
