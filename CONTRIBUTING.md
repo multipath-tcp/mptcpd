@@ -189,8 +189,9 @@ void fnord(struct mptcpd_nm const *network_monitor,
         }
 }
 ```
+
 ##### Parameter Alignment
-Function parameters should be aligned on column immediately after the
+Function parameters should be aligned on the column immediately after the
 opening paranethesis, or split one per line if they cannot all fit on
 a 74 column line.  If after splitting across multiple lines any of the
 parameters extends beyone column 74 shift all parameters down one line
@@ -207,13 +208,119 @@ The same alignment applies to arguments in function calls, control
 statements, etc.
 
 ##### Brace Placement
+* Structure declarations and function definitions
+Place the opening brace on the line below the structure or function
+name.  Align the opening and closing brace with the first character in
+the structure or function name.
+```c
+// Correct
+struct foo
+{
+        int bar;
+        int baz;
+};
+```
+```c
+// Incorrect
+struct foo {
+        int bar;
+        int baz;
+};
+```
+_Exception_: Braces for short inlined functions may be placed on the
+same line as the function parameter list closing parenthesis.
+```c
+int fnord(void) { return -1; }
+```
+* Control statements
+Place the opening brace on the same line as closing parenthesis of the
+control statement.  Align the closing brace with the first character
+of the control statement.
+```c
+for (int i = 0; i < 10; ++i) {
+        if (is_even(i)) {
+                printf("even\n");
+                foo(i);
+        }
+
+        fnord(i);
+}
+```
+
 ##### Variable Declaration and Initialization
-All C99 features are
-* Declare only one variable declaration per line.
-* Declare variables as close to their first use as possible
-  * Mixed Declarations
-  * Proximity
+* Declare only one variable per line.
+```c
+// Correct
+void foo(void)
+{
+        int a = 0;
+        int b;
+        struct bar c;
+        ...
+}
+```
+```c
+// Incorrect
+void foo(void)
+{
+        int a = 0, b;
+        struct bar c;
+        ...
+}
+```
+* Declare variables as close to their first use as possible.
+  * C99 Mixed Declarations
+```c
+// Correct
+foo();
+...
+int *x = NULL;
+bar(&x);
+```
+```c
+// Incorrect
+int *x = NULL;
+...
+foo();
+...
+bar(&x);
+```
   * Scope
+```c
+// Correct
+int x = 0;
+...
+if (x == 0) {
+            int const y = foo();  // 'y' not needed outside of this scope.
+            x = y + bar();
+}
+...
+baz(x);
+```
+```c
+// Incorrect
+int x = 0;
+int y;    // 'y' not needed at this scope.
+...
+if (x == 0) {
+            y = foo();
+            x = y + bar();
+}
+...
+baz(x);
+```
+
+* Declare and initialize variables in the same statement when possible.
+```c
+// Correct
+int a = 0;
+```
+```c
+// Incorrect
+int a;
+a = 0;
+```
+
 * Loops
 ```c
 // Correct: Prefer for-loop initial declaration.
@@ -221,14 +328,44 @@ for (int i = 0; i < 100; ++i)
         printf("%d\n", i);
 ```
 ```c
-// Incorrect
+// Incorrect (unless loop variable is needed outside of loop)
 int i;
 for (i = 0; i < 100; ++i)
         printf("%d\n", i);
 ```
-* Pointers
 * Structures
-<br>The asterisk  `*`
+Given the following structure:
+```c
+struct foo
+{
+    int bar;
+    bool baz;
+};
+```
+Declaration and initialization may occur in several ways, but only one
+is preferred:
+```c
+// Correct: Prefer C99 designated initializer syntax.
+struct foo a = { .bar = 62 };  // 'baz' is default initialized.
+```
+```c
+// Incorrect: Initialize each field after declaration.
+struct foo a;
+a.bar = 62;
+a.baz = false;
+```
+```c
+/*
+    Incorrect: "Zero" the instance after declaration, and initialize
+               specific fields.
+ */
+struct foo a;
+memset(&a, 0, sizeof(a));
+a.bar = 62;
+```
+Use your best judgement to determine if `struct` initialization
+without use of designated initializers is the best approach.
+
 ##### CV-qualifier Placement
 The CV (`const` or `volatile`) type qualifer should be placed to the
 right of the type it is qualifying:
@@ -246,10 +383,54 @@ const char *bar;
 const void *const *const baz;
 void fnord(const long *a);
 ```
+
 ##### Avoid Hardcoded Values
-Symbolic constants ...
+Prefer symbolic constants over hardcoded "magic" values.
+```c
+// Correct
+#define FOO 16
+static int const BAR = 32;  /* Globals constants upper case by
+                               convention. */
+void foo(void)
+{
+    int const baz = 64;
+    static int const fnord = 128;   /* Lower case is fine for local
+                                       constants. */
+
+    printf("FOO: %d\n"
+           "BAR: %d\n"
+           "baz: %d\n"
+           "fnord: %d\n",
+           FOO,
+           BAR,
+           baz,
+           fnord);
+}
+```
+```c
+// Incorrect
+void foo(void)
+{
+    printf("FOO: %d\n"
+           "BAR: %d\n"
+           "baz: %d\n"
+           "fnord: %d\n",
+           16,
+           32,
+           64,
+           128);
+}
+```
+
 ##### `const` Correctness
-##### Parenthesis Space
+To improve type safety, variables, `struct` fields, and function
+parameters that are meant to remain unchanged should be declared as
+`const`.
+
+Code that requires casting away the `const` is often indicative of a
+problem with code design, and should be avoided.  Favor revising code
+to obviate the need to cast the `const` away.
+
 ##### Comments
 ```c
 // One line comment.
@@ -264,6 +445,7 @@ Symbolic constants ...
 _Note_: Code documentation comments follow a different convention,
 i.e. the [Doxygen](http://www.doxygen.nl/) format.  See [Code
 Documentation](#code-documentation) below.
+
 ##### Unused arguments
 ```c
 void foo(int i)
@@ -274,6 +456,7 @@ void foo(int i)
         printf("Hello world!\n");
 }
 ```
+
 ##### Unnecessary `if/else` Blocks
 ```c
 // Correct
@@ -297,7 +480,7 @@ bool is_valid(int n)
         return false;
 }
 ```
-##### Exported Symbols
+
 ##### Code Documentation
 Document all code using [Doxygen](http://www.doxygen.nl/)
 documentation comments, e.g.:
@@ -324,6 +507,7 @@ struct foo
 Refer to the Doxygen [Special
 Commands](http://www.doxygen.nl/manual/commands.html) documentation
 for details on commands like `@struct` used above.
+
 #### Patch Submission
 Please submit patches through a [pull
 request](https://help.github.com/en/articles/about-pull-requests).
@@ -334,4 +518,19 @@ request should be associated with a bug report or feature request.
 Remember to [reference the
 issue](https://help.github.com/en/articles/closing-issues-using-keywords)
 number in the pull request commit message.
-##### Git Commit Message
+
+A patch should contain a single logical change.  Please do not mix
+unrelated changes into the patch.
+
+##### Git Commit Message Format
+Git commit messages should follow the commonly used 50/72 rule:
+```
+Summary line no longer than 50 characters wide.
+
+Optional detailed description of the changes in the commit, wrapped to
+be no more than 72 columns wide.
+```
+Do not add a
+[`Signed-off-by`](https://git.wiki.kernel.org/index.php/CommitMessageConventions)
+trailer to the commit message.  It isn't used.  Others may be used as
+appropriate.
