@@ -1,42 +1,28 @@
+/*
+  SPDX-License-Identifier: BSD-3-Clause
+  Copyright (c) 2017-2019, Intel Corporation
+*/
+
 /**
- * @mainpage Mptcpd - Multipath TCP Daemon
+ * @mainpage @c mptcpd Code Documentation
  *
+ * The Multipath TCP Daemon - `mptcpd` - is a daemon for Linux based
+ * operating systems that performs [multipath
+ * TCP](https://tools.ietf.org/html/rfc6824) [path
+ * management](https://tools.ietf.org/html/rfc6824#section-3.4)
+ * related operations in the user space.  It interacts with the Linux
+ * kernel through a generic netlink connection to track per-connection
+ * information (e.g. available remote addresses), available network
+ * interfaces, request new MPTCP subflows, handle requests for
+ * subflows, etc.
  *
- *
- * @section mptcpd_main_sec mptcpd
- *
- *
- * @subsection config_sec Configuration
- *
- *
- * @note Command line parameters have precedence over their
- *       configuration file counterparts.
- *
- * @section plugins_sec Writing Mptcpd Plugins
- *
- * All mptcpd plugins must implement two functions with C linkage:
- *
- * @code
- * @endcode
- *
- * Both functions must be exported from the plugin if compile- or
- * link-time symbol hiding is enabled.
- *
- * @subsection make_path_manager make_path_manager()
- *
- * The @c make_path_manager() function is a factory function that
- * returns a pointer to ...
- *
- * @subsection destroy_path_manager destroy_path_manager()
- *
- * The @c destroy_path_manager() function will be called by the mptcpd
- * plugin framework when it no longer needs the path manager in
- * question.
- *
- * @subsection linking Link-time Dependencies
- *
- * Mptcpd plugins must link against the mptcpd library, @e e.g.
- * @c libmptcpd on Unix-like platforms.
- *
- * @author Ossama Othman @<ossama.othman@@intel.com@>
+ * @see Additional higher level documentation is available in the
+ *      [`mptcpd` Wiki](https://github.com/intel/mptcpd/wiki).
  */
+
+/*
+  Local Variables:
+  mode: c
+  c-file-style: "linux"
+  End:
+*/
