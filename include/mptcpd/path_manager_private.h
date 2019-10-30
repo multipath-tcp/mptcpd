@@ -31,6 +31,9 @@ struct mptcpd_nm;
  */
 struct mptcpd_pm
 {
+        /**
+         * @privatesection
+         */
         /// Core ELL generic netlink object.
         struct l_genl *genl;
 
