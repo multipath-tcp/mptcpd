@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-struct mptcpd_addr;
+struct sockaddr;
 struct mptcpd_pm;
 
 /**
@@ -51,7 +51,7 @@ MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
 MPTCPD_API bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
                                     mptcpd_token_t token,
                                     mptcpd_aid_t address_id,
-                                    struct mptcpd_addr const *addr);
+                                    struct sockaddr const *addr);
 
 /**
  * @brief Send @c MPTCP_GENL_CMD_ADD_SUBFLOW genl command to kernel.
@@ -76,8 +76,8 @@ mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                       mptcpd_token_t token,
                       mptcpd_aid_t local_address_id,
                       mptcpd_aid_t remote_address_id,
-                      struct mptcpd_addr const *local_addr,
-                      struct mptcpd_addr const *remote_addr,
+                      struct sockaddr const *local_addr,
+                      struct sockaddr const *remote_addr,
                       bool backup);
 
 /**
@@ -97,8 +97,8 @@ mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
 MPTCPD_API bool mptcpd_pm_set_backup(
         struct mptcpd_pm *pm,
         mptcpd_token_t token,
-        struct mptcpd_addr const *local_addr,
-        struct mptcpd_addr const *remote_addr,
+        struct sockaddr const *local_addr,
+        struct sockaddr const *remote_addr,
         bool backup);
 
 /**
@@ -116,8 +116,8 @@ MPTCPD_API bool mptcpd_pm_set_backup(
 MPTCPD_API bool mptcpd_pm_remove_subflow(
         struct mptcpd_pm *pm,
         mptcpd_token_t token,
-        struct mptcpd_addr const *local_addr,
-        struct mptcpd_addr const *remote_addr);
+        struct sockaddr const *local_addr,
+        struct sockaddr const *remote_addr);
 
 /**
  * @brief Get pointer to the underlying network monitor.
