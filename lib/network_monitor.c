@@ -127,10 +127,9 @@ mptcpd_sockaddr_create(struct mptcpd_rtm_addr const *info)
 }
 
 /**
- * @brief Destroy a @c mptcpd_in_addr object.
+ * @brief Destroy a @c sockaddr object.
  *
- * @param[in,out] Pointer to the @c mptcpd_in_addr object to be
- *                destroyed.
+ * @param[in,out] Pointer to the @c sockaddr object to be destroyed.
  */
 static void mptcpd_sockaddr_destroy(void *data)
 {

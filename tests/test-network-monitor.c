@@ -58,7 +58,7 @@ struct foreach_data
  *
  * Print address associated with monitored network interface.
  *
- * @param[in] data      Pointer @c mptcpd_in_addr object.
+ * @param[in] data      Pointer @c sockaddr object.
  * @param[in] user_data Pointer user data (unused).
  */
 static void dump_addr(void *data, void *user_data)
