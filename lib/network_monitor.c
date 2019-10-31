@@ -16,6 +16,7 @@
 
 #include <linux/rtnetlink.h>
 #include <net/if.h>  // For standard network interface flags.
+#include <netinet/in.h>
 
 #include <ell/netlink.h>
 #include <ell/log.h>
@@ -23,7 +24,6 @@
 #include <ell/queue.h>
 
 #include <mptcpd/network_monitor.h>
-#include <mptcpd/types.h>
 
 
 // -------------------------------------------------------------------
@@ -84,8 +84,8 @@ struct mptcpd_rtm_addr
  * @param[in] info Network address-specific information retrieved from
  *                 the @c RTM_NEWADDR message.
  */
-static struct mptcpd_in_addr *
-mptcpd_in_addr_create(struct mptcpd_rtm_addr const *info)
+static struct sockaddr *
+mptcpd_sockaddr_create(struct mptcpd_rtm_addr const *info)
 {
         assert(info != NULL);
 
@@ -94,29 +94,36 @@ mptcpd_in_addr_create(struct mptcpd_rtm_addr const *info)
         if (family != AF_INET && family != AF_INET6)
                 return NULL;
 
-        struct mptcpd_in_addr *const address =
-                l_new(struct mptcpd_in_addr, 1);
-
-        address->family = family;
+        struct sockaddr *addr = NULL;
 
         if (family == AF_INET) {
+                struct sockaddr_in *const a =
+                        l_new(struct sockaddr_in, 1);
+
+                a->sin_family = family;
+
                 /*
                   Kernel nla_put_in_addr() inserts a big endian 32
                   bit unsigned integer, not struct in_addr.
                 */
-                uint32_t const sa = *(uint32_t const*) info->addr;
+                a->sin_addr.s_addr = *(uint32_t const*) info->addr;
 
-                address->addr.addr4.s_addr = sa;
+                addr = (struct sockaddr *) a;
         } else {
+                struct sockaddr_in6 *const a =
+                        l_new(struct sockaddr_in6, 1);
+
+                a->sin6_family = family;
+
                 struct in6_addr const *const sa =
                         (struct in6_addr const*) info->addr;
 
-                memcpy(&address->addr.addr6,
-                       sa,
-                       sizeof(*sa));
+                memcpy(&a->sin6_addr, sa, sizeof(*sa));
+
+                addr = (struct sockaddr *) a;
         }
 
-        return address;
+        return addr;
 }
 
 /**
@@ -125,15 +132,15 @@ mptcpd_in_addr_create(struct mptcpd_rtm_addr const *info)
  * @param[in,out] Pointer to the @c mptcpd_in_addr object to be
  *                destroyed.
  */
-static void mptcpd_in_addr_destroy(void *data)
+static void mptcpd_sockaddr_destroy(void *data)
 {
         l_free(data);
 }
 
 /**
- * @brief Compare two @c mptcpd_in_addr objects.
+ * @brief Compare two @c sockaddr objects.
  *
- * Compare @c mptcpd_in_addr objects to determine where in the network
+ * Compare @c sockaddr objects to determine where in the network
  * address list the first object, @a a, will be inserted relative to
  * the second object, @a b.
  *
@@ -143,7 +150,7 @@ static void mptcpd_in_addr_destroy(void *data)
  * @see l_queue_insert()
  */
 static int
-mptcpd_in_addr_compare(void const *a, void const *b, void *user_data)
+mptcpd_sockaddr_compare(void const *a, void const *b, void *user_data)
 {
         (void) a;
         (void) b;
@@ -154,14 +161,14 @@ mptcpd_in_addr_compare(void const *a, void const *b, void *user_data)
 }
 
 /**
- * @brief Match an @c mptcpd_in_addr object.
+ * @brief Match a @c sockaddr object.
  *
- * A network address represented by @a a (@c struct
- * @c mptcpd_in_addr) matches if its @c family and @c addr members
- * match those in @a b.
+ * A network address represented by @a a (@c struct @c sockaddr)
+ * matches if its @c family and IPv4/IPv6 address members match those
+ * in @a b.
  *
  * @param[in] a Currently monitored network address of type @c struct
- *              @c mptcpd_in_addr*.
+ *              @c sockaddr*.
  * @param[in] b Network address information of type @c struct
  *              @c mptcpd_rtm_addr* to be compared against network
  *              address @a a.
@@ -172,42 +179,48 @@ mptcpd_in_addr_compare(void const *a, void const *b, void *user_data)
  * @see l_queue_find()
  * @see l_queue_remove_if()
  */
-static bool mptcpd_in_addr_match(void const *a, void const *b)
+static bool mptcpd_sockaddr_match(void const *a, void const *b)
 {
-        struct mptcpd_in_addr  const *const lhs = a;
+        struct sockaddr        const *const lhs = a;
         struct mptcpd_rtm_addr const *const rhs = b;
 
         assert(lhs);
         assert(rhs);
-        assert(lhs->family == AF_INET || lhs->family == AF_INET6);
+        assert(lhs->sa_family == AF_INET || lhs->sa_family == AF_INET6);
 
-        bool matched = lhs->family == rhs->ifa->ifa_family;
+        bool matched = (lhs->sa_family == rhs->ifa->ifa_family);
 
-        if (matched) {
-                if (lhs->family == AF_INET) {
-                        /*
-                          Kernel nla_put_in_addr() inserts a big
-                          endian 32 bit unsigned integer, not struct
-                          in_addr.
-                        */
-                        uint32_t const sa = *(uint32_t const*) rhs->addr;
+        if (!matched)
+                return matched;
 
-                        matched = (lhs->addr.addr4.s_addr == sa);
-                } else {
-                        struct in6_addr const *const sa =
-                                (struct in6_addr const*) rhs->addr;
+        if (lhs->sa_family == AF_INET) {
+                struct sockaddr_in const *const addr =
+                        (struct sockaddr_in const *) lhs;
 
-                        /**
-                         * @todo Is memcmp() suitable in this case?
-                         *       Do we need to worry about the
-                         *       existence of uninitialized bytes in
-                         *       the IPv6 address byte array.
-                         */
-                        matched = (memcmp(&lhs->addr.addr6.s6_addr,
-                                          sa,
-                                          sizeof(lhs->addr.addr6.s6_addr))
-                                   == 0);
-                }
+                /*
+                  Kernel nla_put_in_addr() inserts a big endian 32 bit
+                  unsigned integer, not struct in_addr.
+                */
+                uint32_t const sa = *(uint32_t const*) rhs->addr;
+
+                matched = (addr->sin_addr.s_addr == sa);
+        } else {
+                struct sockaddr_in6 const *const addr =
+                        (struct sockaddr_in6 const *) lhs;
+
+                struct in6_addr const *const sa =
+                        (struct in6_addr const*) rhs->addr;
+
+                /**
+                 * @todo Is memcmp() suitable in this case?  Do we
+                 *       need to worry about the existence of
+                 *       uninitialized bytes in the IPv6 address byte
+                 *       array.
+                 */
+                matched = (memcmp(&addr->sin6_addr,
+                                  sa,
+                                  sizeof(addr->sin6_addr))
+                           == 0);
         }
 
         return matched;
@@ -309,7 +322,7 @@ static void mptcpd_interface_destroy(void *data)
 {
         struct mptcpd_interface *const i = data;
 
-        l_queue_destroy(i->addrs, mptcpd_in_addr_destroy);
+        l_queue_destroy(i->addrs, mptcpd_sockaddr_destroy);
         l_free(i);
 }
 
@@ -559,15 +572,14 @@ static void handle_link(uint16_t type,
 static void insert_addr(struct l_queue *addrs,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
-        struct mptcpd_in_addr *const addr =
-                mptcpd_in_addr_create(rtm_addr);
+        struct sockaddr *const addr = mptcpd_sockaddr_create(rtm_addr);
 
         if (unlikely(addr == NULL)
             || !l_queue_insert(addrs,
                                addr,
-                               mptcpd_in_addr_compare,
+                               mptcpd_sockaddr_compare,
                                NULL)) {
-                mptcpd_in_addr_destroy(addr);
+                mptcpd_sockaddr_destroy(addr);
 
                 l_error("Unable to track internet address information.");
         }
@@ -583,7 +595,7 @@ static void remove_addr(struct l_queue *addrs,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
         if (l_queue_remove_if(addrs,
-                              mptcpd_in_addr_match,
+                              mptcpd_sockaddr_match,
                               rtm_addr) == NULL)
                 l_debug("Network address not monitored. "
                         "Ignoring monitoring removal "
@@ -599,8 +611,8 @@ static void remove_addr(struct l_queue *addrs,
 static void update_addr(struct l_queue *addrs,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
-        struct mptcpd_in_addr *const addr =
-                l_queue_find(addrs, mptcpd_in_addr_match, rtm_addr);
+        struct sockaddr *const addr =
+                l_queue_find(addrs, mptcpd_sockaddr_match, rtm_addr);
 
         if (addr == NULL) {
                 insert_addr(addrs, rtm_addr);
