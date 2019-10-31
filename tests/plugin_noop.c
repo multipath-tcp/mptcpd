@@ -19,8 +19,8 @@
 
 
 static void plugin_noop_new_connection(mptcpd_token_t token,
-                                       struct mptcpd_addr const *laddr,
-                                       struct mptcpd_addr const *raddr,
+                                       struct sockaddr const *laddr,
+                                       struct sockaddr const *raddr,
                                        struct mptcpd_pm *pm)
 {
         (void) token;
@@ -31,8 +31,8 @@ static void plugin_noop_new_connection(mptcpd_token_t token,
 
 static void plugin_noop_connection_established(
         mptcpd_token_t token,
-        struct mptcpd_addr const *laddr,
-        struct mptcpd_addr const *raddr,
+        struct sockaddr const *laddr,
+        struct sockaddr const *raddr,
         struct mptcpd_pm *pm)
 {
         (void) token;
@@ -50,7 +50,7 @@ static void plugin_noop_connection_closed(mptcpd_token_t token,
 
 static void plugin_noop_new_address(mptcpd_token_t token,
                                     mptcpd_aid_t addr_id,
-                                    struct mptcpd_addr const *addr,
+                                    struct sockaddr const *addr,
                                     struct mptcpd_pm *pm)
 {
         (void) token;
@@ -69,8 +69,8 @@ static void plugin_noop_address_removed(mptcpd_token_t token,
 }
 
 static void plugin_noop_new_subflow(mptcpd_token_t token,
-                                    struct mptcpd_addr const *laddr,
-                                    struct mptcpd_addr const *raddr,
+                                    struct sockaddr const *laddr,
+                                    struct sockaddr const *raddr,
                                     bool backup,
                                     struct mptcpd_pm *pm)
 {
@@ -82,8 +82,8 @@ static void plugin_noop_new_subflow(mptcpd_token_t token,
 }
 
 static void plugin_noop_subflow_closed(mptcpd_token_t token,
-                                       struct mptcpd_addr const *laddr,
-                                       struct mptcpd_addr const *raddr,
+                                       struct sockaddr const *laddr,
+                                       struct sockaddr const *raddr,
                                        bool backup,
                                        struct mptcpd_pm *pm)
 {
@@ -95,8 +95,8 @@ static void plugin_noop_subflow_closed(mptcpd_token_t token,
 }
 
 static void plugin_noop_subflow_priority(mptcpd_token_t token,
-                                         struct mptcpd_addr const *laddr,
-                                         struct mptcpd_addr const *raddr,
+                                         struct sockaddr const *laddr,
+                                         struct sockaddr const *raddr,
                                          bool backup,
                                          struct mptcpd_pm *pm)
 {

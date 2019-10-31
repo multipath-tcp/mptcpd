@@ -74,8 +74,8 @@ public:
                                 NULL,
                                 test_token_4,
                                 test_raddr_id_4,
-                                &test_laddr_4,
-                                &test_raddr_4,
+                                (struct sockaddr const *) &test_laddr_4,
+                                (struct sockaddr const *) &test_raddr_4,
                                 test_backup_4);
         }
 
