@@ -46,8 +46,8 @@ static bool run_plugin_load(mode_t mode)
                                 NULL,
                                 test_token_4,
                                 test_raddr_id_4,
-                                &test_laddr_4,
-                                &test_raddr_4,
+                                (struct sockaddr const *) &test_laddr_4,
+                                (struct sockaddr const *) &test_raddr_4,
                                 test_backup_4);
 
                 mptcpd_plugin_unload();
@@ -138,8 +138,8 @@ static void test_plugin_dispatch(void const *test_data)
                         TEST_PLUGIN_ONE,
                         test_token_1,
                         test_raddr_id_1,
-                        &test_laddr_1,
-                        &test_raddr_1,
+                        (struct sockaddr const *) &test_laddr_1,
+                        (struct sockaddr const *) &test_raddr_1,
                         test_backup_1);
 
         // Plugin 1 as default
@@ -147,8 +147,8 @@ static void test_plugin_dispatch(void const *test_data)
                         NULL,
                         test_token_1,
                         test_raddr_id_1,
-                        &test_laddr_1,
-                        &test_raddr_1,
+                        (struct sockaddr const *) &test_laddr_1,
+                        (struct sockaddr const *) &test_raddr_1,
                         test_backup_1);
 
         // Plugin 2
@@ -156,8 +156,8 @@ static void test_plugin_dispatch(void const *test_data)
                         TEST_PLUGIN_TWO,
                         test_token_2,
                         test_raddr_id_2,
-                        &test_laddr_2,
-                        &test_raddr_2,
+                        (struct sockaddr const *) &test_laddr_2,
+                        (struct sockaddr const *) &test_raddr_2,
                         test_backup_2);
 
         /*
@@ -174,10 +174,11 @@ static void test_plugin_dispatch(void const *test_data)
           cause the token to be associated with a plugin, which is not
           what we want in this case.
         */
-        mptcpd_plugin_connection_established(test_bad_token,
-                                             &test_laddr_2,
-                                             &test_raddr_2,
-                                             NULL);
+        mptcpd_plugin_connection_established(
+                test_bad_token,
+                (struct sockaddr const *) &test_laddr_2,
+                (struct sockaddr const *) &test_raddr_2,
+                NULL);
 
         // Test assertions will be triggered during plugin unload.
         mptcpd_plugin_unload();

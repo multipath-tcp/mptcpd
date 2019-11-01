@@ -303,8 +303,8 @@ bool mptcpd_plugin_register_ops(char const *name,
 
 void mptcpd_plugin_new_connection(char const *name,
                                   mptcpd_token_t token,
-                                  struct mptcpd_addr const *laddr,
-                                  struct mptcpd_addr const *raddr,
+                                  struct sockaddr const *laddr,
+                                  struct sockaddr const *raddr,
                                   struct mptcpd_pm *pm)
 {
         struct mptcpd_plugin_ops const *const ops = name_to_ops(name);
@@ -321,8 +321,8 @@ void mptcpd_plugin_new_connection(char const *name,
 }
 
 void mptcpd_plugin_connection_established(mptcpd_token_t token,
-                                          struct mptcpd_addr const *laddr,
-                                          struct mptcpd_addr const *raddr,
+                                          struct sockaddr const *laddr,
+                                          struct sockaddr const *raddr,
                                           struct mptcpd_pm *pm)
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
@@ -342,7 +342,7 @@ void mptcpd_plugin_connection_closed(mptcpd_token_t token,
 
 void mptcpd_plugin_new_address(mptcpd_token_t token,
                                mptcpd_aid_t id,
-                               struct mptcpd_addr const *addr,
+                               struct sockaddr const *addr,
                                struct mptcpd_pm *pm)
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
@@ -362,8 +362,8 @@ void mptcpd_plugin_address_removed(mptcpd_token_t token,
 }
 
 void mptcpd_plugin_new_subflow(mptcpd_token_t token,
-                               struct mptcpd_addr const *laddr,
-                               struct mptcpd_addr const *raddr,
+                               struct sockaddr const *laddr,
+                               struct sockaddr const *raddr,
                                bool backup,
                                struct mptcpd_pm *pm)
 {
@@ -374,8 +374,8 @@ void mptcpd_plugin_new_subflow(mptcpd_token_t token,
 }
 
 void mptcpd_plugin_subflow_closed(mptcpd_token_t token,
-                                  struct mptcpd_addr const *laddr,
-                                  struct mptcpd_addr const *raddr,
+                                  struct sockaddr const *laddr,
+                                  struct sockaddr const *raddr,
                                   bool backup,
                                   struct mptcpd_pm *pm)
 {
@@ -387,8 +387,8 @@ void mptcpd_plugin_subflow_closed(mptcpd_token_t token,
 }
 
 void mptcpd_plugin_subflow_priority(mptcpd_token_t token,
-                                    struct mptcpd_addr const *laddr,
-                                    struct mptcpd_addr const *raddr,
+                                    struct sockaddr const *laddr,
+                                    struct sockaddr const *raddr,
                                     bool backup,
                                     struct mptcpd_pm *pm)
 {

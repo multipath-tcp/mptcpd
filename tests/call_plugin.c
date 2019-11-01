@@ -19,8 +19,8 @@ void call_plugin_ops(struct plugin_call_count const *count,
                      char const *name,
                      mptcpd_token_t token,
                      mptcpd_aid_t raddr_id,
-                     struct mptcpd_addr const *laddr,
-                     struct mptcpd_addr const *raddr,
+                     struct sockaddr const *laddr,
+                     struct sockaddr const *raddr,
                      bool backup)
 {
         assert(count != NULL);

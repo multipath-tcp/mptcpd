@@ -27,37 +27,43 @@
 
 static struct plugin_call_count call_count;
 
+static struct sockaddr const *const local_addr =
+        (struct sockaddr const *) &test_laddr_2;
+
+static struct sockaddr const *const remote_addr =
+        (struct sockaddr const *) &test_raddr_2;
+
 // ----------------------------------------------------------------
 
 static void plugin_two_new_connection(mptcpd_token_t token,
-                                      struct mptcpd_addr const *laddr,
-                                      struct mptcpd_addr const *raddr,
+                                      struct sockaddr const *laddr,
+                                      struct sockaddr const *raddr,
                                       struct mptcpd_pm *pm)
 {
         (void) pm;
 
         assert(token == test_token_2);
         assert(laddr != NULL && raddr != NULL);
-        assert(!mptcpd_addr_is_equal(laddr, raddr));
-        assert(mptcpd_addr_is_equal(laddr, &test_laddr_2));
-        assert(mptcpd_addr_is_equal(raddr, &test_raddr_2));
+        assert(!sockaddr_is_equal(laddr, raddr));
+        assert(sockaddr_is_equal(laddr, local_addr));
+        assert(sockaddr_is_equal(raddr, remote_addr));
 
         ++call_count.new_connection;
 }
 
 static void plugin_two_connection_established(
         mptcpd_token_t token,
-        struct mptcpd_addr const *laddr,
-        struct mptcpd_addr const *raddr,
+        struct sockaddr const *laddr,
+        struct sockaddr const *raddr,
         struct mptcpd_pm *pm)
 {
         (void) pm;
 
         assert(token == test_token_2);
         assert(laddr != NULL && raddr != NULL);
-        assert(!mptcpd_addr_is_equal(laddr, raddr));
-        assert(mptcpd_addr_is_equal(laddr, &test_laddr_2));
-        assert(mptcpd_addr_is_equal(raddr, &test_raddr_2));
+        assert(!sockaddr_is_equal(laddr, raddr));
+        assert(sockaddr_is_equal(laddr, local_addr));
+        assert(sockaddr_is_equal(raddr, remote_addr));
 
         ++call_count.connection_established;
 }
@@ -74,14 +80,14 @@ static void plugin_two_connection_closed(mptcpd_token_t token,
 
 static void plugin_two_new_address(mptcpd_token_t token,
                                    mptcpd_aid_t addr_id,
-                                   struct mptcpd_addr const *addr,
+                                   struct sockaddr const *addr,
                                    struct mptcpd_pm *pm)
 {
         (void) pm;
 
         assert(token == test_token_2);
         assert(addr_id == test_raddr_id_2);
-        assert(mptcpd_addr_is_equal(addr, &test_raddr_2));
+        assert(sockaddr_is_equal(addr, remote_addr));
 
         ++call_count.new_address;
 }
@@ -99,50 +105,50 @@ static void plugin_two_address_removed(mptcpd_token_t token,
 }
 
 static void plugin_two_new_subflow(mptcpd_token_t token,
-                                   struct mptcpd_addr const *laddr,
-                                   struct mptcpd_addr const *raddr,
+                                   struct sockaddr const *laddr,
+                                   struct sockaddr const *raddr,
                                    bool backup,
                                    struct mptcpd_pm *pm)
 {
         (void) pm;
 
         assert(token == test_token_2);
-        assert(!mptcpd_addr_is_equal(laddr, raddr));
-        assert(mptcpd_addr_is_equal(laddr, &test_laddr_2));
-        assert(mptcpd_addr_is_equal(raddr, &test_raddr_2));
+        assert(!sockaddr_is_equal(laddr, raddr));
+        assert(sockaddr_is_equal(laddr, local_addr));
+        assert(sockaddr_is_equal(raddr, remote_addr));
         assert(backup == test_backup_2);
 
         ++call_count.new_subflow;
 }
 
 static void plugin_two_subflow_closed(mptcpd_token_t token,
-                                      struct mptcpd_addr const *laddr,
-                                      struct mptcpd_addr const *raddr,
+                                      struct sockaddr const *laddr,
+                                      struct sockaddr const *raddr,
                                       bool backup,
                                       struct mptcpd_pm *pm)
 {
         (void) pm;
 
         assert(token == test_token_2);
-        assert(mptcpd_addr_is_equal(laddr, &test_laddr_2));
-        assert(mptcpd_addr_is_equal(raddr, &test_raddr_2));
+        assert(sockaddr_is_equal(laddr, local_addr));
+        assert(sockaddr_is_equal(raddr, remote_addr));
         assert(backup == test_backup_2);
 
         ++call_count.subflow_closed;
 }
 
 static void plugin_two_subflow_priority(mptcpd_token_t token,
-                                        struct mptcpd_addr const *laddr,
-                                        struct mptcpd_addr const *raddr,
+                                        struct sockaddr const *laddr,
+                                        struct sockaddr const *raddr,
                                         bool backup,
                                         struct mptcpd_pm *pm)
 {
         (void) pm;
 
         assert(token == test_token_2);
-        assert(!mptcpd_addr_is_equal(laddr, raddr));
-        assert(mptcpd_addr_is_equal(laddr, &test_laddr_2));
-        assert(mptcpd_addr_is_equal(raddr, &test_raddr_2));
+        assert(!sockaddr_is_equal(laddr, raddr));
+        assert(sockaddr_is_equal(laddr, local_addr));
+        assert(sockaddr_is_equal(raddr, remote_addr));
         assert(backup == test_backup_2);
 
         ++call_count.subflow_priority;

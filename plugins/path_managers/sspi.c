@@ -11,6 +11,8 @@
 #include <stddef.h>  // For NULL.
 #include <limits.h>
 
+#include <netinet/in.h>
+
 #include <ell/plugin.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
@@ -92,15 +94,15 @@ struct sspi_new_connection_info
 // ----------------------------------------------------------------
 
 /**
- * @brief Match an @c mptcpd_in_addr object.
+ * @brief Match a @c sockaddr object.
  *
- * A network address represented by @a a (@c struct
- * @c mptcpd_in_addr) matches if its @c family and @c addr members
- * match those in the @a b.
+ * A network address represented by @a a (@c struct @c sockaddr)
+ * matches if its @c family and @c addr members match those in the
+ * @a b.
  *
  * @param[in] a Currently monitored network address of type @c struct
- *              @c mptcpd_in_addr*.
- * @param[in] b Network address of type @c struct @c mptcpd_in_addr*
+ *              @c sockaddr*.
+ * @param[in] b Network address of type @c struct @c sockaddr*
  *              to be compared against network address @a a.
  *
  * @return @c true if the network address represented by @a a matches
@@ -109,31 +111,42 @@ struct sspi_new_connection_info
  * @see l_queue_find()
  * @see l_queue_remove_if()
  */
-static bool sspi_in_addr_match(void const *a, void const *b)
+static bool sspi_sockaddr_match(void const *a, void const *b)
 {
-        struct mptcpd_in_addr const *const lhs = a;
-        struct mptcpd_in_addr const *const rhs = b;
+        struct sockaddr const *const lhs = a;
+        struct sockaddr const *const rhs = b;
 
         assert(lhs);
         assert(rhs);
-        assert(lhs->family == AF_INET || lhs->family == AF_INET6);
+        assert(lhs->sa_family == AF_INET || lhs->sa_family == AF_INET6);
 
-        bool matched = lhs->family == rhs->family;
+        bool matched = (lhs->sa_family == rhs->sa_family);
 
-        if (matched) {
-                if (lhs->family == AF_INET)
-                        matched = (lhs->addr.addr4.s_addr
-                                   == rhs->addr.addr4.s_addr);
-                else
-                        /**
-                         * @todo Is memcmp() suitable in this case?
-                         *       Do we need to worry about the
-                         *       existence of uninitialized bytes in
-                         *       the IPv6 address byte array.
-                         */
-                        matched = (memcmp(&lhs->addr.addr6.s6_addr,
-                                          &rhs->addr.addr6.s6_addr,
-                                          sizeof(lhs->addr.addr6.s6_addr))
+        if (!matched)
+                return matched;
+
+        if (lhs->sa_family == AF_INET) {
+                struct sockaddr_in const *const l =
+                        (struct sockaddr_in const *) lhs;
+                struct sockaddr_in const *const r =
+                        (struct sockaddr_in const *) rhs;
+
+                matched = (l->sin_addr.s_addr == r->sin_addr.s_addr);
+        } else {
+                struct sockaddr_in6 const *const l =
+                        (struct sockaddr_in6 const *) lhs;
+                struct sockaddr_in6 const *const r =
+                        (struct sockaddr_in6 const *) rhs;
+
+                /**
+                 * @todo Is memcmp() suitable in this case?
+                 *       Do we need to worry about the
+                 *       existence of uninitialized bytes in
+                 *       the IPv6 address byte array.
+                 */
+                matched = (memcmp(&l->sin6_addr,
+                                  &r->sin6_addr,
+                                  sizeof(l->sin6_addr))
                                    == 0);
         }
 
@@ -174,7 +187,7 @@ static bool sspi_index_match(void const *a, void const *b)
 struct sspi_nm_callback_data
 {
         /// Local address information.        (IN)
-        struct mptcpd_addr const* const addr;
+        struct sockaddr const* const addr;
 
         /// Network interface (link) index.   (OUT)
         int index;
@@ -205,8 +218,8 @@ static void sspi_get_index(struct mptcpd_interface const *interface,
           determine which of them corresponds to the given IP address.
         */
         if (l_queue_find(interface->addrs,
-                         sspi_in_addr_match,
-                         &callback_data->addr->address) != NULL) {
+                         sspi_sockaddr_match,
+                         &callback_data->addr) != NULL) {
                 callback_data->index = interface->index;
         } else {
                 /*
@@ -230,7 +243,7 @@ static void sspi_get_index(struct mptcpd_interface const *interface,
  *         otherwise.
  */
 static bool sspi_addr_to_index(struct mptcpd_nm const *nm,
-                               struct mptcpd_addr const *addr,
+                               struct sockaddr const *addr,
                                int *index)
 {
         assert(index != NULL);
@@ -327,7 +340,7 @@ static struct sspi_interface_info *sspi_interface_info_create(int index)
  */
 static struct sspi_interface_info *sspi_interface_info_lookup(
         struct mptcpd_nm const *nm,
-        struct mptcpd_addr const *addr)
+        struct sockaddr const *addr)
 {
         assert(nm != NULL);
         assert(addr != NULL);
@@ -455,8 +468,8 @@ static bool sspi_remove_token(void *data, void *user_data)
  */
 static void sspi_send_addr(void *data, void *user_data)
 {
-        struct mptcpd_in_addr           const *const ip_addr = data;
-        struct sspi_new_connection_info const *const info    = user_data;
+        struct sockaddr                 const *const addr = data;
+        struct sspi_new_connection_info const *const info = user_data;
 
         /**
          * @bug Use real values instead of these placeholders!  The
@@ -469,16 +482,18 @@ static void sspi_send_addr(void *data, void *user_data)
         /**
          * @note The port is an optional field of the MPTCP
          *       @c ADD_ADDR option.  Setting it to zero causes it to
-         *       be ignored sending the address information to the
-         *       kernel.
+         *       be ignored when sending the address information to
+         *       the kernel.
          */
-        struct mptcpd_addr addr = { .port = 0 };
-        memcpy(&addr.address, ip_addr, sizeof(*ip_addr));
+        /*
+        in_port_t const port = 0;
+        if (addr->sa_family == AF_INET)
+                ((struct sockaddr_in const *) addr)->sin_port = port;
+        else
+                ((struct sockaddr_in6 const *) addr)->sin6_port = port;
+        */
 
-                mptcpd_pm_send_addr(info->pm,
-                                    info->token,
-                                    address_id,
-                                    &addr);
+        mptcpd_pm_send_addr(info->pm, info->token, address_id, addr);
 }
 
 /**
@@ -527,8 +542,8 @@ static void sspi_send_addrs(struct mptcpd_interface const *i, void *data)
 //                     Mptcpd Plugin Operations
 // ----------------------------------------------------------------
 static void sspi_new_connection(mptcpd_token_t token,
-                                struct mptcpd_addr const *laddr,
-                                struct mptcpd_addr const *raddr,
+                                struct sockaddr const *laddr,
+                                struct sockaddr const *raddr,
                                 struct mptcpd_pm *pm)
 {
         (void) raddr;
@@ -589,8 +604,8 @@ static void sspi_new_connection(mptcpd_token_t token,
 }
 
 static void sspi_connection_established(mptcpd_token_t token,
-                                        struct mptcpd_addr const *laddr,
-                                        struct mptcpd_addr const *raddr,
+                                        struct sockaddr const *laddr,
+                                        struct sockaddr const *raddr,
                                         struct mptcpd_pm *pm)
 {
         (void) token;
@@ -623,7 +638,7 @@ static void sspi_connection_closed(mptcpd_token_t token,
 
 static void sspi_new_address(mptcpd_token_t token,
                              mptcpd_aid_t id,
-                             struct mptcpd_addr const *addr,
+                             struct sockaddr const *addr,
                              struct mptcpd_pm *pm)
 {
         (void) token;
@@ -652,8 +667,8 @@ static void sspi_address_removed(mptcpd_token_t token,
 }
 
 static void sspi_new_subflow(mptcpd_token_t token,
-                             struct mptcpd_addr const *laddr,
-                             struct mptcpd_addr const *raddr,
+                             struct sockaddr const *laddr,
+                             struct sockaddr const *raddr,
                              bool backup,
                              struct mptcpd_pm *pm)
 {
@@ -712,8 +727,8 @@ static void sspi_new_subflow(mptcpd_token_t token,
 }
 
 static void sspi_subflow_closed(mptcpd_token_t token,
-                                struct mptcpd_addr const *laddr,
-                                struct mptcpd_addr const *raddr,
+                                struct sockaddr const *laddr,
+                                struct sockaddr const *raddr,
                                 bool backup,
                                 struct mptcpd_pm *pm)
 {
@@ -753,8 +768,8 @@ static void sspi_subflow_closed(mptcpd_token_t token,
 }
 
 static void sspi_subflow_priority(mptcpd_token_t token,
-                                  struct mptcpd_addr const *laddr,
-                                  struct mptcpd_addr const *raddr,
+                                  struct sockaddr const *laddr,
+                                  struct sockaddr const *raddr,
                                   bool backup,
                                   struct mptcpd_pm *pm)
 {

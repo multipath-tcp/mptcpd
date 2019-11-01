@@ -114,39 +114,42 @@ static char const *get_pm_name(void const *data, size_t len)
 #endif // MPTCPD_ENABLE_PM_NAME
 
 /**
- * @brief Initialize @c mptcpd_addr instance.
+ * @brief Initialize @c sockaddr_storage instance.
  *
- * Initialize a @c mptcpd_addr instance with the provided IPv4 or IPv6
- * address.  Only one is required and used.
+ * Initialize a @c sockaddr_storage instance with the provided IPv4 or
+ * IPv6 address.  Only one is required and used.
  *
- * The port will be set to zero if a no port is provided, i.e. @a port
- * is @c NULL.  That may be the case for MPTCP generic netlink API
- * events where the port is optional.
+ * The port may zero in cases where the port is optional for a given
+ * MPTCP generic netlink API event.
  *
  * @param[in]     addr4 IPv4 internet address.
  * @param[in]     addr6 IPv6 internet address.
  * @param[in]     port  IP port.
  * @param[in,out] addr  mptcpd network address information.
  */
-static void get_mptcpd_addr(struct in_addr const *addr4,
-                            struct in6_addr const *addr6,
-                            in_port_t port,
-                            struct mptcpd_addr *addr)
+static void initialize_sockaddr_storage(struct in_addr  const *addr4,
+                                        struct in6_addr const *addr6,
+                                        in_port_t port,
+                                        struct sockaddr_storage *addr)
 {
         assert(addr4 != NULL || addr6 != NULL);
         assert(addr != NULL);
 
         if (addr4 != NULL) {
-                addr->address.family     = AF_INET;
-                addr->address.addr.addr4 = *addr4;
-        } else {
-                addr->address.family     = AF_INET6;
-                memcpy(addr->address.addr.addr6.s6_addr,
-                       addr6->s6_addr,
-                       sizeof(*addr6->s6_addr));
-        }
+                struct sockaddr_in *const a = (struct sockaddr_in *) addr;
 
-        addr->port = port;
+                a->sin_family      = AF_INET;
+                a->sin_port        = port;
+                a->sin_addr.s_addr = addr4->s_addr;
+        } else {
+                struct sockaddr_in6 *const a =
+                        (struct sockaddr_in6 *) addr;
+
+                a->sin6_family = AF_INET6;
+                a->sin6_port   = port;
+
+                memcpy(&a->sin6_addr, addr6, sizeof(*addr6));
+        }
 }
 
 static void handle_connection_created(struct l_genl_msg *msg,
@@ -239,11 +242,15 @@ static void handle_connection_created(struct l_genl_msg *msg,
 
         struct mptcpd_pm *const pm = user_data;
 
-        struct mptcpd_addr laddr, raddr;
-        get_mptcpd_addr(laddr4, laddr6, *local_port, &laddr);
-        get_mptcpd_addr(raddr4, raddr6, *remote_port, &raddr);
+        struct sockaddr_storage laddr, raddr;
+        initialize_sockaddr_storage(laddr4, laddr6, *local_port, &laddr);
+        initialize_sockaddr_storage(raddr4, raddr6, *remote_port, &raddr);
 
-        mptcpd_plugin_new_connection(pm_name, *token, &laddr, &raddr, pm);
+        mptcpd_plugin_new_connection(pm_name,
+                                     *token,
+                                     (struct sockaddr *) &laddr,
+                                     (struct sockaddr *) &raddr,
+                                     pm);
 }
 
 static void handle_connection_established(struct l_genl_msg *msg,
@@ -329,11 +336,14 @@ static void handle_connection_established(struct l_genl_msg *msg,
 
         struct mptcpd_pm *const pm = user_data;
 
-        struct mptcpd_addr laddr, raddr;
-        get_mptcpd_addr(laddr4, laddr6, *local_port, &laddr);
-        get_mptcpd_addr(raddr4, raddr6, *remote_port, &raddr);
+        struct sockaddr_storage laddr, raddr;
+        initialize_sockaddr_storage(laddr4, laddr6, *local_port, &laddr);
+        initialize_sockaddr_storage(raddr4, raddr6, *remote_port, &raddr);
 
-        mptcpd_plugin_connection_established(*token, &laddr, &raddr, pm);
+        mptcpd_plugin_connection_established(*token,
+                                             (struct sockaddr *) &laddr,
+                                             (struct sockaddr *) &raddr,
+                                             pm);
 }
 
 static void handle_connection_closed(struct l_genl_msg *msg,
@@ -443,12 +453,18 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
 
         l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
 
-        struct mptcpd_addr addr;
-        get_mptcpd_addr(addr4, addr6, port ? *port : 0, &addr);
+        struct sockaddr_storage addr;
+        initialize_sockaddr_storage(addr4,
+                                    addr6,
+                                    port ? *port : 0,
+                                    &addr);
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_new_address(*token, *address_id, &addr, pm);
+        mptcpd_plugin_new_address(*token,
+                                  *address_id,
+                                  (struct sockaddr *) &addr,
+                                  pm);
 }
 
 static void handle_addr_removed(struct l_genl_msg *msg, void *user_data)
@@ -520,8 +536,8 @@ static void handle_addr_removed(struct l_genl_msg *msg, void *user_data)
  */
 static bool handle_subflow(struct l_genl_msg *msg,
                            mptcpd_token_t *token,
-                           struct mptcpd_addr *laddr,
-                           struct mptcpd_addr *raddr,
+                           struct sockaddr_storage *laddr,
+                           struct sockaddr_storage *raddr,
                            bool *backup)
 {
         assert(token != NULL);
@@ -611,8 +627,8 @@ static bool handle_subflow(struct l_genl_msg *msg,
 
         l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
 
-        get_mptcpd_addr(laddr4, laddr6, *local_port,  laddr);
-        get_mptcpd_addr(raddr4, raddr6, *remote_port, raddr);
+        initialize_sockaddr_storage(laddr4, laddr6, *local_port,  laddr);
+        initialize_sockaddr_storage(raddr4, raddr6, *remote_port, raddr);
 
         *backup = *bkup;
 
@@ -635,8 +651,8 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
          */
 
         mptcpd_token_t token = 0;
-        struct mptcpd_addr laddr;
-        struct mptcpd_addr raddr;
+        struct sockaddr_storage laddr;
+        struct sockaddr_storage raddr;
         bool backup = false;
 
         if (!handle_subflow(msg, &token, &laddr, &raddr, &backup))
@@ -644,7 +660,11 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_new_subflow(token, &laddr, &raddr, backup, pm);
+        mptcpd_plugin_new_subflow(token,
+                                  (struct sockaddr *) &laddr,
+                                  (struct sockaddr *) &raddr,
+                                  backup,
+                                  pm);
 }
 
 static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
@@ -663,8 +683,8 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
          */
 
         mptcpd_token_t token = 0;
-        struct mptcpd_addr laddr;
-        struct mptcpd_addr raddr;
+        struct sockaddr_storage laddr;
+        struct sockaddr_storage raddr;
         bool backup = false;
 
         if (!handle_subflow(msg, &token, &laddr, &raddr, &backup))
@@ -672,7 +692,11 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_subflow_closed(token, &laddr, &raddr, backup, pm);
+        mptcpd_plugin_subflow_closed(token,
+                                     (struct sockaddr *) &laddr,
+                                     (struct sockaddr *) &raddr,
+                                     backup,
+                                     pm);
 }
 
 static void handle_priority_changed(struct l_genl_msg *msg,
@@ -692,8 +716,8 @@ static void handle_priority_changed(struct l_genl_msg *msg,
          */
 
         mptcpd_token_t token = 0;
-        struct mptcpd_addr laddr;
-        struct mptcpd_addr raddr;
+        struct sockaddr_storage laddr;
+        struct sockaddr_storage raddr;
         bool backup = false;
 
         if (!handle_subflow(msg, &token, &laddr, &raddr, &backup))
@@ -701,7 +725,11 @@ static void handle_priority_changed(struct l_genl_msg *msg,
 
         struct mptcpd_pm *const pm = user_data;
 
-        mptcpd_plugin_subflow_priority(token, &laddr, &raddr, backup, pm);
+        mptcpd_plugin_subflow_priority(token,
+                                       (struct sockaddr *) &laddr,
+                                       (struct sockaddr *) &raddr,
+                                       backup,
+                                       pm);
 }
 
 static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)

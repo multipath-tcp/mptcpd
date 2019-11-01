@@ -67,8 +67,8 @@ struct mptcpd_interface
         char name[IF_NAMESIZE];
 
         /**
-         * List of IP addresses, i.e. @c mptcpd_in_addr objects,
-         * associated with the interface.
+         * List of IP addresses, i.e. @c sockaddr objects, associated
+         * with the interface.
          */
         struct l_queue *addrs;
         //@}
