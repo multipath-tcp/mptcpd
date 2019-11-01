@@ -24,6 +24,7 @@
 #include <mptcpd/path_manager_private.h>
 #include <mptcpd/plugin.h>
 
+
 static void family_send_callback(struct l_genl_msg *msg, void *user_data)
 {
         (void) user_data;
@@ -54,16 +55,9 @@ static size_t get_addr_size(struct sockaddr const *addr)
 {
         assert(is_inet_family(addr));
 
-        size_t size = 0;
-
-        if (addr != NULL) {
-                size = addr->sa_family == AF_INET
-                        ? sizeof(struct in_addr)
-                        : sizeof(struct in6_addr);
-        }
-
-        return size;
-
+        return addr->sa_family == AF_INET
+                ? sizeof(struct in_addr)
+                : sizeof(struct in6_addr);
 }
 
 static uint16_t get_addr_family(struct sockaddr const *addr)
