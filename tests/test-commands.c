@@ -28,6 +28,20 @@
 
 // -------------------------------------------------------------------
 
+static struct sockaddr const *const laddr1 =
+        (struct sockaddr const *) &test_laddr_1;
+
+static struct sockaddr const *const laddr2 =
+        (struct sockaddr const *) &test_laddr_2;
+
+static struct sockaddr const *const raddr1 =
+        (struct sockaddr const *) &test_raddr_1;
+
+static struct sockaddr const *const raddr2 =
+        (struct sockaddr const *) &test_raddr_2;
+
+// -------------------------------------------------------------------
+
 static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
 {
         bool const ready = mptcpd_pm_ready(pm);
@@ -51,7 +65,7 @@ void test_send_addr(void const *test_data)
         assert(mptcpd_pm_send_addr(pm,
                                    test_token_1,
                                    test_laddr_id_1,
-                                   &test_laddr_1));
+                                   laddr1));
 }
 
 void test_add_subflow(void const *test_data)
@@ -65,8 +79,8 @@ void test_add_subflow(void const *test_data)
                                      test_token_2,
                                      test_laddr_id_2,
                                      test_raddr_id_2,
-                                     &test_laddr_2,
-                                     &test_raddr_2,
+                                     laddr2,
+                                     raddr2,
                                      test_backup_2));
 }
 
@@ -79,8 +93,8 @@ void test_set_backup(void const *test_data)
 
         assert(mptcpd_pm_set_backup(pm,
                                     test_token_1,
-                                    &test_laddr_1,
-                                    &test_raddr_1,
+                                    laddr1,
+                                    raddr1,
                                     test_backup_1));
 }
 
@@ -93,8 +107,8 @@ void test_remove_subflow(void const *test_data)
 
         assert(mptcpd_pm_remove_subflow(pm,
                                         test_token_1,
-                                        &test_laddr_1,
-                                        &test_raddr_1));
+                                        laddr1,
+                                        raddr1));
 }
 
 void test_get_nm(void const *test_data)

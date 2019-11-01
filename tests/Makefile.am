@@ -11,7 +11,7 @@ AM_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
 ## mptcpd tests.
 noinst_LTLIBRARIES = libmptcpd_test.la
 
-libmptcpd_test_la_SOURCES = call_count.c call_plugin.c mptcpd_addr.c
+libmptcpd_test_la_SOURCES = call_count.c call_plugin.c sockaddr.c
 libmptcpd_test_la_CPPFLAGS =					\
 	-I$(top_srcdir)/include -I$(top_builddir)/include	\
 	$(CODE_COVERAGE_CPPFLAGS) $(AM_CPPFLAGS)

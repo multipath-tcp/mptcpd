@@ -23,7 +23,6 @@
 #include <ell/log.h>
 #include <ell/queue.h>
 
-#include <mptcpd/types.h>  // For mptcpd_in_addr.
 #include <mptcpd/network_monitor.h>
 
 /// Test user "data".
@@ -59,23 +58,25 @@ struct foreach_data
  *
  * Print address associated with monitored network interface.
  *
- * @param[in] data      Pointer @c mptcpd_in_addr object.
+ * @param[in] data      Pointer @c sockaddr object.
  * @param[in] user_data Pointer user data (unused).
  */
 static void dump_addr(void *data, void *user_data)
 {
         (void) user_data;
 
-        struct mptcpd_in_addr const *const a = data;
-        void const *const src =
-                a->family == AF_INET
-                ? (void const *) &a->addr.addr4
-                : (void const *) &a->addr.addr6;
+        struct sockaddr const *const a = data;
+        void const *src = NULL;
+
+        if (a->sa_family == AF_INET)
+                src = &((struct sockaddr_in  const *) a)->sin_addr;
+        else
+                src = &((struct sockaddr_in6 const *) a)->sin6_addr;
 
         char addrstr[INET6_ADDRSTRLEN];  // Long enough for both IPv4
                                          // and IPv6 addresses.
 
-        assert(inet_ntop(a->family, src, addrstr, sizeof(addrstr)));
+        assert(inet_ntop(a->sa_family, src, addrstr, sizeof(addrstr)));
 
         l_debug("    %s", addrstr);
 }

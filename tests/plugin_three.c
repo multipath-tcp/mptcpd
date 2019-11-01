@@ -30,8 +30,8 @@ static struct plugin_call_count call_count;
 // ----------------------------------------------------------------
 
 static void plugin_three_new_connection(mptcpd_token_t token,
-                                        struct mptcpd_addr const *laddr,
-                                        struct mptcpd_addr const *raddr,
+                                        struct sockaddr const *laddr,
+                                        struct sockaddr const *raddr,
                                         struct mptcpd_pm *pm)
 {
         (void) token;
@@ -44,8 +44,8 @@ static void plugin_three_new_connection(mptcpd_token_t token,
 
 static void plugin_three_connection_established(
         mptcpd_token_t token,
-        struct mptcpd_addr const *laddr,
-        struct mptcpd_addr const *raddr,
+        struct sockaddr const *laddr,
+        struct sockaddr const *raddr,
         struct mptcpd_pm *pm)
 {
         (void) token;
@@ -67,7 +67,7 @@ static void plugin_three_connection_closed(mptcpd_token_t token,
 
 static void plugin_three_new_address(mptcpd_token_t token,
                                      mptcpd_aid_t addr_id,
-                                     struct mptcpd_addr const *addr,
+                                     struct sockaddr const *addr,
                                      struct mptcpd_pm *pm)
 {
         (void) token;
@@ -90,8 +90,8 @@ static void plugin_three_address_removed(mptcpd_token_t token,
 }
 
 static void plugin_three_new_subflow(mptcpd_token_t token,
-                                     struct mptcpd_addr const *laddr,
-                                     struct mptcpd_addr const *raddr,
+                                     struct sockaddr const *laddr,
+                                     struct sockaddr const *raddr,
                                      bool backup,
                                      struct mptcpd_pm *pm)
 {
@@ -105,8 +105,8 @@ static void plugin_three_new_subflow(mptcpd_token_t token,
 }
 
 static void plugin_three_subflow_closed(mptcpd_token_t token,
-                                        struct mptcpd_addr const *laddr,
-                                        struct mptcpd_addr const *raddr,
+                                        struct sockaddr const *laddr,
+                                        struct sockaddr const *raddr,
                                         bool backup,
                                         struct mptcpd_pm *pm)
 {
@@ -120,8 +120,8 @@ static void plugin_three_subflow_closed(mptcpd_token_t token,
 }
 
 static void plugin_three_subflow_priority(mptcpd_token_t token,
-                                          struct mptcpd_addr const *laddr,
-                                          struct mptcpd_addr const *raddr,
+                                          struct sockaddr const *laddr,
+                                          struct sockaddr const *raddr,
                                           bool backup,
                                           struct mptcpd_pm *pm)
 {
