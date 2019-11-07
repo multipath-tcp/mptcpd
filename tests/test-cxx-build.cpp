@@ -21,6 +21,8 @@
 #include <mptcpd/network_monitor.h>
 #include <mptcpd/plugin.h>
 
+#include <mptcpd/plugin_private.h>
+
 #include "test-plugin.h"
 
 /**
