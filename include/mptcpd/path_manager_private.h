@@ -2,7 +2,7 @@
 /**
  * @file path_manager_private.h
  *
- * @brief mptcpd user space path manager plugin header file.
+ * @brief mptcpd path manager private interface.
  *
  * Copyright (c) 2017-2019, Intel Corporation
  */
