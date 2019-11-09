@@ -28,7 +28,7 @@
 #include <ell/util.h>
 
 #include <mptcpd/path_manager_private.h>
-#include <mptcpd/plugin.h>
+#include <mptcpd/plugin_private.h>
 #include <mptcpd/network_monitor.h>
 
 #ifdef HAVE_CONFIG_H
