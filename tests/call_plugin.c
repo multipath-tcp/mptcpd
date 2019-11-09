@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include <mptcpd/plugin.h>
+#include <mptcpd/plugin_private.h>
 
 #include "test-plugin.h"
 

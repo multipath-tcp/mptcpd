@@ -22,6 +22,7 @@
 #include <mptcpd/config-private.h>
 #endif
 
+#include <mptcpd/plugin_private.h>
 #include <mptcpd/plugin.h>
 
 /**
