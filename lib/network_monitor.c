@@ -893,6 +893,13 @@ static void send_getaddr_command(void *user_data)
 {
         struct mptcpd_nm *const nm = user_data;
 
+        /*
+          Don't bother attempting to retrieve IP addresses if no
+          network interfaces are being tracked.
+         */
+        if (l_queue_isempty(nm->interfaces))
+                return;
+
         // Get IP addresses.
         struct ifaddrmsg addr_msg = { .ifa_family = AF_UNSPEC };
         if (l_netlink_send(nm->rtnl,
@@ -1021,6 +1028,7 @@ void mptcpd_nm_destroy(struct mptcpd_nm *nm)
                 l_error("Failed to unregister IPv6 monitor.");
 
         l_queue_destroy(nm->interfaces, mptcpd_interface_destroy);
+        nm->interfaces = NULL;
 
         l_netlink_destroy(nm->rtnl);
         l_free(nm);
