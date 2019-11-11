@@ -208,7 +208,7 @@ The same alignment applies to arguments in function calls, control
 statements, etc.
 
 ##### Brace Placement
-* Structure declarations and function definitions
+###### Structure declarations and function definitions
 Place the opening brace on the line below the structure or function
 name.  Align the opening and closing brace with the first character in
 the structure or function name.
@@ -232,7 +232,7 @@ same line as the function parameter list closing parenthesis.
 ```c
 int fnord(void) { return -1; }
 ```
-* Control statements
+###### Control statements
 Place the opening brace on the same line as closing parenthesis of the
 control statement.  Align the closing brace with the first character
 of the control statement.
