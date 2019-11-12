@@ -1,8 +1,18 @@
+# Basic package variables.
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
+# Mptcpd package library directory.
+#
+# This corresponds to the default plugin directory set when mptcpd was
+# built.  It may differ from the actual site-specific plugin directory
+# if the default directory was overridden in the mptcpd configuration
+# file or on the command line.
+pkglibdir=@libdir@/@PACKAGE@
+
+# Package keywords.
 Name: @PACKAGE_NAME@
 Description: The Multipath TCP Daemon library
 URL: @PACKAGE_URL@
