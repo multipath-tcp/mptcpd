@@ -1042,19 +1042,6 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
-        /**
-         * @bug Mptcpd plugins should only be loaded once at process
-         *      start.  The @c mptcpd_plugin_load() function only
-         *      loads the functions once, and only reloads after
-         *      @c mptcpd_plugin_unload() is called.
-         */
-        if (!mptcpd_plugin_load(config->plugin_dir,
-                                config->default_plugin)) {
-                l_error("Unable to load path manager plugins.");
-
-                return NULL;
-        }
-
         struct mptcpd_pm *const pm = l_new(struct mptcpd_pm, 1);
 
         // No need to check for NULL.  l_new() abort()s on failure.
@@ -1109,6 +1096,19 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
+        /**
+         * @bug Mptcpd plugins should only be loaded once at process
+         *      start.  The @c mptcpd_plugin_load() function only
+         *      loads the functions once, and only reloads after
+         *      @c mptcpd_plugin_unload() is called.
+         */
+        if (!mptcpd_plugin_load(config->plugin_dir,
+                                config->default_plugin)) {
+                l_error("Unable to load path manager plugins.");
+
+                return NULL;
+        }
+
         return pm;
 }
 
@@ -1117,18 +1117,18 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
         if (pm == NULL)
                 return;
 
-        mptcpd_nm_destroy(pm->nm);
-        l_timeout_remove(pm->timeout);
-        l_genl_family_free(pm->family);
-        l_genl_unref(pm->genl);
-        l_free(pm);
-
         /**
          * @bug Mptcpd plugins should only be unloaded once at process
          *      exit, or at least after the last @c mptcpd_pm object
          *      has been destroyed.
          */
         mptcpd_plugin_unload();
+
+        mptcpd_nm_destroy(pm->nm);
+        l_timeout_remove(pm->timeout);
+        l_genl_family_free(pm->family);
+        l_genl_unref(pm->genl);
+        l_free(pm);
 }
 
 
