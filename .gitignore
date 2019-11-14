@@ -35,6 +35,7 @@ mptcpd-*/
 core*
 doc/
 etc/*.conf
+lib/mptcpd.pc
 src/mptcpd
 src/mptcp.service
 man/mptcpd.8

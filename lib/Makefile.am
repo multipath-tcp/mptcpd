@@ -27,4 +27,7 @@ libmptcpd_la_SOURCES =		\
 #libmptcpd_la_SOURCES += debug.c
 #endif
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = mptcpd.pc
+
 clean-local: code-coverage-clean

@@ -265,6 +265,7 @@ AC_CONFIG_FILES([Makefile
                  include/linux/Makefile
                  include/mptcpd/Makefile
                  lib/Makefile
+                 lib/mptcpd.pc
                  src/Makefile
                  plugins/Makefile
                  plugins/path_managers/Makefile
