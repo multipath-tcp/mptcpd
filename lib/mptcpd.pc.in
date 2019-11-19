@@ -4,13 +4,13 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-# Mptcpd package library directory.
+# Mptcpd plugin directory.
 #
 # This corresponds to the default plugin directory set when mptcpd was
 # built.  It may differ from the actual site-specific plugin directory
 # if the default directory was overridden in the mptcpd configuration
 # file or on the command line.
-pkglibdir=@libdir@/@PACKAGE@
+plugindir=@libdir@/@PACKAGE@
 
 # Package keywords.
 Name: @PACKAGE_NAME@
