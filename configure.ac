@@ -204,13 +204,13 @@ AC_SEARCH_LIBS(
 # ---------------------------------------------------------------
 AC_CHECK_DECLS([IPPROTO_MPTCP],
                [],
-	       [AC_MSG_WARN([IPPROTO_MPTCP declaration not found.  Using fallback.])],
-	       [[
+               [AC_MSG_WARN([IPPROTO_MPTCP declaration not found.  Using fallback.])],
+               [[
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <linux/in.h>
-	       ]])
+               ]])
 
 # ---------------------------------------------------------------
 # Enable additional C compiler warnings.  We do this after all
@@ -235,8 +235,8 @@ AX_APPEND_FLAG([-D_FORTIFY_SOURCE=2], [CPPFLAGS])
 # Stack-based buffer overrun detection
 MPTCPD_ADD_COMPILE_FLAG([-fstack-protector-strong],
                         [# GCC < 4.9
-			 MPTCPD_ADD_COMPILE_FLAG([-fstack-protector])
-			])
+                         MPTCPD_ADD_COMPILE_FLAG([-fstack-protector])
+                        ])
 
 # Format string vulnerabilities
 # -Wformat=2 implies:
@@ -246,8 +246,8 @@ MPTCPD_ADD_COMPILE_FLAG([-Wformat=2])
 # Position Independent Execution (PIE)
 AX_CHECK_COMPILE_FLAG([-fPIE],
                       [AX_APPEND_FLAG([-fPIE], [EXECUTABLE_CFLAGS])
-		       AC_SUBST([EXECUTABLE_CFLAGS])
-		      ])
+                       AC_SUBST([EXECUTABLE_CFLAGS])
+                      ])
 
 # ---------------------------------------------------------------
 # Enable link-time defenses
@@ -261,9 +261,9 @@ MPTCPD_ADD_LINK_FLAG([-Wl,-z,relro])
 
 # Position Independent Execution
 AX_CHECK_LINK_FLAG([-pie],
-	           [AX_APPEND_FLAG([-pie], [EXECUTABLE_LDFLAGS])
-		    AC_SUBST([EXECUTABLE_LDFLAGS])
-		   ])
+                   [AX_APPEND_FLAG([-pie], [EXECUTABLE_LDFLAGS])
+                    AC_SUBST([EXECUTABLE_LDFLAGS])
+                   ])
 
 # ---------------------------------------------------------------
 # Generate our build files.

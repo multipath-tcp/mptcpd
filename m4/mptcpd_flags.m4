@@ -10,7 +10,7 @@
 # to CFLAGS.  Otherwise execute the given failure action.
 AC_DEFUN([MPTCPD_ADD_COMPILE_FLAG],
          [AX_CHECK_COMPILE_FLAG([$1],
-	                        [AX_APPEND_FLAG([$1], [CFLAGS])], [$2])
+                                [AX_APPEND_FLAG([$1], [CFLAGS])], [$2])
          ])
 
 # MPTCPD_ADD_LINK_FLAG(FLAG, [ACTION-FAILURE])
@@ -19,7 +19,7 @@ AC_DEFUN([MPTCPD_ADD_COMPILE_FLAG],
 # to LDFLAGS.  Otherwise execute the given failure action.
 AC_DEFUN([MPTCPD_ADD_LINK_FLAG],
          [AX_CHECK_LINK_FLAG([$1],
-	                     [AX_APPEND_FLAG([$1], [LDFLAGS])], [$2])
+                             [AX_APPEND_FLAG([$1], [LDFLAGS])], [$2])
          ])
 
 # MPTCPD_ADD_ASAN_FLAG
