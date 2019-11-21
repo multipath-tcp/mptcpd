@@ -99,7 +99,7 @@ AC_DEFUN([MPTCPD_ADD_LSAN_SUPPORT],
         [lsan],
         [_init],
         [],
-        [AC_MSG_ERROR([liblsan is needed for memory error detector])])
+        [AC_MSG_ERROR([liblsan is needed for memory leak detector])])
     ])
   ])
 
@@ -139,6 +139,6 @@ AC_DEFUN([MPTCPD_ADD_UBSAN_SUPPORT],
         [ubsan],
         [_init],
         [],
-        [AC_MSG_ERROR([libubsan is needed for memory error detector])])
+        [AC_MSG_ERROR([libubsan is needed for undefined behavior detector])])
     ])
   ])
