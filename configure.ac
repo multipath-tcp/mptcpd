@@ -78,6 +78,15 @@ AC_PATH_PROG([PANDOC], [pandoc])
 # Enable pkg-config
 PKG_PROG_PKG_CONFIG
 
+# Enable address sanitizer support.
+MPTCPD_ADD_ASAN_SUPPORT
+
+# Enable leak sanitizer support.
+MPTCPD_ADD_LSAN_SUPPORT
+
+# Enable undefined behavior sanitizer support.
+MPTCPD_ADD_UBSAN_SUPPORT
+
 # Allow the user to set the log message destination at compile-time.
 # The available destinations correspond to those made available by
 # ELL.
@@ -154,6 +163,7 @@ AS_IF([test "x$ax_enable_debug" != "xyes"],
        dnl _FORTIFY_SOURCE support, too.
        MPTCPD_ADD_COMPILE_FLAG([-Og])
       ])
+
 
 dnl Export symbols in the public API from shared libraries.
 AM_CONDITIONAL([BUILDING_DLL], [test "x$enable_shared" = xyes])
