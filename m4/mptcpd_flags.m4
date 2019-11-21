@@ -122,7 +122,7 @@ AC_DEFUN([MPTCPD_ADD_UBSAN_SUPPORT],
      [
       MPTCPD_ADD_COMPILE_FLAG(
         [-fsanitize=undefined],
-        [AC_MSG_ERROR([Address sanitizer not supported by the compiler])])
+        [AC_MSG_ERROR([Undefined behavior sanitizer not supported by the compiler])])
 
       dnl -fno-omit-frame-pointer to get nicer stack traces.
       MPTCPD_ADD_COMPILE_FLAG([-fno-omit-frame-pointer])
