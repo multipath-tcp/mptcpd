@@ -566,9 +566,9 @@ static void sspi_new_connection(mptcpd_token_t token,
                 sspi_interface_info_lookup(nm, laddr);
 
         if (interface_info == NULL) {
-                l_error("Unable to track new connection (0x%"
+                l_error("Unable to track new connection (%"
                         MPTCPD_PRIxTOKEN ")",
-                        token);
+                        mptcpd_masked_token(token));
 
                 return;
         }
@@ -631,9 +631,9 @@ static void sspi_connection_closed(mptcpd_token_t token,
         if (l_queue_foreach_remove(sspi_interfaces,
                                    sspi_remove_token,
                                    L_UINT_TO_PTR(token)) == 0)
-                l_error("No tracked connection with token 0x%"
+                l_error("No tracked connection with token %"
                         MPTCPD_PRIxTOKEN,
-                        token);
+                        mptcpd_masked_token(token));
 }
 
 static void sspi_new_address(mptcpd_token_t token,
@@ -691,8 +691,8 @@ static void sspi_new_subflow(mptcpd_token_t token,
 
         if (info == NULL) {
                 l_error("Unable to track new subflow "
-                        "(token: 0x%" MPTCPD_PRIxTOKEN ")",
-                        token);
+                        "(token: %" MPTCPD_PRIxTOKEN ")",
+                        mptcpd_masked_token(token));
 
                 return;
         }
@@ -752,8 +752,8 @@ static void sspi_subflow_closed(mptcpd_token_t token,
 
         if (info == NULL) {
                 l_error("Unable to remove subflow "
-                        "(token: 0x%" MPTCPD_PRIxTOKEN ")",
-                        token);
+                        "(token: %" MPTCPD_PRIxTOKEN ")",
+                        mptcpd_masked_token(token));
 
                 return;
         }
@@ -761,9 +761,9 @@ static void sspi_subflow_closed(mptcpd_token_t token,
         if (!l_queue_remove(info->tokens,
                             L_UINT_TO_PTR(token)))
                 l_error("No subflow with token "
-                        "0x%" MPTCPD_PRIxTOKEN
+                        "%" MPTCPD_PRIxTOKEN
                         " exists on network interface %d.",
-                        token,
+                        mptcpd_masked_token(token),
                         info->index);
 }
 

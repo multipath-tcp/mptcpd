@@ -238,7 +238,7 @@ static void handle_connection_created(struct l_genl_msg *msg,
                 return;
         }
 
-        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
+        l_debug("token: %" MPTCPD_PRIxTOKEN, mptcpd_masked_token(*token));
 
         struct mptcpd_pm *const pm = user_data;
 
@@ -332,7 +332,7 @@ static void handle_connection_established(struct l_genl_msg *msg,
                 return;
         }
 
-        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
+        l_debug("token: %" MPTCPD_PRIxTOKEN, mptcpd_masked_token(*token));
 
         struct mptcpd_pm *const pm = user_data;
 
@@ -386,7 +386,7 @@ static void handle_connection_closed(struct l_genl_msg *msg,
                 return;
         }
 
-        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
+        l_debug("token: %" MPTCPD_PRIxTOKEN, mptcpd_masked_token(*token));
 
         struct mptcpd_pm *const pm = user_data;
 
@@ -451,7 +451,7 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
                 return;
         }
 
-        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
+        l_debug("token: %" MPTCPD_PRIxTOKEN, mptcpd_masked_token(*token));
 
         struct sockaddr_storage addr;
         initialize_sockaddr_storage(addr4,
@@ -513,7 +513,7 @@ static void handle_addr_removed(struct l_genl_msg *msg, void *user_data)
                 return;
         }
 
-        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
+        l_debug("token: %" MPTCPD_PRIxTOKEN, mptcpd_masked_token(*token));
 
         struct mptcpd_pm *const pm = user_data;
 
@@ -625,7 +625,7 @@ static bool handle_subflow(struct l_genl_msg *msg,
 
         *token = *tok;
 
-        l_debug("token: 0x%" MPTCPD_PRIxTOKEN, *token);
+        l_debug("token: %" MPTCPD_PRIxTOKEN, mptcpd_masked_token(*token));
 
         initialize_sockaddr_storage(laddr4, laddr6, *local_port,  laddr);
         initialize_sockaddr_storage(raddr4, raddr6, *remote_port, raddr);

@@ -28,10 +28,27 @@ typedef uint32_t mptcpd_token_t;
 typedef uint8_t mptcpd_aid_t;
 
 /// MPTCP connection token format specifier.
-#define MPTCPD_PRIxTOKEN PRIx32
+#define MPTCPD_PRIxTOKEN "#010" PRIx32
 
 /// MPTCP address ID format specifier.
 #define MPTCPD_PRIxAID PRIx8
+
+/**
+ * @brief Mask leading MPTCP connection token bits.
+ *
+ * Logging the MPTCP connection token is a security risk.  Mask off
+ * the leading bits to make logging the @a token safer.
+ *
+ * @param[in] token MPTCP connection token.
+ *
+ * @return MPTCP connection stripped of leading bits.
+ */
+static inline mptcpd_token_t mptcpd_masked_token(mptcpd_token_t token)
+{
+        static mptcpd_token_t const mask = 0xFF;
+
+        return token & mask;
+}
 
 #ifdef __cplusplus
 }

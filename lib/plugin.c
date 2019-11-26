@@ -159,8 +159,8 @@ static struct mptcpd_plugin_ops const *token_to_ops(mptcpd_token_t token)
 
         if (unlikely(ops == NULL))
                 l_error("Unable to find plugin operations for "
-                        "connection token 0x%" MPTCPD_PRIxTOKEN ".",
-                        token);
+                        "connection token %" MPTCPD_PRIxTOKEN ".",
+                        mptcpd_masked_token(token));
 
         return ops;
 }
@@ -314,9 +314,9 @@ void mptcpd_plugin_new_connection(char const *name,
         if (!l_hashmap_insert(_token_to_ops,
                               L_UINT_TO_PTR(token),
                               (void *) ops))
-                l_error("Unable to map connection token (0x%"
+                l_error("Unable to map connection token (%"
                         MPTCPD_PRIxTOKEN ") to plugin operations.",
-                        token);
+                        mptcpd_masked_token(token));
 
         ops->new_connection(token, laddr, raddr, pm);
 }
