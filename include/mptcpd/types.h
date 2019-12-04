@@ -27,9 +27,6 @@ typedef uint32_t mptcpd_token_t;
 /// MPTCP address ID type.
 typedef uint8_t mptcpd_aid_t;
 
-/// MPTCP connection token format specifier.
-#define MPTCPD_PRIxTOKEN PRIx32
-
 /// MPTCP address ID format specifier.
 #define MPTCPD_PRIxAID PRIx8
 

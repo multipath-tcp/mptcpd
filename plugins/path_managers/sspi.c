@@ -566,9 +566,7 @@ static void sspi_new_connection(mptcpd_token_t token,
                 sspi_interface_info_lookup(nm, laddr);
 
         if (interface_info == NULL) {
-                l_error("Unable to track new connection (0x%"
-                        MPTCPD_PRIxTOKEN ")",
-                        token);
+                l_error("Unable to track new connection");
 
                 return;
         }
@@ -631,9 +629,7 @@ static void sspi_connection_closed(mptcpd_token_t token,
         if (l_queue_foreach_remove(sspi_interfaces,
                                    sspi_remove_token,
                                    L_UINT_TO_PTR(token)) == 0)
-                l_error("No tracked connection with token 0x%"
-                        MPTCPD_PRIxTOKEN,
-                        token);
+                l_error("Untracked connection closed.");
 }
 
 static void sspi_new_address(mptcpd_token_t token,
@@ -690,9 +686,7 @@ static void sspi_new_subflow(mptcpd_token_t token,
                 sspi_interface_info_lookup(nm, laddr);
 
         if (info == NULL) {
-                l_error("Unable to track new subflow "
-                        "(token: 0x%" MPTCPD_PRIxTOKEN ")",
-                        token);
+                l_error("Unable to track new subflow.");
 
                 return;
         }
@@ -721,7 +715,7 @@ static void sspi_new_subflow(mptcpd_token_t token,
                             L_UINT_TO_PTR(token),
                             sspi_token_compare,
                             NULL))
-                l_error("Unable to associate new subflow token "
+                l_error("Unable to associate new subflow "
                         "with network interface %d",
                         info->index);
 }
@@ -736,13 +730,13 @@ static void sspi_subflow_closed(mptcpd_token_t token,
         (void) backup;
 
         /*
-          1. Retrieve the subflow list associated with the connection
-             token.  Return immediately if no such token exists, and
-             log an error.
+          1. Retrieve the subflow list associated with the local
+             address.  Log an error, and return immediately if no such
+             list exists.
           2. Remove the subflow information associated with the given
-             local IP address from the subflow list.  Return
-             immediately if no subflow corresponding to the local
-             address exists, and log an error.
+             local IP address from the subflow list.  Log an error,
+             and return immediately if no subflow corresponding to the
+             local address exists.
          */
 
         struct mptcpd_nm const *const nm = mptcpd_pm_get_nm(pm);
@@ -751,19 +745,15 @@ static void sspi_subflow_closed(mptcpd_token_t token,
                 sspi_interface_info_lookup(nm, laddr);
 
         if (info == NULL) {
-                l_error("Unable to remove subflow "
-                        "(token: 0x%" MPTCPD_PRIxTOKEN ")",
-                        token);
+                l_error("No tracked subflows on network interface.");
 
                 return;
         }
 
         if (!l_queue_remove(info->tokens,
                             L_UINT_TO_PTR(token)))
-                l_error("No subflow with token "
-                        "0x%" MPTCPD_PRIxTOKEN
-                        " exists on network interface %d.",
-                        token,
+                l_error("Closed subflow was not tracked on "
+                        "network interface %d.",
                         info->index);
 }
 
