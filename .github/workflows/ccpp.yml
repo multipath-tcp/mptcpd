@@ -1,0 +1,29 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: build and install ELL
+      run: |
+        git clone git://git.kernel.org/pub/scm/libs/ell/ell.git
+        cd ell
+        ./bootstrap
+        ./configure --prefix=`dirname $PWD`
+        make install
+      working-directory: ./ell-install
+    - name: configure
+      run: ./configure
+      env:
+        PKG_CONFIG_PATH: $PWD/ell-install/lib
+    - name: make
+      run: make
+    - name: make check
+      run: make check
+    - name: make distcheck
+      run: make distcheck
