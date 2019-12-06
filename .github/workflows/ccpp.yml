@@ -9,16 +9,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-      with:
-        repository: git://git.kernel.org/pub/scm/libs/ell/ell.git
-        path: ell-source 
-    - uses: actions/checkout@v1
     - name: build and install ELL
       run: |
-        cd ell
-        ./bootstrap
-        ./configure --prefix=`dirname $PWD`
-        make install
+        git clone git://git.kernel.org/pub/scm/libs/ell/ell.git
       working-directory: ./ell-install
     - name: configure
       run: ./configure
