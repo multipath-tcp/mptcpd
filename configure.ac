@@ -31,7 +31,7 @@ dnl Support "--enable-debug=..." configure script command line option.
 AX_IS_RELEASE([git-directory])
 AX_CHECK_ENABLE_DEBUG([yes])
 
-AM_INIT_AUTOMAKE([1.15 -Wall -Werror -Wno-portability silent-rules std-options check-news readme-alpha])
+AM_INIT_AUTOMAKE([1.15 -Wall -Werror -Wno-portability silent-rules std-options check-news])
 AM_SILENT_RULES([yes])
 LT_INIT([disable-static])
 
