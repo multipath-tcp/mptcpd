@@ -30,7 +30,7 @@
 
 - Debugger-friendly optimization is now supported.
 
-- ELL 0.21 or better is now required due to changes in the ELL generic
+- ELL 0.27 or better is now required due to changes in the ELL generic
   netlink API.
 
 11 June 2019 - mptcpd 0.2a

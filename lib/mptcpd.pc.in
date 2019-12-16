@@ -17,6 +17,6 @@ Name: @PACKAGE_NAME@
 Description: The Multipath TCP Daemon library
 URL: @PACKAGE_URL@
 Version: @VERSION@
-Requires.private: ell >= 0.21
+Requires.private: ell >= 0.27
 Cflags: -I${includedir}
 Libs: -L${libdir} -lmptcpd
