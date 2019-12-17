@@ -1,3 +1,38 @@
+18 December 2019 - mptcpd 0.3
+
+- This is the Multipath TCP Daemon beta release.
+
+- All known memory leaks have been fixed.
+
+- A potential security hole related to logging of MPTCP connection
+  tokens was closed.  Logging of MPTCP connection tokens no longer
+  occurs.
+
+- Support for compiler-based address, leak, and undefined behavior
+  sanitizers is now available, and may be enabled through
+  corresponding `configure' script options.  Run `./configure --help'
+  for the full list of options.
+
+- Diagnostic messages will be issued if the Linux kernel is not
+  properly configured to support a user space MPTCP path manager like
+  mptcpd.
+
+- Documentation on how to contribute to mptcpd is available in the
+  `CONTRIBUTING.md' file.
+
+- A pkg-config `mptcpd.pc' file is now generated and installed to
+  allow plugin developers to more easily obtain the necessary mptcpd
+  build related information, such as compiler and linker command line
+  flags.
+
+- The mptcpd plugin API dropped the mptcpd_addr type in favor of the
+  standard sockaddr family of structures.
+
+- Debugger-friendly optimization is now supported.
+
+- ELL 0.27 or better is now required due to changes in the ELL generic
+  netlink API.
+
 11 June 2019 - mptcpd 0.2a
 
 - This Multipath TCP Daemon alpha release replaces support for the
