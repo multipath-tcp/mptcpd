@@ -10,13 +10,13 @@ includedir=@includedir@
 # built.  It may differ from the actual site-specific plugin directory
 # if the default directory was overridden in the mptcpd configuration
 # file or on the command line.
-pkglibdir=@libdir@/@PACKAGE@
+plugindir=@libdir@/@PACKAGE@
 
 # Package keywords.
 Name: @PACKAGE_NAME@
 Description: The Multipath TCP Daemon library
 URL: @PACKAGE_URL@
 Version: @VERSION@
-Requires.private: ell >= 0.21
+Requires.private: ell >= 0.27
 Cflags: -I${includedir}
 Libs: -L${libdir} -lmptcpd
