@@ -114,6 +114,9 @@ static void test_no_plugins(void const *test_data)
         assert(dir != NULL);
 
         bool const loaded = mptcpd_plugin_load(dir, NULL);
+
+        (void) rmdir(dir);
+
         assert(!loaded);
 }
 
