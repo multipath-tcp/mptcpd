@@ -171,7 +171,9 @@ AM_CONDITIONAL([BUILDING_DLL], [test "x$enable_shared" = xyes])
 # ---------------------------------------------------------------
 # Checks for libraries.
 # ---------------------------------------------------------------
-PKG_CHECK_MODULES([ELL], [ell >= 0.27])
+ELL_VERSION=0.27  dnl Minimum required version of ELL.
+PKG_CHECK_MODULES([ELL], [ell >= $ELL_VERSION])
+AC_SUBST([ELL_VERSION])
 
 # ---------------------------------------------------------------
 # Checks for header files.
