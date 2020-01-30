@@ -29,6 +29,8 @@
 static int const coffee = 0xc0ffee;
 
 /**
+ * @struct foreach_data Data used when iterating over interfaces.
+ *
  * @brief Test data for callback function passed to
  *        @c mptcpd_nm_foreach_interface().
  */
