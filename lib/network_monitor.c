@@ -507,12 +507,20 @@ static void update_link(struct ifinfomsg const *ifi,
 static void remove_link(struct ifinfomsg const *ifi,
                         struct mptcpd_nm *nm)
 {
-        if (l_queue_remove_if(nm->interfaces,
-                              mptcpd_interface_match,
-                              &ifi->ifi_index) == NULL)
+        struct mptcpd_interface *const interface =
+                l_queue_remove_if(nm->interfaces,
+                                  mptcpd_interface_match,
+                                  &ifi->ifi_index);
+
+        if (interface == NULL) {
                 l_debug("Network interface %d not monitored. "
                         "Ignoring monitoring removal failure.",
                         ifi->ifi_index);
+
+                return;
+        }
+
+        mptcpd_interface_destroy(interface);
 }
 
 /**
