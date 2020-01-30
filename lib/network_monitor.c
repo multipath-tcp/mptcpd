@@ -601,12 +601,20 @@ static void insert_addr(struct l_queue *addrs,
 static void remove_addr(struct l_queue *addrs,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
-        if (l_queue_remove_if(addrs,
-                              mptcpd_sockaddr_match,
-                              rtm_addr) == NULL)
+        struct sockaddr *const addr =
+                l_queue_remove_if(addrs,
+                                  mptcpd_sockaddr_match,
+                                  rtm_addr);
+
+        if (addr == NULL) {
                 l_debug("Network address not monitored. "
                         "Ignoring monitoring removal "
                         "failure.");
+
+                return;
+        }
+
+        mptcpd_sockaddr_destroy(addr);
 }
 
 /**
