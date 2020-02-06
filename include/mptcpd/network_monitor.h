@@ -4,7 +4,7 @@
  *
  * @brief mptcpd network device monitoring.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
 
 #ifndef MPTCPD_NETWORK_MONITOR_H
@@ -75,6 +75,60 @@ struct mptcpd_interface
 };
 
 /**
+ * @struct mptcpd_nm_ops network_monitor.h <mptcpd/network_monitor.h>
+ *
+ * @brief Network monitor event tracking operations.
+ *
+ * A set of functions to be called when changes in network interfaces
+ * and addresses occur.
+ */
+struct mptcpd_nm_ops
+{
+        /**
+         * @brief A new network interface is available.
+         *
+         * @param[in] i Network interface information.
+         *
+         * @note The network address list may be empty.  Set a
+         *       @c new_address callback to be notified when new
+         *       network addresses become available.
+         */
+        void (*new_interface)(struct mptcpd_interface const *i);
+
+        /**
+         * @brief Network interface flags were updated.
+         *
+         * @param[in] i Network interface information.
+         */
+        void (*update_interface)(struct mptcpd_interface const *i);
+
+        /**
+         * @brief A network interface was removed.
+         *
+         * @param[in] i Network interface information.
+         */
+        void (*delete_interface)(struct mptcpd_interface const *i);
+
+        /**
+         * @brief A new network address is available.
+         *
+         * @param[in] i  Network interface information.
+         * @param[in] sa Network address   information.
+         */
+        void (*new_address)(struct mptcpd_interface const *i,
+                            struct sockaddr const *sa);
+
+        /**
+         * @brief A network address was removed.
+         *
+         * @param[in] i  Network interface information.
+         * @param[in] sa Network address   information.
+         */
+        void (*delete_address)(struct mptcpd_interface const *i,
+                               struct sockaddr const *sa);
+};
+
+/**
  * @brief Create a network monitor.
  *
  * @todo As currently implemented, one could create multiple network
@@ -119,6 +173,23 @@ typedef void (*mptcpd_nm_callback)(
 MPTCPD_API void mptcpd_nm_foreach_interface(struct mptcpd_nm const *nm,
                                             mptcpd_nm_callback callback,
                                             void *data);
+
+/**
+ * @brief Subscribe to mptcpd network monitor events.
+ *
+ * Register a set of operations that will be called on a corresponding
+ * mptcpd network monitoring event, e.g. network interface or address
+ * addition, update, or removal.
+ *
+ * @param[in,out] nm  Pointer to the mptcpd network monitor object.
+ * @param[in]     ops Set of network monitoring event handling
+ *                    functions.
+ *
+ * @retval true  Registration succeeded.
+ * @retval false Registration failed.
+ */
+MPTCPD_API bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
+                                       struct mptcpd_nm_ops const *ops);
 
 #ifdef __cplusplus
 }

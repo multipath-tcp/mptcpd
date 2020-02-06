@@ -4,7 +4,7 @@
  *
  * @brief mptcpd network device monitoring.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
 
 #define _POSIX_C_SOURCE 200112L  ///< For XSI-compliant strerror_r().
@@ -47,6 +47,9 @@ struct mptcpd_nm
 
         /// List of @c mptcpd_interface objects.
         struct l_queue *interfaces;
+
+        /// List of @c mptcpd_nm_ops objects.
+        struct l_queue *ops;
 };
 
 // -------------------------------------------------------------------
@@ -263,6 +266,31 @@ mptcpd_interface_create(struct ifinfomsg const *ifi, uint32_t len)
 {
         assert(ifi != NULL);
 
+        /*
+          See rtnetlink(7) man page for struct ifinfomsg details.
+
+          ifi->
+            ifi_family: AF_UNSPEC
+            ifi_type:   ARP protocol hardware identifer,
+                        e.g. ARPHRD_ETHER (see <net/if_arp.h>)
+            ifi_index:  network device/interface index
+            ifi_flags:  device flags
+            ifi_change: change mask
+        */
+
+        l_debug("\n"
+                "ifi_family: %s\n"
+                "ifi_type:   %d\n"
+                "ifi_index:  %d\n"
+                "ifi_flags:  0x%08x\n"
+                "ifi_change: 0x%08x\n",
+                ifi->ifi_family == AF_UNSPEC ? "AF_UNSPEC"
+                                             : "<unexpected family>",
+                ifi->ifi_type,
+                ifi->ifi_index,
+                ifi->ifi_flags,
+                ifi->ifi_change);
+
         struct mptcpd_interface *const interface =
                 l_new(struct mptcpd_interface, 1);
 
@@ -418,6 +446,51 @@ static bool is_interface_ready(struct ifinfomsg const *ifi)
 }
 
 /**
+ * @brief Notify new network interface event subscriber.
+ *
+ * @param[in] data      Set of network event tracking callbacks.
+ * @param[in] user_data @c mptcpd network interface information.
+ */
+static void notify_new_interface(void *data, void *user_data)
+{
+        struct mptcpd_nm_ops    const *ops = data;
+        struct mptcpd_interface const *i   = user_data;
+
+        if (ops->new_interface)
+                ops->new_interface(i);
+}
+
+/**
+ * @brief Notify updated network interface event subscriber.
+ *
+ * @param[in] data      Set of network event tracking callbacks.
+ * @param[in] user_data @c mptcpd network interface information.
+ */
+static void notify_update_interface(void *data, void *user_data)
+{
+        struct mptcpd_nm_ops    const *ops = data;
+        struct mptcpd_interface const *i   = user_data;
+
+        if (ops->update_interface)
+                ops->update_interface(i);
+}
+
+/**
+ * @brief Notify removed network interface event subscriber.
+ *
+ * @param[in] data      Set of network event tracking callbacks.
+ * @param[in] user_data @c mptcpd network interface information.
+ */
+static void notify_delete_interface(void *data, void *user_data)
+{
+        struct mptcpd_nm_ops    const *ops = data;
+        struct mptcpd_interface const *i   = user_data;
+
+        if (ops->delete_interface)
+                ops->delete_interface(i);
+}
+
+/**
  * @brief Register network interface (link) with network monitor.
  *
  * @param[in] ifi Network interface-specific information retrieved
@@ -426,37 +499,16 @@ static bool is_interface_ready(struct ifinfomsg const *ifi)
  * @param[in] nm  Pointer to the @c mptcpd_nm object that contains the
  *                list (queue) to which network interface information
  *                will be inserted.
+ *
+ * @return Inserted @c mptcpd_interface object corresponding to the
+ *         new network link/interface.
  */
-static void insert_link(struct ifinfomsg const *ifi,
-                        uint32_t len,
-                        struct mptcpd_nm *nm)
+static struct mptcpd_interface *
+insert_link(struct ifinfomsg const *ifi,
+            uint32_t len,
+            struct mptcpd_nm *nm)
 {
-        /*
-          See rtnetlink(7) man page for struct ifinfomsg details.
-
-          ifi->
-            ifi_family: AF_UNSPEC
-            ifi_type:   ARP protocol hardware identifer,
-                        e.g. ARPHRD_ETHER (see <net/if_arp.h>)
-            ifi_index:  network device/interface index
-            ifi_flags:  device flags
-            ifi_change: change mask
-        */
-
-        l_debug("\n"
-                "ifi_family: %s\n"
-                "ifi_type:   %d\n"
-                "ifi_index:  %d\n"
-                "ifi_flags:  0x%08x\n"
-                "ifi_change: 0x%08x\n",
-                ifi->ifi_family == AF_UNSPEC ? "AF_UNSPEC"
-                                             : "<unexpected family>",
-                ifi->ifi_type,
-                ifi->ifi_index,
-                ifi->ifi_flags,
-                ifi->ifi_change);
-
-        struct mptcpd_interface *const interface =
+        struct mptcpd_interface *interface =
                 mptcpd_interface_create(ifi, len);
 
         if (!l_queue_insert(nm->interfaces,
@@ -464,9 +516,12 @@ static void insert_link(struct ifinfomsg const *ifi,
                             mptcpd_interface_compare,
                             NULL)) {
                 mptcpd_interface_destroy(interface);
+                interface = NULL;
 
                 l_error("Unable to queue network interface information.");
         }
+
+        return interface;
 }
 
 /**
@@ -483,15 +538,23 @@ static void update_link(struct ifinfomsg const *ifi,
                         uint32_t len,
                         struct mptcpd_nm *nm)
 {
-        struct mptcpd_interface *const i =
+        struct mptcpd_interface *i =
                 l_queue_find(nm->interfaces,
                              mptcpd_interface_match,
                              &ifi->ifi_index);
 
-        if (i == NULL)
-                insert_link(ifi, len, nm);
-        else
+        if (i == NULL) {
+                i = insert_link(ifi, len, nm);
+
+                // Notify new network interface event observers.
+                l_queue_foreach(nm->ops, notify_new_interface, i);
+
+        } else {
                 i->flags = ifi->ifi_flags;
+
+                // Notify updated network interface event observers.
+                l_queue_foreach(nm->ops, notify_update_interface, i);
+        }
 }
 
 /**
@@ -520,6 +583,9 @@ static void remove_link(struct ifinfomsg const *ifi,
                 return;
         }
 
+        // Notify removed network interface event observers.
+        l_queue_foreach(nm->ops, notify_delete_interface, interface);
+
         mptcpd_interface_destroy(interface);
 }
 
@@ -546,10 +612,6 @@ static void handle_link(uint16_t type,
 
         switch (type) {
         case RTM_NEWLINK:
-                /**
-                 * @todo Inform path manager plugins of network
-                 *       interface change.
-                 */
                 if (is_interface_ready(ifi))
                         update_link(ifi, len, nm);
                 else
@@ -557,10 +619,6 @@ static void handle_link(uint16_t type,
 
                 break;
         case RTM_DELLINK:
-                /**
-                 * @todo Inform path manager plugins of network
-                 *       interface change.
-                 */
                 remove_link(ifi, nm);
 
                 break;
@@ -571,18 +629,66 @@ static void handle_link(uint16_t type,
 }
 
 /**
+ * @struct mptcpd_addr_info
+ *
+ * @brief Convenience structure to bundle address information.
+ */
+struct mptcpd_addr_info
+{
+        /// Network interface information.
+        struct mptcpd_interface *const interface;
+
+        /// Network address information.
+        struct sockaddr *const address;
+};
+
+/**
+ * @brief Notify new network address event subscriber.
+ *
+ * @param[in] data      Set of network event tracking callbacks.
+ * @param[in] user_data Network address information.
+ */
+static void notify_new_address(void *data, void *user_data)
+{
+        struct mptcpd_nm_ops    const *ops  = data;
+        struct mptcpd_addr_info const *info = user_data;
+
+        if (ops->new_address)
+                ops->new_address(info->interface, info->address);
+}
+
+/**
+ * @brief Notify new network address event subscriber.
+ *
+ * @param[in] data      Set of network event tracking callbacks.
+ * @param[in] user_data Network address information.
+ */
+static void notify_delete_address(void *data, void *user_data)
+{
+        struct mptcpd_nm_ops    const *ops  = data;
+        struct mptcpd_addr_info const *info = user_data;
+
+        if (ops->delete_address)
+                ops->delete_address(info->interface, info->address);
+}
+
+/**
  * @brief Register network address with network monitor.
  *
- * @param[in] addrs    List of tracked network addresses.
- * @param[in] rtm_addr New network address information.
+ * @param[in] nm        @c mptcpd_nm object that contains the list
+ *                      (queue) of network monitoring event
+ *                      subscribers.
+ * @param[in] interface @c mptcpd network interface information.
+ * @param[in] rtm_addr  New network address information.
  */
-static void insert_addr(struct l_queue *addrs,
+static void insert_addr(struct mptcpd_nm *nm,
+                        struct mptcpd_interface *interface,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
         struct sockaddr *const addr = mptcpd_sockaddr_create(rtm_addr);
 
         if (unlikely(addr == NULL)
-            || !l_queue_insert(addrs,
+            || !l_queue_insert(interface->addrs,
                                addr,
                                mptcpd_sockaddr_compare,
                                NULL)) {
@@ -590,19 +696,31 @@ static void insert_addr(struct l_queue *addrs,
 
                 l_error("Unable to track internet address information.");
         }
+
+        // Notify new network address event observers.
+        struct mptcpd_addr_info info = {
+                .interface = interface,
+                .address   = addr
+        };
+
+        l_queue_foreach(nm->ops, notify_new_address, &info);
 }
 
 /**
  * @brief Remove network address from the network monitor.
  *
- * @param[in] addrs    List of tracked network addresses.
- * @param[in] rtm_addr Removed network address information.
+ * @param[in] nm        @c mptcpd_nm object that contains the list
+ *                      (queue) of network monitoring event
+ *                      subscribers.
+ * @param[in] interface @c mptcpd network interface information.
+ * @param[in] rtm_addr  Removed network address information.
  */
-static void remove_addr(struct l_queue *addrs,
+static void remove_addr(struct mptcpd_nm *nm,
+                        struct mptcpd_interface *interface,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
         struct sockaddr *const addr =
-                l_queue_remove_if(addrs,
+                l_queue_remove_if(interface->addrs,
                                   mptcpd_sockaddr_match,
                                   rtm_addr);
 
@@ -614,23 +732,36 @@ static void remove_addr(struct l_queue *addrs,
                 return;
         }
 
+        struct mptcpd_addr_info info = {
+                .interface = interface,
+                .address   = addr
+        };
+
+        l_queue_foreach(nm->ops, notify_delete_address, &info);
+
         mptcpd_sockaddr_destroy(addr);
 }
 
 /**
  * @brief Register or update network address with network monitor.
  *
- * @param[in] addrs    List of tracked network addresses.
- * @param[in] rtm_addr New or updated network address information.
+ * @param[in] nm        @c mptcpd_nm object that contains the list
+ *                      (queue) of network monitoring event
+ *                      subscribers.
+ * @param[in] interface @c mptcpd network interface information.
+ * @param[in] rtm_addr  New or updated network address information.
  */
-static void update_addr(struct l_queue *addrs,
+static void update_addr(struct mptcpd_nm *nm,
+                        struct mptcpd_interface *interface,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
         struct sockaddr *const addr =
-                l_queue_find(addrs, mptcpd_sockaddr_match, rtm_addr);
+                l_queue_find(interface->addrs,
+                             mptcpd_sockaddr_match,
+                             rtm_addr);
 
         if (addr == NULL) {
-                insert_addr(addrs, rtm_addr);
+                insert_addr(nm, interface, rtm_addr);
         } else {
                 /**
                  * @todo Will we actually care about updating
@@ -695,7 +826,8 @@ static struct mptcpd_interface *get_mptcpd_interface(
  * @brief Network address handler function signature.
  */
 typedef
-void (*handle_ifaddr_func_t)(struct l_queue *addrs,
+void (*handle_ifaddr_func_t)(struct mptcpd_nm *nm,
+                             struct mptcpd_interface *interface,
                              struct mptcpd_rtm_addr const *rtm_addr);
 
 /**
@@ -714,12 +846,13 @@ void (*handle_ifaddr_func_t)(struct l_queue *addrs,
  */
 static void foreach_ifaddr(struct ifaddrmsg const *ifa,
                            uint32_t len,
-                           struct l_queue *addrs,
+                           struct mptcpd_nm *nm,
+                           struct mptcpd_interface *interface,
                            handle_ifaddr_func_t handler)
 {
         assert(ifa != NULL);
         assert(len != 0);
-        assert(addrs != NULL);
+        assert(interface != NULL);
         assert(handler != NULL);
 
         size_t bytes = len - NLMSG_ALIGN(sizeof(*ifa));
@@ -733,7 +866,7 @@ static void foreach_ifaddr(struct ifaddrmsg const *ifa,
                                 .addr = RTA_DATA(rta)
                         };
 
-                        handler(addrs, &rtm_addr);
+                        handler(nm, interface, &rtm_addr);
                 }
         }
 }
@@ -785,7 +918,7 @@ static void handle_ifaddr(uint16_t type,
                 return;
         }
 
-        foreach_ifaddr(ifa, len, interface->addrs, handler);
+        foreach_ifaddr(ifa, len, nm, interface, handler);
 
         /**
          * @todo Inform path manager plugins of network address
@@ -855,8 +988,9 @@ static void handle_rtm_getlink(int error,
         struct ifinfomsg const *const ifi = data;
         struct mptcpd_nm *const nm        = user_data;
 
-        if (is_interface_ready(ifi))
-                insert_link(ifi, len, nm);
+        if (is_interface_ready(ifi)) {
+                (void) insert_link(ifi, len, nm);
+        }
 }
 
 /**
@@ -895,7 +1029,7 @@ static void handle_rtm_getaddr(int error,
         if (interface == NULL)
                 return;
 
-        foreach_ifaddr(ifa, len, interface->addrs, insert_addr);
+        foreach_ifaddr(ifa, len, nm, interface, insert_addr);
 }
 
 /**
@@ -993,6 +1127,7 @@ struct mptcpd_nm *mptcpd_nm_create(void)
         }
 
         nm->interfaces = l_queue_new();
+        nm->ops        = l_queue_new();
 
         /**
          * Get network interface information.
@@ -1043,6 +1178,9 @@ void mptcpd_nm_destroy(struct mptcpd_nm *nm)
             && !l_netlink_unregister(nm->rtnl, nm->ipv6_id))
                 l_error("Failed to unregister IPv6 monitor.");
 
+        l_queue_destroy(nm->ops, NULL);
+        nm->ops = NULL;
+
         l_queue_destroy(nm->interfaces, mptcpd_interface_destroy);
         nm->interfaces = NULL;
 
@@ -1066,6 +1204,27 @@ void mptcpd_nm_foreach_interface(struct mptcpd_nm const *nm,
                         mptcpd_interface_callback,
                         &cb_data);
 }
+
+bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
+                            struct mptcpd_nm_ops const *ops)
+{
+        if (nm == NULL || ops == NULL)
+                return false;
+
+        /**
+         * @todo Should we return @c false if all of the callbacks in
+         *       @a ops are @c NULL?
+         */
+        if (ops->new_interface       == NULL
+            && ops->update_interface == NULL
+            && ops->delete_interface == NULL
+            && ops->new_address      == NULL
+            && ops->delete_address   == NULL)
+                l_warn("No network monitor event tracking ops were set.");
+
+        return l_queue_push_tail(nm->ops, (void *)ops);
+}
+
 
 /*
   Local Variables:
