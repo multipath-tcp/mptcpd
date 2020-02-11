@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2017-2019, Intel Corporation
+## Copyright (c) 2017-2020, Intel Corporation
 
 ## @todo Do not add the EXECUTABLE_* flags to test libraries (if any).
 AM_CPPFLAGS = -I$(top_srcdir)/include
@@ -138,13 +138,14 @@ xfail_test_scripts =		\
 dist_check_SCRIPTS = test-start-stop $(xfail_test_scripts)
 
 test_plugin_SOURCES = test-plugin.c
-test_plugin_CPPFLAGS =					\
-	-I$(top_srcdir)/include				\
-	-D_POSIX_C_SOURCE=200809L			\
-	-DTEST_PLUGIN_DIR_A=\"$(TEST_PLUGIN_DIR_A)\"	\
-	-DTEST_PLUGIN_DIR_B=\"$(TEST_PLUGIN_DIR_B)\"	\
-	-DTEST_PLUGIN_ONE=\"$(TEST_PLUGIN_ONE)\"	\
-	-DTEST_PLUGIN_TWO=\"$(TEST_PLUGIN_TWO)\"	\
+test_plugin_CPPFLAGS =						\
+	-I$(top_srcdir)/include					\
+	-D_POSIX_C_SOURCE=200809L				\
+	-DTEST_PLUGIN_DIR_A=\"$(TEST_PLUGIN_DIR_A)\"		\
+	-DTEST_PLUGIN_DIR_B=\"$(TEST_PLUGIN_DIR_B)\"		\
+	-DTEST_PLUGIN_DIR_NOOP=\"$(TEST_PLUGIN_DIR_NOOP)\"	\
+	-DTEST_PLUGIN_ONE=\"$(TEST_PLUGIN_ONE)\"		\
+	-DTEST_PLUGIN_TWO=\"$(TEST_PLUGIN_TWO)\"		\
 	-DTEST_PLUGIN_FOUR=\"$(TEST_PLUGIN_FOUR)\"
 test_plugin_LDADD =				\
 	$(top_builddir)/lib/libmptcpd.la	\

@@ -4,7 +4,7 @@
  *
  * @brief mptcpd plugin test.
  *
- * Copyright (c) 2018, 2019, Intel Corporation
+ * Copyright (c) 2018-2020, Intel Corporation
  */
 
 #undef NDEBUG
@@ -19,6 +19,7 @@
 
 #include <ell/test.h>
 
+#include <mptcpd/plugin.h>
 #include <mptcpd/plugin_private.h>
 
 #include "test-plugin.h"
@@ -123,7 +124,8 @@ static void test_no_plugins(void const *test_data)
 /**
  * @brief Verify dispatch of plugin operations.
  *
- *
+ * Confirm that specific plugins are dispatched with the expected
+ * arguments.
  */
 static void test_plugin_dispatch(void const *test_data)
 {
@@ -187,6 +189,50 @@ static void test_plugin_dispatch(void const *test_data)
         mptcpd_plugin_unload();
 }
 
+/**
+ * @brief Verify graceful handling of NULL plugin operations.
+ *
+ * Confirm that the mptcpd plugin framework will not call operations
+ * that have not been specified by the user, i.e. those that are
+ * @c NULL.
+ */
+static void test_null_plugin_ops(void const *test_data)
+{
+        (void) test_data;
+
+        static char const        dir[]          = TEST_PLUGIN_DIR_NOOP;
+        static char const *const default_plugin = NULL;
+
+        bool const loaded = mptcpd_plugin_load(dir, default_plugin);
+        assert(loaded);
+
+        char const name[] = "null ops";
+        struct mptcpd_plugin_ops const ops = { .new_connection = NULL };
+
+        bool registered = mptcpd_plugin_register_ops(name, &ops);
+        assert(registered);
+
+        // Unused dummy arguments.
+        static mptcpd_token_t const token = 0;
+        static mptcpd_aid_t const id = 0;
+        static struct sockaddr const *const laddr = NULL;
+        static struct sockaddr const *const raddr = NULL;
+        static struct mptcpd_pm *const pm = NULL;
+        static bool backup = false;
+
+        // No dispatch should occur in the following calls.
+        mptcpd_plugin_new_connection(name, token, laddr, raddr, pm);
+        mptcpd_plugin_connection_established(token, laddr, raddr, pm);
+        mptcpd_plugin_connection_closed(token, pm);
+        mptcpd_plugin_new_address(token, id, raddr, pm);
+        mptcpd_plugin_address_removed(token, id, pm);
+        mptcpd_plugin_new_subflow(token, laddr, raddr, backup, pm);
+        mptcpd_plugin_subflow_closed(token, laddr, raddr, backup, pm);
+        mptcpd_plugin_subflow_priority(token, laddr, raddr, backup, pm);
+
+        mptcpd_plugin_unload();
+}
+
 int main(int argc, char *argv[])
 {
         l_test_init(&argc, &argv);
@@ -195,6 +241,7 @@ int main(int argc, char *argv[])
         l_test_add("bad  permissions", test_bad_perms,       NULL);
         l_test_add("no plugins",       test_no_plugins,      NULL);
         l_test_add("plugin dispatch",  test_plugin_dispatch, NULL);
+        l_test_add("null plugin ops",  test_null_plugin_ops, NULL);
 
         return l_test_run();
 }
