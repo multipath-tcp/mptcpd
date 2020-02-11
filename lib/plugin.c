@@ -328,7 +328,7 @@ void mptcpd_plugin_new_connection(char const *name,
                               (void *) ops))
                 l_error("Unable to map connection to plugin.");
 
-        if (ops->new_connection)
+        if (ops && ops->new_connection)
                 ops->new_connection(token, laddr, raddr, pm);
 }
 
