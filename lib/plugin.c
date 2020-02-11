@@ -4,7 +4,7 @@
  *
  * @brief Common path manager plugin functions.
  *
- * Copyright (c) 2018, 2019, Intel Corporation
+ * Copyright (c) 2018-2020, Intel Corporation
  */
 
 #include <sys/types.h>
@@ -270,6 +270,20 @@ bool mptcpd_plugin_register_ops(char const *name,
         if (name == NULL || ops == NULL)
                 return false;
 
+        /**
+         * @todo Should we return @c false if all of the callbacks in
+         *       @a ops are @c NULL?
+         */
+        if (ops->new_connection            == NULL
+            && ops->connection_established == NULL
+            && ops->connection_closed      == NULL
+            && ops->new_address            == NULL
+            && ops->address_removed        == NULL
+            && ops->new_subflow            == NULL
+            && ops->subflow_closed         == NULL
+            && ops->subflow_priority       == NULL)
+                l_warn("No plugin operations were set.");
+
         bool const first_registration = l_hashmap_isempty(_pm_plugins);
 
         bool const registered =
@@ -314,7 +328,8 @@ void mptcpd_plugin_new_connection(char const *name,
                               (void *) ops))
                 l_error("Unable to map connection to plugin.");
 
-        ops->new_connection(token, laddr, raddr, pm);
+        if (ops && ops->new_connection)
+                ops->new_connection(token, laddr, raddr, pm);
 }
 
 void mptcpd_plugin_connection_established(mptcpd_token_t token,
@@ -324,7 +339,7 @@ void mptcpd_plugin_connection_established(mptcpd_token_t token,
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
 
-        if (ops)
+        if (ops && ops->connection_established)
                 ops->connection_established(token, laddr, raddr, pm);
 }
 
@@ -333,7 +348,7 @@ void mptcpd_plugin_connection_closed(mptcpd_token_t token,
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
 
-        if (ops)
+        if (ops && ops->connection_closed)
                 ops->connection_closed(token, pm);
 }
 
@@ -344,7 +359,7 @@ void mptcpd_plugin_new_address(mptcpd_token_t token,
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
 
-        if (ops)
+        if (ops && ops->new_address)
                 ops->new_address(token, id, addr, pm);
 }
 
@@ -354,7 +369,7 @@ void mptcpd_plugin_address_removed(mptcpd_token_t token,
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
 
-        if (ops)
+        if (ops && ops->address_removed)
                 ops->address_removed(token, id, pm);
 }
 
@@ -366,7 +381,7 @@ void mptcpd_plugin_new_subflow(mptcpd_token_t token,
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
 
-        if (ops)
+        if (ops && ops->new_subflow)
                 ops->new_subflow(token, laddr, raddr, backup, pm);
 }
 
@@ -378,7 +393,7 @@ void mptcpd_plugin_subflow_closed(mptcpd_token_t token,
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
 
-        if (ops)
+        if (ops && ops->subflow_closed)
                 ops->subflow_closed(token, laddr, raddr, backup, pm);
 
 }
@@ -391,7 +406,7 @@ void mptcpd_plugin_subflow_priority(mptcpd_token_t token,
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
 
-        if (ops)
+        if (ops && ops->subflow_priority)
                 ops->subflow_priority(token, laddr, raddr, backup, pm);
 
 }
