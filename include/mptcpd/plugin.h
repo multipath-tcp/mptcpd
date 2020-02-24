@@ -171,15 +171,21 @@ struct mptcpd_plugin_ops
 /**
  * @brief Register path manager operations.
  *
- * Path manager plugins should call this function to register their
- * MPTCP path manager event handling functions.
+ * Path manager plugins should call this function in their @c init
+ * function to register their MPTCP path manager event handling
+ * functions.
  *
  * @param[in] name Plugin name.
  * @param[in] ops  Set of MPTCP path manager event handling functions
  *                 provided by the path manager plugin.
  *
  * @retval true  Registration succeeded.
- * @retval false Registration failed.
+ * @retval false Registration failed.  Failure should only occur if
+ *               plugins were not loaded prior to calling this
+ *               function.  Plugin developers should generally not
+ *               have to worry about that since the load is guaranteed
+ *               to have occurred prior to their @c init function
+ *               being called.
  */
 MPTCPD_API bool mptcpd_plugin_register_ops(
         char const *name,
