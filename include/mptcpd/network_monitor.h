@@ -91,7 +91,9 @@ struct mptcpd_nm_ops
          *
          * @note The network address list may be empty.  Set a
          *       @c new_address callback to be notified when new
-         *       network addresses become available.
+         *       network addresses become available.  Network
+         *       addresses on a given network interface may be
+         *       retrieved through the @c new_address callback below.
          */
         void (*new_interface)(struct mptcpd_interface const *i);
 
