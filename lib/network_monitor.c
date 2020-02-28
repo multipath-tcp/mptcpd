@@ -24,6 +24,7 @@
 #include <ell/queue.h>
 
 #include <mptcpd/network_monitor.h>
+#include <mptcpd/network_monitor_private.h>
 
 
 // -------------------------------------------------------------------
@@ -627,20 +628,6 @@ static void handle_link(uint16_t type,
                 break;
         }
 }
-
-/**
- * @struct mptcpd_addr_info
- *
- * @brief Convenience structure to bundle address information.
- */
-struct mptcpd_addr_info
-{
-        /// Network interface information.
-        struct mptcpd_interface *const interface;
-
-        /// Network address information.
-        struct sockaddr *const address;
-};
 
 /**
  * @brief Notify new network address event subscriber.

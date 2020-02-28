@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2017-2019, Intel Corporation
+## Copyright (c) 2017-2020, Intel Corporation
 
 pkginclude_HEADERS =		\
 	export.h		\
@@ -9,7 +9,8 @@ pkginclude_HEADERS =		\
 	plugin.h		\
 	types.h
 
-noinst_HEADERS =		\
-	config-private.h	\
-	path_manager_private.h 	\
+noinst_HEADERS =			\
+	config-private.h		\
+	network_monitor_private.h 	\
+	path_manager_private.h 		\
 	plugin_private.h
