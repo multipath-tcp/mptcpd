@@ -4,7 +4,7 @@
  *
  * @brief mptcpd private plugin interface.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
 
 #ifndef MPTCPD_PLUGIN_PRIVATE_H
@@ -21,7 +21,12 @@ extern "C" {
 
 struct sockaddr;
 struct mptcpd_pm;
+struct mptcpd_interface;
 
+/**
+ * @name MPTCP Path Manager Generic Netlink Event Handlers
+ */
+//@{
 /**
  * @brief Load mptcpd plugins.
  *
@@ -150,6 +155,72 @@ MPTCPD_API void mptcpd_plugin_subflow_priority(
         struct sockaddr const *raddr,
         bool backup,
         struct mptcpd_pm *pm);
+//@}
+
+/**
+ * @name Network Monitor Event Handlers
+ *
+ * A set of operations that dispatch mptcpd network monitor events to
+ * all registered plugins.
+ *
+ * @see mptcpd_nm_ops
+ */
+//@{
+/**
+ * @brief Notify plugin of new network interface.
+ *
+ * @param[in] i  Network interface information.
+ * @param[in] pm Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_new_interface(
+        struct mptcpd_interface const *i,
+        void *pm);
+
+/**
+ * @brief Notify plugin of updated network interface.
+ *
+ * @param[in] i  Network interface information.
+ * @param[in] pm Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_update_interface(
+        struct mptcpd_interface const *i,
+        void *pm);
+
+/**
+ * @brief Notify plugin of removed network interface.
+ *
+ * @param[in] i  Network interface information.
+ * @param[in] pm Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_delete_interface(
+        struct mptcpd_interface const *i,
+        void *pm);
+
+/**
+ * @brief Notify plugin of new network address.
+ *
+ * @param[in] i  Network interface information.
+ * @param[in] sa Network address information.
+ * @param[in] pm Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_new_local_address(
+        struct mptcpd_interface const *i,
+        struct sockaddr const *sa,
+        void *pm);
+
+/**
+ * @brief Notify plugin of removed network address.
+ *
+ * @param[in] i  Network interface information.
+ * @param[in] sa Network address information.
+ * @param[in] pm Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_delete_local_address(
+        struct mptcpd_interface const *i,
+        struct sockaddr const *sa,
+        void *pm);
+//@}
+
 
 #ifdef __cplusplus
 }

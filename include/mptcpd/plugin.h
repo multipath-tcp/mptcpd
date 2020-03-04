@@ -4,7 +4,7 @@
  *
  * @brief mptcpd user space path manager plugin header file.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
 
 #ifndef MPTCPD_PLUGIN_H
@@ -29,15 +29,16 @@ extern "C" {
 
 struct sockaddr;
 struct mptcpd_pm;
+struct mptcpd_interface;
 
 /**
  * @struct mptcpd_plugin_ops plugin.h <mptcpd/plugin.h>
  *
  * @brief Mptcpd plugin interface.
  *
- * This is a set of functions that comprise the mptcpd plugin
- * interface.  They correspond to the kernel events in the MPTCP path
- * manager generic netlink API.
+ * This is a set of functions that comprise the mptcpd plugin path
+ * management interface.  They correspond to the kernel events in
+ * the MPTCP path manager generic netlink API.
  */
 struct mptcpd_plugin_ops
 {
@@ -166,6 +167,79 @@ struct mptcpd_plugin_ops
                                  struct sockaddr const *raddr,
                                  bool backup,
                                  struct mptcpd_pm *pm);
+
+        /**
+         * @brief Network monitor event handlers.
+         *
+         * Set of network monitoring event handling functions provided
+         * by the path manager plugin.
+         */
+        struct mptcpd_plugin_nm_ops const *nm_ops;
+};
+
+/**
+ * @struct mptcpd_plugin_nm_ops plugin.h <mptcpd/plugin.h>
+ *
+ * @brief Mptcpd plugin network event tracking operations.
+ *
+ * A set of functions to be called when changes in network interfaces
+ * and addresses occur.
+ *
+ * @see @c mptcpd_nm_ops
+ */
+struct mptcpd_plugin_nm_ops
+{
+        /**
+         * @brief A new network interface is available.
+         *
+         * @param[in] i  Network interface information.
+         * @param[in] pm Opaque pointer to mptcpd path manager
+         *               object.
+         *
+         * @note The network address list may be empty.  Set a
+         *       @c new_address callback to be notified when new
+         *       network addresses become available.  Network
+         *       addresses on a given network interface may be
+         *       retrieved through the @c new_address callback below.
+         */
+        void (*new_interface)(struct mptcpd_interface const *i,
+                              struct mptcpd_pm *pm);
+
+        /**
+         * @brief Network interface flags were updated.
+         *
+         * @param[in] i Network interface information.
+         */
+        void (*update_interface)(struct mptcpd_interface const *i,
+                                 struct mptcpd_pm *pm);
+
+        /**
+         * @brief A network interface was removed.
+         *
+         * @param[in] i Network interface information.
+         */
+        void (*delete_interface)(struct mptcpd_interface const *i,
+                                 struct mptcpd_pm *pm);
+
+        /**
+         * @brief A new network address is available.
+         *
+         * @param[in] i  Network interface information.
+         * @param[in] sa Network address   information.
+         */
+        void (*new_address)(struct mptcpd_interface const *i,
+                            struct sockaddr const *sa,
+                            struct mptcpd_pm *pm);
+
+        /**
+         * @brief A network address was removed.
+         *
+         * @param[in] i  Network interface information.
+         * @param[in] sa Network address   information.
+         */
+        void (*delete_address)(struct mptcpd_interface const *i,
+                               struct sockaddr const *sa,
+                               struct mptcpd_pm *pm);
 };
 
 /**

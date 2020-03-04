@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include <linux/mptcp.h>
 
@@ -22,8 +23,8 @@
 #include <mptcpd/config-private.h>
 #endif
 
-#include <mptcpd/plugin_private.h>
 #include <mptcpd/plugin.h>
+#include <mptcpd/plugin_private.h>
 
 /**
  * @todo Remove this preprocessor symbol definition once support for
@@ -46,8 +47,8 @@
 /**
  * @brief Map of path manager plugins.
  *
- * A map of path manager plugins where the key is the plugin
- * name and the value is a pointer to a @c struct @c mptcpd_pm_ops
+ * A map of path manager plugins where the key is the plugin name and
+ * the value is a pointer to a @c struct @c mptcpd_plugin_ops
  * instance.
  *
  * @note This is a static variable since ELL's plugin framework
@@ -91,7 +92,7 @@ static char _default_name[MPTCP_PM_NAME_LEN + 1];
 static struct mptcpd_plugin_ops const *_default_ops;
 
 // ----------------------------------------------------------------
-//                      Implementation details
+//                      Implementation Details
 // ----------------------------------------------------------------
 
 /**
@@ -409,6 +410,178 @@ void mptcpd_plugin_subflow_priority(mptcpd_token_t token,
         if (ops && ops->subflow_priority)
                 ops->subflow_priority(token, laddr, raddr, backup, pm);
 
+}
+
+// ----------------------------------------------------------------
+// Network Monitoring Related Plugin Operation Callback Invocation
+// ----------------------------------------------------------------
+
+/**
+ * @struct plugin_address_info
+ *
+ * @brief Convenience structure to bundle address information.
+ */
+struct plugin_address_info
+{
+        /// Network interface information.
+        struct mptcpd_interface const *const interface;
+
+        /// Network address information.
+        struct sockaddr const *const address;
+
+        /// Mptcpd path manager object.
+        struct mptcpd_pm *const pm;
+};
+
+/**
+ * @struct plugin_interface_info
+ *
+ * @brief Convenience structure to bundle interface information.
+ */
+struct plugin_interface_info
+{
+        /// Network interface information.
+        struct mptcpd_interface const *const interface;
+
+        /// Mptcpd path manager object.
+        struct mptcpd_pm *const pm;
+};
+
+static void new_interface(void const *key, void *value, void *user_data)
+{
+        (void) key;
+
+        assert(value != NULL);
+
+        struct mptcpd_plugin_ops     const *const ops    = value;
+        struct mptcpd_plugin_nm_ops  const *const nm_ops = ops->nm_ops;
+        struct plugin_interface_info const *const i      = user_data;
+
+        if (nm_ops && nm_ops->new_interface)
+                nm_ops->new_interface(i->interface, i->pm);
+}
+
+static void update_interface(void const *key,
+                             void *value,
+                             void *user_data)
+{
+        (void) key;
+
+        assert(value != NULL);
+
+        struct mptcpd_plugin_ops     const *const ops    = value;
+        struct mptcpd_plugin_nm_ops  const *const nm_ops = ops->nm_ops;
+        struct plugin_interface_info const *const i      = user_data;
+
+        if (nm_ops && nm_ops->update_interface)
+                nm_ops->update_interface(i->interface, i->pm);
+}
+
+static void delete_interface(void const *key,
+                             void *value,
+                             void *user_data)
+{
+        (void) key;
+
+        assert(value != NULL);
+
+        struct mptcpd_plugin_ops     const *const ops    = value;
+        struct mptcpd_plugin_nm_ops  const *const nm_ops = ops->nm_ops;
+        struct plugin_interface_info const *const i      = user_data;
+
+        if (nm_ops && nm_ops->delete_interface)
+                nm_ops->delete_interface(i->interface, i->pm);
+}
+
+static void new_local_address(void const *key,
+                              void *value,
+                              void *user_data)
+{
+        (void) key;
+
+        assert(value != NULL);
+
+        struct mptcpd_plugin_ops   const *const ops    = value;
+        struct mptcpd_plugin_nm_ops  const *const nm_ops = ops->nm_ops;
+        struct plugin_address_info const *const i      = user_data;
+
+        if (nm_ops && nm_ops->new_address)
+                nm_ops->new_address(i->interface, i->address, i->pm);
+}
+
+static void delete_local_address(void const *key,
+                                 void *value,
+                                 void *user_data)
+{
+        (void) key;
+
+        assert(value != NULL);
+
+        struct mptcpd_plugin_ops    const *const ops    = value;
+        struct mptcpd_plugin_nm_ops const *const nm_ops = ops->nm_ops;
+        struct plugin_address_info  const *const i      = user_data;
+
+        if (nm_ops && nm_ops->delete_address)
+                nm_ops->delete_address(i->interface, i->address, i->pm);
+}
+
+void mptcpd_plugin_new_interface(struct mptcpd_interface const *i,
+                                 void *pm)
+{
+        struct plugin_interface_info info = {
+                .interface = i,
+                .pm        = pm
+        };
+
+        l_hashmap_foreach(_pm_plugins, new_interface, &info);
+}
+
+void mptcpd_plugin_update_interface(struct mptcpd_interface const *i,
+                                    void *pm)
+{
+        struct plugin_interface_info info = {
+                .interface = i,
+                .pm        = pm
+        };
+
+        l_hashmap_foreach(_pm_plugins, update_interface, &info);
+}
+
+void mptcpd_plugin_delete_interface(struct mptcpd_interface const *i,
+                                    void *pm)
+{
+        struct plugin_interface_info info = {
+                .interface = i,
+                .pm        = pm
+        };
+
+        l_hashmap_foreach(_pm_plugins, delete_interface, &info);
+}
+
+void mptcpd_plugin_new_local_address(struct mptcpd_interface const *i,
+                                     struct sockaddr const *sa,
+                                     void *pm)
+{
+        struct plugin_address_info info = {
+                .interface = i,
+                .address   = sa,
+                .pm        = pm
+        };
+
+        l_hashmap_foreach(_pm_plugins, new_local_address, &info);
+}
+
+void mptcpd_plugin_delete_local_address(struct mptcpd_interface const *i,
+                                        struct sockaddr const *sa,
+                                        void *pm)
+{
+        struct plugin_address_info info = {
+                .interface = i,
+                .address   = sa,
+                .pm        = pm
+        };
+
+        l_hashmap_foreach(_pm_plugins, delete_local_address, &info);
 }
 
 
