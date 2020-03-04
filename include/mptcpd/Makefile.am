@@ -11,6 +11,5 @@ pkginclude_HEADERS =		\
 
 noinst_HEADERS =			\
 	config-private.h		\
-	network_monitor_private.h 	\
 	path_manager_private.h 		\
 	plugin_private.h
