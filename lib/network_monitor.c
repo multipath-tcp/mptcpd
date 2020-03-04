@@ -24,10 +24,23 @@
 #include <ell/queue.h>
 
 #include <mptcpd/network_monitor.h>
-#include <mptcpd/network_monitor_private.h>
 
 
 // -------------------------------------------------------------------
+
+/**
+ * @struct nm_ops_info
+ *
+ * @brief Network monitoring event tracking callback information.
+ */
+struct nm_ops_info
+{
+        /// Network monitor event tracking operations.
+        struct mptcpd_nm_ops const *ops;
+
+        /// Data passed to the network event tracking operations.
+        void *user_data;
+};
 
 /**
  * @brief Data needed to run the network monitor.
@@ -49,7 +62,7 @@ struct mptcpd_nm
         /// List of @c mptcpd_interface objects.
         struct l_queue *interfaces;
 
-        /// List of @c mptcpd_nm_ops objects.
+        /// List of @c nm_ops_info objects.
         struct l_queue *ops;
 };
 
@@ -427,6 +440,20 @@ static void mptcpd_interface_callback(void *data, void *user_data)
 // -------------------------------------------------------------------
 
 /**
+ * @struct mptcpd_addr_info
+ *
+ * @brief Convenience structure to bundle address information.
+ */
+struct mptcpd_addr_info
+{
+        /// Network interface information.
+        struct mptcpd_interface const *const interface;
+
+        /// Network address information.
+        struct sockaddr const *const address;
+};
+
+/**
  * @brief Check if network interface is ready for use.
  *
  * @param[in] ifi Network interface-specific information retrieved
@@ -449,31 +476,33 @@ static bool is_interface_ready(struct ifinfomsg const *ifi)
 /**
  * @brief Notify new network interface event subscriber.
  *
- * @param[in] data      Set of network event tracking callbacks.
+ * @param[in] data      Network event tracking callbacks and data.
  * @param[in] user_data @c mptcpd network interface information.
  */
 static void notify_new_interface(void *data, void *user_data)
 {
-        struct mptcpd_nm_ops    const *ops = data;
-        struct mptcpd_interface const *i   = user_data;
+        struct nm_ops_info            *const info = data;
+        struct mptcpd_nm_ops    const *const ops  = info->ops;
+        struct mptcpd_interface const *const i    = user_data;
 
         if (ops->new_interface)
-                ops->new_interface(i);
+                ops->new_interface(i, info->user_data);
 }
 
 /**
  * @brief Notify updated network interface event subscriber.
  *
- * @param[in] data      Set of network event tracking callbacks.
+ * @param[in] data      Network event tracking callbacks and data.
  * @param[in] user_data @c mptcpd network interface information.
  */
 static void notify_update_interface(void *data, void *user_data)
 {
-        struct mptcpd_nm_ops    const *ops = data;
-        struct mptcpd_interface const *i   = user_data;
+        struct nm_ops_info            *const info = data;
+        struct mptcpd_nm_ops    const *const ops  = info->ops;
+        struct mptcpd_interface const *const i    = user_data;
 
         if (ops->update_interface)
-                ops->update_interface(i);
+                ops->update_interface(i, info->user_data);
 }
 
 /**
@@ -484,11 +513,12 @@ static void notify_update_interface(void *data, void *user_data)
  */
 static void notify_delete_interface(void *data, void *user_data)
 {
-        struct mptcpd_nm_ops    const *ops = data;
-        struct mptcpd_interface const *i   = user_data;
+        struct nm_ops_info            *const info = data;
+        struct mptcpd_nm_ops    const *const ops  = info->ops;
+        struct mptcpd_interface const *const i    = user_data;
 
         if (ops->delete_interface)
-                ops->delete_interface(i);
+                ops->delete_interface(i, info->user_data);
 }
 
 /**
@@ -632,31 +662,37 @@ static void handle_link(uint16_t type,
 /**
  * @brief Notify new network address event subscriber.
  *
- * @param[in] data      Set of network event tracking callbacks.
+ * @param[in] data      Network event tracking callbacks and data.
  * @param[in] user_data Network address information.
  */
 static void notify_new_address(void *data, void *user_data)
 {
-        struct mptcpd_nm_ops    const *ops  = data;
-        struct mptcpd_addr_info const *info = user_data;
+        struct nm_ops_info            *const info = data;
+        struct mptcpd_nm_ops    const *const ops  = info->ops;
+        struct mptcpd_addr_info const *const ai   = user_data;
 
         if (ops->new_address)
-                ops->new_address(info->interface, info->address);
+                ops->new_address(ai->interface,
+                                 ai->address,
+                                 info->user_data);
 }
 
 /**
  * @brief Notify new network address event subscriber.
  *
- * @param[in] data      Set of network event tracking callbacks.
+ * @param[in] data      Network event tracking callbacks and data.
  * @param[in] user_data Network address information.
  */
 static void notify_delete_address(void *data, void *user_data)
 {
-        struct mptcpd_nm_ops    const *ops  = data;
-        struct mptcpd_addr_info const *info = user_data;
+        struct nm_ops_info            *const info = data;
+        struct mptcpd_nm_ops    const *const ops  = info->ops;
+        struct mptcpd_addr_info const *const ai   = user_data;
 
         if (ops->delete_address)
-                ops->delete_address(info->interface, info->address);
+                ops->delete_address(ai->interface,
+                                    ai->address,
+                                    info->user_data);
 }
 
 /**
@@ -1165,7 +1201,7 @@ void mptcpd_nm_destroy(struct mptcpd_nm *nm)
             && !l_netlink_unregister(nm->rtnl, nm->ipv6_id))
                 l_error("Failed to unregister IPv6 monitor.");
 
-        l_queue_destroy(nm->ops, NULL);
+        l_queue_destroy(nm->ops, l_free);
         nm->ops = NULL;
 
         l_queue_destroy(nm->interfaces, mptcpd_interface_destroy);
@@ -1193,7 +1229,8 @@ void mptcpd_nm_foreach_interface(struct mptcpd_nm const *nm,
 }
 
 bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
-                            struct mptcpd_nm_ops const *ops)
+                            struct mptcpd_nm_ops const *ops,
+                            void *user_data)
 {
         if (nm == NULL || ops == NULL)
                 return false;
@@ -1209,7 +1246,11 @@ bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
             && ops->delete_address   == NULL)
                 l_warn("No network monitor event tracking ops were set.");
 
-        return l_queue_push_tail(nm->ops, (void *)ops);
+        struct nm_ops_info *const info = l_malloc(sizeof(*info));
+        info->ops = ops;
+        info->user_data = user_data;
+
+        return l_queue_push_tail(nm->ops, info);
 }
 
 

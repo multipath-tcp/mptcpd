@@ -178,29 +178,39 @@ static void idle_callback(struct l_idle *idle, void *user_data)
                 l_main_quit();
 }
 
-static void handle_new_interface(struct mptcpd_interface const *i)
+static void handle_new_interface(struct mptcpd_interface const *i,
+                                 void *user_data)
 {
         l_debug("new_interface event occurred.");
 
         check_interface(i, NULL);
+
+        assert((int const *) user_data == &coffee);
 }
 
-static void handle_update_interface(struct mptcpd_interface const *i)
+static void handle_update_interface(struct mptcpd_interface const *i,
+                                    void *user_data)
 {
         l_debug("update_interface event occurred.");
 
         check_interface(i, NULL);
+
+        assert((int const *) user_data == &coffee);
 }
 
-static void handle_delete_interface(struct mptcpd_interface const *i)
+static void handle_delete_interface(struct mptcpd_interface const *i,
+                                    void *user_data)
 {
         l_debug("delete_interface event occurred.");
 
         check_interface(i, NULL);
+
+        assert((int const *) user_data == &coffee);
 }
 
 void handle_new_address(struct mptcpd_interface const *i,
-                        struct sockaddr const *sa)
+                        struct sockaddr const *sa,
+                        void *user_data)
 {
         l_debug("new_address event occurred.");
 
@@ -208,10 +218,13 @@ void handle_new_address(struct mptcpd_interface const *i,
 
         l_debug("  new address:");
         dump_addr((void *) sa, NULL);
+
+        assert((int const *) user_data == &coffee);
 }
 
 void handle_delete_address(struct mptcpd_interface const *i,
-                           struct sockaddr const *sa)
+                           struct sockaddr const *sa,
+                           void *user_data)
 {
         l_debug("delete_address event occurred.");
 
@@ -219,6 +232,8 @@ void handle_delete_address(struct mptcpd_interface const *i,
 
         l_debug("  deleted address:");
         dump_addr((void *) sa, NULL);
+
+        assert((int const *) user_data == &coffee);
 }
 
 int main(void)
@@ -253,7 +268,9 @@ int main(void)
 
         // Subscribe to network monitoring related events.
         for (size_t i = 0; i < L_ARRAY_SIZE(nm_events); ++i)
-                mptcpd_nm_register_ops(nm, &nm_events[i]);
+                mptcpd_nm_register_ops(nm,
+                                       &nm_events[i],
+                                       (void *) &coffee);
 
         struct foreach_data data = { .nm = nm, .cup = coffee };
 
