@@ -9,6 +9,7 @@ pkginclude_HEADERS =		\
 	plugin.h		\
 	types.h
 
+
 noinst_HEADERS =			\
 	config-private.h		\
 	path_manager_private.h 		\
