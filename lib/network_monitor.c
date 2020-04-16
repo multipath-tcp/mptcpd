@@ -945,11 +945,6 @@ static void handle_ifaddr(uint16_t type,
         }
 
         foreach_ifaddr(ifa, len, nm, interface, handler);
-
-        /**
-         * @todo Inform path manager plugins of network address
-         *       change.
-         */
 }
 
 // -------------------------------------------------------------------
@@ -1088,11 +1083,10 @@ static void send_getaddr_command(void *user_data)
                            NULL) == 0) {
                 l_error("Unable to obtain IP addresses.");
 
-                /**
-                 * @todo We should probably terminate mptcpd since
-                 *       there isn't much we can do with out the
-                 *       network addresses.
-                 */
+                /*
+                  Continue running since addresses may be appear
+                  dynamically later on.
+                */
         }
 }
 
@@ -1238,16 +1232,16 @@ bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
         if (nm == NULL || ops == NULL)
                 return false;
 
-        /**
-         * @todo Should we return @c false if all of the callbacks in
-         *       @a ops are @c NULL?
-         */
         if (ops->new_interface       == NULL
             && ops->update_interface == NULL
             && ops->delete_interface == NULL
             && ops->new_address      == NULL
-            && ops->delete_address   == NULL)
-                l_warn("No network monitor event tracking ops were set.");
+            && ops->delete_address   == NULL) {
+                l_error("No network monitor event tracking "
+                        "ops were set.");
+
+                return false;
+        }
 
         struct nm_ops_info *const info = l_malloc(sizeof(*info));
         info->ops = ops;
