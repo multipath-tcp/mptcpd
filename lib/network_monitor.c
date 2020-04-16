@@ -719,6 +719,8 @@ static void insert_addr(struct mptcpd_nm *nm,
                 mptcpd_sockaddr_destroy(addr);
 
                 l_error("Unable to track internet address information.");
+
+                return;
         }
 
         // Notify new network address event observers.
