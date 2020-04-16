@@ -578,7 +578,8 @@ static void update_link(struct ifinfomsg const *ifi,
                 i = insert_link(ifi, len, nm);
 
                 // Notify new network interface event observers.
-                l_queue_foreach(nm->ops, notify_new_interface, i);
+                if (i != NULL)
+                        l_queue_foreach(nm->ops, notify_new_interface, i);
 
         } else {
                 i->flags = ifi->ifi_flags;
