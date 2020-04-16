@@ -453,12 +453,11 @@ static void new_interface(void const *key, void *value, void *user_data)
 
         assert(value != NULL);
 
-        struct mptcpd_plugin_ops     const *const ops    = value;
-        struct mptcpd_plugin_nm_ops  const *const nm_ops = ops->nm_ops;
-        struct plugin_interface_info const *const i      = user_data;
+        struct mptcpd_plugin_ops     const *const ops = value;
+        struct plugin_interface_info const *const i   = user_data;
 
-        if (nm_ops && nm_ops->new_interface)
-                nm_ops->new_interface(i->interface, i->pm);
+        if (ops->new_interface)
+                ops->new_interface(i->interface, i->pm);
 }
 
 static void update_interface(void const *key,
@@ -469,12 +468,11 @@ static void update_interface(void const *key,
 
         assert(value != NULL);
 
-        struct mptcpd_plugin_ops     const *const ops    = value;
-        struct mptcpd_plugin_nm_ops  const *const nm_ops = ops->nm_ops;
-        struct plugin_interface_info const *const i      = user_data;
+        struct mptcpd_plugin_ops     const *const ops = value;
+        struct plugin_interface_info const *const i   = user_data;
 
-        if (nm_ops && nm_ops->update_interface)
-                nm_ops->update_interface(i->interface, i->pm);
+        if (ops->update_interface)
+                ops->update_interface(i->interface, i->pm);
 }
 
 static void delete_interface(void const *key,
@@ -485,12 +483,11 @@ static void delete_interface(void const *key,
 
         assert(value != NULL);
 
-        struct mptcpd_plugin_ops     const *const ops    = value;
-        struct mptcpd_plugin_nm_ops  const *const nm_ops = ops->nm_ops;
-        struct plugin_interface_info const *const i      = user_data;
+        struct mptcpd_plugin_ops     const *const ops = value;
+        struct plugin_interface_info const *const i   = user_data;
 
-        if (nm_ops && nm_ops->delete_interface)
-                nm_ops->delete_interface(i->interface, i->pm);
+        if (ops->delete_interface)
+                ops->delete_interface(i->interface, i->pm);
 }
 
 static void new_local_address(void const *key,
@@ -501,12 +498,11 @@ static void new_local_address(void const *key,
 
         assert(value != NULL);
 
-        struct mptcpd_plugin_ops   const *const ops    = value;
-        struct mptcpd_plugin_nm_ops  const *const nm_ops = ops->nm_ops;
-        struct plugin_address_info const *const i      = user_data;
+        struct mptcpd_plugin_ops   const *const ops = value;
+        struct plugin_address_info const *const i   = user_data;
 
-        if (nm_ops && nm_ops->new_address)
-                nm_ops->new_address(i->interface, i->address, i->pm);
+        if (ops->new_local_address)
+                ops->new_local_address(i->interface, i->address, i->pm);
 }
 
 static void delete_local_address(void const *key,
@@ -517,12 +513,11 @@ static void delete_local_address(void const *key,
 
         assert(value != NULL);
 
-        struct mptcpd_plugin_ops    const *const ops    = value;
-        struct mptcpd_plugin_nm_ops const *const nm_ops = ops->nm_ops;
-        struct plugin_address_info  const *const i      = user_data;
+        struct mptcpd_plugin_ops    const *const ops = value;
+        struct plugin_address_info  const *const i   = user_data;
 
-        if (nm_ops && nm_ops->delete_address)
-                nm_ops->delete_address(i->interface, i->address, i->pm);
+        if (ops->delete_local_address)
+                ops->delete_local_address(i->interface, i->address, i->pm);
 }
 
 void mptcpd_plugin_new_interface(struct mptcpd_interface const *i,
