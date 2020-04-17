@@ -750,44 +750,6 @@ static void insert_addr(struct mptcpd_nm *nm,
         (void) insert_addr_return(interface, rtm_addr);
 }
 
-
-
-/**
- * @brief Remove network address from the network monitor.
- *
- * @param[in] nm        @c mptcpd_nm object that contains the list
- *                      (queue) of network monitoring event
- *                      subscribers.
- * @param[in] interface @c mptcpd network interface information.
- * @param[in] rtm_addr  Removed network address information.
- */
-static void remove_addr(struct mptcpd_nm *nm,
-                        struct mptcpd_interface *interface,
-                        struct mptcpd_rtm_addr const *rtm_addr)
-{
-        struct sockaddr *const addr =
-                l_queue_remove_if(interface->addrs,
-                                  mptcpd_sockaddr_match,
-                                  rtm_addr);
-
-        if (addr == NULL) {
-                l_debug("Network address not monitored. "
-                        "Ignoring monitoring removal "
-                        "failure.");
-
-                return;
-        }
-
-        struct mptcpd_addr_info info = {
-                .interface = interface,
-                .address   = addr
-        };
-
-        l_queue_foreach(nm->ops, notify_delete_address, &info);
-
-        mptcpd_sockaddr_destroy(addr);
-}
-
 /**
  * @brief Register or update network address with network monitor.
  *
@@ -830,6 +792,42 @@ static void update_addr(struct mptcpd_nm *nm,
                  */
                 l_debug("Network address information updated.");
         }
+}
+
+/**
+ * @brief Remove network address from the network monitor.
+ *
+ * @param[in] nm        @c mptcpd_nm object that contains the list
+ *                      (queue) of network monitoring event
+ *                      subscribers.
+ * @param[in] interface @c mptcpd network interface information.
+ * @param[in] rtm_addr  Removed network address information.
+ */
+static void remove_addr(struct mptcpd_nm *nm,
+                        struct mptcpd_interface *interface,
+                        struct mptcpd_rtm_addr const *rtm_addr)
+{
+        struct sockaddr *const addr =
+                l_queue_remove_if(interface->addrs,
+                                  mptcpd_sockaddr_match,
+                                  rtm_addr);
+
+        if (addr == NULL) {
+                l_debug("Network address not monitored. "
+                        "Ignoring monitoring removal "
+                        "failure.");
+
+                return;
+        }
+
+        struct mptcpd_addr_info info = {
+                .interface = interface,
+                .address   = addr
+        };
+
+        l_queue_foreach(nm->ops, notify_delete_address, &info);
+
+        mptcpd_sockaddr_destroy(addr);
 }
 
 /**
