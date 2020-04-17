@@ -679,7 +679,7 @@ static void notify_new_address(void *data, void *user_data)
 }
 
 /**
- * @brief Notify new network address event subscriber.
+ * @brief Notify network address event subscriber of deleted address.
  *
  * @param[in] data      Network event tracking callbacks and data.
  * @param[in] user_data Network address information.
@@ -699,17 +699,17 @@ static void notify_delete_address(void *data, void *user_data)
 /**
  * @brief Register network address with network monitor.
  *
- * @param[in] nm        @c mptcpd_nm object that contains the list
- *                      (queue) of network monitoring event
- *                      subscribers.
  * @param[in] interface @c mptcpd network interface information.
  * @param[in] rtm_addr  New network address information.
+ *
+ * @return Inserted @c sockaddr object corresponding to the new
+ *         network address.
  */
-static void insert_addr(struct mptcpd_nm *nm,
-                        struct mptcpd_interface *interface,
-                        struct mptcpd_rtm_addr const *rtm_addr)
+static struct sockaddr *
+insert_addr_return(struct mptcpd_interface *interface,
+                   struct mptcpd_rtm_addr const *rtm_addr)
 {
-        struct sockaddr *const addr = mptcpd_sockaddr_create(rtm_addr);
+        struct sockaddr *addr = mptcpd_sockaddr_create(rtm_addr);
 
         if (unlikely(addr == NULL)
             || !l_queue_insert(interface->addrs,
@@ -717,20 +717,40 @@ static void insert_addr(struct mptcpd_nm *nm,
                                mptcpd_sockaddr_compare,
                                NULL)) {
                 mptcpd_sockaddr_destroy(addr);
+                addr = NULL;
 
                 l_error("Unable to track internet address information.");
-
-                return;
         }
 
-        // Notify new network address event observers.
-        struct mptcpd_addr_info info = {
-                .interface = interface,
-                .address   = addr
-        };
-
-        l_queue_foreach(nm->ops, notify_new_address, &info);
+        return addr;
 }
+
+/**
+ * @brief Register network address with network monitor (no return).
+ *
+ * @param[in] nm        @c mptcpd_nm object that contains the list
+ *                      (queue) of network monitoring event
+ *                      subscribers.
+ * @param[in] interface @c mptcpd network interface information.
+ * @param[in] rtm_addr  New network address information.
+ *
+ * This wrapper function drops the @c insert_addr_return() return
+ * value so that it matches the @c handle_ifaddr_func_t type to allow
+ * it to be used as an argument to @c foreach_ifaddr().
+ *
+ * @note This function is only used at mptcpd start when the initial
+ *       network address is retrieved.
+ */
+static void insert_addr(struct mptcpd_nm *nm,
+                        struct mptcpd_interface *interface,
+                        struct mptcpd_rtm_addr const *rtm_addr)
+{
+        (void) nm;
+
+        (void) insert_addr_return(interface, rtm_addr);
+}
+
+
 
 /**
  * @brief Remove network address from the network monitor.
@@ -781,13 +801,25 @@ static void update_addr(struct mptcpd_nm *nm,
                         struct mptcpd_interface *interface,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
-        struct sockaddr *const addr =
+        struct sockaddr *addr =
                 l_queue_find(interface->addrs,
                              mptcpd_sockaddr_match,
                              rtm_addr);
 
         if (addr == NULL) {
-                insert_addr(nm, interface, rtm_addr);
+                addr = insert_addr_return(interface, rtm_addr);
+
+                // Notify new network interface event observers.
+                if (addr != NULL) {
+                        struct mptcpd_addr_info info = {
+                                .interface = interface,
+                                .address   = addr
+                        };
+
+                        l_queue_foreach(nm->ops,
+                                        notify_new_address,
+                                        &info);
+                }
         } else {
                 /**
                  * @todo Will we actually care about updating
