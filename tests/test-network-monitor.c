@@ -4,7 +4,7 @@
  *
  * @brief mptcpd network monitor test.
  *
- * Copyright (c) 2018, 2019, Intel Corporation
+ * Copyright (c) 2018-2020, Intel Corporation
  */
 
 #undef NDEBUG
@@ -29,6 +29,8 @@
 static int const coffee = 0xc0ffee;
 
 /**
+ * @struct foreach_data Data used when iterating over interfaces.
+ *
  * @brief Test data for callback function passed to
  *        @c mptcpd_nm_foreach_interface().
  */
@@ -68,6 +70,8 @@ static void dump_addr(void *data, void *user_data)
         struct sockaddr const *const a = data;
         void const *src = NULL;
 
+        assert(a != NULL);
+
         if (a->sa_family == AF_INET)
                 src = &((struct sockaddr_in  const *) a)->sin_addr;
         else
@@ -89,7 +93,7 @@ static void dump_addr(void *data, void *user_data)
  */
 static void check_interface(struct mptcpd_interface const *i, void *data)
 {
-        struct foreach_data *const fdata = data;
+        assert(i != NULL);
 
         l_debug("\ninterface\n"
                 "  family: %d\n"
@@ -102,7 +106,6 @@ static void check_interface(struct mptcpd_interface const *i, void *data)
                 i->index,
                 i->flags,
                 i->name);
-
 
         assert(l_queue_length(i->addrs) > 0);
 
@@ -117,13 +120,17 @@ static void check_interface(struct mptcpd_interface const *i, void *data)
         assert(ready == (i->flags & ready));
         assert(!(i->flags & IFF_LOOPBACK));
 
-        /*
-          Verify the user/callback data passed to and from the
-          mptcpd_nm_foreach_interface() function match.
-        */
-        assert(fdata->cup == coffee);
+        if (data) {
+                struct foreach_data *const fdata = data;
 
-        ++fdata->count;
+                /*
+                  Verify the user/callback data passed to and from the
+                  mptcpd_nm_foreach_interface() function match.
+                */
+                assert(fdata->cup == coffee);
+
+                ++fdata->count;
+        }
 }
 
 // -------------------------------------------------------------------
@@ -171,6 +178,64 @@ static void idle_callback(struct l_idle *idle, void *user_data)
                 l_main_quit();
 }
 
+static void handle_new_interface(struct mptcpd_interface const *i,
+                                 void *user_data)
+{
+        l_debug("new_interface event occurred.");
+
+        check_interface(i, NULL);
+
+        assert((int const *) user_data == &coffee);
+}
+
+static void handle_update_interface(struct mptcpd_interface const *i,
+                                    void *user_data)
+{
+        l_debug("update_interface event occurred.");
+
+        check_interface(i, NULL);
+
+        assert((int const *) user_data == &coffee);
+}
+
+static void handle_delete_interface(struct mptcpd_interface const *i,
+                                    void *user_data)
+{
+        l_debug("delete_interface event occurred.");
+
+        check_interface(i, NULL);
+
+        assert((int const *) user_data == &coffee);
+}
+
+void handle_new_address(struct mptcpd_interface const *i,
+                        struct sockaddr const *sa,
+                        void *user_data)
+{
+        l_debug("new_address event occurred.");
+
+        check_interface(i, NULL);
+
+        l_debug("  new address:");
+        dump_addr((void *) sa, NULL);
+
+        assert((int const *) user_data == &coffee);
+}
+
+void handle_delete_address(struct mptcpd_interface const *i,
+                           struct sockaddr const *sa,
+                           void *user_data)
+{
+        l_debug("delete_address event occurred.");
+
+        check_interface(i, NULL);
+
+        l_debug("  deleted address:");
+        dump_addr((void *) sa, NULL);
+
+        assert((int const *) user_data == &coffee);
+}
+
 int main(void)
 {
         if (!l_main_init())
@@ -181,6 +246,31 @@ int main(void)
 
         struct mptcpd_nm *const nm = mptcpd_nm_create();
         assert(nm);
+
+        struct mptcpd_nm_ops const nm_events[] = {
+                {
+                        .new_interface    = handle_new_interface,
+                        .update_interface = handle_update_interface,
+                        .delete_interface = handle_delete_interface,
+                        .new_address      = handle_new_address,
+                        .delete_address   = handle_delete_address
+                },
+                {
+                        .new_interface    = handle_new_interface,
+                        .update_interface = handle_update_interface,
+                        .delete_interface = handle_delete_interface
+                },
+                {
+                        .new_address      = handle_new_address,
+                        .delete_address   = handle_delete_address
+                }
+        };
+
+        // Subscribe to network monitoring related events.
+        for (size_t i = 0; i < L_ARRAY_SIZE(nm_events); ++i)
+                mptcpd_nm_register_ops(nm,
+                                       &nm_events[i],
+                                       (void *) &coffee);
 
         struct foreach_data data = { .nm = nm, .cup = coffee };
 

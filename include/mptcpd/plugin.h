@@ -4,7 +4,7 @@
  *
  * @brief mptcpd user space path manager plugin header file.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
 
 #ifndef MPTCPD_PLUGIN_H
@@ -29,18 +29,29 @@ extern "C" {
 
 struct sockaddr;
 struct mptcpd_pm;
+struct mptcpd_interface;
 
 /**
  * @struct mptcpd_plugin_ops plugin.h <mptcpd/plugin.h>
  *
  * @brief Mptcpd plugin interface.
  *
- * This is a set of functions that comprise the mptcpd plugin
- * interface.  They correspond to the kernel events in the MPTCP path
- * manager generic netlink API.
+ * This is a set of event handler callbacks that comprise the mptcpd
+ * plugin API.  Mptcpd plugins should implement these event handlers
+ * as needed.  Unused event handler fields may be @c NULL.
  */
 struct mptcpd_plugin_ops
 {
+        /**
+         * @name Path Manager Event Handlers
+         *
+         * @brief Mptcpd plugin path management event tracking
+         *        operations.
+         *
+         * A set of functions to be called when MPTCP path management
+         * related events occur.
+         */
+        //@{
         /**
          * @brief New MPTCP-capable connection has been created.
          *
@@ -166,20 +177,91 @@ struct mptcpd_plugin_ops
                                  struct sockaddr const *raddr,
                                  bool backup,
                                  struct mptcpd_pm *pm);
+        //@}
+
+        // --------------------------------------------------------
+
+        /**
+         * @name Network Monitor Event Handlers
+         *
+         * @brief Mptcpd plugin network event tracking operations.
+         *
+         * A set of functions to be called when changes in network
+         * interfaces and addresses occur.
+         */
+        //@{
+        /**
+         * @brief A new network interface is available.
+         *
+         * @param[in] i  Network interface information.
+         * @param[in] pm Opaque pointer to mptcpd path manager
+         *               object.
+         *
+         * @note The network address list may be empty.  Set a
+         *       @c new_address callback to be notified when new
+         *       network addresses become available.  Network
+         *       addresses on a given network interface may be
+         *       retrieved through the @c new_address callback below.
+         */
+        void (*new_interface)(struct mptcpd_interface const *i,
+                              struct mptcpd_pm *pm);
+
+        /**
+         * @brief Network interface flags were updated.
+         *
+         * @param[in] i Network interface information.
+         */
+        void (*update_interface)(struct mptcpd_interface const *i,
+                                 struct mptcpd_pm *pm);
+
+        /**
+         * @brief A network interface was removed.
+         *
+         * @param[in] i Network interface information.
+         */
+        void (*delete_interface)(struct mptcpd_interface const *i,
+                                 struct mptcpd_pm *pm);
+
+        /**
+         * @brief A new local network address is available.
+         *
+         * @param[in] i  Network interface information.
+         * @param[in] sa Network address   information.
+         */
+        void (*new_local_address)(struct mptcpd_interface const *i,
+                                  struct sockaddr const *sa,
+                                  struct mptcpd_pm *pm);
+
+        /**
+         * @brief A local network address was removed.
+         *
+         * @param[in] i  Network interface information.
+         * @param[in] sa Network address   information.
+         */
+        void (*delete_local_address)(struct mptcpd_interface const *i,
+                                     struct sockaddr const *sa,
+                                     struct mptcpd_pm *pm);
+        //@}
 };
 
 /**
  * @brief Register path manager operations.
  *
- * Path manager plugins should call this function to register their
- * MPTCP path manager event handling functions.
+ * Path manager plugins should call this function in their @c init
+ * function to register their MPTCP path manager event handling
+ * functions.
  *
  * @param[in] name Plugin name.
  * @param[in] ops  Set of MPTCP path manager event handling functions
  *                 provided by the path manager plugin.
  *
  * @retval true  Registration succeeded.
- * @retval false Registration failed.
+ * @retval false Registration failed.  Failure should only occur if
+ *               plugins were not loaded prior to calling this
+ *               function.  Plugin developers should generally not
+ *               have to worry about that since the load is guaranteed
+ *               to have occurred prior to their @c init function
+ *               being called.
  */
 MPTCPD_API bool mptcpd_plugin_register_ops(
         char const *name,

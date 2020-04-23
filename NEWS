@@ -1,3 +1,10 @@
+- Network monitoring related events are now propagated to plugins.
+  Events are triggered upon the addition, update, and removal of a
+  network interface (link), as well as the addition and removal of a
+  network address.  Plugins interested in receiving any of these
+  events need only implement the corresponding callback in the
+  `mptcpd_plugin_ops' API found in `<mptcpd/plugin.h>'.
+
 18 December 2019 - mptcpd 0.3
 
 - This is the Multipath TCP Daemon beta release.

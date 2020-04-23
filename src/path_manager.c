@@ -4,7 +4,7 @@
  *
  * @brief mptcpd path manager framework.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
 
 #include <stdio.h>
@@ -1019,6 +1019,14 @@ static void family_timeout(struct l_timeout *timeout, void *user_data)
         l_warn("Verify MPTCP \"netlink\" path manager kernel support.");
 }
 
+static struct mptcpd_nm_ops const _nm_ops = {
+        .new_interface    = mptcpd_plugin_new_interface,
+        .update_interface = mptcpd_plugin_update_interface,
+        .delete_interface = mptcpd_plugin_delete_interface,
+        .new_address      = mptcpd_plugin_new_local_address,
+        .delete_address   = mptcpd_plugin_delete_local_address,
+};
+
 struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 {
         assert(config != NULL);
@@ -1078,11 +1086,15 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         // Listen for network device changes.
         pm->nm = mptcpd_nm_create();
 
-        if (pm->nm == NULL) {
+        if (pm->nm == NULL
+            || !mptcpd_nm_register_ops(pm->nm, &_nm_ops, pm)) {
                 mptcpd_pm_destroy(pm);
                 l_error("Unable to create network monitor.");
                 return NULL;
         }
+
+        // Register network interface/address change handlers.
+
 
         /**
          * @bug Mptcpd plugins should only be loaded once at process

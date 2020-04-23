@@ -4,7 +4,7 @@
  *
  * @brief mptcpd network device monitoring.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
 
 #ifndef MPTCPD_NETWORK_MONITOR_H
@@ -75,6 +75,72 @@ struct mptcpd_interface
 };
 
 /**
+ * @struct mptcpd_nm_ops network_monitor.h <mptcpd/network_monitor.h>
+ *
+ * @brief Network monitor event tracking operations.
+ *
+ * A set of functions to be called when changes in network interfaces
+ * and addresses occur.
+ */
+struct mptcpd_nm_ops
+{
+        /**
+         * @brief A new network interface is available.
+         *
+         * @param[in] i         Network interface information.
+         * @param[in] user_data User-supplied data.
+         *
+         * @note The network address list may be empty.  Set a
+         *       @c new_address callback to be notified when new
+         *       network addresses become available.  Network
+         *       addresses on a given network interface may be
+         *       retrieved through the @c new_address callback below.
+         */
+        void (*new_interface)(struct mptcpd_interface const *i,
+                              void *user_data);
+
+        /**
+         * @brief Network interface flags were updated.
+         *
+         * @param[in] i         Network interface information.
+         * @param[in] user_data User-supplied data.
+         */
+        void (*update_interface)(struct mptcpd_interface const *i,
+                                 void *user_data);
+
+        /**
+         * @brief A network interface was removed.
+         *
+         * @param[in] i         Network interface information.
+         * @param[in] user_data User-supplied data.
+         */
+        void (*delete_interface)(struct mptcpd_interface const *i,
+                                 void *user_data);
+
+        /**
+         * @brief A new network address is available.
+         *
+         * @param[in] i         Network interface information.
+         * @param[in] sa        Network address   information.
+         * @param[in] user_data User-supplied data.
+         */
+        void (*new_address)(struct mptcpd_interface const *i,
+                            struct sockaddr const *sa,
+                            void *user_data);
+
+        /**
+         * @brief A network address was removed.
+         *
+         * @param[in] i         Network interface information.
+         * @param[in] sa        Network address   information.
+         * @param[in] user_data User-supplied data.
+         */
+        void (*delete_address)(struct mptcpd_interface const *i,
+                               struct sockaddr const *sa,
+                               void *user_data);
+};
+
+/**
  * @brief Create a network monitor.
  *
  * @todo As currently implemented, one could create multiple network
@@ -119,6 +185,27 @@ typedef void (*mptcpd_nm_callback)(
 MPTCPD_API void mptcpd_nm_foreach_interface(struct mptcpd_nm const *nm,
                                             mptcpd_nm_callback callback,
                                             void *data);
+
+/**
+ * @brief Subscribe to mptcpd network monitor events.
+ *
+ * Register a set of operations that will be called on a corresponding
+ * mptcpd network monitoring event, e.g. network interface or address
+ * addition, update, or removal.
+ *
+ * @param[in,out] nm        Pointer to the mptcpd network monitor
+ *                          object.
+ * @param[in]     ops       Set of network monitoring event handling
+ *                          functions.
+ * @param[in]     user_data Data to be passed to the network event
+ *                          tracking operations.
+ *
+ * @retval true  Registration succeeded.
+ * @retval false Registration failed.
+ */
+MPTCPD_API bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
+                                       struct mptcpd_nm_ops const *ops,
+                                       void *user_data);
 
 #ifdef __cplusplus
 }
