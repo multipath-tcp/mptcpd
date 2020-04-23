@@ -283,7 +283,12 @@ bool mptcpd_plugin_register_ops(char const *name,
             && ops->address_removed        == NULL
             && ops->new_subflow            == NULL
             && ops->subflow_closed         == NULL
-            && ops->subflow_priority       == NULL)
+            && ops->subflow_priority       == NULL
+            && ops->new_interface          == NULL
+            && ops->update_interface       == NULL
+            && ops->delete_interface       == NULL
+            && ops->new_local_address      == NULL
+            && ops->delete_local_address   == NULL)
                 l_warn("No plugin operations were set.");
 
         bool const first_registration = l_hashmap_isempty(_pm_plugins);
