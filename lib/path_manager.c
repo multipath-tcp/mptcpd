@@ -4,7 +4,7 @@
  *
  * @brief mptcpd generic netlink commands.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
 
 #define _POSIX_C_SOURCE 200112L  ///< For XSI-compliant strerror_r().
@@ -222,6 +222,59 @@ bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
                                            MPTCP_ATTR_SPORT,
                                            sizeof(port),
                                            &port));
+
+        if (!appended) {
+                l_genl_msg_unref(msg);
+
+                return appended;
+        }
+
+        return l_genl_family_send(pm->family,
+                                  msg,
+                                  family_send_callback,
+                                  NULL, /* user data */
+                                  NULL  /* destroy */)
+                != 0;
+}
+
+bool mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
+                           mptcpd_token_t token,
+                           mptcpd_aid_t address_id)
+{
+        if (pm == NULL)
+                return false;
+
+        if (!is_pm_ready(pm, __func__))
+                return false;
+
+        /*
+          Payload:
+              Token
+              Local address ID
+         */
+
+        /**
+         * @todo Verify that this payload size calculation is
+         *       correct.  The alignment, in particular, doesn't look
+         *       quite right.
+         */
+        size_t const payload_size =
+                NLA_HDRLEN + NLA_ALIGN(sizeof(token))
+                + NLA_HDRLEN + NLA_ALIGN(sizeof(address_id));
+
+        struct l_genl_msg *const msg =
+                l_genl_msg_new_sized(MPTCP_CMD_REMOVE, payload_size);
+
+        bool const appended =
+                l_genl_msg_append_attr(msg,
+                                       MPTCP_ATTR_TOKEN,
+                                       sizeof(token),
+                                       &token)
+                && l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_ATTR_LOC_ID,
+                        sizeof(address_id),
+                        &address_id);
 
         if (!appended) {
                 l_genl_msg_unref(msg);

@@ -4,7 +4,7 @@
  *
  * @brief mptcpd generic netlink commands.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
 
 #ifndef MPTCPD_LIB_PATH_MANAGER_H
@@ -36,11 +36,11 @@ struct mptcpd_pm;
 MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
 
 /**
- * @brief Send @c MPTCP_GENL_CMD_SEND_ADDR genl command to kernel.
+ * @brief Send @c MPTCP_CMD_ANNOUNCE genl command to kernel.
  *
  * @param[in] pm         The mptcpd path manager object.
  * @param[in] token      MPTCP connection token.
- * @param[in] address_id MPTCP local address ID
+ * @param[in] address_id MPTCP local address ID.
  * @param[in] addr       MPTCP local IP address and port to be
  *                       advertised through the MPTCP protocol
  *                       @c ADD_ADDR option.  The port is optional,
@@ -52,6 +52,22 @@ MPTCPD_API bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
                                     mptcpd_token_t token,
                                     mptcpd_aid_t address_id,
                                     struct sockaddr const *addr);
+
+/**
+ * @brief Send @c MPTCP_CMD_REMOVE genl command to kernel.
+ *
+ * @param[in] pm         The mptcpd path manager object.
+ * @param[in] token      MPTCP connection token.
+ * @param[in] address_id MPTCP local address ID to be sent in the
+ *                       MPTCP protocol @c REMOVE_ADDR option
+ *                       corresponding to the local address that will
+ *                       no longer be available.
+ *
+ * @return @c true if operation was successful. @c false otherwise.
+ */
+MPTCPD_API bool mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
+                                      mptcpd_token_t token,
+                                      mptcpd_aid_t address_id);
 
 /**
  * @brief Send @c MPTCP_GENL_CMD_ADD_SUBFLOW genl command to kernel.
