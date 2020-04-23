@@ -70,7 +70,7 @@ MPTCPD_API bool mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
                                       mptcpd_aid_t address_id);
 
 /**
- * @brief Send @c MPTCP_GENL_CMD_ADD_SUBFLOW genl command to kernel.
+ * @brief Send @c MPTCP_CMD_SUB_CREATE genl command to kernel.
  *
  * @param[in] pm                The mptcpd path manager object.
  * @param[in] token             MPTCP connection token.
@@ -97,7 +97,7 @@ mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                       bool backup);
 
 /**
- * @brief Send @c MPTCP_GENL_CMD_SET_BACKUP genl command to kernel.
+ * @brief Send @c MPTCP_CMD_SUB_PRIORITY genl command to kernel.
  *
  * @param[in] pm                The mptcpd path manager object.
  * @param[in] token             MPTCP connection token.
@@ -118,7 +118,7 @@ MPTCPD_API bool mptcpd_pm_set_backup(
         bool backup);
 
 /**
- * @brief Send @c MPTCP_GENL_CMD_REMOVE_SUBFLOW genl command to kernel.
+ * @brief Send @c MPTCP_CMD_SUB_DESTROY genl command to kernel.
  *
  * @param[in] pm                The mptcpd path manager object.
  * @param[in] token             MPTCP connection token.
