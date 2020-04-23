@@ -38,7 +38,7 @@ struct mptcpd_interface;
  *
  * This is a set of event handler callbacks that comprise the mptcpd
  * plugin API.  Mptcpd plugins should implement these event handlers
- * as needed.  Unused event handler fields may be @C NULL.
+ * as needed.  Unused event handler fields may be @c NULL.
  */
 struct mptcpd_plugin_ops
 {
