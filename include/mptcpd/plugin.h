@@ -104,9 +104,6 @@ struct mptcpd_plugin_ops
          *
          * Called when an address has been advertised by a peer
          * through an @c ADD_ADDR MPTCP option.
-         *
-         * @todo Why don't we have an @c address_removed() operation
-         *       for the @c REMOVE_ADDR case?
          */
         void (*new_address)(mptcpd_token_t token,
                             mptcpd_aid_t id,

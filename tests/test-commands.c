@@ -4,7 +4,7 @@
  *
  * @brief mptcpd commands API test.
  *
- * Copyright (c) 2019, Intel Corporation
+ * Copyright (c) 2019-2020, Intel Corporation
  */
 
 #undef NDEBUG
@@ -66,6 +66,18 @@ void test_send_addr(void const *test_data)
                                    test_token_1,
                                    test_laddr_id_1,
                                    laddr1));
+}
+
+void test_remove_addr(void const *test_data)
+{
+        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
+
+        assert(mptcpd_pm_remove_addr(pm,
+                                     test_token_1,
+                                     test_laddr_id_1));
 }
 
 void test_add_subflow(void const *test_data)
@@ -182,6 +194,7 @@ int main(void)
         l_test_init(&argc, &args);
 
         l_test_add("send_addr",      test_send_addr,      pm);
+        l_test_add("remove_addr",    test_remove_addr,    pm);
         l_test_add("add_subflow",    test_add_subflow,    pm);
         l_test_add("set_backup",     test_set_backup,     pm);
         l_test_add("remove_subflow", test_remove_subflow, pm);

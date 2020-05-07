@@ -1,3 +1,6 @@
+- Plugins may now inform peers that an address is no longer being
+  advertised through the new mptcpd_pm_remove_addr() function.
+
 - Network monitoring related events are now propagated to plugins.
   Events are triggered upon the addition, update, and removal of a
   network interface (link), as well as the addition and removal of a
