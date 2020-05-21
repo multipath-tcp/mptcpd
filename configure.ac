@@ -2,11 +2,11 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (c) 2017-2019, Intel Corporation
+# Copyright (c) 2017-2020, Intel Corporation
 
 AC_PREREQ([2.69])
 AC_INIT([mptcpd],
-        [0.3],
+        [0.4],
         [mptcp@lists.01.org],
         [],
         [https://01.org/multipath-tcp-linux])
