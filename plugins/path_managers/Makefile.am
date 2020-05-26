@@ -4,22 +4,17 @@
 
 include $(top_srcdir)/aminclude_static.am
 
-MPTCPD_PLUGIN_CPPFLAGS = \
-	-I$(top_srcdir)/include
-
 pkglib_LTLIBRARIES = sspi.la
 
 sspi_la_SOURCES  = sspi.c
-sspi_la_CPPFLAGS = $(MPTCPD_PLUGIN_CPPFLAGS) $(CODE_COVERAGE_CPPFLAGS)
+sspi_la_CPPFLAGS = -I$(top_srcdir)/include $(CODE_COVERAGE_CPPFLAGS)
 sspi_la_CFLAGS   = 		\
 	$(ELL_CFLAGS)		\
-	$(MPTCPD_PLUGIN_CFLAGS)	\
 	$(CODE_COVERAGE_CFLAGS)
 sspi_la_LDFLAGS  =       \
 	-no-undefined    \
 	-module          \
-	-avoid-version   \
-        $(ELL_LIBS)
+	-avoid-version
 sspi_la_LIBADD   =                       \
         $(top_builddir)/lib/libmptcpd.la \
         $(CODE_COVERAGE_LIBS)
