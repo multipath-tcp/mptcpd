@@ -3,7 +3,7 @@
 ## Copyright (c) 2017-2020, Intel Corporation
 
 ## @todo Do not add the EXECUTABLE_* flags to test libraries (if any).
-AM_CPPFLAGS = -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
 AM_CFLAGS   = $(ELL_CFLAGS) $(EXECUTABLE_CFLAGS)
 AM_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
 
@@ -13,7 +13,6 @@ noinst_LTLIBRARIES = libmptcpd_test.la
 
 libmptcpd_test_la_SOURCES = call_count.c call_plugin.c sockaddr.c
 libmptcpd_test_la_CPPFLAGS =					\
-	-I$(top_srcdir)/include -I$(top_builddir)/include	\
 	$(CODE_COVERAGE_CPPFLAGS) $(AM_CPPFLAGS)
 libmptcpd_test_la_CFLAGS = $(ELL_CFLAGS) $(CODE_COVERAGE_CFLAGS)
 libmptcpd_test_la_LIBADD = $(ELL_LIBS) $(CODE_COVERAGE_LIBS)
@@ -66,42 +65,42 @@ TEST_PLUGIN_NOOP    = plugin_noop
 PLUGIN_LIBMPTCPD_FLAGS = -L$(abs_top_builddir)/lib/.libs -lmptcpd
 
 plugin_one_la_SOURCES  = plugin_one.c
-plugin_one_la_CPPFLAGS = \
-	-DTEST_PLUGIN=\"$(TEST_PLUGIN_ONE)\" \
-	-I$(top_srcdir)/include
+plugin_one_la_CPPFLAGS =			\
+	$(AM_CPPFLAGS)				\
+	-DTEST_PLUGIN=\"$(TEST_PLUGIN_ONE)\"
 plugin_one_la_CFLAGS   = $(ELL_CFLAGS)
 plugin_one_la_LDFLAGS  = -no-undefined -module -avoid-version $(ELL_LIBS)
 plugin_one_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
 
 plugin_two_la_SOURCES  = plugin_two.c
-plugin_two_la_CPPFLAGS = \
-	-DTEST_PLUGIN=\"$(TEST_PLUGIN_TWO)\" \
-	-I$(top_srcdir)/include
+plugin_two_la_CPPFLAGS =			\
+	$(AM_CPPFLAGS)				\
+	-DTEST_PLUGIN=\"$(TEST_PLUGIN_TWO)\"
 plugin_two_la_CFLAGS   = $(ELL_CFLAGS)
 plugin_two_la_LDFLAGS  = -no-undefined -module -avoid-version $(ELL_LIBS)
 plugin_two_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
 
 plugin_three_la_SOURCES  = plugin_three.c
-plugin_three_la_CPPFLAGS = \
-	-DTEST_PLUGIN=\"$(TEST_PLUGIN_THREE)\" \
-	-I$(top_srcdir)/include
+plugin_three_la_CPPFLAGS =			\
+	$(AM_CPPFLAGS)				\
+	-DTEST_PLUGIN=\"$(TEST_PLUGIN_THREE)\"
 plugin_three_la_CFLAGS   = $(ELL_CFLAGS)
 plugin_three_la_LDFLAGS  = -no-undefined -module -avoid-version $(ELL_LIBS)
 plugin_three_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
 
 plugin_four_la_SOURCES  = plugin_four.c
-plugin_four_la_CPPFLAGS = \
-	-DTEST_PLUGIN=\"$(TEST_PLUGIN_FOUR)\" \
-	-I$(top_srcdir)/include
+plugin_four_la_CPPFLAGS =			\
+	$(AM_CPPFLAGS)				\
+	-DTEST_PLUGIN=\"$(TEST_PLUGIN_FOUR)\"
 plugin_four_la_CFLAGS   = $(ELL_CFLAGS)
 plugin_four_la_LDFLAGS  = \
 	-no-undefined -module -avoid-version $(ELL_LIBS)
 plugin_four_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
 
 plugin_noop_la_SOURCES  = plugin_noop.c
-plugin_noop_la_CPPFLAGS = \
-	-DTEST_PLUGIN=\"$(TEST_PLUGIN_NOOP)\" \
-	-I$(top_srcdir)/include
+plugin_noop_la_CPPFLAGS =			\
+	$(AM_CPPFLAGS)				\
+	-DTEST_PLUGIN=\"$(TEST_PLUGIN_NOOP)\"
 plugin_noop_la_CFLAGS   = $(ELL_CFLAGS)
 plugin_noop_la_LDFLAGS  = \
 	-no-undefined -module -avoid-version $(ELL_LIBS)
@@ -139,7 +138,7 @@ dist_check_SCRIPTS = test-start-stop $(xfail_test_scripts)
 
 test_plugin_SOURCES = test-plugin.c
 test_plugin_CPPFLAGS =						\
-	-I$(top_srcdir)/include					\
+	$(AM_CPPFLAGS)						\
 	-D_POSIX_C_SOURCE=200809L				\
 	-DTEST_PLUGIN_DIR_A=\"$(TEST_PLUGIN_DIR_A)\"		\
 	-DTEST_PLUGIN_DIR_B=\"$(TEST_PLUGIN_DIR_B)\"		\
@@ -183,7 +182,7 @@ if HAVE_CXX
 check_PROGRAMS += test-cxx-build
 test_cxx_build_SOURCES  = test-cxx-build.cpp
 test_cxx_build_CPPFLAGS =				\
-	-I$(top_srcdir)/include				\
+	$(AM_CPPFLAGS)					\
 	-DTEST_PLUGIN_DIR=\"$(TEST_PLUGIN_DIR_A)\"	\
 	-DTEST_PLUGIN_FOUR=\"$(TEST_PLUGIN_FOUR)\"
 test_cxx_build_CXXFLAGS = $(AM_CFLAGS) -Og
