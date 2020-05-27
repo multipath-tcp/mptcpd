@@ -5,7 +5,7 @@
 include $(top_srcdir)/aminclude_static.am
 
 MPTCPD_PLUGIN_CPPFLAGS = \
-	-I$(top_srcdir)/include
+	-I$(top_srcdir)/include -I$(top_builddir)/include
 
 pkglib_LTLIBRARIES = sspi.la
 
