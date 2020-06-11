@@ -23,6 +23,7 @@ autom4te.cache/
 compile
 configure
 depcomp
+.dirstamp
 install-sh
 libtool
 ltmain.sh

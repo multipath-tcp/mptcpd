@@ -268,6 +268,15 @@ AX_CHECK_LINK_FLAG([-pie],
                    ])
 
 # ---------------------------------------------------------------
+# Test plugin names (centrally defined here)
+# ---------------------------------------------------------------
+AC_SUBST([TEST_PLUGIN_ONE],   [plugin_one])
+AC_SUBST([TEST_PLUGIN_TWO],   [plugin_two])
+AC_SUBST([TEST_PLUGIN_THREE], [plugin_three])
+AC_SUBST([TEST_PLUGIN_FOUR],  [plugin_four])
+AC_SUBST([TEST_PLUGIN_NOOP],  [plugin_noop])
+
+# ---------------------------------------------------------------
 # Generate our build files.
 # ---------------------------------------------------------------
 AC_CONFIG_FILES([Makefile
@@ -282,5 +291,10 @@ AC_CONFIG_FILES([Makefile
                  plugins/Makefile
                  plugins/path_managers/Makefile
                  scripts/Makefile
-                 tests/Makefile])
+                 tests/Makefile
+                 tests/lib/Makefile
+                 tests/plugins/Makefile
+                 tests/plugins/noop/Makefile
+                 tests/plugins/priority/Makefile
+                 tests/plugins/security/Makefile])
 AC_OUTPUT

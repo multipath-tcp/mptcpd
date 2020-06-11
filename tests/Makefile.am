@@ -2,120 +2,19 @@
 ##
 ## Copyright (c) 2017-2020, Intel Corporation
 
+SUBDIRS = lib plugins
+
 ## @todo Do not add the EXECUTABLE_* flags to test libraries (if any).
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
-AM_CFLAGS   = $(ELL_CFLAGS) $(EXECUTABLE_CFLAGS)
+AM_CPPFLAGS =				\
+	-I$(top_srcdir)/include		\
+	-I$(top_builddir)/include	\
+	-I$(srcdir)/lib
+AM_CFLAGS   = $(ELL_CFLAGS) $(EXECUTABLE_CFLAGS) $(CODE_COVERAGE_CFLAGS)
 AM_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
 
-## Convenience library that contains utility functions used by the
-## mptcpd tests.
-noinst_LTLIBRARIES = libmptcpd_test.la
-
-libmptcpd_test_la_SOURCES = call_count.c call_plugin.c sockaddr.c
-libmptcpd_test_la_CPPFLAGS =					\
-	$(CODE_COVERAGE_CPPFLAGS) $(AM_CPPFLAGS)
-libmptcpd_test_la_CFLAGS = $(ELL_CFLAGS) $(CODE_COVERAGE_CFLAGS)
-libmptcpd_test_la_LIBADD = $(ELL_LIBS) $(CODE_COVERAGE_LIBS)
-
-## Build a test mptcpd plugin.
-##
-## "check_LTLIBRARIES" can't be used here since a dynamically loadable
-## module will not be built.  A Libtool convenience library would be
-## built instead.
-##
-## Absolute path needed by Libtool during installation.
-plugin_adir    = $(abs_builddir)/plugins_a
-plugin_bdir    = $(abs_builddir)/plugins_b
-plugin_noopdir = $(abs_builddir)/plugins_noop
-
-## For testing mptcpd plugin framework when default plugin is
-## explicitly specified, as well as plugin security checks.
-plugin_a_LTLIBRARIES = plugin_three.la plugin_four.la
-
-## For testing mptcpd plugin framework when default plugin is
-## is the first registered plugin, i.e. the one with the *lowest*
-## plugin priority, as well as testing plugin operation dispatch.
-plugin_b_LTLIBRARIES = plugin_one.la plugin_two.la
-
-## For mptcpd tests that require a plugin without testing the plugin
-## itself.  The plugin will be a no-op in this case.
-plugin_noop_LTLIBRARIES = plugin_noop.la
-
-TEST_PLUGIN_DIR_A    = $(DESTDIR)$(plugin_adir)
-TEST_PLUGIN_DIR_B    = $(DESTDIR)$(plugin_bdir)
-TEST_PLUGIN_DIR_NOOP = $(DESTDIR)$(plugin_noopdir)
-
-## List of test plugin directory for use as dependencies for test
-## plugin installation.
-TEST_PLUGIN_DIRS =		\
-	$(TEST_PLUGIN_DIR_A)	\
-	$(TEST_PLUGIN_DIR_B)	\
-	$(TEST_PLUGIN_DIR_NOOP)
-
-## Plugin names
-TEST_PLUGIN_ONE     = plugin_one
-TEST_PLUGIN_TWO     = plugin_two
-TEST_PLUGIN_THREE   = plugin_three
-TEST_PLUGIN_FOUR    = plugin_four
-TEST_PLUGIN_NOOP    = plugin_noop
-
-## libmptcpd hasn't been installed yet, so directly link to the
-## library in its build directory so that dynamic linker can find it
-## when relinking the "installed" test plugin binaries.
-PLUGIN_LIBMPTCPD_FLAGS = -L$(abs_top_builddir)/lib/.libs -lmptcpd
-
-plugin_one_la_SOURCES  = plugin_one.c
-plugin_one_la_CPPFLAGS =			\
-	$(AM_CPPFLAGS)				\
-	-DTEST_PLUGIN=\"$(TEST_PLUGIN_ONE)\"
-plugin_one_la_CFLAGS   = $(ELL_CFLAGS)
-plugin_one_la_LDFLAGS  = -no-undefined -module -avoid-version $(ELL_LIBS)
-plugin_one_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
-
-plugin_two_la_SOURCES  = plugin_two.c
-plugin_two_la_CPPFLAGS =			\
-	$(AM_CPPFLAGS)				\
-	-DTEST_PLUGIN=\"$(TEST_PLUGIN_TWO)\"
-plugin_two_la_CFLAGS   = $(ELL_CFLAGS)
-plugin_two_la_LDFLAGS  = -no-undefined -module -avoid-version $(ELL_LIBS)
-plugin_two_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
-
-plugin_three_la_SOURCES  = plugin_three.c
-plugin_three_la_CPPFLAGS =			\
-	$(AM_CPPFLAGS)				\
-	-DTEST_PLUGIN=\"$(TEST_PLUGIN_THREE)\"
-plugin_three_la_CFLAGS   = $(ELL_CFLAGS)
-plugin_three_la_LDFLAGS  = -no-undefined -module -avoid-version $(ELL_LIBS)
-plugin_three_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
-
-plugin_four_la_SOURCES  = plugin_four.c
-plugin_four_la_CPPFLAGS =			\
-	$(AM_CPPFLAGS)				\
-	-DTEST_PLUGIN=\"$(TEST_PLUGIN_FOUR)\"
-plugin_four_la_CFLAGS   = $(ELL_CFLAGS)
-plugin_four_la_LDFLAGS  = \
-	-no-undefined -module -avoid-version $(ELL_LIBS)
-plugin_four_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS) libmptcpd_test.la
-
-plugin_noop_la_SOURCES  = plugin_noop.c
-plugin_noop_la_CPPFLAGS =			\
-	$(AM_CPPFLAGS)				\
-	-DTEST_PLUGIN=\"$(TEST_PLUGIN_NOOP)\"
-plugin_noop_la_CFLAGS   = $(ELL_CFLAGS)
-plugin_noop_la_LDFLAGS  = \
-	-no-undefined -module -avoid-version $(ELL_LIBS)
-plugin_noop_la_LIBADD   = $(PLUGIN_LIBMPTCPD_FLAGS)
-
-## List of test plugin sources for use as dependencies for test plugin
-## installation.
-TEST_PLUGIN_SOURCE_FILES =		\
-	$(plugin_one_la_SOURCES)	\
-	$(plugin_two_la_SOURCES)	\
-	$(plugin_three_la_SOURCES)	\
-	$(plugin_four_la_SOURCES)	\
-	$(plugin_noop_la_SOURCES)
-
-check_HEADERS = test-plugin.h
+TEST_PLUGIN_DIR_SECURITY = $(abs_builddir)/plugins/security/.libs
+TEST_PLUGIN_DIR_PRIORITY = $(abs_builddir)/plugins/priority/.libs
+TEST_PLUGIN_DIR_NOOP     = $(abs_builddir)/plugins/noop/.libs
 
 check_PROGRAMS =		\
 	test-plugin		\
@@ -137,18 +36,18 @@ xfail_test_scripts =		\
 dist_check_SCRIPTS = test-start-stop $(xfail_test_scripts)
 
 test_plugin_SOURCES = test-plugin.c
-test_plugin_CPPFLAGS =						\
-	$(AM_CPPFLAGS)						\
-	-D_POSIX_C_SOURCE=200809L				\
-	-DTEST_PLUGIN_DIR_A=\"$(TEST_PLUGIN_DIR_A)\"		\
-	-DTEST_PLUGIN_DIR_B=\"$(TEST_PLUGIN_DIR_B)\"		\
-	-DTEST_PLUGIN_DIR_NOOP=\"$(TEST_PLUGIN_DIR_NOOP)\"	\
-	-DTEST_PLUGIN_ONE=\"$(TEST_PLUGIN_ONE)\"		\
-	-DTEST_PLUGIN_TWO=\"$(TEST_PLUGIN_TWO)\"		\
-	-DTEST_PLUGIN_FOUR=\"$(TEST_PLUGIN_FOUR)\"
+test_plugin_CPPFLAGS =							\
+	$(AM_CPPFLAGS)							\
+	-D_POSIX_C_SOURCE=200809L					\
+	-DTEST_PLUGIN_DIR_SECURITY=\"$(TEST_PLUGIN_DIR_SECURITY)\"	\
+	-DTEST_PLUGIN_DIR_PRIORITY=\"$(TEST_PLUGIN_DIR_PRIORITY)\"	\
+	-DTEST_PLUGIN_DIR_NOOP=\"$(TEST_PLUGIN_DIR_NOOP)\"		\
+	-DTEST_PLUGIN_ONE=\"@TEST_PLUGIN_ONE@\"				\
+	-DTEST_PLUGIN_TWO=\"@TEST_PLUGIN_TWO@\"				\
+	-DTEST_PLUGIN_FOUR=\"@TEST_PLUGIN_FOUR@\"
 test_plugin_LDADD =				\
 	$(top_builddir)/lib/libmptcpd.la	\
-	libmptcpd_test.la			\
+	$(builddir)/lib/libmptcpd_test.la	\
 	$(ELL_LIBS)
 
 test_network_monitor_SOURCES = test-network-monitor.c
@@ -181,26 +80,20 @@ test_configuration_LDADD =			\
 if HAVE_CXX
 check_PROGRAMS += test-cxx-build
 test_cxx_build_SOURCES  = test-cxx-build.cpp
-test_cxx_build_CPPFLAGS =				\
-	$(AM_CPPFLAGS)					\
-	-DTEST_PLUGIN_DIR=\"$(TEST_PLUGIN_DIR_A)\"	\
-	-DTEST_PLUGIN_FOUR=\"$(TEST_PLUGIN_FOUR)\"
+test_cxx_build_CPPFLAGS =					\
+	$(AM_CPPFLAGS)						\
+	-DTEST_PLUGIN_DIR=\"$(TEST_PLUGIN_DIR_SECURITY)\"	\
+	-DTEST_PLUGIN_FOUR=\"@TEST_PLUGIN_FOUR@\"
 test_cxx_build_CXXFLAGS = $(AM_CFLAGS) -Og
 test_cxx_build_LDADD =				\
 	$(top_builddir)/lib/libmptcpd.la	\
-	libmptcpd_test.la			\
+	$(builddir)/lib/libmptcpd_test.la	\
 	$(ELL_LIBS)
 endif
-
-## "Install" test plugins, as needed, prior to running the tests.
-all-local: $(TEST_PLUGIN_DIRS)
-
-$(TEST_PLUGIN_DIRS): $(TEST_PLUGIN_SOURCE_FILES)
-	$(MAKE) $(AM_MAKEFLAGS) install-data
-
-clean-local:
-	-rm -rf $(TEST_PLUGIN_DIRS)
 
 AM_TESTS_ENVIRONMENT = TEST_PLUGIN_DIR=$(TEST_PLUGIN_DIR_NOOP)
 TESTS = $(check_PROGRAMS) $(dist_check_SCRIPTS)
 XFAIL_TESTS = $(xfail_test_scripts)
+
+# Clean up code coverage related generated files.
+clean-local: code-coverage-clean
