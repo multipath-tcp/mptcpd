@@ -1,3 +1,15 @@
+12 June 2020 - mptcpd 0.5
+
+- Test plugins are no longer installed when running "make install".  A
+  side benefit of the changes is that test plugins only build when the
+  test suite is built via "make check" or "make distcheck".  Libtool
+  relink warnings that occurred when building the tests have also been
+  addressed.
+
+- VPATH builds where the build directory and source directory
+  differ (e.g. "mkdir build; cd build; ../configure; make") now
+  succeed.
+
 21 May 2020 - mptcpd 0.4
 
 - Plugins may now inform peers that an address is no longer being
