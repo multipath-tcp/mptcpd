@@ -27,7 +27,7 @@
 
 static bool run_plugin_load(mode_t mode)
 {
-        static char const dir[]            = TEST_PLUGIN_DIR_A;
+        static char const dir[]            = TEST_PLUGIN_DIR_SECURITY;
         static char const default_plugin[] = TEST_PLUGIN_FOUR;
 
         int const fd = open(dir, O_DIRECTORY);
@@ -131,7 +131,7 @@ static void test_plugin_dispatch(void const *test_data)
 {
         (void) test_data;
 
-        static char const        dir[]          = TEST_PLUGIN_DIR_B;
+        static char const dir[] = TEST_PLUGIN_DIR_PRIORITY;
         static char const *const default_plugin = NULL;
 
         bool const loaded = mptcpd_plugin_load(dir, default_plugin);
