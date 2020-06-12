@@ -8,7 +8,7 @@ AM_CPPFLAGS =				\
 	-I$(top_srcdir)/include		\
 	-I$(top_builddir)/include	\
 	$(CODE_COVERAGE_CPPFLAGS)
-AM_CFLAGS   = $(ELL_CFLAGS) $(CODE_COVERAGE_CFLAGS)
+AM_CFLAGS = $(ELL_CFLAGS) $(CODE_COVERAGE_CFLAGS)
 
 ## Convenience library that contains utility functions used by the
 ## mptcpd tests.

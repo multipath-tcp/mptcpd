@@ -16,10 +16,10 @@ AM_CFLAGS = $(ELL_CFLAGS) $(CODE_COVERAGE_CFLAGS)
 ## modules in the Automake check_LTLIBRARIES variable.  Otherwise a
 ## convenience library would be built instead.
 AM_LDFLAGS =			\
-	-no-undefined   	\
+	-no-undefined		\
 	-module			\
 	-avoid-version		\
-        $(ELL_LIBS)		\
+	$(ELL_LIBS)		\
 	-rpath $(abs_builddir)
 
 ## For testing mptcpd plugin framework when default plugin is
@@ -31,10 +31,10 @@ one_la_SOURCES = one.c
 one_la_CPPFLAGS =				\
 	$(AM_CPPFLAGS)				\
 	-DTEST_PLUGIN=\"@TEST_PLUGIN_ONE@\"
-one_la_LIBADD  =				\
-	../../lib/libmptcpd_test.la	\
-        $(top_builddir)/lib/libmptcpd.la	\
-        $(CODE_COVERAGE_LIBS)
+one_la_LIBADD =					\
+	../../lib/libmptcpd_test.la		\
+	$(top_builddir)/lib/libmptcpd.la	\
+	$(CODE_COVERAGE_LIBS)
 
 two_la_SOURCES = two.c
 two_la_CPPFLAGS =				\
@@ -42,8 +42,8 @@ two_la_CPPFLAGS =				\
 	-DTEST_PLUGIN=\"@TEST_PLUGIN_TWO@\"
 two_la_LIBADD  =				\
 	../../lib/libmptcpd_test.la		\
-        $(top_builddir)/lib/libmptcpd.la	\
-        $(CODE_COVERAGE_LIBS)
+	$(top_builddir)/lib/libmptcpd.la	\
+	$(CODE_COVERAGE_LIBS)
 
 # Clean up code coverage related generated files.
 clean-local: code-coverage-clean

@@ -15,10 +15,10 @@ AM_CFLAGS = $(ELL_CFLAGS) $(CODE_COVERAGE_CFLAGS)
 ## modules in the Automake check_LTLIBRARIES variable.  Otherwise a
 ## convenience library would be built instead.
 AM_LDFLAGS =			\
-	-no-undefined   	\
+	-no-undefined		\
 	-module			\
 	-avoid-version		\
-        $(ELL_LIBS)		\
+	$(ELL_LIBS)		\
 	-rpath $(abs_builddir)
 
 ## For mptcpd tests that require a plugin without testing the plugin
@@ -29,7 +29,7 @@ noop_la_SOURCES = noop.c
 noop_la_CPPFLAGS =				\
 	$(AM_CPPFLAGS)				\
 	-DTEST_PLUGIN=\"@TEST_PLUGIN_NOOP@\"
-noop_la_LIBADD  = $(top_builddir)/lib/libmptcpd.la $(CODE_COVERAGE_LIBS)
+noop_la_LIBADD = $(top_builddir)/lib/libmptcpd.la $(CODE_COVERAGE_LIBS)
 
 # Clean up code coverage related generated files.
 clean-local: code-coverage-clean
