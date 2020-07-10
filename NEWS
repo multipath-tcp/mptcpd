@@ -27,12 +27,11 @@
   longer needed.  Simply set the unused field in the
   `mptcpd_plugin_ops' structure to NULL.
 
-- This will be the last release to support the MPTCP generic netlink
-  path management API in the multipath-tcp.org kernel.  Subsequent
-  releases will support the new API found in the
-  "multipath-tcp/mptcp_net-next" kernel on GitHub currently being used
-  for development of patch submissions to the upstream Linux kernel
-  network subsystem maintainers.
+- This will be the last release to support the Linux 4.x based kernel
+  on multipath-tcp.org.  Subsequent releases will support the new API
+  found in the "multipath-tcp/mptcp_net-next" kernel on GitHub
+  currently being used for development of patch submissions to the
+  upstream Linux kernel network subsystem maintainers.
 
 18 December 2019 - mptcpd 0.3
 
