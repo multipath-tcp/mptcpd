@@ -1,11 +1,11 @@
 .\" SPDX-License-Identifier: BSD-3-Clause
 .\"
-.\" Copyright (c) 2017-2019, Intel Corporation
+.\" Copyright (c) 2017-2020, Intel Corporation
 
 .\" Process this file with
 .\" groff -man -Tascii mptcpd.8
 .\"
-.TH MPTCPD 8 "2018-09-13" "Multipath TCP Daemon" "System Management Commands"
+.TH MPTCPD 8 "2020-07-10" "Multipath TCP Daemon" "System Management Commands"
 .SH NAME
 mptcpd \- multipath TCP daemon
 .SH SYNOPSIS
@@ -24,7 +24,7 @@ mptcpd \- multipath TCP daemon
 .SH DESCRIPTION
 .B mptcpd
 is a daemon for Linux based operating systems that performs multipath
-TCP (see IETF RFC 6824) path management related operations in the user
+TCP (see IETF RFC 8684) path management related operations in the user
 space.  It interacts with the Linux kernel through a generic netlink
 connection to track per-connection information, available network
 interfaces, request new MPTCP subflows, handle requests for subflows,
