@@ -7,6 +7,10 @@
  * Copyright (c) 2017-2020, Intel Corporation
  */
 
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/config-private.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +20,7 @@
 
 #include <netinet/in.h>
 #include <linux/netlink.h>  // For NLA_* macros.
-#include <linux/mptcp.h>
+#include LINUX_MPTCP_CLIENT_HEADER
 
 #include <sys/socket.h>
 #include <netinet/tcp.h>
@@ -31,10 +35,6 @@
 #include <mptcpd/plugin_private.h>
 #include <mptcpd/network_monitor.h>
 
-#ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>
-#endif
-
 #include "path_manager.h"
 #include "configuration.h"
 
@@ -48,7 +48,7 @@
  *       @c <net/mptcp.h> kernel header.
 */
 #ifndef MPTCP_PM_NAME_MAX
-#define MPTCP_PM_NAME_MAX 16
+# define MPTCP_PM_NAME_MAX 16
 #endif
 
 

@@ -7,12 +7,16 @@
  * Copyright (c) 2018-2020, Intel Corporation
  */
 
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/config-private.h>
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <assert.h>
 
-#include <linux/mptcp.h>
+#include LINUX_MPTCP_CLIENT_HEADER
 
 #include <ell/hashmap.h>
 #include <ell/plugin.h>

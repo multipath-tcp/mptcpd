@@ -4,13 +4,17 @@
  *
  * @brief mptcpd path manager test.
  *
- * Copyright (c) 2019, Intel Corporation
+ * Copyright (c) 2019-2020, Intel Corporation
  */
+
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/config-private.h>
+#endif
 
 #undef NDEBUG
 #include <assert.h>
 
-#include <linux/mptcp.h>
+#include LINUX_MPTCP_CLIENT_HEADER
 
 #include <ell/main.h>
 #include <ell/genl.h>

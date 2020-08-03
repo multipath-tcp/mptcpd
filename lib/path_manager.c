@@ -7,6 +7,10 @@
  * Copyright (c) 2017-2020, Intel Corporation
  */
 
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/config-private.h>
+#endif
+
 #define _POSIX_C_SOURCE 200112L  ///< For XSI-compliant strerror_r().
 
 #include <assert.h>
@@ -14,7 +18,7 @@
 #include <netinet/in.h>
 
 #include <linux/netlink.h>
-#include <linux/mptcp.h>
+#include LINUX_MPTCP_CLIENT_HEADER
 
 #include <ell/genl.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().

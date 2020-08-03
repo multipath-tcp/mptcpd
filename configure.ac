@@ -187,14 +187,41 @@ AC_SUBST([ELL_VERSION])
 # ---------------------------------------------------------------
 # Checks for header files.
 # ---------------------------------------------------------------
-# @todo mptcpd ships with a copy of <linux/mptcp.h>.  Ideally it
-#       should not.  Consider removing it from mptcpd, and
-#       reintroducing this check once the kernel ships with that
-#       header.
-#AC_CHECK_HEADER(
-#   [linux/mptcp.h],
-#   [],
-#   [AC_MSG_ERROR([<linux/mptcp.h> header could not be found])])
+# @todo mptcpd ships with a copies of the server- and client-oriented
+#       <linux/mptcp.h> header files.  Ideally it should not.
+#       Consider removing them from mptcpd.
+mptcp_server_pm_header=\"linux/mptcp_server.h\" dnl mptcpd header
+mptcp_client_pm_header=\"linux/mptcp_client.h\" dnl mptcpd header
+AC_CHECK_HEADER(
+   [linux/mptcp.h],
+   [AC_COMPILE_IFELSE([
+      dnl Upstream kernel's path management generic netlink API.
+      AC_LANG_SOURCE([
+        #include <linux/mptcp.h>
+        static int const cmd = (int) MPTCP_PM_CMD_ADD_ADDR;
+      ])
+    ],
+    [mptcp_server_pm_header="linux/mptcp.h"], dnl kernel header
+    [AC_COMPILE_IFELSE([
+       dnl multipath-tcp.org kernel's path management generic netlink API.
+       AC_LANG_SOURCE([
+         #include <linux/mptcp.h>
+         static int const event = (int) MPTCP_EVENT_CREATED;
+       ])
+     ],
+     [mptcp_client_pm_header="linux/mptcp.h"], dnl kernel header
+     [
+      AC_MSG_ERROR([Unsupported path management API in <linux/mptcp.h>.])])
+     ])
+   ],
+   [AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])])
+
+AC_DEFINE_UNQUOTED([LINUX_MPTCP_SERVER_HEADER],
+                   [$mptcp_server_pm_header],
+                   [Server-oriented MPTCP PM generic netlink API header])
+AC_DEFINE_UNQUOTED([LINUX_MPTCP_CLIENT_HEADER],
+                   [$mptcp_client_pm_header],
+                   [Client-oriented MPTCP PM generic netlink API header])
 
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.
