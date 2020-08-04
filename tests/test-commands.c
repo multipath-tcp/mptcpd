@@ -14,8 +14,6 @@
 #undef NDEBUG
 #include <assert.h>
 
-#include LINUX_MPTCP_CLIENT_HEADER
-
 #include <ell/main.h>
 #include <ell/genl.h>
 #include <ell/timeout.h>
@@ -29,6 +27,8 @@
 #include "test-plugin.h"
 
 #include <mptcpd/path_manager.h>
+#include <mptcpd/mptcp_private.h>
+
 
 // -------------------------------------------------------------------
 

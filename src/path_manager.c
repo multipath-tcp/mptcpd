@@ -20,7 +20,6 @@
 
 #include <netinet/in.h>
 #include <linux/netlink.h>  // For NLA_* macros.
-#include LINUX_MPTCP_CLIENT_HEADER
 
 #include <sys/socket.h>
 #include <netinet/tcp.h>
@@ -34,6 +33,7 @@
 #include <mptcpd/path_manager_private.h>
 #include <mptcpd/plugin_private.h>
 #include <mptcpd/network_monitor.h>
+#include <mptcpd/mptcp_private.h>
 
 #include "path_manager.h"
 #include "configuration.h"

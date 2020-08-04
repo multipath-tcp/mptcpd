@@ -16,20 +16,10 @@
 #include <unistd.h>
 #include <assert.h>
 
-#include LINUX_MPTCP_CLIENT_HEADER
-
 #include <ell/hashmap.h>
 #include <ell/plugin.h>
 #include <ell/util.h>
 #include <ell/log.h>
-
-#ifdef HAVE_CONFIG_H
-#include <mptcpd/config-private.h>
-#endif
-
-#include <mptcpd/plugin_private.h>
-#include <mptcpd/plugin.h>
-#include <mptcpd/plugin_private.h>
 
 /**
  * @todo Remove this preprocessor symbol definition once support for
@@ -44,6 +34,11 @@
 # include <linux/genetlink.h>  // For GENL_NAMSIZ
 # define MPTCP_PM_NAME_LEN GENL_NAMSIZ
 #endif
+
+#include <mptcpd/plugin_private.h>
+#include <mptcpd/plugin.h>
+#include <mptcpd/mptcp_private.h>
+
 
 // ----------------------------------------------------------------
 //                         Global variables

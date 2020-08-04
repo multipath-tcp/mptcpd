@@ -18,7 +18,6 @@
 #include <netinet/in.h>
 
 #include <linux/netlink.h>
-#include LINUX_MPTCP_CLIENT_HEADER
 
 #include <ell/genl.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
@@ -27,6 +26,7 @@
 #include <mptcpd/path_manager.h>
 #include <mptcpd/path_manager_private.h>
 #include <mptcpd/plugin.h>
+#include <mptcpd/mptcp_private.h>
 
 
 static void family_send_callback(struct l_genl_msg *msg, void *user_data)

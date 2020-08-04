@@ -10,7 +10,8 @@ pkginclude_HEADERS =		\
 	types.h
 
 
-noinst_HEADERS =			\
-	config-private.h		\
-	path_manager_private.h 		\
+noinst_HEADERS =		\
+	config-private.h	\
+	mptcp_private.h		\
+	path_manager_private.h 	\
 	plugin_private.h
