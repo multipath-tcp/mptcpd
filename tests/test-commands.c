@@ -7,10 +7,6 @@
  * Copyright (c) 2019-2020, Intel Corporation
  */
 
-#ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>
-#endif
-
 #undef NDEBUG
 #include <assert.h>
 

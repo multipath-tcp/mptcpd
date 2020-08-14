@@ -4,8 +4,12 @@
  *
  * @brief Main mptcpd source file.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
+
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/config-private.h>  // For NDEBUG
+#endif
 
 #include <stdlib.h>
 #include <signal.h>
@@ -17,6 +21,7 @@
 
 #include "configuration.h"
 #include "path_manager.h"
+
 
 // Handle termination gracefully.
 static void signal_handler(uint32_t signo, void *user_data)
