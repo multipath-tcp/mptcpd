@@ -45,8 +45,8 @@
  * @brief Maximum path manager name length.
  *
  * @note @c MPTCP_PM_NAME_MAX is defined in the internal
- *       @c <net/mptcp.h> kernel header.
-*/
+ *       @c <net/mptcp.h> header in the multipath-tcp.org kernel.
+ */
 #ifndef MPTCP_PM_NAME_MAX
 # define MPTCP_PM_NAME_MAX 16
 #endif
@@ -119,8 +119,8 @@ static char const *get_pm_name(void const *data, size_t len)
  * Initialize a @c sockaddr_storage instance with the provided IPv4 or
  * IPv6 address.  Only one is required and used.
  *
- * The port may zero in cases where the port is optional for a given
- * MPTCP generic netlink API event.
+ * The port may be zero in cases where the port is optional for a
+ * given MPTCP generic netlink API event.
  *
  * @param[in]     addr4 IPv4 internet address.
  * @param[in]     addr6 IPv6 internet address.
