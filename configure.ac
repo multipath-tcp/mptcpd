@@ -208,19 +208,6 @@ AC_SEARCH_LIBS(
     [AC_MSG_ERROR([library with argp_parse() could not be found])])
 
 # ---------------------------------------------------------------
-# Checks for declarations.
-# ---------------------------------------------------------------
-AC_CHECK_DECLS([IPPROTO_MPTCP],
-               [],
-               [AC_MSG_WARN([IPPROTO_MPTCP declaration not found.  Using fallback.])],
-               [[
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <linux/in.h>
-               ]])
-
-# ---------------------------------------------------------------
 # Enable additional C compiler warnings.  We do this after all
 # Autoconf tests have been run since not all autoconf macros are
 # warning free.

@@ -21,10 +21,6 @@
 #include <netinet/in.h>
 #include <linux/netlink.h>  // For NLA_* macros.
 
-#include <sys/socket.h>
-#include <netinet/tcp.h>
-#include <linux/in.h>       // For IPPROTO_MPTCP
-
 #include <ell/genl.h>
 #include <ell/log.h>
 #include <ell/timeout.h>
@@ -768,34 +764,6 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
 /**
  * @brief Verify that MPTCP is enabled at run-time in the kernel.
  *
- * Check that MPTCP is supported in the kernel by opening a socket
- * with the @c IPPROTO_MPTCP protocol.
- *
- * @note @c IPPROTO_MPTCP is supported by the "MPTCP upstream"
- *       kernel.
- */
-static bool check_mptcp_socket_support(void)
-{
-#if !HAVE_DECL_IPPROTO_MPTCP
-# define IPPROTO_MPTCP 262
-#endif  // !HAVE_DECL_IPPROTO_MPTCP
-
-        int const fd = socket(AF_INET, SOCK_STREAM, IPPROTO_MPTCP);
-
-        // An errno other than EINVAL is unexpected.
-        if (fd != -1) {
-                close(fd);
-                return true;
-        } else if (errno != EINVAL) {
-                l_error("Unable to confirm MPTCP socket support.");
-        }
-
-        return false;
-}
-
-/**
- * @brief Verify that MPTCP is enabled at run-time in the kernel.
- *
  * Check that MPTCP is enabled through the @c net.mptcp.mptcp_enabled
  * @c sysctl variable if it exists.
  *
@@ -1022,8 +990,7 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 {
         assert(config != NULL);
 
-        if (!check_mptcp_socket_support()
-            && !check_kernel_mptcp_enabled()) {
+        if (!check_kernel_mptcp_enabled()) {
                 l_error("Required kernel MPTCP support not available.");
 
                 return NULL;
