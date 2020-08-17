@@ -859,7 +859,7 @@ static void check_kernel_mptcp_path_manager(void)
         if (f == NULL)
                 return;  // Not using multipath-tcp.org kernel.
 
-        char pm[MPTCP_PM_NAME_MAX + 1] = { 0 };
+        char pm[MPTCP_PM_NAME_MAX] = { 0 };
 
         static char const MPTCP_PM_NAME_FMT[] =
                 "%" L_STRINGIFY(MPTCP_PM_NAME_MAX) "s";
