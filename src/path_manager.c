@@ -918,33 +918,30 @@ static void family_appeared(struct l_genl_family_info const *info,
                   kernel after mptcpd has started.
                 */
 
-                l_debug("Request for \""
-                        MPTCP_GENL_NAME
-                        "\" Generic Netlink family failed.  Waiting.");
+                l_debug("Request for MPTCP generic netlink "
+                        "family failed. Waiting.");
 
                 return;
         }
 
-        assert(strcmp(l_genl_family_info_get_name(info),
-                      MPTCP_GENL_NAME) == 0);
+        char const *const name = l_genl_family_info_get_name(info);
+
+        l_debug("\"%s\" generic netlink family appeared", name);
 
         struct mptcpd_pm *const pm = user_data;
-
-        l_debug(MPTCP_GENL_NAME " generic netlink family appeared");
-
         /*
           This function could be called in either of two cases, (1)
-          handling the appearance of the "mptcp" generic netlink
-          family through a family watch, or (2) through an explicit
-          family request.
+          handling the appearance of the MPTCP generic netlink family
+          through a family watch, or (2) through an explicit family
+          request.
 
-          Do nothing if the necessary "mptcp" family registration was
+          Do nothing if the necessary MPTCP family registration was
           completed as a result of a previous call to this function.
          */
         if (pm->family != NULL)
                 return;
 
-        pm->family = l_genl_family_new(pm->genl, MPTCP_GENL_NAME);
+        pm->family = l_genl_family_new(pm->genl, name);
 
         /*
           Register callbacks for MPTCP generic netlink multicast
@@ -977,13 +974,9 @@ static void family_appeared(struct l_genl_family_info const *info,
  */
 static void family_vanished(char const *name, void *user_data)
 {
-        (void) name;
-
-        assert(strcmp(name, MPTCP_GENL_NAME) == 0);
-
         struct mptcpd_pm *const pm = user_data;
 
-        l_debug(MPTCP_GENL_NAME " generic netlink family vanished");
+        l_debug("%s generic netlink family vanished", name);
 
         /*
           Unregister callbacks for MPTCP generic netlink multicast
@@ -991,8 +984,7 @@ static void family_vanished(char const *name, void *user_data)
         */
         if (pm->id != 0) {
                 if (!l_genl_family_unregister(pm->family, pm->id))
-                        l_warn(MPTCP_GENL_EV_GRP_NAME
-                               " multicast handler deregistration "
+                        l_warn("MPTCP event handler deregistration "
                                "failed.");
 
                 pm->id = 0;
@@ -1001,7 +993,7 @@ static void family_vanished(char const *name, void *user_data)
         l_genl_family_free(pm->family);
         pm->family = NULL;
 
-        // Re-arm the "mptcp" generic netlink family timeout.
+        // Re-arm the MPTCP generic netlink family timeout.
         l_timeout_modify(pm->timeout, FAMILY_TIMEOUT_SECONDS);
 }
 
@@ -1014,8 +1006,7 @@ static void family_timeout(struct l_timeout *timeout, void *user_data)
         if (pm->family != NULL)
                 return;  // "mptcp" genl family appeared.
 
-        l_warn(MPTCP_GENL_NAME
-               " generic netlink family has not appeared.");
+        l_warn("MPTCP generic netlink family has not appeared.");
         l_warn("Verify MPTCP \"netlink\" path manager kernel support.");
 }
 
@@ -1050,11 +1041,11 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         }
 
         if (l_genl_add_family_watch(pm->genl,
-                                       MPTCP_GENL_NAME,
-                                       family_appeared,
-                                       family_vanished,
-                                       pm,
-                                       NULL) == 0
+                                    MPTCP_GENL_NAME,
+                                    family_appeared,
+                                    family_vanished,
+                                    pm,
+                                    NULL) == 0
             || !l_genl_request_family(pm->genl,
                                       MPTCP_GENL_NAME,
                                       family_appeared,
@@ -1092,9 +1083,6 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 l_error("Unable to create network monitor.");
                 return NULL;
         }
-
-        // Register network interface/address change handlers.
-
 
         /**
          * @bug Mptcpd plugins should only be loaded once at process
