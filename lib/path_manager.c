@@ -152,7 +152,7 @@ static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
         bool const ready = mptcpd_pm_ready(pm);
 
         if (!ready)
-                l_warn("%s: \"" MPTCP_GENL_NAME "\" family is not "
+                l_warn("%s: MPTCP generic netlink family is not "
                        "yet available",
                         fname);
 
