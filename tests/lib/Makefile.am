@@ -18,7 +18,9 @@ libmptcpd_test_la_SOURCES =	\
 	call_count.c		\
 	call_plugin.c		\
 	sockaddr.c		\
-	test-plugin.h
+	test-plugin.h		\
+	test-util.c		\
+	test-util.h
 libmptcpd_test_la_LIBADD =			\
 	$(top_builddir)/lib/libmptcpd.la	\
 	$(ELL_LIBS)				\

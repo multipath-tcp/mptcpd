@@ -21,10 +21,20 @@
 #include "../src/path_manager.h"    // INTERNAL!
 
 #include "test-plugin.h"
+#include "test-util.h"
 
 #include <mptcpd/path_manager.h>
 #include <mptcpd/mptcp_private.h>
 
+
+// -------------------------------------------------------------------
+
+struct test_info
+{
+        char const *const family_name;
+
+        bool tests_called;
+};
 
 // -------------------------------------------------------------------
 
@@ -136,20 +146,21 @@ static void run_tests(struct l_genl_family_info const *info,
                       void *user_data)
 {
         /*
-          Check if the initial request for the "mptcp" generic netlink
+          Check if the initial request for the MPTCP generic netlink
           family failed.  A subsequent family watch will be used to
           call this function again when it appears.
          */
         if (info == NULL)
                 return;
 
+        struct test_info *const t = user_data;
+
         assert(strcmp(l_genl_family_info_get_name(info),
-                      MPTCP_GENL_NAME) == 0);
+                      t->family_name) == 0);
 
         l_test_run();
 
-        bool *const tests_called = user_data;
-        *tests_called = true;
+        t->tests_called = true;
 
         l_main_quit();
 }
@@ -191,6 +202,12 @@ int main(void)
         struct mptcpd_pm *pm = mptcpd_pm_create(config);
         assert(pm);
 
+        struct test_info info = {
+                .family_name = tests_get_pm_family_name()
+        };
+
+        assert(info.family_name);
+
         l_test_init(&argc, &args);
 
         l_test_add("send_addr",      test_send_addr,      pm);
@@ -204,24 +221,23 @@ int main(void)
           Prepare to run the path management generic netlink command
           tests.
         */
-        bool tests_called = false;
         struct l_genl *const genl = l_genl_new();
         assert(genl != NULL);
 
         unsigned int const watch_id =
                 l_genl_add_family_watch(genl,
-                                        MPTCP_GENL_NAME,
+                                        info.family_name,
                                         run_tests,
                                         NULL,
-                                        &tests_called,
+                                        &info,
                                         NULL);
 
         assert(watch_id != 0);
 
         bool const requested = l_genl_request_family(genl,
-                                                     MPTCP_GENL_NAME,
+                                                     info.family_name,
                                                      run_tests,
-                                                     &tests_called,
+                                                     &info,
                                                      NULL);
         assert(requested);
 
@@ -236,10 +252,10 @@ int main(void)
         (void) l_main_run();
 
         /*
-          The tests will have run only if the "mptcp" generic netlink
+          The tests will have run only if the MPTCP generic netlink
           family appeared.
          */
-        assert(tests_called);
+        assert(info.tests_called);
 
         l_timeout_remove(timeout);
         l_genl_remove_family_watch(genl, watch_id);

@@ -68,6 +68,7 @@ test_path_manager_CPPFLAGS =				\
 test_path_manager_LDADD =			\
 	$(top_builddir)/src/libpath_manager.la	\
 	$(top_builddir)/lib/libmptcpd.la	\
+	$(builddir)/lib/libmptcpd_test.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
 
@@ -78,6 +79,7 @@ test_commands_CPPFLAGS =				\
 test_commands_LDADD =				\
 	$(top_builddir)/src/libpath_manager.la	\
 	$(top_builddir)/lib/libmptcpd.la	\
+	$(builddir)/lib/libmptcpd_test.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
 

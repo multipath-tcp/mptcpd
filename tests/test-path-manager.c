@@ -10,12 +10,16 @@
 #undef NDEBUG
 #include <assert.h>
 
+#include <unistd.h>
+
 #include <ell/main.h>
 #include <ell/genl.h>
 #include <ell/timeout.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
 #include <ell/log.h>
 #include <ell/test.h>
+
+#include "test-util.h"
 
 #include "../src/configuration.h"        // INTERNAL!
 #include "../src/path_manager.h"         // INTERNAL!
@@ -29,6 +33,8 @@ struct test_info
 {
         struct mptcpd_config *const config;
 
+        char const *const family_name;
+
         struct mptcpd_pm *pm;
 
         bool tests_called;
@@ -36,7 +42,7 @@ struct test_info
 
 // -------------------------------------------------------------------
 
-void test_pm_create(void const *test_data)
+static void test_pm_create(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
 
@@ -53,7 +59,7 @@ void test_pm_create(void const *test_data)
         */
 }
 
-void test_pm_destroy(void const *test_data)
+static void test_pm_destroy(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
 
@@ -70,19 +76,20 @@ static void run_tests(struct l_genl_family_info const *info,
                       void *user_data)
 {
         /*
-          Check if the initial request for the "mptcp" generic netlink
+          Check if the initial request for the MPTCP generic netlink
           family failed.  A subsequent family watch will be used to
           call this function again when it appears.
          */
         if (info == NULL)
                 return;
 
+        struct test_info *const t = user_data;
+
         assert(strcmp(l_genl_family_info_get_name(info),
-                      MPTCP_GENL_NAME) == 0);
+                      t->family_name) == 0);
 
         l_test_run();
 
-        struct test_info *const t = user_data;
         t->tests_called = true;
 
         l_main_quit();
@@ -119,10 +126,12 @@ int main(void)
         static int argc = L_ARRAY_SIZE(argv);
 
         struct test_info info = {
-                .config = mptcpd_config_create(argc, argv)
+                .config = mptcpd_config_create(argc, argv),
+                .family_name = tests_get_pm_family_name()
         };
 
         assert(info.config);
+        assert(info.family_name);
 
         l_test_init(&argc, &args);
 
@@ -138,7 +147,7 @@ int main(void)
 
         unsigned int const watch_id =
                 l_genl_add_family_watch(genl,
-                                        MPTCP_GENL_NAME,
+                                        info.family_name,
                                         run_tests,
                                         NULL,
                                         &info,
@@ -147,7 +156,7 @@ int main(void)
         assert(watch_id != 0);
 
         bool const requested = l_genl_request_family(genl,
-                                                     MPTCP_GENL_NAME,
+                                                     info.family_name,
                                                      run_tests,
                                                      &info,
                                                      NULL);
