@@ -147,7 +147,7 @@ AS_IF([test "x$ax_enable_debug" != "xyes"],
        dnl AX_ENABLE_DEBUG macro disables the autoconf default of
        dnl implicitly adding it.
        AS_IF([test "x$enable_code_coverage" != "xyes"],
-             [MPTCPD_ADD_COMPILE_FLAG([-O2])])
+             [AX_APPEND_COMPILE_FLAGS([-O2])])
 
        dnl AX_CODE_COVERAGE will define NDEBUG on the command line,
        dnl equivalent to #define NDEBUG 1, if code coverage is
@@ -161,7 +161,7 @@ AS_IF([test "x$ax_enable_debug" != "xyes"],
       [
        dnl Minimal optimization for the debug case.  We need this for
        dnl _FORTIFY_SOURCE support, too.
-       MPTCPD_ADD_COMPILE_FLAG([-Og])
+       AX_APPEND_COMPILE_FLAGS([-Og])
       ])
 
 
@@ -220,9 +220,7 @@ AC_CHECK_DECLS([IPPROTO_MPTCP],
 # warning free.
 # ---------------------------------------------------------------
 AX_CFLAGS_WARN_ALL([CFLAGS])
-MPTCPD_ADD_COMPILE_FLAG([-Wextra])
-MPTCPD_ADD_COMPILE_FLAG([-Werror])
-MPTCPD_ADD_COMPILE_FLAG([-pedantic])
+AX_APPEND_COMPILE_FLAGS([-Wextra -Werror -pedantic])
 
 # ---------------------------------------------------------------
 # Enable compile-time defense
@@ -234,38 +232,34 @@ MPTCPD_ADD_COMPILE_FLAG([-pedantic])
 AX_APPEND_FLAG([-U_FORTIFY_SOURCE], [CPPFLAGS])
 AX_APPEND_FLAG([-D_FORTIFY_SOURCE=2], [CPPFLAGS])
 
+# Format string vulnerabilities
+# -Wformat=2 implies:
+#    -Wformat -Wformat-nonliteral -Wformat-security -Wformat-y2k
+AX_APPEND_COMPILE_FLAGS([-Wformat=2])
+
 # Stack-based buffer overrun detection
 MPTCPD_ADD_COMPILE_FLAG([-fstack-protector-strong],
                         [# GCC < 4.9
                          MPTCPD_ADD_COMPILE_FLAG([-fstack-protector])
                         ])
 
-# Format string vulnerabilities
-# -Wformat=2 implies:
-#    -Wformat -Wformat-nonliteral -Wformat-security -Wformat-y2k
-MPTCPD_ADD_COMPILE_FLAG([-Wformat=2])
-
 # Position Independent Execution (PIE)
-AX_CHECK_COMPILE_FLAG([-fPIE],
-                      [AX_APPEND_FLAG([-fPIE], [EXECUTABLE_CFLAGS])
-                       AC_SUBST([EXECUTABLE_CFLAGS])
-                      ])
+AX_APPEND_COMPILE_FLAGS([-fPIE], [EXECUTABLE_CFLAGS])
+AC_SUBST([EXECUTABLE_CFLAGS])
+
 
 # ---------------------------------------------------------------
 # Enable link-time defenses
 # ---------------------------------------------------------------
 # Stack execution protection
-MPTCPD_ADD_LINK_FLAG([-Wl,-z,noexecstack])
+AX_APPEND_LINK_FLAGS([-Wl,-z,noexecstack])
 
 # Data relocation and protection (RELRO)
-MPTCPD_ADD_LINK_FLAG([-Wl,-z,now])
-MPTCPD_ADD_LINK_FLAG([-Wl,-z,relro])
+AX_APPEND_LINK_FLAGS([-Wl,-z,now -Wl,-z,relro])
 
 # Position Independent Execution
-AX_CHECK_LINK_FLAG([-pie],
-                   [AX_APPEND_FLAG([-pie], [EXECUTABLE_LDFLAGS])
-                    AC_SUBST([EXECUTABLE_LDFLAGS])
-                   ])
+AX_APPEND_LINK_FLAGS([-pie], [EXECUTABLE_LDFLAGS])
+AC_SUBST([EXECUTABLE_LDFLAGS])
 
 # ---------------------------------------------------------------
 # Test plugin names (centrally defined here)
