@@ -95,7 +95,6 @@ test_cxx_build_CPPFLAGS =					\
 	$(AM_CPPFLAGS)						\
 	-DTEST_PLUGIN_DIR=\"$(TEST_PLUGIN_DIR_SECURITY)\"	\
 	-DTEST_PLUGIN_FOUR=\"@TEST_PLUGIN_FOUR@\"
-test_cxx_build_CXXFLAGS = $(AM_CXXFLAGS) -Og
 test_cxx_build_LDADD =				\
 	$(top_builddir)/lib/libmptcpd.la	\
 	$(builddir)/lib/libmptcpd_test.la	\
