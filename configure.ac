@@ -162,6 +162,13 @@ AS_IF([test "x$ax_enable_debug" != "xyes"],
        dnl Minimal optimization for the debug case.  We need this for
        dnl _FORTIFY_SOURCE support, too.
        AX_APPEND_COMPILE_FLAGS([-Og])
+
+       dnl Enable debug optimization for C++ build test, too.
+       AS_IF([test -n "$CXX"],
+             [AC_LANG_PUSH([C++])
+              AX_APPEND_COMPILE_FLAGS([-Og])
+              AC_LANG_POP([C++])
+             ])
       ])
 
 
