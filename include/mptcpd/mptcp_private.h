@@ -4,8 +4,8 @@
  *
  * @brief mptcpd convenience wrapper around <linux/mptcp.h>.
  *
- * Support for the upstream (server-oriented) and the
- * multipath-tcp.org (client-oriented) <linux/mptcp.h> headers.
+ * Support for the upstream and the multipath-tcp.org <linux/mptcp.h>
+ * headers.
  *
  * Copyright (c) 2020, Intel Corporation
  */
@@ -22,18 +22,16 @@
 
 # ifdef MPTCP_PM_NAME
 /*
-  Platform has upstream / server-oriented MPTCP path mangement generic
-  netlink API so include local copy of the multipath-tcp-org /
-  client-oriented <linux/mptcp.h> header.
+  Platform has upstream MPTCP path mangement generic netlink API so
+  include local copy of the multipath-tcp-org <linux/mptcp.h> header.
 */
-#  include "linux/mptcp_client.h"
+#  include "linux/mptcp_org.h"
 # elif defined(MPTCP_GENL_NAME)
 /*
-  Platform has multipath-tcp.org / client-oriented MPTCP path
-  mangement generic netlink API so include local copy of the upstream
-  / server-oriented <linux/mptcp.h> header.
+  Platform has multipath-tcp.org MPTCP path mangement generic netlink
+  API so include local copy of the upstream <linux/mptcp.h> header.
 */
-#  include "linux/mptcp_server.h"
+#  include "linux/mptcp_upstream.h"
 # else
 #  error "Unrecognized <linux/mptcp.h> header."
 # endif // MPTCP_PM_NAME
@@ -46,8 +44,8 @@
  * @todo Should we drop this case entirely, and require the
  *       <linux/mptcp.h> header to exist?
  */
-# include "linux/mptcp_server.h"
-# include "linux/mptcp_client.h"
+# include "linux/mptcp_upstream.h"
+# include "linux/mptcp_org.h"
 #endif // HAVE_LINUX_MPTCP_H
 
 #endif // MPTCPD_MPTCP_PRIVATE_H

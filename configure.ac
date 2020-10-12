@@ -187,9 +187,9 @@ AC_SUBST([ELL_VERSION])
 # ---------------------------------------------------------------
 # Checks for header files.
 # ---------------------------------------------------------------
-# @todo mptcpd ships with a copies of the server- and client-oriented
-#       <linux/mptcp.h> header files.  Ideally it should not.
-#       Consider removing them from mptcpd.
+# @todo mptcpd ships with a copies of the upstream and
+#       multipath-tcp.org kernel <linux/mptcp.h> header files. Ideally
+#       it should not. Consider removing them from mptcpd.
 AC_CHECK_HEADERS([linux/mptcp.h], [],
    [AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])])
 
