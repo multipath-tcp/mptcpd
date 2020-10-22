@@ -4,20 +4,26 @@
  *
  * @brief mptcpd path manager private interface.
  *
- * Copyright (c) 2017-2019, Intel Corporation
+ * Copyright (c) 2017-2020, Intel Corporation
  */
 
 #ifndef MPTCPD_PATH_MANAGER_PRIVATE_H
 #define MPTCPD_PATH_MANAGER_PRIVATE_H
 
+#include <mptcpd/types.h>
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct sockaddr;
 
 struct l_genl;
 struct l_genl_family;
 struct l_timeout;
 
+struct mptcpd_pm_cmd_ops;
 struct mptcpd_nm;
 
 /**
@@ -34,6 +40,9 @@ struct mptcpd_pm
         /**
          * @privatesection
          */
+        ///
+        struct mptcpd_pm_cmd_ops const *cmd_ops;
+
         /// Core ELL generic netlink object.
         struct l_genl *genl;
 
@@ -65,6 +74,102 @@ struct mptcpd_pm
          * detect changes to network devices.
          */
         struct mptcpd_nm *nm;
+};
+
+/**
+ * @struct mptcpd_pm_cmd_ops
+ *
+ * @brief MPTCP path management generic netlink command functions.
+ *
+ * The set of functions that implement MPTCP path management generic
+ * netlink command calls.
+ */
+struct mptcpd_pm_cmd_ops
+{
+        /**
+         * @name Common Path Management Commands
+         *
+         * Path management common to both the upstream and
+         * multipath-tcp.org Linux kernels.
+         *
+         * @param[in] pm    The mptcpd path manager object.
+         * @param[in] addr  Local IP address and port to be advertised
+         *                  through the MPTCP protocol @c ADD_ADDR
+         *                  option.  The port is optional, and is
+         *                  ignored if it is zero.
+         * @param[in] id    MPTCP local address ID.
+         * @param[in] flags
+         * @param[in] index Network interface index (optional for
+         *                  upstream Linux kernel).
+         * @param[in] token MPTCP connection token.
+         */
+        //@{
+        /**
+         * @brief Advertise new network address to peers.
+         */
+        int (*add_addr)(struct mptcpd_pm *pm,
+                        struct sockaddr const *addr,
+                        mptcpd_aid_t id,
+                        uint32_t const flags,
+                        int index,
+                        mptcpd_token_t token);
+
+        /**
+         * @brief Stop advertising network address to peers.
+         */
+        int (*remove_addr)(struct mptcpd_pm *pm,
+                           mptcpd_aid_t address_id,
+                           uint32_t flags,
+                           mptcpd_token_t token);
+        //@}
+
+        /**
+         * @name Upstream Kernel Path Management Commands
+         *
+         * Path management commands supported by the upstream Linux
+         * kernel.
+         */
+        //@{
+        /**
+         * @brief Get network address corresponding to an address ID.
+         */
+        int (*get_addr)(struct mptcpd_pm *pm,
+                        mptcpd_aid_t id,
+                        struct sockaddr *addr);
+
+        int (*flush_addrs)(void);
+
+        int (*set_limits)(void);
+
+        int (*get_limits)(void);
+        //@}
+
+        /**
+         * @name multipath-tcp.org kernel Path Management Commands
+         *
+         * Path management commands supported by the multipath-tcp.org
+         * Linux kernel.
+         */
+        //@{
+        int (*add_subflow)(struct mptcpd_pm *pm,
+                           mptcpd_token_t token,
+                           mptcpd_aid_t local_address_id,
+                           mptcpd_aid_t remote_address_id,
+                           struct sockaddr const *local_addr,
+                           struct sockaddr const *remote_addr,
+                           bool backup);
+
+        int (*remove_subflow)(struct mptcpd_pm *pm,
+                              mptcpd_token_t token,
+                              struct sockaddr const *local_addr,
+                              struct sockaddr const *remote_addr);
+
+        int (*set_backup)(struct mptcpd_pm *pm,
+                          mptcpd_token_t token,
+                          struct sockaddr const *local_addr,
+                          struct sockaddr const *remote_addr,
+                          bool backup);
+        //@}
 };
 
 #ifdef __cplusplus

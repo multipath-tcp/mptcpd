@@ -14,6 +14,8 @@ AM_CPPFLAGS =				\
 noinst_LTLIBRARIES = libpath_manager.la
 
 libpath_manager_la_SOURCES =	\
+	commands.h		\
+	commands_mptcp_org.c	\
 	configuration.c		\
 	configuration.h		\
 	path_manager.c		\

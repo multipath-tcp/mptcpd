@@ -36,41 +36,48 @@ struct mptcpd_pm;
 MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
 
 /**
- * @brief Send @c MPTCP_CMD_ANNOUNCE genl command to kernel.
+ * @brief Advertise new network address to peers.
  *
- * @param[in] pm         The mptcpd path manager object.
- * @param[in] token      MPTCP connection token.
- * @param[in] address_id MPTCP local address ID.
- * @param[in] addr       MPTCP local IP address and port to be
- *                       advertised through the MPTCP protocol
- *                       @c ADD_ADDR option.  The port is optional,
- *                       and is ignored if it is zero.
+ * @param[in] pm    The mptcpd path manager object.
+ * @param[in] addr  Local IP address and port to be advertised
+ *                  through the MPTCP protocol @c ADD_ADDR
+ *                  option.  The port is optional, and is
+ *                  ignored if it is zero.
+ * @param[in] id    MPTCP local address ID.
+ * @param[in] flags 
+ * @param[in] index Network interface index (optional for
+ *                  upstream Linux kernel).
+ * @param[in] token MPTCP connection token.
  *
- * @return @c true if operation was successful. @c false otherwise.
+ * @return @c 0 if operation was successful. @c errno otherwise.
  */
-MPTCPD_API bool mptcpd_pm_send_addr(struct mptcpd_pm *pm,
-                                    mptcpd_token_t token,
-                                    mptcpd_aid_t address_id,
-                                    struct sockaddr const *addr);
+MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
+                                  struct sockaddr const *addr,
+                                  mptcpd_aid_t id,
+                                  uint32_t flags,
+                                  int index,
+                                  mptcpd_token_t token);
 
 /**
- * @brief Send @c MPTCP_CMD_REMOVE genl command to kernel.
+ * @brief Stop advertising network address to peers.
  *
  * @param[in] pm         The mptcpd path manager object.
- * @param[in] token      MPTCP connection token.
  * @param[in] address_id MPTCP local address ID to be sent in the
  *                       MPTCP protocol @c REMOVE_ADDR option
  *                       corresponding to the local address that will
  *                       no longer be available.
+ * @param[in] flags      
+ * @param[in] token      MPTCP connection token.
  *
- * @return @c true if operation was successful. @c false otherwise.
+ * @return @c 0 if operation was successful. @c errno otherwise.
  */
-MPTCPD_API bool mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
-                                      mptcpd_token_t token,
-                                      mptcpd_aid_t address_id);
+MPTCPD_API int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
+                                     mptcpd_aid_t address_id,
+                                     uint32_t flags,
+                                     mptcpd_token_t token);
 
 /**
- * @brief Send @c MPTCP_CMD_SUB_CREATE genl command to kernel.
+ * @brief Create a new subflow.
  *
  * @param[in] pm                The mptcpd path manager object.
  * @param[in] token             MPTCP connection token.
@@ -83,11 +90,11 @@ MPTCPD_API bool mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
  * @param[in] backup            Whether or not to set the MPTCP
  *                              subflow backup priority flag.
  *
- * @return @c true if operation was successful. @c false otherwise.
+ * @return @c 0 if operation was successful. @c errno otherwise.
  *
  * @todo There far too many parameters.  Reduce.
  */
-MPTCPD_API bool
+MPTCPD_API int
 mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                       mptcpd_token_t token,
                       mptcpd_aid_t local_address_id,
@@ -97,7 +104,7 @@ mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                       bool backup);
 
 /**
- * @brief Send @c MPTCP_CMD_SUB_PRIORITY genl command to kernel.
+ * @brief Set priority of a subflow.
  *
  * @param[in] pm                The mptcpd path manager object.
  * @param[in] token             MPTCP connection token.
@@ -108,9 +115,9 @@ mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
  * @param[in] backup            Whether or not to set the MPTCP
  *                              subflow backup priority flag.
  *
- * @return @c true if operation was successful. @c false otherwise.
+ * @return @c 0 if operation was successful. @c errno otherwise.
  */
-MPTCPD_API bool mptcpd_pm_set_backup(
+MPTCPD_API int mptcpd_pm_set_backup(
         struct mptcpd_pm *pm,
         mptcpd_token_t token,
         struct sockaddr const *local_addr,
@@ -118,7 +125,7 @@ MPTCPD_API bool mptcpd_pm_set_backup(
         bool backup);
 
 /**
- * @brief Send @c MPTCP_CMD_SUB_DESTROY genl command to kernel.
+ * @brief Remove a subflow.
  *
  * @param[in] pm                The mptcpd path manager object.
  * @param[in] token             MPTCP connection token.
@@ -127,9 +134,9 @@ MPTCPD_API bool mptcpd_pm_set_backup(
  * @param[in] remote_addr       MPTCP subflow remote address
  *                              information, including the port.
  *
- * @return @c true if operation was successful. @c false otherwise.
+ * @return @c 0 if operation was successful. @c errno otherwise.
  */
-MPTCPD_API bool mptcpd_pm_remove_subflow(
+MPTCPD_API int mptcpd_pm_remove_subflow(
         struct mptcpd_pm *pm,
         mptcpd_token_t token,
         struct sockaddr const *local_addr,

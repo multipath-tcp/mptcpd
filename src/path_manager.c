@@ -19,7 +19,6 @@
 #include <unistd.h>
 
 #include <netinet/in.h>
-#include <linux/netlink.h>  // For NLA_* macros.
 
 #include <ell/genl.h>
 #include <ell/log.h>
@@ -33,6 +32,7 @@
 
 #include "path_manager.h"
 #include "configuration.h"
+#include "commands.h"
 
 /// Directory containing MPTCP sysctl variable entries.
 #define MPTCP_SYSCTL_BASE "/proc/sys/net/mptcp/"
@@ -1050,11 +1050,14 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         assert(config != NULL);
 
         char const *name = NULL;
+        struct mptcpd_pm_cmd_ops const *cmd_ops = NULL;
 
         if (is_upstream_kernel()) {
                 name = MPTCP_PM_NAME;
+                cmd_ops = NULL; /* mptcpd_get_upstream_cmd_ops(); */
         } else if (is_mptcp_org_kernel()) {
                 name = MPTCP_GENL_NAME;
+                cmd_ops = mptcpd_get_mptcp_org_cmd_ops();
         } else {
                 l_error("Required kernel MPTCP support not available.");
                 return NULL;
@@ -1063,6 +1066,8 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         struct mptcpd_pm *const pm = l_new(struct mptcpd_pm, 1);
 
         // No need to check for NULL.  l_new() abort()s on failure.
+
+        pm->cmd_ops = cmd_ops;
 
         pm->genl = l_genl_new();
         if (pm->genl == NULL) {
