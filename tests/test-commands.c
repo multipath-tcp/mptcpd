@@ -65,17 +65,22 @@ static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
 
 // -------------------------------------------------------------------
 
-void test_send_addr(void const *test_data)
+void test_add_addr(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
 
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        assert(mptcpd_pm_send_addr(pm,
-                                   test_token_1,
-                                   test_laddr_id_1,
-                                   laddr1));
+        uint32_t flags = 0;
+        int index = 0;
+
+        assert(mptcpd_pm_add_addr(pm,
+                                  laddr1,
+                                  test_laddr_id_1,
+                                  flags,
+                                  index,
+                                  test_token_1));
 }
 
 void test_remove_addr(void const *test_data)
@@ -85,9 +90,12 @@ void test_remove_addr(void const *test_data)
         if (!is_pm_ready(pm, __func__))
                 return;
 
+        uint32_t flags = 0;
+
         assert(mptcpd_pm_remove_addr(pm,
-                                     test_token_1,
-                                     test_laddr_id_1));
+                                     test_laddr_id_1,
+                                     flags,
+                                     test_token_1));
 }
 
 void test_add_subflow(void const *test_data)
@@ -210,7 +218,7 @@ int main(void)
 
         l_test_init(&argc, &args);
 
-        l_test_add("send_addr",      test_send_addr,      pm);
+        l_test_add("add_addr",       test_add_addr,       pm);
         l_test_add("remove_addr",    test_remove_addr,    pm);
         l_test_add("add_subflow",    test_add_subflow,    pm);
         l_test_add("set_backup",     test_set_backup,     pm);

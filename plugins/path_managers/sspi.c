@@ -493,7 +493,14 @@ static void sspi_send_addr(void *data, void *user_data)
                 ((struct sockaddr_in6 const *) addr)->sin6_port = port;
         */
 
-        mptcpd_pm_send_addr(info->pm, info->token, address_id, addr);
+        uint32_t flags = 0;
+
+        mptcpd_pm_add_addr(info->pm,
+                           addr,
+                           address_id,
+                           flags,
+                           info->index,
+                           info->token);
 }
 
 /**
