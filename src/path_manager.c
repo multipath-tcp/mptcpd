@@ -1053,7 +1053,7 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 
         if (is_upstream_kernel()) {
                 name = MPTCP_PM_NAME;
-                cmd_ops = NULL; /* mptcpd_get_upstream_cmd_ops(); */
+                cmd_ops = mptcpd_get_upstream_cmd_ops();
         } else if (is_mptcp_org_kernel()) {
                 name = MPTCP_GENL_NAME;
                 cmd_ops = mptcpd_get_mptcp_org_cmd_ops();
