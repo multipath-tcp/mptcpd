@@ -11,8 +11,6 @@
 # include <mptcpd/config-private.h>
 #endif
 
-#define _POSIX_C_SOURCE 200112L  ///< For XSI-compliant strerror_r().
-
 #include <assert.h>
 #include <errno.h>
 
@@ -74,7 +72,6 @@ int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
 
 int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
                           mptcpd_aid_t address_id,
-                          uint32_t flags,
                           mptcpd_token_t token)
 {
         if (pm == NULL || address_id == 0)
@@ -88,7 +85,95 @@ int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
         if (ops->remove_addr == NULL)
                 return ENOTSUP;
 
-        return ops->remove_addr(pm, address_id, flags, token);
+        return ops->remove_addr(pm, address_id, token);
+}
+
+int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
+                       mptcpd_aid_t id,
+                       struct mptcpd_addr_info **addr)
+{
+        if (pm == NULL || id == 0 || addr == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+
+        if (ops->get_addr == NULL)
+                return ENOTSUP;
+
+        return ops->get_addr(pm, id, addr);
+}
+
+int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
+                         struct mptcpd_addr_info **addrs,
+                         size_t *len)
+{
+        if (pm == NULL || addrs == NULL || len == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+
+        if (ops->dump_addrs == NULL)
+                return ENOTSUP;
+
+        return ops->dump_addrs(pm, addrs, len);
+}
+
+int mptcpd_pm_flush_addrs(struct mptcpd_pm *pm)
+{
+        if (pm == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+
+        if (ops->flush_addrs == NULL)
+                return ENOTSUP;
+
+        return ops->flush_addrs(pm);
+}
+
+int mptcpd_pm_set_limits(struct mptcpd_pm *pm,
+                         struct mptcpd_limit const *limits,
+                         size_t len)
+{
+        if (pm == NULL || limits == NULL || len == 0)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+
+        if (ops->set_limits == NULL)
+                return ENOTSUP;
+
+        return ops->set_limits(pm, limits, len);
+}
+
+int mptcpd_pm_get_limits(struct mptcpd_pm *pm,
+                         struct mptcpd_limit **limits,
+                         size_t *len)
+{
+        if (pm == NULL || limits == NULL || len == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+
+        if (ops->get_limits == NULL)
+                return ENOTSUP;
+
+        return ops->get_limits(pm, limits, len);
 }
 
 int mptcpd_pm_add_subflow(struct mptcpd_pm *pm,

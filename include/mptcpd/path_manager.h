@@ -19,6 +19,8 @@ extern "C" {
 
 struct sockaddr;
 struct mptcpd_pm;
+struct mptcpd_addr_info;
+struct mptcpd_limits;
 
 /**
  * @brief Is mptcpd path manager ready for use?
@@ -44,10 +46,18 @@ MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
  *                  option.  The port is optional, and is
  *                  ignored if it is zero.
  * @param[in] id    MPTCP local address ID.
- * @param[in] flags 
- * @param[in] index Network interface index (optional for
- *                  upstream Linux kernel).
- * @param[in] token MPTCP connection token.
+ * @param[in] flags Bitset of MPTCP flags associated with the network
+ *                  address, e.g. @c MPTCP_ADDR_FLAG_BACKUP @c |
+ *                   @c MPTCP_PM_ADDR_FLAG_SUBFLOW.  Optional for
+ *                  upstream kernel.  Unused by the multipath-tcp.org
+ *                  Linux kernel (e.g. set to zero).
+ * @param[in] index Network interface index.  Optional for upstream
+ *                  Linux kernel (e.g. set to zero).
+ * @param[in] token MPTCP connection token.  Unused by the upstream
+ *                  Linux kernel (e.g. set to zero).
+ *
+ * @todo Should we define corresponding mptcpd flags instead of
+ *       exposing the flags in <linux/mptcp.h>?
  *
  * @return @c 0 if operation was successful. @c errno otherwise.
  */
@@ -66,15 +76,80 @@ MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
  *                       MPTCP protocol @c REMOVE_ADDR option
  *                       corresponding to the local address that will
  *                       no longer be available.
- * @param[in] flags      
  * @param[in] token      MPTCP connection token.
  *
- * @return @c 0 if operation was successful. @c errno otherwise.
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
                                      mptcpd_aid_t address_id,
-                                     uint32_t flags,
                                      mptcpd_token_t token);
+
+/**
+ * @brief Get network address corresponding to an address ID.
+ *
+ * @param[in]  pm   The mptcpd path manager object.
+ * @param[in]  id   MPTCP local address ID.
+ * @param[out] addr Network address information associated
+ *                  with the @a id.  Deallocate with
+ *                  @c mptcpd_addr_info_destroy().
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
+                                  mptcpd_aid_t id,
+                                  struct mptcpd_addr_info **addr);
+
+/**
+ * @brief Get list (array) of MPTCP network addresses.
+ *
+ * @param[in]  pm   The mptcpd path manager object.
+ * @param[out] addr Array of MPTCP network address information.
+ *                  Deallocate with @c mptcpd_addr_info_destroy().
+ * @param[out] len  Length of the @a addrs array.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
+                                    struct mptcpd_addr_info **addrs,
+                                    size_t *len);
+
+/**
+ * @brief Flush MPTCP addresses.
+ *
+ * @param[in] pm The mptcpd path manager object.
+ *
+ * @todo Improve documentation.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_pm_flush_addrs(struct mptcpd_pm *pm);
+
+/**
+ * @brief Set MPTCP resource limits.
+ *
+ * @param[in] pm     The mptcpd path manager object.
+ * @param[in] limits Array of MPTCP resource type/limit pairs.
+ * @param[in] len    Length of the @a limits array.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_pm_set_limits(struct mptcpd_pm *pm,
+                                    struct mptcpd_limit const *limits,
+                                    size_t len);
+
+/**
+ * @brief Get MPTCP resource limits.
+ *
+ * @param[in]  pm     The mptcpd path manager object.
+ * @param[out] limits Array of MPTCP resource type/limit pairs.
+ *                    Destroy with @c free().
+ * @param[out] len    Length of the @a limits array.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_pm_get_limits(struct mptcpd_pm *pm,
+                                    struct mptcpd_limit **limits,
+                                    size_t *len);
 
 /**
  * @brief Create a new subflow.
@@ -90,7 +165,7 @@ MPTCPD_API int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
  * @param[in] backup            Whether or not to set the MPTCP
  *                              subflow backup priority flag.
  *
- * @return @c 0 if operation was successful. @c errno otherwise.
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  *
  * @todo There far too many parameters.  Reduce.
  */

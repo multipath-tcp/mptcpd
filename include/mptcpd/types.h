@@ -33,6 +33,23 @@ typedef uint8_t mptcpd_aid_t;
 /// MPTCP flags type.
 typedef uint32_t mptcpd_flags_t;
 
+#define MPTCPD_LIMIT_RCV_ADD_ADDRS MPTCP_PM_ATTR_RCV_ADD_ADDRS
+#define MPTCPD_LIMIT_SUBFLOWS MPTCP_PM_ATTR_SUBFLOWS
+
+/**
+ * @struct mptcpd_limit
+ *
+ * @brief MPTCP resource type/limit pair.
+ */
+struct mptcpd_limit
+{
+        /// MPTCP resource type, e.g. @c MPTCPD_LIMIT_SUBFLOWS.
+        uint16_t type;
+
+        /// MPTCP resource limit value.
+        uint32_t limit;
+};
+
 #ifdef __cplusplus
 }
 #endif

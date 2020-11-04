@@ -24,6 +24,8 @@ struct l_genl_family;
 struct l_timeout;
 
 struct mptcpd_pm_cmd_ops;
+struct mptcpd_addr_info;
+struct mptcpd_limit;
 struct mptcpd_nm;
 
 /**
@@ -87,6 +89,9 @@ struct mptcpd_pm
 struct mptcpd_pm_cmd_ops
 {
         /**
+         * @privatesection
+         */
+        /**
          * @name Common Path Management Commands
          *
          * Path management common to both the upstream and
@@ -110,7 +115,7 @@ struct mptcpd_pm_cmd_ops
         int (*add_addr)(struct mptcpd_pm *pm,
                         struct sockaddr const *addr,
                         mptcpd_aid_t id,
-                        uint32_t const flags,
+                        uint32_t flags,
                         int index,
                         mptcpd_token_t token);
 
@@ -119,7 +124,6 @@ struct mptcpd_pm_cmd_ops
          */
         int (*remove_addr)(struct mptcpd_pm *pm,
                            mptcpd_aid_t address_id,
-                           uint32_t flags,
                            mptcpd_token_t token);
         //@}
 
@@ -132,16 +136,77 @@ struct mptcpd_pm_cmd_ops
         //@{
         /**
          * @brief Get network address corresponding to an address ID.
+         *
+         * @param[in]  pm   The mptcpd path manager object.
+         * @param[in]  id   MPTCP local address ID.
+         * @param[out] addr Network address information associated
+         *                  with the @a id.  Deallocate with
+         *                  @c mptcpd_addr_info_destroy().
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
          */
         int (*get_addr)(struct mptcpd_pm *pm,
                         mptcpd_aid_t id,
-                        struct sockaddr *addr);
+                        struct mptcpd_addr_info **addr);
 
-        int (*flush_addrs)(void);
+        /**
+         * @brief Dump list of network addresses.
+         *
+         * @param[in]  pm   The mptcpd path manager object.
+         * @param[out] addrs Array of network addresses.  Deallocate
+         *                   by iterating over the array, and calling
+         *                   @c mptcpd_addr_info_destroy() on each
+         *                   element.
+         * @param[out] len  Length of the @a addrs array.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
+         */
+        int (*dump_addrs)(struct mptcpd_pm *pm,
+                          struct mptcpd_addr_info **addrs,
+                          size_t *len);
 
-        int (*set_limits)(void);
+        /**
+         * @brief Flush MPTCP addresses.
+         *
+         * @param[in] pm The mptcpd path manager object.
+         *
+         * @todo Improve documentation.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
+         */
+        int (*flush_addrs)(struct mptcpd_pm *pm);
 
-        int (*get_limits)(void);
+        /**
+         * @brief Set MPTCP resource limits.
+         *
+         * @param[in] pm     The mptcpd path manager object.
+         * @param[in] limits Array of MPTCP resource type/limit pairs.
+         * @param[in] len    Length of the @a limits array.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
+         */
+        int (*set_limits)(struct mptcpd_pm *pm,
+                          struct mptcpd_limit const *limits,
+                          size_t len);
+
+        /**
+         * @brief Get MPTCP resource limits.
+         *
+         * @param[in]  pm     The mptcpd path manager object.
+         * @param[out] limits Array of MPTCP resource type/limit pairs.
+         *                    Destroy with @c free().
+         * @param[out] len    Length of the @a limits array.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
+         */
+        int (*get_limits)(struct mptcpd_pm *pm,
+                          struct mptcpd_limit **limits,
+                          size_t *len);
         //@}
 
         /**
@@ -151,6 +216,25 @@ struct mptcpd_pm_cmd_ops
          * Linux kernel.
          */
         //@{
+        /**
+         * @brief Create a new subflow.
+         *
+         * @param[in] pm                The mptcpd path manager object.
+         * @param[in] token             MPTCP connection token.
+         * @param[in] local_address_id  MPTCP local address ID.
+         * @param[in] remote_address_id MPTCP remote address ID.
+         * @param[in] local_addr        MPTCP subflow local address
+         *                              information, including the port.
+         * @param[in] remote_addr       MPTCP subflow remote address
+         *                              information, including the port.
+         * @param[in] backup            Whether or not to set the MPTCP
+         *                              subflow backup priority flag.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
+         *
+         * @todo There far too many parameters.  Reduce.
+         */
         int (*add_subflow)(struct mptcpd_pm *pm,
                            mptcpd_token_t token,
                            mptcpd_aid_t local_address_id,
@@ -159,11 +243,39 @@ struct mptcpd_pm_cmd_ops
                            struct sockaddr const *remote_addr,
                            bool backup);
 
+        /**
+         * @brief Remove a subflow.
+         *
+         * @param[in] pm                The mptcpd path manager object.
+         * @param[in] token             MPTCP connection token.
+         * @param[in] local_addr        MPTCP subflow local address
+         *                              information, including the port.
+         * @param[in] remote_addr       MPTCP subflow remote address
+         *                              information, including the port.
+         *
+         * @return @c 0 if operation was successful. @c errno
+         *         otherwise.
+         */
         int (*remove_subflow)(struct mptcpd_pm *pm,
                               mptcpd_token_t token,
                               struct sockaddr const *local_addr,
                               struct sockaddr const *remote_addr);
 
+        /**
+         * @brief Set priority of a subflow.
+         *
+         * @param[in] pm                The mptcpd path manager object.
+         * @param[in] token             MPTCP connection token.
+         * @param[in] local_addr        MPTCP subflow local address
+         *                              information, including the port.
+         * @param[in] remote_addr       MPTCP subflow remote address
+         *                              information, including the port.
+         * @param[in] backup            Whether or not to set the MPTCP
+         *                              subflow backup priority flag.
+         *
+         * @return @c 0 if operation was successful. @c errno
+         *         otherwise.
+         */
         int (*set_backup)(struct mptcpd_pm *pm,
                           mptcpd_token_t token,
                           struct sockaddr const *local_addr,
