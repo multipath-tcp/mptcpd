@@ -21,8 +21,8 @@
 #include <netinet/in.h>
 #include <linux/netlink.h>  // For NLA_* macros.
 
-#define MPTCPD_NLA_ALIGN(v) NLA_HDRLEN + NLA_ALIGN(sizeof(v))
-#define MPTCPD_NLA_ALIGN_OPT(v) (v) == 0 ? 0 : (MPTCPD_NLA_ALIGN(v))
+#define MPTCPD_NLA_ALIGN(v) (NLA_HDRLEN + NLA_ALIGN(sizeof(v)))
+#define MPTCPD_NLA_ALIGN_OPT(v) ((v) == 0 ? 0 : (MPTCPD_NLA_ALIGN(v)))
 
 
 #ifdef __cplusplus
