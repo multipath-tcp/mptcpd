@@ -30,6 +30,9 @@ typedef uint8_t mptcpd_aid_t;
 /// MPTCP address ID format specifier.
 #define MPTCPD_PRIxAID PRIx8
 
+/// MPTCP flags type.
+typedef uint32_t mptcpd_flags_t;
+
 #ifdef __cplusplus
 }
 #endif
