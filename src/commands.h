@@ -29,6 +29,8 @@
 extern "C" {
 #endif
 
+struct l_genl_msg;
+
 inline bool mptcpd_is_inet_family(struct sockaddr const *addr)
 {
         return addr->sa_family == AF_INET || addr->sa_family == AF_INET6;
@@ -52,6 +54,8 @@ inline uint16_t mptcpd_get_addr_family(struct sockaddr const *addr)
 
 struct mptcpd_pm_cmd_ops const *mptcpd_get_upstream_cmd_ops(void);
 struct mptcpd_pm_cmd_ops const *mptcpd_get_mptcp_org_cmd_ops(void);
+
+void mptcpd_family_send_callback(struct l_genl_msg *msg, void *user_data);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file lib/path_manager.c
+ * @file commands_mptcp_org.c
  *
  * @brief mptcpd generic netlink commands.
  *
@@ -10,8 +10,6 @@
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/config-private.h>
 #endif
-
-#define _POSIX_C_SOURCE 200112L  ///< For XSI-compliant strerror_r().
 
 #include <assert.h>
 #include <errno.h>
@@ -26,27 +24,6 @@
 #include <mptcpd/path_manager_private.h>
 #include <mptcpd/path_manager.h>
 
-
-static void family_send_callback(struct l_genl_msg *msg, void *user_data)
-{
-        (void) user_data;
-
-        int const error = l_genl_msg_get_error(msg);
-
-        if (error < 0) {
-                // Error during send.  Likely insufficient perms.
-
-                char errmsg[80];
-                int const r = strerror_r(-error,
-                                         errmsg,
-                                         L_ARRAY_SIZE(errmsg));
-
-                l_error("Path manager command error: %s",
-                        r == 0 ? errmsg : "<unknown error>");
-        }
-}
-
-// ---------------------------------------------------------------------
 
 static uint16_t get_port_number(struct sockaddr const *addr)
 {
@@ -205,7 +182,7 @@ static int mptcp_org_add_addr(struct mptcpd_pm *pm,
 
         return l_genl_family_send(pm->family,
                                   msg,
-                                  family_send_callback,
+                                  mptcpd_family_send_callback,
                                   NULL, /* user data */
                                   NULL  /* destroy */)
                 == 0;
@@ -213,16 +190,8 @@ static int mptcp_org_add_addr(struct mptcpd_pm *pm,
 
 static int mptcp_org_remove_addr(struct mptcpd_pm *pm,
                                  mptcpd_aid_t address_id,
-                                 uint32_t flags,
                                  mptcpd_token_t token)
 {
-        /*
-          MPTCP flags are not needed by multipath-tcp.org kernel to
-          remove network address.
-        */
-        if (flags != 0)
-                l_warn("remove_addr: MPTCP flags are ignored.");
-
         /*
           Payload:
               Token
@@ -260,7 +229,7 @@ static int mptcp_org_remove_addr(struct mptcpd_pm *pm,
 
         return l_genl_family_send(pm->family,
                                   msg,
-                                  family_send_callback,
+                                  mptcpd_family_send_callback,
                                   NULL, /* user data */
                                   NULL  /* destroy */)
                 == 0;
@@ -369,7 +338,7 @@ static int mptcp_org_add_subflow(struct mptcpd_pm *pm,
 
         return l_genl_family_send(pm->family,
                                   msg,
-                                  family_send_callback,
+                                  mptcpd_family_send_callback,
                                   NULL, /* user data */
                                   NULL  /* destroy */)
                 == 0;
@@ -454,7 +423,7 @@ static int mptcp_org_set_backup(struct mptcpd_pm *pm,
 
         return l_genl_family_send(pm->family,
                                   msg,
-                                  family_send_callback,
+                                  mptcpd_family_send_callback,
                                   NULL, /* user data */
                                   NULL  /* destroy */)
                 == 0;
@@ -531,7 +500,7 @@ static int mptcp_org_remove_subflow(struct mptcpd_pm *pm,
 
         return l_genl_family_send(pm->family,
                                   msg,
-                                  family_send_callback,
+                                  mptcpd_family_send_callback,
                                   NULL, /* user data */
                                   NULL  /* destroy */)
                 == 0;
