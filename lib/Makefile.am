@@ -21,7 +21,8 @@ libmptcpd_la_LDFLAGS = 	\
 libmptcpd_la_SOURCES =		\
 	network_monitor.c	\
 	path_manager.c		\
-	plugin.c
+	plugin.c		\
+	sockaddr.c
 
 #if BUILDING_DLL
 #libmptcpd_la_SOURCES += debug.c

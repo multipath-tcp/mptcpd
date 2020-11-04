@@ -14,4 +14,5 @@ noinst_HEADERS =		\
 	config-private.h	\
 	mptcp_private.h		\
 	path_manager_private.h 	\
-	plugin_private.h
+	plugin_private.h	\
+	sockaddr_private.h

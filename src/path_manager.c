@@ -29,6 +29,7 @@
 #include <mptcpd/plugin_private.h>
 #include <mptcpd/network_monitor.h>
 #include <mptcpd/mptcp_private.h>
+#include <mptcpd/sockaddr_private.h>
 
 #include "path_manager.h"
 #include "configuration.h"
@@ -137,45 +138,6 @@ static char const *get_pm_name(void const *data, size_t len)
 }
 #endif // MPTCPD_ENABLE_PM_NAME
 
-/**
- * @brief Initialize @c sockaddr_storage instance.
- *
- * Initialize a @c sockaddr_storage instance with the provided IPv4 or
- * IPv6 address.  Only one is required and used.
- *
- * The port may be zero in cases where the port is optional for a
- * given MPTCP generic netlink API event.
- *
- * @param[in]     addr4 IPv4 internet address.
- * @param[in]     addr6 IPv6 internet address.
- * @param[in]     port  IP port.
- * @param[in,out] addr  mptcpd network address information.
- */
-static void initialize_sockaddr_storage(struct in_addr  const *addr4,
-                                        struct in6_addr const *addr6,
-                                        in_port_t port,
-                                        struct sockaddr_storage *addr)
-{
-        assert(addr4 != NULL || addr6 != NULL);
-        assert(addr != NULL);
-
-        if (addr4 != NULL) {
-                struct sockaddr_in *const a = (struct sockaddr_in *) addr;
-
-                a->sin_family      = AF_INET;
-                a->sin_port        = port;
-                a->sin_addr.s_addr = addr4->s_addr;
-        } else {
-                struct sockaddr_in6 *const a =
-                        (struct sockaddr_in6 *) addr;
-
-                a->sin6_family = AF_INET6;
-                a->sin6_port   = port;
-
-                memcpy(&a->sin6_addr, addr6, sizeof(*addr6));
-        }
-}
-
 static void handle_connection_created(struct l_genl_msg *msg,
                                       void *user_data)
 {
@@ -262,11 +224,22 @@ static void handle_connection_created(struct l_genl_msg *msg,
                 return;
         }
 
-        struct mptcpd_pm *const pm = user_data;
-
         struct sockaddr_storage laddr, raddr;
-        initialize_sockaddr_storage(laddr4, laddr6, *local_port, &laddr);
-        initialize_sockaddr_storage(raddr4, raddr6, *remote_port, &raddr);
+
+        if (!mptcpd_sockaddr_storage_init(laddr4,
+                                          laddr6,
+                                          *local_port,
+                                          &laddr)
+            || !mptcpd_sockaddr_storage_init(raddr4,
+                                             raddr6,
+                                             *remote_port,
+                                             &raddr)) {
+                l_error("Unable to initialize address information");
+
+                return;
+        }
+
+        struct mptcpd_pm *const pm = user_data;
 
         mptcpd_plugin_new_connection(pm_name,
                                      *token,
@@ -354,11 +327,22 @@ static void handle_connection_established(struct l_genl_msg *msg,
                 return;
         }
 
-        struct mptcpd_pm *const pm = user_data;
-
         struct sockaddr_storage laddr, raddr;
-        initialize_sockaddr_storage(laddr4, laddr6, *local_port, &laddr);
-        initialize_sockaddr_storage(raddr4, raddr6, *remote_port, &raddr);
+
+        if (!mptcpd_sockaddr_storage_init(laddr4,
+                                          laddr6,
+                                          *local_port,
+                                          &laddr)
+            || !mptcpd_sockaddr_storage_init(raddr4,
+                                             raddr6,
+                                             *remote_port,
+                                             &raddr)) {
+                l_error("Unable to initialize address information");
+
+                return;
+        }
+
+        struct mptcpd_pm *const pm = user_data;
 
         mptcpd_plugin_connection_established(*token,
                                              (struct sockaddr *) &laddr,
@@ -470,10 +454,15 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
         }
 
         struct sockaddr_storage addr;
-        initialize_sockaddr_storage(addr4,
-                                    addr6,
-                                    port ? *port : 0,
-                                    &addr);
+
+        if (!mptcpd_sockaddr_storage_init(addr4,
+                                          addr6,
+                                          port ? *port : 0,
+                                          &addr)) {
+                l_error("Unable to initialize address information");
+
+                return;
+        }
 
         struct mptcpd_pm *const pm = user_data;
 
@@ -639,8 +628,18 @@ static bool handle_subflow(struct l_genl_msg *msg,
 
         *token = *tok;
 
-        initialize_sockaddr_storage(laddr4, laddr6, *local_port,  laddr);
-        initialize_sockaddr_storage(raddr4, raddr6, *remote_port, raddr);
+        if (!mptcpd_sockaddr_storage_init(laddr4,
+                                          laddr6,
+                                          *local_port,
+                                          laddr)
+            || !mptcpd_sockaddr_storage_init(raddr4,
+                                             raddr6,
+                                             *remote_port,
+                                             raddr)) {
+                l_error("Unable to initialize address information");
+
+                return false;
+        }
 
         *backup = *bkup;
 
