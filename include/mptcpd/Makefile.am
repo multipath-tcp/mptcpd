@@ -3,6 +3,7 @@
 ## Copyright (c) 2017-2020, Intel Corporation
 
 pkginclude_HEADERS =		\
+	addr_info.h		\
 	export.h		\
 	network_monitor.h	\
 	path_manager.h		\
