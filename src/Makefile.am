@@ -17,6 +17,7 @@ libpath_manager_la_SOURCES =	\
 	commands.c		\
 	commands.h		\
 	commands_mptcp_org.c	\
+	commands_upstream.c	\
 	configuration.c		\
 	configuration.h		\
 	path_manager.c		\
