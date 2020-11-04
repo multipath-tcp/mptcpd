@@ -145,19 +145,10 @@ static bool           const test_backup_4   = true;
 // For verifying that a plugin will not be dispatched.
 static mptcpd_token_t const test_bad_token  = 0xFFFFFFFF;
 
-/*
-  Mptcpd Test IP Address Notes
-  ============================
-  IPv4 addresses conform to IETF RFC 5737: IPv4 Address Blocks
-  Reserved for Documentation.
-
-  IPv6 addresses conform to IETF RFC 3849: IPv6 Address Prefix
-  Reserved for Documentation.
- */
 static struct sockaddr_in const test_laddr_1 = {
         .sin_family = AF_INET,
         .sin_port   = 0x1234,
-        .sin_addr   = { .s_addr = 0xC0000201 }  // 192.0.2.1
+        .sin_addr   = { .s_addr = 0x34567890 }
 };
 
 #ifdef __cplusplus
@@ -169,18 +160,28 @@ static struct sockaddr_in const test_laddr_1 = {
 static struct sockaddr_in const test_laddr_2 = {
         .sin_family = AF_INET,
         .sin_port   = 0x5678,
-        .sin_addr   = { .s_addr = 0xC0000202 }  // 192.0.2.2
+        .sin_addr   = { .s_addr = 0x45678901 }
 };
 #else
 static struct sockaddr_in6 const test_laddr_2 = {
         .sin6_family = AF_INET6,
         .sin6_port   = 0x5678,
-        .sin6_addr   = { .s6_addr = { [0]  = 0x20,
-                                      [1]  = 0x01,
-                                      [2]  = 0X0D,
-                                      [3]  = 0xB8,
-                                      [14] = 0x01,
-                                      [15] = 0x02 }  // 2001:DB8::102
+        .sin6_addr   = { .s6_addr = { [0]  = 0x0,
+                                      [1]  = 0x1,
+                                      [2]  = 0x2,
+                                      [3]  = 0x3,
+                                      [4]  = 0x4,
+                                      [5]  = 0x5,
+                                      [6]  = 0x6,
+                                      [7]  = 0x7,
+                                      [8]  = 0x8,
+                                      [9]  = 0x9,
+                                      [10] = 0xA,
+                                      [11] = 0xB,
+                                      [12] = 0xC,
+                                      [13] = 0xD,
+                                      [14] = 0xE,
+                                      [15] = 0xF }
         }
 };
 #endif  // __cplusplus
@@ -195,18 +196,28 @@ static struct sockaddr_in6 const test_laddr_2 = {
 static struct sockaddr_in const test_raddr_1 = {
         .sin_family = AF_INET,
         .sin_port   = 0x3456,
-        .sin_addr   = { .s_addr = 0xCB007101 }  // 203.0.113.1
+        .sin_addr   = { .s_addr = 0x56789012 }
 };
 #else
 static struct sockaddr_in6 const test_raddr_1 = {
         .sin6_family = AF_INET6,
         .sin6_port   = 0x3456,
-        .sin6_addr   = { .s6_addr = { [0]  = 0x20,
-                                      [1]  = 0x01,
-                                      [2]  = 0X0D,
-                                      [3]  = 0xB8,
-                                      [14] = 0x02,
-                                      [15] = 0x01 }  // 2001:DB8::201
+        .sin6_addr   = { .s6_addr = { [0]  = 0xF,
+                                      [1]  = 0xE,
+                                      [2]  = 0xD,
+                                      [3]  = 0xC,
+                                      [4]  = 0xB,
+                                      [5]  = 0xA,
+                                      [6]  = 0x9,
+                                      [7]  = 0x8,
+                                      [8]  = 0x7,
+                                      [9]  = 0x6,
+                                      [10] = 0x5,
+                                      [11] = 0x4,
+                                      [12] = 0x3,
+                                      [13] = 0x2,
+                                      [14] = 0x1,
+                                      [15] = 0x0 }
         }
 };
 #endif  // __cplusplus
@@ -214,19 +225,19 @@ static struct sockaddr_in6 const test_raddr_1 = {
 static struct sockaddr_in const test_raddr_2 = {
         .sin_family = AF_INET,
         .sin_port   = 0x7890,
-        .sin_addr   = { .s_addr = 0xCB007102 }  // 203.0.113.2
+        .sin_addr   = { .s_addr = 0x98765432 }
 };
 
 static struct sockaddr_in const test_laddr_4 = {
         .sin_family = AF_INET,
         .sin_port   = 0x2345,
-        .sin_addr   = { .s_addr = 0xC0000204 }  // 192.0.2.4
+        .sin_addr   = { .s_addr = 0x45678901 }
 };
 
 static struct sockaddr_in const test_raddr_4 = {
         .sin_family = AF_INET,
         .sin_port   = 0x3456,
-        .sin_addr   = { .s_addr = 0xCB007104 }  // 203.0.113.4
+        .sin_addr   = { .s_addr = 0x56789012 }
 };
 
 //@}
