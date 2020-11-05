@@ -33,7 +33,10 @@ typedef uint8_t mptcpd_aid_t;
 /// MPTCP flags type.
 typedef uint32_t mptcpd_flags_t;
 
+/// Maximum number of address advertisements to receive.
 #define MPTCPD_LIMIT_RCV_ADD_ADDRS MPTCP_PM_ATTR_RCV_ADD_ADDRS
+
+/// Maximum number of subflows.
 #define MPTCPD_LIMIT_SUBFLOWS MPTCP_PM_ATTR_SUBFLOWS
 
 /**
