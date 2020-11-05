@@ -4,7 +4,7 @@
  *
  * @brief mptcpd user space path manager attribute types.
  *
- * Copyright (c) 2018, 2019, Intel Corporation
+ * Copyright (c) 2018-2020, Intel Corporation
  */
 
 #ifndef MPTCPD_TYPES_H
