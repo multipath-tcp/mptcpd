@@ -9,6 +9,8 @@
 
 #undef NDEBUG
 #include <assert.h>
+#include <errno.h>
+#include <stdlib.h>
 
 #include <ell/main.h>
 #include <ell/genl.h>
@@ -24,6 +26,7 @@
 #include "test-util.h"
 
 #include <mptcpd/path_manager.h>
+#include <mptcpd/addr_info.h>
 #include <mptcpd/mptcp_private.h>
 
 
@@ -52,6 +55,22 @@ static struct sockaddr const *const raddr2 =
 
 // -------------------------------------------------------------------
 
+static uint32_t const max_addrs = 3;
+static uint32_t const max_subflows = 5;
+
+static struct mptcpd_limit const limits[] = {
+        {
+                .type  = MPTCPD_LIMIT_RCV_ADD_ADDRS,
+                .limit = max_addrs
+        },
+        {
+                .type  = MPTCPD_LIMIT_SUBFLOWS,
+                .limit = max_subflows
+        }
+};
+        
+// -------------------------------------------------------------------
+
 static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
 {
         bool const ready = mptcpd_pm_ready(pm);
@@ -65,7 +84,7 @@ static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
 
 // -------------------------------------------------------------------
 
-void test_add_addr(void const *test_data)
+static void test_add_addr(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
 
@@ -80,38 +99,177 @@ void test_add_addr(void const *test_data)
                                   test_laddr_id_1,
                                   flags,
                                   index,
-                                  test_token_1));
+                                  test_token_1) == 0);
 }
 
-void test_remove_addr(void const *test_data)
+static void test_remove_addr(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
 
         if (!is_pm_ready(pm, __func__))
                 return;
-
-        uint32_t flags = 0;
 
         assert(mptcpd_pm_remove_addr(pm,
                                      test_laddr_id_1,
-                                     flags,
-                                     test_token_1));
+                                     test_token_1) == 0);
 }
 
-void test_add_subflow(void const *test_data)
+static void test_get_addr(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
 
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        assert(mptcpd_pm_add_subflow(pm,
-                                     test_token_2,
-                                     test_laddr_id_2,
-                                     test_raddr_id_2,
-                                     laddr2,
-                                     raddr2,
-                                     test_backup_2));
+        mptcpd_aid_t const id = test_laddr_id_1;
+        struct mptcpd_addr_info *info = NULL;
+
+        int const result = mptcpd_pm_get_addr(pm, id, &info);
+
+        assert(result == 0 || result == ENOTSUP);
+
+        if (result == 0) {
+                /**
+                 * @bug We could have a resource leak in the kernel
+                 *      here if the below assert()s are triggered
+                 *      since addresses previously added through
+                 *      @c mptcpd_pm_add_addr() would end up not being
+                 *      removed prior to test exit.
+                 */
+                assert(info != NULL);
+                assert(info->id == id);
+
+                struct sockaddr const *const addr = laddr1;
+                assert(sockaddr_is_equal(addr,
+                                         (struct sockaddr *) &info->addr));
+
+                mptcpd_addr_info_destroy(info);
+        }
+}
+
+static void test_dump_addrs(void const *test_data)
+{
+        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
+
+        struct mptcpd_addr_info *info = NULL;
+        size_t len = 0;
+
+        int const result = mptcpd_pm_dump_addrs(pm, &info, &len);
+
+        assert(result == 0 || result == ENOTSUP);
+
+        if (result == 0) {
+                /**
+                 * @bug We could have a resource leak in the kernel
+                 *      here if the below assert()s are triggered
+                 *      since addresses previously added through
+                 *      @c mptcpd_pm_add_addr() would end up not being
+                 *      removed prior to test exit.
+                 */
+                assert(info != NULL);
+                assert(len != 0);
+
+                mptcpd_aid_t const id = test_laddr_id_1;
+                assert(info[0].id == id);
+
+                struct sockaddr const *const addr = laddr1;
+                assert(sockaddr_is_equal(addr,
+                                         (struct sockaddr *) &(info[0].addr)));
+
+                mptcpd_addr_info_destroy(info);
+        }
+}
+
+static void test_flush_addrs(void const *test_data)
+{
+        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
+
+        int const result = mptcpd_pm_flush_addrs(pm);
+
+        /**
+         * @bug We could have a resource leak in the kernel here if
+         *      the below assert()s are triggered since addresses
+         *      previously added through @c mptcpd_pm_add_addr() would
+         *      end up not being removed prior to test exit.
+         */
+        assert(result == 0 || result == ENOTSUP);
+}
+
+static void test_set_limits(void const *test_data)
+{
+        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
+
+        int const result = mptcpd_pm_set_limits(pm,
+                                                limits,
+                                                L_ARRAY_SIZE(limits));
+
+        assert(result == 0 || result == ENOTSUP);
+}
+
+static void test_get_limits(void const *test_data)
+{
+        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
+
+        struct mptcpd_limit *rl = NULL;
+        size_t len = 0;
+
+        int const result = mptcpd_pm_get_limits(pm,
+                                                &rl,
+                                                &len);
+
+        assert(result == 0 || result == ENOTSUP);
+
+        if (result == 0) {
+                assert(rl != NULL);
+                assert(len == L_ARRAY_SIZE(limits));
+
+                for (struct mptcpd_limit *l = rl; l != rl + len; ++l) {
+                        if (l->type == MPTCPD_LIMIT_RCV_ADD_ADDRS) {
+                                assert(l->limit == max_addrs);
+                        } else if (l->type == MPTCPD_LIMIT_SUBFLOWS) {
+                                assert(l->limit == max_subflows);
+                        } else {
+                                /*
+                                  Unless more MPTCP limit types are
+                                  added to the kernel path management
+                                  API this should never be reached.
+                                */
+                                l_error("Unexpected MPTCP limit type.");
+                        }
+                }
+
+                free(rl);
+        }
+}
+
+static void test_add_subflow(void const *test_data)
+{
+        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
+
+        int const result = mptcpd_pm_add_subflow(pm,
+                                                 test_token_2,
+                                                 test_laddr_id_2,
+                                                 test_raddr_id_2,
+                                                 laddr2,
+                                                 raddr2,
+                                                 test_backup_2);
+
+        assert(result == 0 || result == ENOTSUP);
 }
 
 void test_set_backup(void const *test_data)
@@ -121,11 +279,14 @@ void test_set_backup(void const *test_data)
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        assert(mptcpd_pm_set_backup(pm,
-                                    test_token_1,
-                                    laddr1,
-                                    raddr1,
-                                    test_backup_1));
+
+        int const result = mptcpd_pm_set_backup(pm,
+                                                test_token_1,
+                                                laddr1,
+                                                raddr1,
+                                                test_backup_1);
+
+        assert(result == 0 || result == ENOTSUP);
 }
 
 void test_remove_subflow(void const *test_data)
@@ -135,10 +296,12 @@ void test_remove_subflow(void const *test_data)
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        assert(mptcpd_pm_remove_subflow(pm,
-                                        test_token_1,
-                                        laddr1,
-                                        raddr1));
+        int const result = mptcpd_pm_remove_subflow(pm,
+                                                    test_token_1,
+                                                    laddr1,
+                                                    raddr1);
+
+        assert(result == 0 || result == ENOTSUP);
 }
 
 void test_get_nm(void const *test_data)
@@ -219,7 +382,12 @@ int main(void)
         l_test_init(&argc, &args);
 
         l_test_add("add_addr",       test_add_addr,       pm);
+        l_test_add("get_addr",       test_get_addr,       pm);
+        l_test_add("dump_addrs",     test_dump_addrs,     pm);
+        l_test_add("flush_addrs",    test_flush_addrs,    pm);
         l_test_add("remove_addr",    test_remove_addr,    pm);
+        l_test_add("set_limits",     test_set_limits,     pm);
+        l_test_add("get_limits",     test_get_limits,     pm);
         l_test_add("add_subflow",    test_add_subflow,    pm);
         l_test_add("set_backup",     test_set_backup,     pm);
         l_test_add("remove_subflow", test_remove_subflow, pm);
