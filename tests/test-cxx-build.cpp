@@ -14,7 +14,6 @@
 
 #include <ell/main.h>
 #include <ell/idle.h>
-#include <ell/util.h>  // Needed by <ell/log.h>
 #include <ell/log.h>
 
 #include <mptcpd/path_manager.h>   // Include to test build under C++.
