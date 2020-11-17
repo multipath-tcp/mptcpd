@@ -5,6 +5,7 @@
 pkginclude_HEADERS =		\
 	addr_info.h		\
 	export.h		\
+	id_manager.h		\
 	network_monitor.h	\
 	path_manager.h		\
 	plugin.h		\
