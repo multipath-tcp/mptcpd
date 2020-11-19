@@ -19,7 +19,6 @@ libmptcpd_la_LDFLAGS = 	\
 	-version-info @LIB_CURRENT@:@LIB_REVISION@:@LIB_AGE@
 
 libmptcpd_la_SOURCES =		\
-	addr_info.c		\
 	id_manager.c		\
 	network_monitor.c	\
 	path_manager.c		\

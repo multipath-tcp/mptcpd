@@ -65,34 +65,6 @@ struct mptcpd_addr_info
         int index;
 };
 
-/**
- * @brief Initialize a @c struct @c mptcpd_addr_info instance.
- *
- * Initialize a @c addr_info instance with the provided IPv4 or
- * IPv6 address.  Only one is required and used.  The @a port, @a id,
- * @a flags, and @a index are optional and may be set to @c NULL if
- * not used.
- *
- * @param[in]     addr4 IPv4 internet address.
- * @param[in]     addr6 IPv6 internet address.
- * @param[in]     port  IP port.
- * @param[in]     id    Address ID.
- * @param[in]     flags MPTCP flags.
- * @param[in]     index Network interface index.
- * @param[in,out] addr  mptcpd network address information.
- *
- * @note This function is mostly meant for internal use.
- *
- * @return @c true on success.  @c false otherwise.
- */
-MPTCPD_API bool mptcpd_addr_info_init(struct in_addr  const *addr4,
-                                      struct in6_addr const *addr6,
-                                      in_port_t       const *port,
-                                      uint8_t         const *id,
-                                      uint32_t        const *flags,
-                                      int32_t         const *index,
-                                      struct mptcpd_addr_info *info);
-
 #ifdef __cplusplus
 }
 #endif

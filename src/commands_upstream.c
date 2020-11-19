@@ -24,6 +24,7 @@
 #include <mptcpd/path_manager.h>
 #include <mptcpd/types.h>
 #include <mptcpd/addr_info.h>
+#include <mptcpd/sockaddr_private.h>
 
 #include "commands.h"
 #include "path_manager.h"
@@ -61,6 +62,48 @@ struct get_limits_user_callback
 };
 
 // -----------------------------------------------------------------------
+
+/**
+ * @brief Initialize a @c struct @c mptcpd_addr_info instance.
+ *
+ * Initialize a @c addr_info instance with the provided IPv4 or
+ * IPv6 address.  Only one is required and used.  The @a port, @a id,
+ * @a flags, and @a index are optional and may be set to @c NULL if
+ * not used.
+ *
+ * @param[in]     addr4 IPv4 internet address.
+ * @param[in]     addr6 IPv6 internet address.
+ * @param[in]     port  IP port.
+ * @param[in]     id    Address ID.
+ * @param[in]     flags MPTCP flags.
+ * @param[in]     index Network interface index.
+ * @param[in,out] addr  mptcpd network address information.
+ *
+ * @note This function is mostly meant for internal use.
+ *
+ * @return @c true on success.  @c false otherwise.
+ */
+static bool mptcpd_addr_info_init(struct in_addr  const *addr4,
+                                  struct in6_addr const *addr6,
+                                  in_port_t       const *port,
+                                  uint8_t         const *id,
+                                  uint32_t        const *flags,
+                                  int32_t         const *index,
+                                  struct mptcpd_addr_info *info)
+{
+        if (info == NULL
+            || !mptcpd_sockaddr_storage_init(addr4,
+                                             addr6,
+                                             port ? *port : 0,
+                                             &info->addr))
+                return false;
+
+        info->id    = (id    ? *id    : 0);
+        info->flags = (flags ? *flags : 0);
+        info->index = (index ? *index : 0);
+
+        return true;
+}
 
 static void get_addr_callback_recurse(struct l_genl_attr *attr,
                                       struct mptcpd_addr_info *info)
