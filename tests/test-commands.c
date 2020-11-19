@@ -14,7 +14,7 @@
 
 #include <ell/main.h>
 #include <ell/genl.h>
-#include <ell/timeout.h>
+#include <ell/idle.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
 #include <ell/log.h>
 #include <ell/test.h>
@@ -58,7 +58,7 @@ static struct sockaddr const *const raddr2 =
 static uint32_t const max_addrs = 3;
 static uint32_t const max_subflows = 5;
 
-static struct mptcpd_limit const limits[] = {
+static struct mptcpd_limit const _limits[] = {
         {
                 .type  = MPTCPD_LIMIT_RCV_ADD_ADDRS,
                 .limit = max_addrs
@@ -80,6 +80,75 @@ static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
                        "%s cannot be completed.", fname);
 
         return ready;
+}
+
+// -------------------------------------------------------------------
+
+static void get_addr_callback(struct mptcpd_addr_info const *info,
+                              void *user_data)
+{
+        mptcpd_aid_t const id = L_PTR_TO_UINT(user_data);
+
+        /**
+         * @bug We could have a resource leak in the kernel here if
+         *      the below assert()s are triggered since addresses
+         *      previously added through @c mptcpd_pm_add_addr() would
+         *      end up not being removed prior to test exit.
+         */
+        assert(info != NULL);
+        assert(info->id == id);
+
+        struct sockaddr const *const addr = laddr1;
+        assert(sockaddr_is_equal(addr,
+                                 (struct sockaddr *) &info->addr));
+}
+
+static void dump_addrs_callback(struct mptcpd_addr_info const *info,
+                                size_t len,
+                                void *user_data)
+{
+        mptcpd_aid_t const id = L_PTR_TO_UINT(user_data);
+
+        /**
+         * @bug We could have a resource leak in the kernel here if
+         *      the below assert()s are triggered since addresses
+         *      previously added through @c mptcpd_pm_add_addr() would
+         *      end up not being removed prior to test exit.
+         */
+        assert(len == 1);
+        assert(info != NULL);
+        assert(info[0].id == id);
+
+        struct sockaddr const *const addr = laddr1;
+        assert(sockaddr_is_equal(addr,
+                                 (struct sockaddr *) &info[0].addr));
+}
+
+static void get_limits_callback(struct mptcpd_limit const *limits,
+                                size_t len,
+                                void *user_data)
+{
+        (void) user_data;
+
+        assert(limits != NULL);
+        assert(len == L_ARRAY_SIZE(_limits));
+
+        for (struct mptcpd_limit const *l = limits;
+             l != limits + len;
+             ++l) {
+                if (l->type == MPTCPD_LIMIT_RCV_ADD_ADDRS) {
+                        assert(l->limit == max_addrs);
+                } else if (l->type == MPTCPD_LIMIT_SUBFLOWS) {
+                        assert(l->limit == max_subflows);
+                } else {
+                        /*
+                          Unless more MPTCP limit types are added to
+                          the kernel path management API this should
+                          never be reached.
+                        */
+                        l_error("Unexpected MPTCP limit type.");
+                }
+        }
 }
 
 // -------------------------------------------------------------------
@@ -122,29 +191,14 @@ static void test_get_addr(void const *test_data)
                 return;
 
         mptcpd_aid_t const id = test_laddr_id_1;
-        struct mptcpd_addr_info *info = NULL;
 
-        int const result = mptcpd_pm_get_addr(pm, id, &info);
+        int const result =
+                mptcpd_pm_get_addr(pm,
+                                   id,
+                                   get_addr_callback,
+                                   L_UINT_TO_PTR(id));
 
         assert(result == 0 || result == ENOTSUP);
-
-        if (result == 0) {
-                /**
-                 * @bug We could have a resource leak in the kernel
-                 *      here if the below assert()s are triggered
-                 *      since addresses previously added through
-                 *      @c mptcpd_pm_add_addr() would end up not being
-                 *      removed prior to test exit.
-                 */
-                assert(info != NULL);
-                assert(info->id == id);
-
-                struct sockaddr const *const addr = laddr1;
-                assert(sockaddr_is_equal(addr,
-                                         (struct sockaddr *) &info->addr));
-
-                mptcpd_addr_info_destroy(info);
-        }
 }
 
 static void test_dump_addrs(void const *test_data)
@@ -154,33 +208,14 @@ static void test_dump_addrs(void const *test_data)
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        struct mptcpd_addr_info *info = NULL;
-        size_t len = 0;
+        mptcpd_aid_t const id = test_laddr_id_1;
 
-        int const result = mptcpd_pm_dump_addrs(pm, &info, &len);
+        int const result =
+                mptcpd_pm_dump_addrs(pm,
+                                     dump_addrs_callback,
+                                     L_UINT_TO_PTR(id));
 
         assert(result == 0 || result == ENOTSUP);
-
-        if (result == 0) {
-                /**
-                 * @bug We could have a resource leak in the kernel
-                 *      here if the below assert()s are triggered
-                 *      since addresses previously added through
-                 *      @c mptcpd_pm_add_addr() would end up not being
-                 *      removed prior to test exit.
-                 */
-                assert(info != NULL);
-                assert(len != 0);
-
-                mptcpd_aid_t const id = test_laddr_id_1;
-                assert(info[0].id == id);
-
-                struct sockaddr const *const addr = laddr1;
-                assert(sockaddr_is_equal(addr,
-                                         (struct sockaddr *) &(info[0].addr)));
-
-                mptcpd_addr_info_destroy(info);
-        }
 }
 
 static void test_flush_addrs(void const *test_data)
@@ -209,8 +244,8 @@ static void test_set_limits(void const *test_data)
                 return;
 
         int const result = mptcpd_pm_set_limits(pm,
-                                                limits,
-                                                L_ARRAY_SIZE(limits));
+                                                _limits,
+                                                L_ARRAY_SIZE(_limits));
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -222,36 +257,11 @@ static void test_get_limits(void const *test_data)
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        struct mptcpd_limit *rl = NULL;
-        size_t len = 0;
-
         int const result = mptcpd_pm_get_limits(pm,
-                                                &rl,
-                                                &len);
+                                                get_limits_callback,
+                                                NULL);
 
         assert(result == 0 || result == ENOTSUP);
-
-        if (result == 0) {
-                assert(rl != NULL);
-                assert(len == L_ARRAY_SIZE(limits));
-
-                for (struct mptcpd_limit *l = rl; l != rl + len; ++l) {
-                        if (l->type == MPTCPD_LIMIT_RCV_ADD_ADDRS) {
-                                assert(l->limit == max_addrs);
-                        } else if (l->type == MPTCPD_LIMIT_SUBFLOWS) {
-                                assert(l->limit == max_subflows);
-                        } else {
-                                /*
-                                  Unless more MPTCP limit types are
-                                  added to the kernel path management
-                                  API this should never be reached.
-                                */
-                                l_error("Unexpected MPTCP limit type.");
-                        }
-                }
-
-                free(rl);
-        }
 }
 
 static void test_add_subflow(void const *test_data)
@@ -332,19 +342,36 @@ static void run_tests(struct l_genl_family_info const *info,
         l_test_run();
 
         t->tests_called = true;
-
-        l_main_quit();
 }
 
-static void timeout_callback(struct l_timeout *timeout,
-                             void *user_data)
+static void idle_callback(struct l_idle *idle, void *user_data)
 {
-        (void) timeout;
+        (void) idle;
         (void) user_data;
 
-        l_debug("test timed out");
+        /*
+          Number of ELL event loop iterations to go through before
+          exiting.
 
-        l_main_quit();
+          This gives the mptcpd path manager enough time to process
+          replies from commands like get_addr, dump_addrs, and get_limits.
+        */
+        static int const trigger_count = 10;
+
+        /*
+          Maximum number of ELL event loop iterations.
+
+          Stop the ELL event loop after this number of iterations.
+         */
+        static int const max_count = trigger_count * 2;
+
+        /* ELL event loop iteration count. */
+        static int count = 0;
+
+        assert(max_count > trigger_count);  // Sanity check.
+
+        if (++count > max_count)
+                l_main_quit();
 }
 
 // -------------------------------------------------------------------
@@ -417,13 +444,8 @@ int main(void)
                                                      NULL);
         assert(requested);
 
-        // Bound the time we wait for the tests to run.
-        static unsigned long const milliseconds = 500;
-        struct l_timeout *const timeout =
-                l_timeout_create_ms(milliseconds,
-                                    timeout_callback,
-                                    NULL,
-                                    NULL);
+        struct l_idle *const idle =
+                l_idle_create(idle_callback, NULL, NULL);
 
         (void) l_main_run();
 
@@ -433,7 +455,7 @@ int main(void)
          */
         assert(info.tests_called);
 
-        l_timeout_remove(timeout);
+        l_idle_remove(idle);
         l_genl_remove_family_watch(genl, watch_id);
         l_genl_unref(genl);
         mptcpd_pm_destroy(pm);
