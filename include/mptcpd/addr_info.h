@@ -93,13 +93,6 @@ MPTCPD_API bool mptcpd_addr_info_init(struct in_addr  const *addr4,
                                       int32_t         const *index,
                                       struct mptcpd_addr_info *info);
 
-/**
- * @brief Destroy a @c struct @c mptcpd_addr_info instance.
- *
- * @param[in,out] info @c struct @c mptcpd_addr_info to be destroyed.
- */
-MPTCPD_API void mptcpd_addr_info_destroy(struct mptcpd_addr_info *info);
-
 #ifdef __cplusplus
 }
 #endif

@@ -35,12 +35,6 @@ bool mptcpd_addr_info_init(struct in_addr  const *addr4,
         return true;
 }
 
-void mptcpd_addr_info_destroy(struct mptcpd_addr_info *info)
-{
-        l_free(info);
-}
-
-
 
 /*
   Local Variables:
