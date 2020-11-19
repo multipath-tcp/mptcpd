@@ -30,31 +30,34 @@
 
 
 /**
- * @struct dumped_addrs
+ * @struct get_addr_user_callbacks
  *
- * @brief Convenience struct for passing more than one addr info.
+ * @brief Convenience struct for passing addr(s) to user callback.
  */
-struct dumped_addrs
+struct get_addr_user_callbacks
 {
-        /// Array of @c struct @c mptcpd_addr_info objects.
-        struct mptcpd_addr_info *addrs;
+        /// User supplied get_addr callback.
+        mptcpd_pm_get_addr_cb get_addr;
 
-        /// Length of the above array.
-        size_t len;
+        /// User supplied dump_addrs callback.
+        mptcpd_pm_dump_addrs_cb dump_addrs;
+
+        /// User data to be passed to one of the above callback.
+        void *data;
 };
 
 /**
- * @struct retrieved_limits
+ * @struct get_limits_user_callback
  *
- * @brief Convenience struct for passing more than one limit.
+ * @brief Convenience struct for passing limits to user callback.
  */
-struct retrieved_limits
+struct get_limits_user_callback
 {
-        /// Array of @c struct @c mptcpd_limit objects.
-        struct mptcpd_limit *limits;
+        /// User supplied callback.
+        mptcpd_pm_get_limits_cb get_limits;
 
-        /// Length of the above array.
-        size_t len;
+        /// User data to be passed to the above callback.
+        void *data;
 };
 
 // -----------------------------------------------------------------------
@@ -119,7 +122,8 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
 {
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
-                l_error("Unable to initialize genl attribute");
+                l_error("get_addr: "
+                        "Unable to initialize genl attribute");
                 return;
         }
 
@@ -135,7 +139,8 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
         uint16_t len;
         void const *data = NULL;
 
-        struct dumped_addrs *const dump = user_data;
+        struct mptcpd_addr_info *addrs = NULL;
+        size_t addrs_len = 0;
 
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 if (type != MPTCP_PM_ATTR_ADDR) {
@@ -144,14 +149,22 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
                         continue;
                 }
 
-                size_t const offset = dump->len++;
+                size_t const offset = addrs_len++;
 
-                dump->addrs =
-                        l_realloc(dump->addrs,
-                                  sizeof(*dump->addrs) * dump->len);
+                addrs = l_realloc(addrs, sizeof(*addrs) * addrs_len);
 
-                get_addr_callback_recurse(&attr, dump->addrs + offset);
+                get_addr_callback_recurse(&attr, addrs + offset);
         }
+
+        // Pass the results to the user.
+        struct get_addr_user_callbacks const *const cb = user_data;
+
+        if (cb->get_addr)
+                cb->get_addr(addrs, cb->data);
+        else
+                cb->dump_addrs(addrs, addrs_len, cb->data);
+
+        l_free(addrs);
 }
 
 static bool append_addr_attr(struct l_genl_msg *msg,
@@ -190,7 +203,8 @@ static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
 {
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
-                l_error("Unable to initialize genl attribute");
+                l_error("get_limits: "
+                        "Unable to initialize genl attribute");
                 return;
         }
 
@@ -206,19 +220,27 @@ static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
         uint16_t len;
         void const *data = NULL;
 
-        struct retrieved_limits *const rl = user_data;
+        struct mptcpd_limit *limits = NULL;
+        size_t limits_len = 0;
 
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
-                size_t const offset = rl->len++;
+                size_t const offset = limits_len++;
 
-                rl->limits = l_realloc(rl->limits,
-                                       sizeof(*rl->limits) * rl->len);
+                limits = l_realloc(limits,
+                                   sizeof(*limits) * limits_len);
 
-                struct mptcpd_limit *const l = rl->limits + offset;
+                struct mptcpd_limit *const l = limits + offset;
 
                 l->type = type;
                 l->limit = *(uint32_t const *) data;
         }
+
+        // Pass the results to the user.
+        struct get_limits_user_callback const *const cb = user_data;
+
+        cb->get_limits(limits, limits_len, cb->data);
+
+        l_free(limits);
 }
 
 // --------------------------------------------------------------
@@ -299,8 +321,7 @@ static int upstream_add_addr(struct mptcpd_pm *pm,
                                   msg,
                                   mptcpd_family_send_callback,
                                   NULL, /* user data */
-                                  NULL  /* destroy */)
-                == 0;
+                                  NULL  /* destroy */) == 0;
 }
 
 static int upstream_remove_addr(struct mptcpd_pm *pm,
@@ -344,13 +365,13 @@ static int upstream_remove_addr(struct mptcpd_pm *pm,
                                   msg,
                                   mptcpd_family_send_callback,
                                   NULL, /* user data */
-                                  NULL  /* destroy */)
-                == 0;
+                                  NULL  /* destroy */) == 0;
 }
 
 static int upstream_get_addr(struct mptcpd_pm *pm,
                              mptcpd_aid_t address_id,
-                             struct mptcpd_addr_info **addr)
+                             mptcpd_pm_get_addr_cb callback,
+                             void *data)
 {
         /*
           Payload (nested):
@@ -378,33 +399,22 @@ static int upstream_get_addr(struct mptcpd_pm *pm,
                 return ENOMEM;
         }
 
-        struct dumped_addrs dump = { .addrs = NULL };
+        struct get_addr_user_callbacks *const cb =
+                l_new(struct get_addr_user_callbacks, 1);
 
-        /**
-         * @todo This is assumed to be a synchronous call.  Verify.
-         *       If not, we'll likely need to manage the addr memory
-         *       differently.
-         */
-        int const request_id =
-                l_genl_family_send(pm->family,
-                                   msg,
-                                   get_addr_callback,
-                                   &dump, /* user data */
-                                   NULL  /* destroy */);
+        cb->get_addr = callback;
+        cb->data     = data;
 
-        if (request_id != 0) {
-                *addr = dump.addrs;
-                assert(dump.len == 1);
-
-                return 0;
-        }
-
-        return -1;
+        return l_genl_family_send(pm->family,
+                                  msg,
+                                  get_addr_callback,
+                                  cb,     /* user data */
+                                  l_free  /* destroy */) == 0;
 }
 
 static int upstream_dump_addrs(struct mptcpd_pm *pm,
-                               struct mptcpd_addr_info **addrs,
-                               size_t *len)
+                               mptcpd_pm_dump_addrs_cb callback,
+                               void *data)
 {
         /*
           Payload:
@@ -414,23 +424,17 @@ static int upstream_dump_addrs(struct mptcpd_pm *pm,
         struct l_genl_msg *const msg =
                 l_genl_msg_new(MPTCP_PM_CMD_GET_ADDR);
 
-        struct dumped_addrs dump = { .addrs = NULL };
+        struct get_addr_user_callbacks *const cb =
+                l_new(struct get_addr_user_callbacks, 1);
 
-        int const request_id =
-                l_genl_family_dump(pm->family,
-                                   msg,
-                                   get_addr_callback,
-                                   &dump, /* user data */
-                                   NULL  /* destroy */);
+        cb->dump_addrs = callback;
+        cb->data       = data;
 
-        if (request_id != 0) {
-                *addrs = dump.addrs;
-                *len = dump.len;
-
-                return 0;
-        }
-
-        return -1;
+        return l_genl_family_dump(pm->family,
+                                  msg,
+                                  get_addr_callback,
+                                  cb,     /* user data */
+                                  l_free  /* destroy */) == 0;
 }
 
 static int upstream_flush_addrs(struct mptcpd_pm *pm)
@@ -447,8 +451,7 @@ static int upstream_flush_addrs(struct mptcpd_pm *pm)
                                   msg,
                                   mptcpd_family_send_callback,
                                   NULL, /* user data */
-                                  NULL  /* destroy */)
-                == 0;
+                                  NULL  /* destroy */) == 0;
 }
 
 static int upstream_set_limits(struct mptcpd_pm *pm,
@@ -488,13 +491,12 @@ static int upstream_set_limits(struct mptcpd_pm *pm,
                                   msg,
                                   mptcpd_family_send_callback,
                                   NULL, /* user data */
-                                  NULL  /* destroy */)
-                == 0;
+                                  NULL  /* destroy */) == 0;
 }
 
 static int upstream_get_limits(struct mptcpd_pm *pm,
-                               struct mptcpd_limit **limits,
-                               size_t *len)
+                               mptcpd_pm_get_limits_cb callback,
+                               void *data)
 {
         /*
           Payload:
@@ -502,25 +504,19 @@ static int upstream_get_limits(struct mptcpd_pm *pm,
          */
 
         struct l_genl_msg *const msg =
-                l_genl_msg_new(MPTCP_PM_CMD_GET_ADDR);
+                l_genl_msg_new(MPTCP_PM_CMD_GET_LIMITS);
 
-        struct retrieved_limits rl = { .limits = NULL };
+        struct get_limits_user_callback *const cb =
+                l_new(struct get_limits_user_callback, 1);
 
-        int const request_id =
-                l_genl_family_dump(pm->family,
-                                   msg,
-                                   get_limits_callback,
-                                   &rl, /* user data */
-                                   NULL  /* destroy */);
+        cb->get_limits = callback;
+        cb->data       = data;
 
-        if (request_id != 0) {
-                *limits = rl.limits;
-                *len = rl.len;
-
-                return 0;
-        }
-
-        return -1;
+        return l_genl_family_dump(pm->family,
+                                  msg,
+                                  get_limits_callback,
+                                  cb,     /* user data */
+                                  l_free  /* destroy */) == 0;
 }
 
 static struct mptcpd_pm_cmd_ops const cmd_ops =

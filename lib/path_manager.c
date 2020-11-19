@@ -90,9 +90,10 @@ int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
 
 int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
                        mptcpd_aid_t id,
-                       struct mptcpd_addr_info **addr)
+                       mptcpd_pm_get_addr_cb callback,
+                       void *data)
 {
-        if (pm == NULL || id == 0 || addr == NULL)
+        if (pm == NULL || id == 0 || callback == NULL)
                 return EINVAL;
 
         if (!is_pm_ready(pm, __func__))
@@ -103,14 +104,14 @@ int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
         if (ops->get_addr == NULL)
                 return ENOTSUP;
 
-        return ops->get_addr(pm, id, addr);
+        return ops->get_addr(pm, id, callback, data);
 }
 
 int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
-                         struct mptcpd_addr_info **addrs,
-                         size_t *len)
+                         mptcpd_pm_dump_addrs_cb callback,
+                         void *data)
 {
-        if (pm == NULL || addrs == NULL || len == NULL)
+        if (pm == NULL || callback == NULL)
                 return EINVAL;
 
         if (!is_pm_ready(pm, __func__))
@@ -121,7 +122,7 @@ int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
         if (ops->dump_addrs == NULL)
                 return ENOTSUP;
 
-        return ops->dump_addrs(pm, addrs, len);
+        return ops->dump_addrs(pm, callback, data);
 }
 
 int mptcpd_pm_flush_addrs(struct mptcpd_pm *pm)
@@ -159,10 +160,10 @@ int mptcpd_pm_set_limits(struct mptcpd_pm *pm,
 }
 
 int mptcpd_pm_get_limits(struct mptcpd_pm *pm,
-                         struct mptcpd_limit **limits,
-                         size_t *len)
+                         mptcpd_pm_get_limits_cb callback,
+                         void *data)
 {
-        if (pm == NULL || limits == NULL || len == NULL)
+        if (pm == NULL || callback == NULL)
                 return EINVAL;
 
         if (!is_pm_ready(pm, __func__))
@@ -173,7 +174,7 @@ int mptcpd_pm_get_limits(struct mptcpd_pm *pm,
         if (ops->get_limits == NULL)
                 return ENOTSUP;
 
-        return ops->get_limits(pm, limits, len);
+        return ops->get_limits(pm, callback, data);
 }
 
 int mptcpd_pm_add_subflow(struct mptcpd_pm *pm,

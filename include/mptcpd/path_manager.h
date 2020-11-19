@@ -87,31 +87,33 @@ MPTCPD_API int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
 /**
  * @brief Get network address corresponding to an address ID.
  *
- * @param[in]  pm   The mptcpd path manager object.
- * @param[in]  id   MPTCP local address ID.
- * @param[out] addr Network address information associated
- *                  with the @a id.  Deallocate with
- *                  @c mptcpd_addr_info_destroy().
+ * @param[in] pm       The mptcpd path manager object.
+ * @param[in] id       MPTCP local address ID.
+ * @param[in] callback Function to be called when the network address
+ *                     corresponding to the given MPTCP address @a id
+ *                     has been retrieved.
+ * @param[in] data     Data to be passed to the @a callback function.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
                                   mptcpd_aid_t id,
-                                  struct mptcpd_addr_info **addr);
+                                  mptcpd_pm_get_addr_cb callback,
+                                  void *data);
 
 /**
  * @brief Get list (array) of MPTCP network addresses.
  *
- * @param[in]  pm   The mptcpd path manager object.
- * @param[out] addr Array of MPTCP network address information.
- *                  Deallocate with @c mptcpd_addr_info_destroy().
- * @param[out] len  Length of the @a addrs array.
+ * @param[in] pm       The mptcpd path manager object.
+ * @param[in] callback Function to be called when a dump of network
+ *                     addresses has been retrieved.
+ * @param[in] data     Data to be passed to the @a callback function.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
-                                    struct mptcpd_addr_info **addrs,
-                                    size_t *len);
+                                    mptcpd_pm_dump_addrs_cb callback,
+                                    void *data);
 
 /**
  * @brief Flush MPTCP addresses.
@@ -140,16 +142,16 @@ MPTCPD_API int mptcpd_pm_set_limits(struct mptcpd_pm *pm,
 /**
  * @brief Get MPTCP resource limits.
  *
- * @param[in]  pm     The mptcpd path manager object.
- * @param[out] limits Array of MPTCP resource type/limit pairs.
- *                    Destroy with @c free().
- * @param[out] len    Length of the @a limits array.
+ * @param[in] pm       The mptcpd path manager object.
+ * @param[in] callback Function to be called when the MPTCP resource
+ *                     limits have been retrieved.
+ * @param[in] data     Data to be passed to the @a callback function.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_get_limits(struct mptcpd_pm *pm,
-                                    struct mptcpd_limit **limits,
-                                    size_t *len);
+                                    mptcpd_pm_get_limits_cb callback,
+                                    void *data);
 
 /**
  * @brief Create a new subflow.
