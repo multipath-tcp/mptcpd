@@ -22,23 +22,40 @@
 #include "commands.h"
 
 
-void mptcpd_family_send_callback(struct l_genl_msg *msg, void *user_data)
+bool mptcpd_check_genl_error(struct l_genl_msg *msg, char const *fname)
 {
-        (void) user_data;
-
         int const error = l_genl_msg_get_error(msg);
 
         if (error < 0) {
                 // Error during send.  Likely insufficient perms.
 
-                char errmsg[80];
-                int const r = strerror_r(-error,
-                                         errmsg,
-                                         L_ARRAY_SIZE(errmsg));
+                char const *const genl_errmsg =
+                        l_genl_msg_get_extended_error(msg);
 
-                l_error("Path manager command error: %s",
-                        r == 0 ? errmsg : "<unknown error>");
+                if (genl_errmsg != NULL) {
+                        l_error("%s: %s", fname, genl_errmsg);
+                } else {
+                        char errmsg[80];
+                        int const r = strerror_r(-error,
+                                                 errmsg,
+                                                 L_ARRAY_SIZE(errmsg));
+
+                        l_error("%s error: %s",
+                                fname,
+                                r == 0 ? errmsg : "<unknown error>");
+                }
+
+                return false;
         }
+
+        return true;
+}
+
+void mptcpd_family_send_callback(struct l_genl_msg *msg, void *user_data)
+{
+        char const *const fname = user_data;
+
+        (void) mptcpd_check_genl_error(msg, fname);
 }
 
 

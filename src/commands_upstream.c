@@ -163,6 +163,14 @@ static void get_addr_callback_recurse(struct l_genl_attr *attr,
 
 static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
 {
+        struct get_addr_user_callbacks const *const cb = user_data;
+
+        if (!mptcpd_check_genl_error(msg,
+                                     cb->get_addr
+                                     ? "get_addr"
+                                     : "dump_addrs"))
+                return;
+
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
                 l_error("get_addr: "
@@ -200,8 +208,6 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
         }
 
         // Pass the results to the user.
-        struct get_addr_user_callbacks const *const cb = user_data;
-
         if (cb->get_addr)
                 cb->get_addr(addrs, cb->data);
         else
@@ -244,6 +250,9 @@ static bool append_addr_attr(struct l_genl_msg *msg,
 
 static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
 {
+        if (!mptcpd_check_genl_error(msg, "get_limits"))
+                return;
+
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
                 l_error("get_limits: "
@@ -364,7 +373,7 @@ static int upstream_add_addr(struct mptcpd_pm *pm,
         return l_genl_family_send(pm->family,
                                   msg,
                                   mptcpd_family_send_callback,
-                                  NULL, /* user data */
+                                  "add_addr", /* user data */
                                   NULL  /* destroy */) == 0;
 }
 
@@ -409,7 +418,7 @@ static int upstream_remove_addr(struct mptcpd_pm *pm,
         return l_genl_family_send(pm->family,
                                   msg,
                                   mptcpd_family_send_callback,
-                                  NULL, /* user data */
+                                  "remove_addr", /* user data */
                                   NULL  /* destroy */) == 0;
 }
 
@@ -496,7 +505,7 @@ static int upstream_flush_addrs(struct mptcpd_pm *pm)
         return l_genl_family_send(pm->family,
                                   msg,
                                   mptcpd_family_send_callback,
-                                  NULL, /* user data */
+                                  "flush_addrs", /* user data */
                                   NULL  /* destroy */) == 0;
 }
 
@@ -536,7 +545,7 @@ static int upstream_set_limits(struct mptcpd_pm *pm,
         return l_genl_family_send(pm->family,
                                   msg,
                                   mptcpd_family_send_callback,
-                                  NULL, /* user data */
+                                  "set_limits", /* user data */
                                   NULL  /* destroy */) == 0;
 }
 

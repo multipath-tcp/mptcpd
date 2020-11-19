@@ -55,6 +55,14 @@ inline uint16_t mptcpd_get_addr_family(struct sockaddr const *addr)
 struct mptcpd_pm_cmd_ops const *mptcpd_get_upstream_cmd_ops(void);
 struct mptcpd_pm_cmd_ops const *mptcpd_get_mptcp_org_cmd_ops(void);
 
+bool mptcpd_check_genl_error(struct l_genl_msg *msg, char const *fname);
+
+/**
+ * @brief Generic error reporting callback.
+ *
+ * @param[in] msg       Generic netlink message information.
+ * @param[in] user_data Function name.
+ */
 void mptcpd_family_send_callback(struct l_genl_msg *msg, void *user_data);
 
 #ifdef __cplusplus
