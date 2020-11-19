@@ -284,7 +284,8 @@ static int upstream_add_addr(struct mptcpd_pm *pm,
                 l_genl_msg_new_sized(MPTCP_PM_CMD_ADD_ADDR, payload_size);
 
         bool const appended =
-                l_genl_msg_enter_nested(msg, MPTCP_PM_ATTR_ADDR)
+                l_genl_msg_enter_nested(msg,
+                                        NLA_F_NESTED | MPTCP_PM_ATTR_ADDR)
                 && l_genl_msg_append_attr(
                         msg,
                         MPTCP_PM_ADDR_ATTR_FAMILY,
@@ -347,7 +348,8 @@ static int upstream_remove_addr(struct mptcpd_pm *pm,
                 l_genl_msg_new_sized(MPTCP_PM_CMD_DEL_ADDR, payload_size);
 
         bool const appended =
-                l_genl_msg_enter_nested(msg, MPTCP_PM_ATTR_ADDR)
+                l_genl_msg_enter_nested(msg,
+                                        NLA_F_NESTED | MPTCP_PM_ATTR_ADDR)
                 && l_genl_msg_append_attr(
                         msg,
                         MPTCP_PM_ADDR_ATTR_ID,
@@ -385,7 +387,8 @@ static int upstream_get_addr(struct mptcpd_pm *pm,
                                      payload_size);
 
         bool const appended =
-                l_genl_msg_enter_nested(msg, MPTCP_PM_ATTR_ADDR)
+                l_genl_msg_enter_nested(msg,
+                                        NLA_F_NESTED | MPTCP_PM_ATTR_ADDR)
                 && l_genl_msg_append_attr(
                         msg,
                         MPTCP_PM_ADDR_ATTR_ID,
