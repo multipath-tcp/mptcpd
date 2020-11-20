@@ -105,13 +105,13 @@ static bool mptcpd_addr_info_init(struct in_addr  const *addr4,
         return true;
 }
 
-static void get_addr_callback_recurse(struct l_genl_attr *attr,
+static bool get_addr_callback_recurse(struct l_genl_attr *attr,
                                       struct mptcpd_addr_info *info)
 {
         struct l_genl_attr nested;
         if (!l_genl_attr_recurse(attr, &nested)) {
                 l_error("get_addr: unable to obtain nested data");
-                return;
+                return false;
         }
 
         uint16_t type;
@@ -159,23 +159,28 @@ static void get_addr_callback_recurse(struct l_genl_attr *attr,
         }
 
         mptcpd_addr_info_init(addr4, addr6, port, id, flags, index, info);
+
+        return true;
 }
 
 static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
 {
         struct get_addr_user_callbacks const *const cb = user_data;
+        struct mptcpd_addr_info *addrs = NULL;
+        size_t addrs_len = 0;
 
         if (!mptcpd_check_genl_error(msg,
                                      cb->get_addr
                                      ? "get_addr"
                                      : "dump_addrs"))
-                return;
+                goto get_addr_out;
 
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
                 l_error("get_addr: "
                         "Unable to initialize genl attribute");
-                return;
+
+                goto get_addr_out;
         }
 
         /*
@@ -190,9 +195,6 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
         uint16_t len;
         void const *data = NULL;
 
-        struct mptcpd_addr_info *addrs = NULL;
-        size_t addrs_len = 0;
-
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 if (type != MPTCP_PM_ATTR_ADDR) {
                         // Sanity check.  This condition should never occur.
@@ -204,8 +206,15 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
 
                 addrs = l_realloc(addrs, sizeof(*addrs) * addrs_len);
 
-                get_addr_callback_recurse(&attr, addrs + offset);
+                if (!get_addr_callback_recurse(&attr, addrs + offset)) {
+                        l_free(addrs);
+                        addrs = NULL;
+                        addrs_len = 0;
+                        break;
+                }
         }
+
+get_addr_out:
 
         // Pass the results to the user.
         if (cb->get_addr)
@@ -250,14 +259,19 @@ static bool append_addr_attr(struct l_genl_msg *msg,
 
 static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
 {
+        struct get_limits_user_callback const *const cb = user_data;
+        struct mptcpd_limit *limits = NULL;
+        size_t limits_len = 0;
+
         if (!mptcpd_check_genl_error(msg, "get_limits"))
-                return;
+                goto get_limits_out;
 
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
                 l_error("get_limits: "
                         "Unable to initialize genl attribute");
-                return;
+
+                goto get_limits_out;
         }
 
         /*
@@ -272,9 +286,6 @@ static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
         uint16_t len;
         void const *data = NULL;
 
-        struct mptcpd_limit *limits = NULL;
-        size_t limits_len = 0;
-
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
                 size_t const offset = limits_len++;
 
@@ -287,9 +298,9 @@ static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
                 l->limit = *(uint32_t const *) data;
         }
 
-        // Pass the results to the user.
-        struct get_limits_user_callback const *const cb = user_data;
+get_limits_out:
 
+        // Pass the results to the user.
         cb->get_limits(limits, limits_len, cb->data);
 
         l_free(limits);

@@ -63,7 +63,8 @@ struct mptcpd_limit
  * The mptcpd path manager will call a function of this type when
  * the result of calling @c mptcpd_pm_get_addr() is available.
  *
- * @param[in]     info          Network address information.
+ * @param[in]     info          Network address information.  @c NULL
+ *                              on error.
  * @param[in,out] callback_data Data provided by the caller of
  *                              @c mptcpd_pm_get_addr().
  */
@@ -77,8 +78,9 @@ typedef void (*mptcpd_pm_get_addr_cb)(struct mptcpd_addr_info const *info,
  * the result of calling @c mptcpd_pm_dump_addrs() is available.
  *
  * @param[in]     info          Array of network address
- *                              information.
- * @param[in]     len           Length of the @a info array.
+ *                              information. @c NULL on error.
+ * @param[in]     len           Length of the @a info array.  Zero on
+ *                              error.
  * @param[in,out] callback_data Data provided by the caller of
  *                              @c mptcpd_pm_dump_addrs().
  */
@@ -94,8 +96,9 @@ typedef void (*mptcpd_pm_dump_addrs_cb)(
  * the result of calling @c mptcpd_pm_dump_addrs() is available.
  *
  * @param[in]     limits        Array of MPTCP resource type/limit
- *                              pairs.
- * @param[in]     len           Length of the @a limits array.
+ *                              pairs.  @c NULL on error.
+ * @param[in]     len           Length of the @a limits array.  Zero
+ *                              on error.
  * @param[in,out] callback_data Data provided by the caller of
  *                              @c mptcpd_pm_get_limits().
  */
