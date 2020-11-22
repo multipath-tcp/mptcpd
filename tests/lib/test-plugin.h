@@ -4,7 +4,7 @@
  *
  * @brief mptcpd plugin test header.
  *
- * Copyright (c) 2019, Intel Corporation
+ * Copyright (c) 2019, 2020, Intel Corporation
  */
 
 #ifndef MPTCPD_TEST_PLUGIN_H
