@@ -1,3 +1,31 @@
+- Support for the MPTCP netlink path manager in the upstream Linux
+  kernel is now available.  A new set of path management command
+  functions corresponding to those available in the kernel netlink
+  path management API has been added to the `<mptcpd/path_manager.h>'
+  header.  The new functions allow plugins to retrieve IP address
+  information, flush addresses, and modify MPTCP resource limits.
+
+- The mptcpd_pm_add_addr() (formerly mptcpd_pm_send_addr()) and
+  mptcpd_pm_remove_addr() function parameters have been modified in
+  order to support both the upstream and multipath-tcp.org kernels.
+
+- Mptcpd path management command functions declared in
+  `<mptcpd/path_manager.h>' now return zero on success and -1 or an
+  errno on failure instead of a bool.
+
+- A MPTCP address ID manager "mptcpd_idm" interface was introduced
+  that mptcpd plugins may leverage to map an IP address to a MPTCP
+  address ID, as well as to track used and unused IDs.  The interface
+  is defined in the new `<mptcpd/id_manager.h>' header.
+
+- A new address advertising plugin, "addr_adv", has been added.  It
+  simply triggers a MPTCP ADD_ADDR when a new IP address is detected
+  by the mptcpd network monitor.  Similarly, a MPTCP REMOVE_ADDR is
+  triggered when an IP address is no longer available.
+
+- MPTCP netlink command error message logging was improved to be more
+  descriptive when possible.
+
 12 June 2020 - mptcpd 0.5
 
 - Test plugins are no longer installed when running "make install".  A
@@ -26,13 +54,6 @@
 - Stub implementations for unused mptcpd plugin operations are no
   longer needed.  Simply set the unused field in the
   `mptcpd_plugin_ops' structure to NULL.
-
-- This will be the last release to support the MPTCP generic netlink
-  path management API in the multipath-tcp.org kernel.  Subsequent
-  releases will support the new API found in the
-  "multipath-tcp/mptcp_net-next" kernel on GitHub currently being used
-  for development of patch submissions to the upstream Linux kernel
-  network subsystem maintainers.
 
 18 December 2019 - mptcpd 0.3
 

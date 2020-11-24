@@ -3,14 +3,18 @@
 ## Copyright (c) 2017-2020, Intel Corporation
 
 pkginclude_HEADERS =		\
+	addr_info.h		\
 	export.h		\
+	id_manager.h		\
 	network_monitor.h	\
 	path_manager.h		\
 	plugin.h		\
 	types.h
 
 
-noinst_HEADERS =			\
-	config-private.h		\
-	path_manager_private.h 		\
-	plugin_private.h
+noinst_HEADERS =		\
+	config-private.h	\
+	mptcp_private.h		\
+	path_manager_private.h 	\
+	plugin_private.h	\
+	sockaddr_private.h

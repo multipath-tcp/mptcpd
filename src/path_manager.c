@@ -7,6 +7,10 @@
  * Copyright (c) 2017-2020, Intel Corporation
  */
 
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/config-private.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,12 +19,6 @@
 #include <unistd.h>
 
 #include <netinet/in.h>
-#include <linux/netlink.h>  // For NLA_* macros.
-#include <linux/mptcp.h>
-
-#include <sys/socket.h>
-#include <netinet/tcp.h>
-#include <linux/in.h>       // For IPPROTO_MPTCP
 
 #include <ell/genl.h>
 #include <ell/log.h>
@@ -30,29 +28,56 @@
 #include <mptcpd/path_manager_private.h>
 #include <mptcpd/plugin_private.h>
 #include <mptcpd/network_monitor.h>
-
-#ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>
-#endif
+#include <mptcpd/mptcp_private.h>
+#include <mptcpd/sockaddr_private.h>
 
 #include "path_manager.h"
 #include "configuration.h"
+#include "commands.h"
 
 /// Directory containing MPTCP sysctl variable entries.
 #define MPTCP_SYSCTL_BASE "/proc/sys/net/mptcp/"
+
+/// Constuct full path for MPTCP sysctl variable "@a name".
+#define MPTCP_SYSCTL_VARIABLE(name) MPTCP_SYSCTL_BASE #name
 
 /**
  * @brief Maximum path manager name length.
  *
  * @note @c MPTCP_PM_NAME_MAX is defined in the internal
- *       @c <net/mptcp.h> kernel header.
-*/
+ *       @c <net/mptcp.h> header in the multipath-tcp.org kernel.
+ */
 #ifndef MPTCP_PM_NAME_MAX
-#define MPTCP_PM_NAME_MAX 16
+# define MPTCP_PM_NAME_MAX 16
 #endif
 
 
 static unsigned int const FAMILY_TIMEOUT_SECONDS = 10;
+
+/**
+ * @brief Check for multipath-tcp.org kernel path manager.
+ *
+ * Determine if the given generic netlink family name corresponds to
+ * the multipath-tcp.org Linux kernel "netlink" path manager.
+ *
+ * @param[in] family_name Generic netlink family name.
+ *
+ * @return @c true if @a family_name corresponds to the
+ *         multipath-tcp.org Linux kernel generic netlink path
+ *         manager, and @c false otherwise.
+ */
+static inline bool is_mptcp_org_kernel_pm(char const *family_name)
+{
+        /*
+          Sanity check:
+            We assume upstream and multipath-tcp.org
+            kernels to use different family names for their respective
+            generic netlink path management APIs.
+        */
+        assert(strcmp(MPTCP_GENL_NAME, MPTCP_PM_NAME) != 0);
+
+        return strcmp(family_name, MPTCP_GENL_NAME) == 0;
+}
 
 /**
  * @brief Validate generic netlink attribute size.
@@ -112,45 +137,6 @@ static char const *get_pm_name(void const *data, size_t len)
         return pm_name;
 }
 #endif // MPTCPD_ENABLE_PM_NAME
-
-/**
- * @brief Initialize @c sockaddr_storage instance.
- *
- * Initialize a @c sockaddr_storage instance with the provided IPv4 or
- * IPv6 address.  Only one is required and used.
- *
- * The port may zero in cases where the port is optional for a given
- * MPTCP generic netlink API event.
- *
- * @param[in]     addr4 IPv4 internet address.
- * @param[in]     addr6 IPv6 internet address.
- * @param[in]     port  IP port.
- * @param[in,out] addr  mptcpd network address information.
- */
-static void initialize_sockaddr_storage(struct in_addr  const *addr4,
-                                        struct in6_addr const *addr6,
-                                        in_port_t port,
-                                        struct sockaddr_storage *addr)
-{
-        assert(addr4 != NULL || addr6 != NULL);
-        assert(addr != NULL);
-
-        if (addr4 != NULL) {
-                struct sockaddr_in *const a = (struct sockaddr_in *) addr;
-
-                a->sin_family      = AF_INET;
-                a->sin_port        = port;
-                a->sin_addr.s_addr = addr4->s_addr;
-        } else {
-                struct sockaddr_in6 *const a =
-                        (struct sockaddr_in6 *) addr;
-
-                a->sin6_family = AF_INET6;
-                a->sin6_port   = port;
-
-                memcpy(&a->sin6_addr, addr6, sizeof(*addr6));
-        }
-}
 
 static void handle_connection_created(struct l_genl_msg *msg,
                                       void *user_data)
@@ -238,11 +224,22 @@ static void handle_connection_created(struct l_genl_msg *msg,
                 return;
         }
 
-        struct mptcpd_pm *const pm = user_data;
-
         struct sockaddr_storage laddr, raddr;
-        initialize_sockaddr_storage(laddr4, laddr6, *local_port, &laddr);
-        initialize_sockaddr_storage(raddr4, raddr6, *remote_port, &raddr);
+
+        if (!mptcpd_sockaddr_storage_init(laddr4,
+                                          laddr6,
+                                          *local_port,
+                                          &laddr)
+            || !mptcpd_sockaddr_storage_init(raddr4,
+                                             raddr6,
+                                             *remote_port,
+                                             &raddr)) {
+                l_error("Unable to initialize address information");
+
+                return;
+        }
+
+        struct mptcpd_pm *const pm = user_data;
 
         mptcpd_plugin_new_connection(pm_name,
                                      *token,
@@ -330,11 +327,22 @@ static void handle_connection_established(struct l_genl_msg *msg,
                 return;
         }
 
-        struct mptcpd_pm *const pm = user_data;
-
         struct sockaddr_storage laddr, raddr;
-        initialize_sockaddr_storage(laddr4, laddr6, *local_port, &laddr);
-        initialize_sockaddr_storage(raddr4, raddr6, *remote_port, &raddr);
+
+        if (!mptcpd_sockaddr_storage_init(laddr4,
+                                          laddr6,
+                                          *local_port,
+                                          &laddr)
+            || !mptcpd_sockaddr_storage_init(raddr4,
+                                             raddr6,
+                                             *remote_port,
+                                             &raddr)) {
+                l_error("Unable to initialize address information");
+
+                return;
+        }
+
+        struct mptcpd_pm *const pm = user_data;
 
         mptcpd_plugin_connection_established(*token,
                                              (struct sockaddr *) &laddr,
@@ -446,10 +454,15 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
         }
 
         struct sockaddr_storage addr;
-        initialize_sockaddr_storage(addr4,
-                                    addr6,
-                                    port ? *port : 0,
-                                    &addr);
+
+        if (!mptcpd_sockaddr_storage_init(addr4,
+                                          addr6,
+                                          port ? *port : 0,
+                                          &addr)) {
+                l_error("Unable to initialize address information");
+
+                return;
+        }
 
         struct mptcpd_pm *const pm = user_data;
 
@@ -615,8 +628,18 @@ static bool handle_subflow(struct l_genl_msg *msg,
 
         *token = *tok;
 
-        initialize_sockaddr_storage(laddr4, laddr6, *local_port,  laddr);
-        initialize_sockaddr_storage(raddr4, raddr6, *remote_port, raddr);
+        if (!mptcpd_sockaddr_storage_init(laddr4,
+                                          laddr6,
+                                          *local_port,
+                                          laddr)
+            || !mptcpd_sockaddr_storage_init(raddr4,
+                                             raddr6,
+                                             *remote_port,
+                                             raddr)) {
+                l_error("Unable to initialize address information");
+
+                return false;
+        }
 
         *backup = *bkup;
 
@@ -768,49 +791,21 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
 /**
  * @brief Verify that MPTCP is enabled at run-time in the kernel.
  *
- * Check that MPTCP is supported in the kernel by opening a socket
- * with the @c IPPROTO_MPTCP protocol.
- *
- * @note @c IPPROTO_MPTCP is supported by the "MPTCP upstream"
- *       kernel.
- */
-static bool check_mptcp_socket_support(void)
-{
-#if !HAVE_DECL_IPPROTO_MPTCP
-# define IPPROTO_MPTCP 262
-#endif  // !HAVE_DECL_IPPROTO_MPTCP
-
-        int const fd = socket(AF_INET, SOCK_STREAM, IPPROTO_MPTCP);
-
-        // An errno other than EINVAL is unexpected.
-        if (fd != -1) {
-                close(fd);
-                return true;
-        } else if (errno != EINVAL) {
-                l_error("Unable to confirm MPTCP socket support.");
-        }
-
-        return false;
-}
-
-/**
- * @brief Verify that MPTCP is enabled at run-time in the kernel.
- *
  * Check that MPTCP is enabled through the @c net.mptcp.mptcp_enabled
  * @c sysctl variable if it exists.
  *
  * @note The @c net.mptcp.mptcp_enabled is supported by the
  *       multipath-tcp.org kernel.
  */
-static bool check_kernel_mptcp_enabled(void)
+static bool check_kernel_mptcp_enabled(char const *path,
+                                       char const *variable,
+                                       int enable_val)
 {
-        static char const mptcp_enabled[] =
-                MPTCP_SYSCTL_BASE "mptcp_enabled";
-
-        FILE *const f = fopen(mptcp_enabled, "r");
+        FILE *const f = fopen(path, "r");
 
         if (f == NULL)
-                return false;  // Not using multipath-tcp.org kernel.
+                return false;  // Not using kernel that supports given
+                               // MPTCP sysctl variable.
 
         int enabled = 0;
         int const n = fscanf(f, "%d", &enabled);
@@ -818,13 +813,11 @@ static bool check_kernel_mptcp_enabled(void)
         fclose(f);
 
         if (n == 1) {
-                // "enabled" could be 0, 1, or 2.
-                enabled = (enabled == 1 || enabled == 2);
-
-                if (!enabled) {
+                if (enabled == 0) {
                         l_error("MPTCP is not enabled in the kernel.");
-                        l_error("Try 'sysctl -w "
-                                "net.mptcp.mptcp_enabled=2'.");
+                        l_error("Try 'sysctl -w net.mptcp.%s=%d'.",
+                                variable,
+                                enable_val);
 
                         /*
                           Mptcpd should not set this variable since it
@@ -859,7 +852,7 @@ static void check_kernel_mptcp_path_manager(void)
         if (f == NULL)
                 return;  // Not using multipath-tcp.org kernel.
 
-        char pm[MPTCP_PM_NAME_MAX + 1] = { 0 };
+        char pm[MPTCP_PM_NAME_MAX] = { 0 };
 
         static char const MPTCP_PM_NAME_FMT[] =
                 "%" L_STRINGIFY(MPTCP_PM_NAME_MAX) "s";
@@ -896,56 +889,8 @@ static void check_kernel_mptcp_path_manager(void)
         }
 }
 
-/**
- * @brief Handle MPTCP generic netlink family appearing on us.
- *
- * This function performs operations that must occur after the MPTCP
- * generic netlink family has appeared since some data is only
- * available after that has happened.  Such data includes multicast
- * groups exposed by the generic netlink family, etc.
- *
- * @param[in]     info      Generic netlink family information.
- * @param[in,out] user_data Pointer @c mptcp_pm object to which the
- *                          @c l_genl_family watch belongs.
- */
-static void family_appeared(struct l_genl_family_info const *info,
-                            void *user_data)
+static void complete_mptcp_org_kernel_pm_init(struct mptcpd_pm *pm)
 {
-        if (info == NULL) {
-                /*
-                  Request for "mptcp" generic netlink family failed.
-                  Wait for it to appear in case it is loaded into the
-                  kernel after mptcpd has started.
-                */
-
-                l_debug("Request for \""
-                        MPTCP_GENL_NAME
-                        "\" Generic Netlink family failed.  Waiting.");
-
-                return;
-        }
-
-        assert(strcmp(l_genl_family_info_get_name(info),
-                      MPTCP_GENL_NAME) == 0);
-
-        struct mptcpd_pm *const pm = user_data;
-
-        l_debug(MPTCP_GENL_NAME " generic netlink family appeared");
-
-        /*
-          This function could be called in either of two cases, (1)
-          handling the appearance of the "mptcp" generic netlink
-          family through a family watch, or (2) through an explicit
-          family request.
-
-          Do nothing if the necessary "mptcp" family registration was
-          completed as a result of a previous call to this function.
-         */
-        if (pm->family != NULL)
-                return;
-
-        pm->family = l_genl_family_new(pm->genl, MPTCP_GENL_NAME);
-
         /*
           Register callbacks for MPTCP generic netlink multicast
           notifications.
@@ -969,21 +914,68 @@ static void family_appeared(struct l_genl_family_info const *info,
 }
 
 /**
+ * @brief Handle MPTCP generic netlink family appearing on us.
+ *
+ * This function performs operations that must occur after the MPTCP
+ * generic netlink family has appeared since some data is only
+ * available after that has happened.  Such data includes multicast
+ * groups exposed by the generic netlink family, etc.
+ *
+ * @param[in]     info      Generic netlink family information.
+ * @param[in,out] user_data Pointer to @c mptcp_pm object to which the
+ *                          @c l_genl_family watch belongs.
+ */
+static void family_appeared(struct l_genl_family_info const *info,
+                            void *user_data)
+{
+        if (info == NULL) {
+                /*
+                  Request for "mptcp" generic netlink family failed.
+                  Wait for it to appear in case it is loaded into the
+                  kernel after mptcpd has started.
+                */
+
+                l_debug("Request for MPTCP generic netlink "
+                        "family failed. Waiting.");
+
+                return;
+        }
+
+        char const *const name = l_genl_family_info_get_name(info);
+
+        l_debug("\"%s\" generic netlink family appeared", name);
+
+        struct mptcpd_pm *const pm = user_data;
+        /*
+          This function could be called in either of two cases, (1)
+          handling the appearance of the MPTCP generic netlink family
+          through a family watch, or (2) through an explicit family
+          request.
+
+          Do nothing if the necessary MPTCP family registration was
+          completed as a result of a previous call to this function.
+         */
+        if (pm->family != NULL)
+                return;
+
+        pm->family = l_genl_family_new(pm->genl, name);
+
+        if (is_mptcp_org_kernel_pm(name))
+                complete_mptcp_org_kernel_pm_init(pm);
+}
+
+/**
  * @brief Handle MPTCP generic netlink family disappearing on us.
  *
  * @param[in]     name      Generic netlink family name.
- * @param[in,out] user_data Pointer @c mptcp_pm object to which the
+ * @param[in,out] user_data Pointer to @c mptcp_pm object to which the
  *                          @c l_genl_family watch belongs.
  */
 static void family_vanished(char const *name, void *user_data)
 {
-        (void) name;
-
-        assert(strcmp(name, MPTCP_GENL_NAME) == 0);
-
         struct mptcpd_pm *const pm = user_data;
 
-        l_debug(MPTCP_GENL_NAME " generic netlink family vanished");
+        l_debug("%s generic netlink family vanished", name);
 
         /*
           Unregister callbacks for MPTCP generic netlink multicast
@@ -991,8 +983,7 @@ static void family_vanished(char const *name, void *user_data)
         */
         if (pm->id != 0) {
                 if (!l_genl_family_unregister(pm->family, pm->id))
-                        l_warn(MPTCP_GENL_EV_GRP_NAME
-                               " multicast handler deregistration "
+                        l_warn("MPTCP event handler deregistration "
                                "failed.");
 
                 pm->id = 0;
@@ -1001,22 +992,28 @@ static void family_vanished(char const *name, void *user_data)
         l_genl_family_free(pm->family);
         pm->family = NULL;
 
-        // Re-arm the "mptcp" generic netlink family timeout.
+        // Re-arm the MPTCP generic netlink family timeout.
         l_timeout_modify(pm->timeout, FAMILY_TIMEOUT_SECONDS);
 }
 
+/**
+ * @brief Handle MPTCP generic netlink family appearance timeout.
+ *
+ * @param[in] timeout   Timeout information.
+ * @param[in] user_data Pointer to @c mptcp_pm object to which the
+ *                      timeout belongs.
+ */
 static void family_timeout(struct l_timeout *timeout, void *user_data)
 {
         (void) timeout;
 
-        struct mptcpd_pm *const pm =  user_data;
+        struct mptcpd_pm const *const pm =  user_data;
 
         if (pm->family != NULL)
-                return;  // "mptcp" genl family appeared.
+                return;  // MPTCP genl family appeared.
 
-        l_warn(MPTCP_GENL_NAME
-               " generic netlink family has not appeared.");
-        l_warn("Verify MPTCP \"netlink\" path manager kernel support.");
+        l_warn("MPTCP generic netlink family has not appeared.");
+        l_warn("Verify MPTCP netlink path manager kernel support.");
 }
 
 static struct mptcpd_nm_ops const _nm_ops = {
@@ -1027,20 +1024,49 @@ static struct mptcpd_nm_ops const _nm_ops = {
         .delete_address   = mptcpd_plugin_delete_local_address,
 };
 
+/// Are we being run under a MPTCP-capable upstream kernel?
+static bool is_upstream_kernel(void)
+{
+        static char const path[] = MPTCP_SYSCTL_VARIABLE(enabled);
+        static char const name[] = "enabled";
+        static int  const enable_val = 1;
+
+        return check_kernel_mptcp_enabled(path, name, enable_val);
+}
+
+/// Are we being run under a MPTCP-capable multipath-tcp.org kernel?
+static bool is_mptcp_org_kernel(void)
+{
+        static char const path[] = MPTCP_SYSCTL_VARIABLE(mptcp_enabled);
+        static char const name[] = "mptcp_enabled";
+        static int  const enable_val = 2;  // or 1
+
+        return check_kernel_mptcp_enabled(path, name, enable_val);
+}
+
 struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 {
         assert(config != NULL);
 
-        if (!check_mptcp_socket_support()
-            && !check_kernel_mptcp_enabled()) {
-                l_error("Required kernel MPTCP support not available.");
+        char const *name = NULL;
+        struct mptcpd_pm_cmd_ops const *cmd_ops = NULL;
 
+        if (is_upstream_kernel()) {
+                name = MPTCP_PM_NAME;
+                cmd_ops = mptcpd_get_upstream_cmd_ops();
+        } else if (is_mptcp_org_kernel()) {
+                name = MPTCP_GENL_NAME;
+                cmd_ops = mptcpd_get_mptcp_org_cmd_ops();
+        } else {
+                l_error("Required kernel MPTCP support not available.");
                 return NULL;
         }
 
         struct mptcpd_pm *const pm = l_new(struct mptcpd_pm, 1);
 
         // No need to check for NULL.  l_new() abort()s on failure.
+
+        pm->cmd_ops = cmd_ops;
 
         pm->genl = l_genl_new();
         if (pm->genl == NULL) {
@@ -1050,25 +1076,25 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         }
 
         if (l_genl_add_family_watch(pm->genl,
-                                       MPTCP_GENL_NAME,
-                                       family_appeared,
-                                       family_vanished,
-                                       pm,
-                                       NULL) == 0
+                                    name,
+                                    family_appeared,
+                                    family_vanished,
+                                    pm,
+                                    NULL) == 0
             || !l_genl_request_family(pm->genl,
-                                      MPTCP_GENL_NAME,
+                                      name,
                                       family_appeared,
                                       pm,
                                       NULL)) {
                 mptcpd_pm_destroy(pm);
-                l_error("Unable to watch or request \""
-                        MPTCP_GENL_NAME
-                        "\" generic netlink family.");
+                l_error("Unable to watch or request \"%s\" "
+                        "generic netlink family.",
+                        name);
                 return NULL;
         }
 
         /*
-          Warn the user if the "mptcp" generic netlink family doesn't
+          Warn the user if the MPTCP generic netlink family doesn't
           appear within a reasonable amount of time.
         */
         pm->timeout =
@@ -1092,9 +1118,6 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 l_error("Unable to create network monitor.");
                 return NULL;
         }
-
-        // Register network interface/address change handlers.
-
 
         /**
          * @bug Mptcpd plugins should only be loaded once at process

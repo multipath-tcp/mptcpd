@@ -4,9 +4,10 @@
  *
  * @brief mptcpd test plugin call functions.
  *
- * Copyright (c) 2019, Intel Corporation
+ * Copyright (c) 2019-2020, Intel Corporation
  */
 
+#undef NDEBUG
 #include <assert.h>
 #include <stdlib.h>
 

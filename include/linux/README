@@ -1,0 +1,10 @@
+This directory contains copies of the <linux/mptcp.h> header in the
+upstream Linux kernel, as well as the multipath-tcp.org kernel.  They
+are only used if the mptcpd `configure' script doesn't detect them.
+Mptcpd supports the MPTCP path management generic netlink APIs defined
+in both headers, and refers to the upstream kernel header as
+"mptcp_upstream.h", and the multipath-tcp.org header as
+"mptcp_org.h".
+
+The licensing terms for both headers is the same as their in-kernel
+source tree counterparts.

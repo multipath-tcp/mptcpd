@@ -18,7 +18,7 @@ AC_INIT([mptcpd],
 # Interfaces changed:  CURRENT++ REVISION=0
 #            added:    CURRENT++ REVISION=0 AGE++
 #            removed:  CURRENT++ REVISION=0 AGE=0
-LIB_CURRENT=0
+LIB_CURRENT=1
 LIB_REVISION=0
 LIB_AGE=0
 
@@ -187,14 +187,11 @@ AC_SUBST([ELL_VERSION])
 # ---------------------------------------------------------------
 # Checks for header files.
 # ---------------------------------------------------------------
-# @todo mptcpd ships with a copy of <linux/mptcp.h>.  Ideally it
-#       should not.  Consider removing it from mptcpd, and
-#       reintroducing this check once the kernel ships with that
-#       header.
-#AC_CHECK_HEADER(
-#   [linux/mptcp.h],
-#   [],
-#   [AC_MSG_ERROR([<linux/mptcp.h> header could not be found])])
+# @todo mptcpd ships with a copies of the upstream and
+#       multipath-tcp.org kernel <linux/mptcp.h> header files. Ideally
+#       it should not. Consider removing them from mptcpd.
+AC_CHECK_HEADERS([linux/mptcp.h], [],
+   [AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])])
 
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.
@@ -209,19 +206,6 @@ AC_SEARCH_LIBS(
     [argp],
     [],
     [AC_MSG_ERROR([library with argp_parse() could not be found])])
-
-# ---------------------------------------------------------------
-# Checks for declaration.
-# ---------------------------------------------------------------
-AC_CHECK_DECLS([IPPROTO_MPTCP],
-               [],
-               [AC_MSG_WARN([IPPROTO_MPTCP declaration not found.  Using fallback.])],
-               [[
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <linux/in.h>
-               ]])
 
 # ---------------------------------------------------------------
 # Enable additional C compiler warnings.  We do this after all

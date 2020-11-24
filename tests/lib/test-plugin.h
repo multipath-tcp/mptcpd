@@ -4,7 +4,7 @@
  *
  * @brief mptcpd plugin test header.
  *
- * Copyright (c) 2019, Intel Corporation
+ * Copyright (c) 2019, 2020, Intel Corporation
  */
 
 #ifndef MPTCPD_TEST_PLUGIN_H
@@ -157,7 +157,7 @@ static mptcpd_token_t const test_bad_token  = 0xFFFFFFFF;
 static struct sockaddr_in const test_laddr_1 = {
         .sin_family = AF_INET,
         .sin_port   = 0x1234,
-        .sin_addr   = { .s_addr = 0xC0000201 }  // 192.0.2.1
+        .sin_addr   = { .s_addr = 0x010200C0 }  // 192.0.2.1
 };
 
 #ifdef __cplusplus
@@ -169,7 +169,7 @@ static struct sockaddr_in const test_laddr_1 = {
 static struct sockaddr_in const test_laddr_2 = {
         .sin_family = AF_INET,
         .sin_port   = 0x5678,
-        .sin_addr   = { .s_addr = 0xC0000202 }  // 192.0.2.2
+        .sin_addr   = { .s_addr = 0x020200C0 }  // 192.0.2.2
 };
 #else
 static struct sockaddr_in6 const test_laddr_2 = {
@@ -195,7 +195,7 @@ static struct sockaddr_in6 const test_laddr_2 = {
 static struct sockaddr_in const test_raddr_1 = {
         .sin_family = AF_INET,
         .sin_port   = 0x3456,
-        .sin_addr   = { .s_addr = 0xCB007101 }  // 203.0.113.1
+        .sin_addr   = { .s_addr = 0x017100CB }  // 203.0.113.1
 };
 #else
 static struct sockaddr_in6 const test_raddr_1 = {
@@ -214,19 +214,19 @@ static struct sockaddr_in6 const test_raddr_1 = {
 static struct sockaddr_in const test_raddr_2 = {
         .sin_family = AF_INET,
         .sin_port   = 0x7890,
-        .sin_addr   = { .s_addr = 0xCB007102 }  // 203.0.113.2
+        .sin_addr   = { .s_addr = 0x027100CB }  // 203.0.113.2
 };
 
 static struct sockaddr_in const test_laddr_4 = {
         .sin_family = AF_INET,
         .sin_port   = 0x2345,
-        .sin_addr   = { .s_addr = 0xC0000204 }  // 192.0.2.4
+        .sin_addr   = { .s_addr = 0x040200C0 }  // 192.0.2.4
 };
 
 static struct sockaddr_in const test_raddr_4 = {
         .sin_family = AF_INET,
         .sin_port   = 0x3456,
-        .sin_addr   = { .s_addr = 0xCB007104 }  // 203.0.113.4
+        .sin_addr   = { .s_addr = 0x047100CB }  // 203.0.113.4
 };
 
 //@}

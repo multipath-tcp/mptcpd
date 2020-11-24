@@ -7,6 +7,10 @@
  * Copyright (c) 2017-2020, Intel Corporation
  */
 
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/config-private.h>  // For NDEBUG
+#endif
+
 #define _POSIX_C_SOURCE 200112L  ///< For XSI-compliant strerror_r().
 #define _DEFAULT_SOURCE  ///< For standard network interface flags.
 

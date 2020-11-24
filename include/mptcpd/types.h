@@ -4,12 +4,13 @@
  *
  * @brief mptcpd user space path manager attribute types.
  *
- * Copyright (c) 2018, 2019, Intel Corporation
+ * Copyright (c) 2018-2020, Intel Corporation
  */
 
 #ifndef MPTCPD_TYPES_H
 #define MPTCPD_TYPES_H
 
+#include <stddef.h>
 #include <inttypes.h>
 
 #ifdef __cplusplus
@@ -29,6 +30,82 @@ typedef uint8_t mptcpd_aid_t;
 
 /// MPTCP address ID format specifier.
 #define MPTCPD_PRIxAID PRIx8
+
+/// MPTCP flags type.
+typedef uint32_t mptcpd_flags_t;
+
+/// Maximum number of address advertisements to receive.
+#define MPTCPD_LIMIT_RCV_ADD_ADDRS MPTCP_PM_ATTR_RCV_ADD_ADDRS
+
+/// Maximum number of subflows.
+#define MPTCPD_LIMIT_SUBFLOWS MPTCP_PM_ATTR_SUBFLOWS
+
+
+struct mptcpd_addr_info;
+
+/**
+ * @struct mptcpd_limit
+ *
+ * @brief MPTCP resource type/limit pair.
+ */
+struct mptcpd_limit
+{
+        /// MPTCP resource type, e.g. @c MPTCPD_LIMIT_SUBFLOWS.
+        uint16_t type;
+
+        /// MPTCP resource limit value.
+        uint32_t limit;
+};
+
+/**
+ * @brief Type of function called when an address is available.
+ *
+ * The mptcpd path manager will call a function of this type when
+ * the result of calling @c mptcpd_pm_get_addr() is available.
+ *
+ * @param[in]     info          Network address information.  @c NULL
+ *                              on error.
+ * @param[in,out] callback_data Data provided by the caller of
+ *                              @c mptcpd_pm_get_addr().
+ */
+typedef void (*mptcpd_pm_get_addr_cb)(struct mptcpd_addr_info const *info,
+                                      void *callback_data);
+
+/**
+ * @brief Type of function called when an address dump is available.
+ *
+ * The mptcpd path manager will call a function of this type when
+ * the result of calling @c mptcpd_pm_dump_addrs() is available.
+ *
+ * @param[in]     info          Array of network address
+ *                              information. @c NULL on error.
+ * @param[in]     len           Length of the @a info array.  Zero on
+ *                              error.
+ * @param[in,out] callback_data Data provided by the caller of
+ *                              @c mptcpd_pm_dump_addrs().
+ */
+typedef void (*mptcpd_pm_dump_addrs_cb)(
+        struct mptcpd_addr_info const *info,
+        size_t len,
+        void *callback_data);
+
+/**
+ * @brief Type of function called when MPTCP resource limit are available.
+ *
+ * The mptcpd path manager will call a function of this type when
+ * the result of calling @c mptcpd_pm_get_limits() is available.
+ *
+ * @param[in]     limits        Array of MPTCP resource type/limit
+ *                              pairs.  @c NULL on error.
+ * @param[in]     len           Length of the @a limits array.  Zero
+ *                              on error.
+ * @param[in,out] callback_data Data provided by the caller of
+ *                              @c mptcpd_pm_get_limits().
+ */
+typedef void (*mptcpd_pm_get_limits_cb)(
+        struct mptcpd_limit const *limits,
+        size_t len,
+        void *callback_data);
 
 #ifdef __cplusplus
 }

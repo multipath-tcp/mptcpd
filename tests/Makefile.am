@@ -25,7 +25,8 @@ check_PROGRAMS =		\
 	test-network-monitor	\
 	test-path-manager	\
 	test-commands		\
-	test-configuration
+	test-configuration	\
+	test-id-manager
 
 ## Test scripts expected to fail due to intentionally bad mptcpd
 ## command line options.  Successful exit will be treated as failure.
@@ -68,6 +69,7 @@ test_path_manager_CPPFLAGS =				\
 test_path_manager_LDADD =			\
 	$(top_builddir)/src/libpath_manager.la	\
 	$(top_builddir)/lib/libmptcpd.la	\
+	$(builddir)/lib/libmptcpd_test.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
 
@@ -78,12 +80,19 @@ test_commands_CPPFLAGS =				\
 test_commands_LDADD =				\
 	$(top_builddir)/src/libpath_manager.la	\
 	$(top_builddir)/lib/libmptcpd.la	\
+	$(builddir)/lib/libmptcpd_test.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
 
 test_configuration_SOURCES = test-configuration.c
 test_configuration_LDADD =			\
 	$(top_builddir)/src/libpath_manager.la	\
+	$(top_builddir)/lib/libmptcpd.la	\
+	$(ELL_LIBS)				\
+	$(CODE_COVERAGE_LIBS)
+
+test_id_manager_SOURCES = test-id-manager.c
+test_id_manager_LDADD =				\
 	$(top_builddir)/lib/libmptcpd.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
