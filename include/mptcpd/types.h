@@ -90,10 +90,10 @@ typedef void (*mptcpd_pm_dump_addrs_cb)(
         void *callback_data);
 
 /**
- * @brief Type of function called when an address dump is available.
+ * @brief Type of function called when MPTCP resource limit are available.
  *
  * The mptcpd path manager will call a function of this type when
- * the result of calling @c mptcpd_pm_dump_addrs() is available.
+ * the result of calling @c mptcpd_pm_get_limits() is available.
  *
  * @param[in]     limits        Array of MPTCP resource type/limit
  *                              pairs.  @c NULL on error.
