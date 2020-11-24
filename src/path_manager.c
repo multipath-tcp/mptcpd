@@ -1094,7 +1094,7 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         }
 
         /*
-          Warn the user if the "mptcp" generic netlink family doesn't
+          Warn the user if the MPTCP generic netlink family doesn't
           appear within a reasonable amount of time.
         */
         pm->timeout =
