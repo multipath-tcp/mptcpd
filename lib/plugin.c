@@ -56,11 +56,6 @@
  * instance.
  *
  * @todo Consider merging this map the @c plugin_infos queue.
- *
- * @note This is a static variable since ELL's plugin framework
- *       doesn't provide a way to pass user data to loaded plugins.
- *       Access to this variable may need to be synchronized if mptcpd
- *       ever supports multiple threads.
  */
 static struct l_hashmap *_pm_plugins;
 
@@ -70,11 +65,6 @@ static struct l_hashmap *_pm_plugins;
  * @todo Determine if use of a hashmap scales well, in terms
  *       of both performance and resource usage, in the
  *       presence of a large number of MPTCP connections.
- *
- * @note This is a static variable since ELL's plugin framework
- *       doesn't provide a way to pass user data to loaded plugins.
- *       Access to this variable may need to be synchronized if mptcpd
- *       ever supports multiple threads.
  */
 static struct l_hashmap *_token_to_ops;
 
@@ -114,8 +104,7 @@ static struct mptcpd_plugin_ops const *_default_ops;
  * @note There is a TOCTOU race condition between this directory
  *       permissions check and subsequent calls to functions that
  *       access the given directory @a dir, such as the call to
- *       @c l_plugin_load().  There is currently no way to avoid that
- *       with the existing ELL API.
+ *       @c load_plugins().
  */
 static bool check_directory_perms(char const *dir)
 {
