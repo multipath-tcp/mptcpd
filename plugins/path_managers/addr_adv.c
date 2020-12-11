@@ -11,7 +11,6 @@
 # include <mptcpd/config-private.h>
 #endif
 
-#include <ell/plugin.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by ELL log macros.
 #include <ell/log.h>
 
