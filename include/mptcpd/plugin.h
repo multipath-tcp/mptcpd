@@ -19,17 +19,98 @@
 extern "C" {
 #endif
 
-/**
- * @brief Mptcpd plugin @a "symbol" argument for @c L_PLUGIN_DEFINE.
- *
- * All mptcpd plugins are expected to use this value as the @a symbol
- * argument in their @c L_PLUGIN_DEFINE() macro call.
- */
-#define MPTCPD_PLUGIN_DESC mptcpd_plugin_desc
-
 struct sockaddr;
 struct mptcpd_pm;
 struct mptcpd_interface;
+
+/**
+ * @brief Symbol name of mptcpd plugin characterstics.
+ *
+ * @note This is a private preprocessor constant that is not part of
+ *       the mptcpd plugin API.
+ */
+#define MPTCPD_PLUGIN_SYM _mptcpd_plugin
+
+/**
+ * @brief Define mptcpd plugin characterstics.
+ *
+ * Mptcpd plugins should use this macro to define and export
+ * characterstics (descriptor) required by mptcpd.
+ *
+ * @param[in] name        Plugin name (unquoted)
+ * @param[in] description Plugin description
+ * @param[in] priority    Plugin priority, where the higher values are
+ *                        lower in priority, and lower values are
+ *                        higher in priority, similar to how process
+ *                        scheduling priorities are defined.  Mptcpd
+ *                        defines convenience plugin priorities
+ *                        @c MPTCP_PLUGIN_PRIORITY_LOW,
+ *                        @c MPTCP_PLUGIN_PRIORITY_DEFAULT, and
+ *                        @c  MPTCP_PLUGIN_PRIORITY_HIGH.
+ * @param[in] init        Function called when mptcpd initializes the
+ *                        plugin.
+ * @param[in] exit        Function called when mptcpd finalizes the
+ *                        plugin.
+ */
+#define MPTCPD_PLUGIN_DEFINE(name, description, priority, init, exit)   \
+        extern struct mptcpd_plugin_desc const MPTCPD_PLUGIN_SYM        \
+                __attribute__((visibility("default")));                 \
+        struct mptcpd_plugin_desc const MPTCPD_PLUGIN_SYM = {           \
+                #name,                                                  \
+                description,                                            \
+                0, /* version */                                        \
+                priority,                                               \
+                init,                                                   \
+                exit                                                    \
+        };
+
+/// Lowest priority value, i.e. highest priority
+#define MPTCPD_PLUGIN_PRIORITY_LOW     -20
+
+/// Default priority
+#define MPTCPD_PLUGIN_PRIORITY_DEFAULT   0
+
+/// Higher priority value, i.e. lowest priority
+#define MPTCPD_PLUGIN_PRIORITY_HIGH     19
+
+/**
+ * @struct mptcpd_plugin_desc
+ *
+ * @brief Plugin-specific characteristics / descriptor.
+ */
+struct mptcpd_plugin_desc
+{
+        /**
+         * @privatesection
+         */
+        /// Plugin name.
+        char const *const name;
+
+        /// Plugin description.
+        char const *const description;
+
+        /// mptcpd version against which the plugin was compiled.
+        char const *const version;
+
+        /**
+         * @brief Plugin priority.
+         *
+         * Plugin priority, where the higher values are lower in
+         * priority, and lower values are higher in priority, similar
+         * to how process scheduling priorities are defined.
+         *
+         * @see @c MPTCP_PLUGIN_PRIORITY_LOW
+         * @see @c MPTCP_PLUGIN_PRIORITY_DEFAULT
+         * @see @c MPTCP_PLUGIN_PRIORITY_HIGH
+         */
+        int const priority;
+
+        /// Plugin initialization function.
+        int (*init)(struct mptcpd_pm *);
+
+        /// Plugin finalization function.
+        void (*exit)(struct mptcpd_pm *);
+};
 
 /**
  * @struct mptcpd_plugin_ops plugin.h <mptcpd/plugin.h>
