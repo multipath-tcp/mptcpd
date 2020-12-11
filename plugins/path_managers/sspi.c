@@ -786,8 +786,10 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .subflow_priority       = sspi_subflow_priority
 };
 
-static int sspi_init(void)
+static int sspi_init(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         // Create list of connection tokens on each network interface.
         sspi_interfaces = l_queue_new();
 
@@ -807,20 +809,20 @@ static int sspi_init(void)
         return 0;
 }
 
-static void sspi_exit(void)
+static void sspi_exit(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         l_queue_destroy(sspi_interfaces, sspi_interface_info_destroy);
 
         l_info("MPTCP single-subflow-per-interface path manager exited.");
 }
 
-L_PLUGIN_DEFINE(MPTCPD_PLUGIN_DESC,
-                sspi,
-                "Single-subflow-per-interface path manager",
-                VERSION,
-                L_PLUGIN_PRIORITY_DEFAULT,
-                sspi_init,
-                sspi_exit)
+MPTCPD_PLUGIN_DEFINE(sspi,
+                     "Single-subflow-per-interface path manager",
+                     MPTCPD_PLUGIN_PRIORITY_DEFAULT,
+                     sspi_init,
+                     sspi_exit)
 
 
 /*
