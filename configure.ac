@@ -116,7 +116,7 @@ AC_ARG_WITH([path-manager],
               [addr_adv | sspi],
               [with_path_manager=$withval],
               [AC_MSG_ERROR([invalid path manager plugin: $withval])])],
-     [with_path_manager=sspi])
+     [with_path_manager=addr_adv])
 
 AC_SUBST([mptcpd_default_pm],[$with_path_manager])
 
