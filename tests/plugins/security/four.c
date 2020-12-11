@@ -4,14 +4,13 @@
  *
  * @brief MPTCP test plugin.
  *
- * Copyright (c) 2019, Intel Corporation
+ * Copyright (c) 2019-2020, Intel Corporation
  */
 
 #undef NDEBUG
 
 #include <assert.h>
 
-#include <ell/plugin.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
 
