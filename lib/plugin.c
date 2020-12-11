@@ -13,11 +13,15 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <dlfcn.h>
+#include <errno.h>
 #include <unistd.h>
 #include <assert.h>
 
+#include <ell/queue.h>
 #include <ell/hashmap.h>
-#include <ell/plugin.h>
 #include <ell/util.h>
 #include <ell/log.h>
 
@@ -50,6 +54,8 @@
  * A map of path manager plugins where the key is the plugin name and
  * the value is a pointer to a @c struct @c mptcpd_plugin_ops
  * instance.
+ *
+ * @todo Consider merging this map the @c plugin_infos queue.
  *
  * @note This is a static variable since ELL's plugin framework
  *       doesn't provide a way to pass user data to loaded plugins.
@@ -168,7 +174,235 @@ static struct mptcpd_plugin_ops const *token_to_ops(mptcpd_token_t token)
 //                Plugin Registration and Management
 // ----------------------------------------------------------------
 
-bool mptcpd_plugin_load(char const *dir, char const *default_name)
+/**
+ * @struct plugin_info
+ *
+ * @brief Plugin information
+ */
+struct plugin_info
+{
+        /// Handle returned from call to @c dlopen().
+        void *handle;
+
+        /// Plugin descriptor.
+        struct mptcpd_plugin_desc const *desc;
+};
+
+/// List of @c plugin_info objects.
+static struct l_queue *_plugin_infos;
+
+/**
+ * @brief Compare plugin priorities.
+ *
+ * @param[in] a         New      plugin information.
+ * @param[in] b         Existing plugin information.
+ * @param[in] user_data User data (unused).
+ *
+ * @return Value greater than 0 if the new plugin should be inserted
+ *         after the existing plugin in the list, and a negative value
+ *         otherwise.
+ */
+static int compare_plugin_priority(void const *a,
+                                   void const *b,
+                                   void *user_data)
+{
+        (void) user_data;
+
+        struct plugin_info const *const new      = a;
+        struct plugin_info const *const existing = b;
+
+        /*
+          Cause "new" plugin to be inserted into the plugin list
+          before the "existing" plugin it its priority is higher
+          (lower value) than the existing plugin priority.
+        */
+        return new->desc->priority - existing->desc->priority;
+}
+
+static void report_error(int error, char const *msg)
+{
+        char errmsg[80];
+        int const r =
+                strerror_r(error, errmsg, L_ARRAY_SIZE(errmsg));
+
+        l_error("%s: %s", msg, r == 0 ? errmsg : "<unknown error>");
+}
+
+static void init_plugin(void *data, void *user_data)
+{
+        struct plugin_info const *const p  = data;
+        struct mptcpd_pm         *const pm = user_data;
+
+        if (p->desc->init && p->desc->init(pm) != 0)
+                l_warn("Plugin \"%s\" failed to initialize",
+                       p->desc->name);
+}
+
+static bool file_ends_in_so(char const *filename)
+{
+        static char const so[] = ".so";
+
+        /*
+          strlen(".so") == 3, which is the expected position of the
+          period relative to the end of the plugin filename.
+        */
+        static size_t const ppos = L_ARRAY_SIZE(so) - 1;
+
+        size_t const len = strlen(filename);
+
+        /*
+          The last three characters in the filename should be the
+          ".so" extension.
+        */
+        char const *const ext = filename + len - ppos;
+
+        return strcmp(ext, so) == 0;
+}
+
+static void load_plugin(char const *filename)
+{
+        void *const handle = dlopen(filename, RTLD_NOW);
+
+        if (handle == NULL) {
+                l_error("%s", dlerror());
+                return;
+        }
+
+        void *const sym = dlsym(handle, L_STRINGIFY(MPTCPD_PLUGIN_SYM));
+
+        if (sym == NULL) {
+                l_error("%s", dlerror());
+                dlclose(handle);
+                return;
+        }
+
+        struct mptcpd_plugin_desc const *const desc = sym;
+
+        /**
+         * @note We assume that plugin names stored in the plugin
+         *       descriptor will be unique .  Path management events
+         *       could potentially be dispatched to the wrong plugin
+         *       with the same name, otherwise.
+         */
+        // Require a plugin name since we map it plugin operations.
+        if (desc->name == NULL) {
+                l_error("No plugin name specified in %s", filename);
+                dlclose(handle);
+                return;
+        }
+
+        struct plugin_info *const p = l_new(struct plugin_info, 1);
+        p->handle = handle;
+        p->desc   = desc;
+
+        // Register plugin.
+        if (!l_queue_insert(_plugin_infos,
+                            p,
+                            compare_plugin_priority,
+                            NULL)) {
+                /*
+                  We should never get here.  The only way to get here
+                  is if either the l_queue pointer argument,
+                  i.e. _plugin_infos, is NULL or if the comparison
+                  function argument is NULL.
+                */
+                l_error("Unexpected error registering plugin \"%s\"",
+                        filename);
+                l_free(p);
+                dlclose(handle);
+        }
+
+        /*
+          Initialization will be performed after all plugins are
+          loaded to taken into account plugin priority.
+        */
+}
+
+static int load_plugins(char const *dir, struct mptcpd_pm *pm)
+{
+        /**
+         * @note It would be simpler to implement this function in
+         *       terms of @c glob() but that introduces a TOCTOU race
+         *       condition between the @c glob() call and subsequent
+         *       calls to @c dlopen().  The below approach closes to
+         *       the TOCTOU race condition.
+         */
+
+        int const fd = open(dir, O_RDONLY | O_DIRECTORY);
+
+        if (fd == -1) {
+                report_error(errno, "Unable to open plugin directory");
+
+                return -1;
+        }
+
+        DIR *const ds = fdopendir(fd);
+
+        errno = 0;
+        for (struct dirent const *d = readdir(ds);
+             d != NULL;
+             d = readdir(ds)) {
+                if ((d->d_type == DT_REG || d->d_type == DT_UNKNOWN)
+                    && file_ends_in_so(d->d_name)) {
+                        char *const path = l_strdup_printf("%s/%s",
+                                                           dir,
+                                                           d->d_name);
+                        load_plugin(path);
+                        l_free(path);
+                }
+
+                // Reset to detect error on NULL readdir().
+                errno = 0;
+        }
+
+        int const error = errno;
+
+        (void) closedir(ds);
+
+        /**
+         * @todo Should a readdir() error from above be considered
+         *       fatal?
+         */
+        if (error != 0)
+                report_error(error, "Error during plugin directory read");
+
+        // Initialize all load plugins.
+        l_queue_foreach(_plugin_infos, init_plugin, pm);
+
+        return error;  // 0 on success
+}
+
+static bool unload_plugin(void *data, void *user_data)
+{
+        struct plugin_info *const p  = data;
+        struct mptcpd_pm   *const pm = user_data;
+
+        if (p->desc->exit)
+                p->desc->exit(pm);
+
+        dlclose(p->handle);
+        l_free(p);
+
+        return true;
+}
+
+static void unload_plugins(struct mptcpd_pm *pm)
+{
+        /*
+          Unload plugins in the reverse order in which they were
+          loaded.
+        */
+        if (!l_queue_reverse(_plugin_infos))
+                return;  // Empty queue
+
+        (void) l_queue_foreach_remove(_plugin_infos, unload_plugin, pm);
+        l_queue_destroy(_plugin_infos, NULL);
+        _plugin_infos = NULL;
+}
+
+bool mptcpd_plugin_load(char const *dir,
+                        char const *default_name,
+                        struct mptcpd_pm *pm)
 {
         if (dir == NULL) {
                 l_error("No plugin directory specified.");
@@ -179,8 +413,17 @@ bool mptcpd_plugin_load(char const *dir, char const *default_name)
         if (!check_directory_perms(dir))
                 return false;
 
+        if (_plugin_infos == NULL)
+                _plugin_infos = l_queue_new();
+
         if (_pm_plugins == NULL) {
                 _pm_plugins = l_hashmap_string_new();
+
+                /*
+                  No need to check for NULL since
+                  l_hashmap_string_new() abort()s on memory allocation
+                  failure.
+                */
 
                 if (default_name != NULL) {
                         size_t const len = L_ARRAY_SIZE(_default_name);
@@ -197,26 +440,8 @@ bool mptcpd_plugin_load(char const *dir, char const *default_name)
                                        len);
                 }
 
-                /*
-                  No need to check for NULL since
-                  l_hashmap_string_new() abort()s on memory allocation
-                  failure.
-                */
-
-                char *const pattern = l_strdup_printf("%s/*.so", dir);
-
-                // l_strdup_printf() abort()s on failure.
-
-                // All mptcpd plugins are expected to use this symbol
-                // in their L_PLUGIN_DEFINE() macro call.
-                static char const symbol[] =
-                        L_STRINGIFY(MPTCPD_PLUGIN_DESC);
-
-                l_plugin_load(pattern, symbol, VERSION);
-
-                l_free(pattern);
-
-                if (l_hashmap_isempty(_pm_plugins)) {
+                if (load_plugins(dir, pm) != 0
+                    || l_hashmap_isempty(_pm_plugins)) {
                         l_hashmap_destroy(_pm_plugins, NULL);
                         _pm_plugins = NULL;
 
@@ -246,7 +471,7 @@ bool mptcpd_plugin_load(char const *dir, char const *default_name)
         return !l_hashmap_isempty(_pm_plugins);
 }
 
-void mptcpd_plugin_unload(void)
+void mptcpd_plugin_unload(struct mptcpd_pm *pm)
 {
         /**
          * @note This isn't thread-safe.  We'll need a lock if we ever
@@ -262,7 +487,7 @@ void mptcpd_plugin_unload(void)
         _default_ops = NULL;
         memset(_default_name, 0, sizeof(_default_name));
 
-        l_plugin_unload();
+        unload_plugins(pm);
 }
 
 bool mptcpd_plugin_register_ops(char const *name,
