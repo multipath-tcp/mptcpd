@@ -145,8 +145,10 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .subflow_priority       = plugin_four_subflow_priority,
 };
 
-static int plugin_four_init(void)
+static int plugin_four_init(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         static char const name[] = TEST_PLUGIN;
 
         if (!mptcpd_plugin_register_ops(name, &pm_ops)) {
@@ -159,21 +161,21 @@ static int plugin_four_init(void)
         return 0;
 }
 
-static void plugin_four_exit(void)
+static void plugin_four_exit(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         assert(call_count_is_sane(&call_count));
         assert(call_count_is_equal(&call_count, &test_count_4));
 
         call_count_reset(&call_count);
 }
 
-L_PLUGIN_DEFINE(MPTCPD_PLUGIN_DESC,
-                plugin_four,
-                "test plugin four",
-                VERSION,
-                L_PLUGIN_PRIORITY_HIGH,  // Unfavorable priority.
-                plugin_four_init,
-                plugin_four_exit)
+MPTCPD_PLUGIN_DEFINE(plugin_four,
+                     "test plugin four",
+                     MPTCPD_PLUGIN_PRIORITY_HIGH,  // Unfavorable priority.
+                     plugin_four_init,
+                     plugin_four_exit)
 
 
 /*

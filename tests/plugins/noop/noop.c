@@ -118,8 +118,10 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .subflow_priority       = plugin_noop_subflow_priority
 };
 
-static int plugin_noop_init(void)
+static int plugin_noop_init(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         static char const name[] = TEST_PLUGIN;
 
         if (!mptcpd_plugin_register_ops(name, &pm_ops)) {
@@ -132,17 +134,16 @@ static int plugin_noop_init(void)
         return 0;
 }
 
-static void plugin_noop_exit(void)
+static void plugin_noop_exit(struct mptcpd_pm *pm)
 {
+        (void) pm;
 }
 
-L_PLUGIN_DEFINE(MPTCPD_PLUGIN_DESC,
-                plugin_noop,
-                "test plugin noop",
-                VERSION,
-                L_PLUGIN_PRIORITY_DEFAULT,
-                plugin_noop_init,
-                plugin_noop_exit)
+MPTCPD_PLUGIN_DEFINE(plugin_noop,
+                     "test plugin noop",
+                     MPTCPD_PLUGIN_PRIORITY_DEFAULT,
+                     plugin_noop_init,
+                     plugin_noop_exit)
 
 
 /*

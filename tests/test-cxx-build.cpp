@@ -64,12 +64,14 @@ class test_plugin
 {
 public:
         test_plugin()
+                : pm(NULL)
         {
                 static char const dir[]            = TEST_PLUGIN_DIR;
                 static char const default_plugin[] = TEST_PLUGIN_FOUR;
+                struct mptcpd_pm *const pm = NULL;
 
                 bool const loaded =
-                        mptcpd_plugin_load(dir, default_plugin);
+                        mptcpd_plugin_load(dir, default_plugin, this->pm);
                 assert(loaded);
 
                 call_plugin_ops(&test_count_4,
@@ -81,11 +83,13 @@ public:
                                 test_backup_4);
         }
 
-        ~test_plugin() { mptcpd_plugin_unload(); }
+        ~test_plugin() { mptcpd_plugin_unload(this->pm); }
 
 private:
         test_plugin(test_plugin const &);
         void operator=(test_plugin const &);
+private:
+        struct mptcpd_pm *const pm;
 };
 
 

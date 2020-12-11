@@ -29,6 +29,7 @@ static bool run_plugin_load(mode_t mode)
 {
         static char const dir[]            = TEST_PLUGIN_DIR_SECURITY;
         static char const default_plugin[] = TEST_PLUGIN_FOUR;
+        struct mptcpd_pm *const pm         = NULL;
 
         int const fd = open(dir, O_DIRECTORY);
         assert(fd != -1);
@@ -40,7 +41,7 @@ static bool run_plugin_load(mode_t mode)
         int const mode_ok = fchmod(fd, mode);
         assert(mode_ok == 0);
 
-        bool const loaded = mptcpd_plugin_load(dir, default_plugin);
+        bool const loaded = mptcpd_plugin_load(dir, default_plugin, pm);
 
         if (loaded) {
                 call_plugin_ops(&test_count_4,
@@ -51,7 +52,7 @@ static bool run_plugin_load(mode_t mode)
                                 (struct sockaddr const *) &test_raddr_4,
                                 test_backup_4);
 
-                mptcpd_plugin_unload();
+                mptcpd_plugin_unload(pm);
         }
 
         (void) fchmod(fd, st.st_mode);  // Restore original perms.
@@ -114,7 +115,8 @@ static void test_no_plugins(void const *test_data)
 
         assert(dir != NULL);
 
-        bool const loaded = mptcpd_plugin_load(dir, NULL);
+        struct mptcpd_pm *const pm = NULL;
+        bool const loaded = mptcpd_plugin_load(dir, NULL, pm);
 
         (void) rmdir(dir);
 
@@ -133,8 +135,9 @@ static void test_plugin_dispatch(void const *test_data)
 
         static char const dir[] = TEST_PLUGIN_DIR_PRIORITY;
         static char const *const default_plugin = NULL;
+        struct mptcpd_pm *const pm = NULL;
 
-        bool const loaded = mptcpd_plugin_load(dir, default_plugin);
+        bool const loaded = mptcpd_plugin_load(dir, default_plugin, pm);
         assert(loaded);
 
         // Notice that we call plugin 1 twice.
@@ -186,7 +189,7 @@ static void test_plugin_dispatch(void const *test_data)
                 NULL);
 
         // Test assertions will be triggered during plugin unload.
-        mptcpd_plugin_unload();
+        mptcpd_plugin_unload(pm);
 }
 
 /**
@@ -202,8 +205,9 @@ static void test_null_plugin_ops(void const *test_data)
 
         static char const        dir[]          = TEST_PLUGIN_DIR_NOOP;
         static char const *const default_plugin = NULL;
+        struct mptcpd_pm *const pm = NULL;
 
-        bool const loaded = mptcpd_plugin_load(dir, default_plugin);
+        bool const loaded = mptcpd_plugin_load(dir, default_plugin, pm);
         assert(loaded);
 
         char const name[] = "null ops";
@@ -217,7 +221,6 @@ static void test_null_plugin_ops(void const *test_data)
         static mptcpd_aid_t const id = 0;
         static struct sockaddr const *const laddr = NULL;
         static struct sockaddr const *const raddr = NULL;
-        static struct mptcpd_pm *const pm = NULL;
         static bool backup = false;
 
         // No dispatch should occur in the following calls.
@@ -230,7 +233,7 @@ static void test_null_plugin_ops(void const *test_data)
         mptcpd_plugin_subflow_closed(token, laddr, raddr, backup, pm);
         mptcpd_plugin_subflow_priority(token, laddr, raddr, backup, pm);
 
-        mptcpd_plugin_unload();
+        mptcpd_plugin_unload(pm);
 }
 
 int main(int argc, char *argv[])
