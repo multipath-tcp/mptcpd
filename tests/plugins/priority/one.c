@@ -163,8 +163,10 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .subflow_priority       = plugin_one_subflow_priority
 };
 
-static int plugin_one_init(void)
+static int plugin_one_init(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         static char const name[] = TEST_PLUGIN;
 
         if (!mptcpd_plugin_register_ops(name, &pm_ops)) {
@@ -177,8 +179,10 @@ static int plugin_one_init(void)
         return 0;
 }
 
-static void plugin_one_exit(void)
+static void plugin_one_exit(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         /*
           This plugin should be called twice, once with the plugin name
           explicitly specified, and once as the default plugin with no
@@ -202,13 +206,11 @@ static void plugin_one_exit(void)
         call_count_reset(&call_count);
 }
 
-L_PLUGIN_DEFINE(MPTCPD_PLUGIN_DESC,
-                plugin_one,
-                "test plugin one",
-                VERSION,
-                L_PLUGIN_PRIORITY_LOW,  // favorable priority
-                plugin_one_init,
-                plugin_one_exit)
+MPTCPD_PLUGIN_DEFINE(plugin_one,
+                     "test plugin one",
+                     MPTCPD_PLUGIN_PRIORITY_LOW,  // favorable priority
+                     plugin_one_init,
+                     plugin_one_exit)
 
 
 /*
