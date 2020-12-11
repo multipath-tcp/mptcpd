@@ -111,9 +111,9 @@ AC_SUBST([mptcpd_logger],[$enable_logging])
 # Allow the user to set the default path manager plugin at 'configure-time'.
 AC_ARG_WITH([path-manager],
      [AS_HELP_STRING([--with-path-manager[=PLUGIN]],
-                     [Set default path manager plugin to PLUGIN (sspi, reject_join) @<:@default=sspi@:>@])],
+                     [Set default path manager plugin to PLUGIN (addr_adv, sspi) @<:@default=addr_adv@:>@])],
      [AS_CASE([$withval],
-              [sspi | reject_join],
+              [addr_adv | sspi],
               [with_path_manager=$withval],
               [AC_MSG_ERROR([invalid path manager plugin: $withval])])],
      [with_path_manager=sspi])
