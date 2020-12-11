@@ -206,6 +206,12 @@ AC_SEARCH_LIBS(
     [],
     [AC_MSG_ERROR([library with argp_parse() could not be found])])
 
+AC_SEARCH_LIBS(
+    [dlopen],
+    [dl],
+    [],
+    [AC_MSG_ERROR([library with dlopen() could not be found])])
+
 # ---------------------------------------------------------------
 # Enable additional C compiler warnings.  We do this after all
 # Autoconf tests have been run since not all autoconf macros are

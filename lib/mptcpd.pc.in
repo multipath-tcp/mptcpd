@@ -20,3 +20,4 @@ Version: @VERSION@
 Requires.private: ell >= @ELL_VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -lmptcpd
+Libs.private: @LIBS@
