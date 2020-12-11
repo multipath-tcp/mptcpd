@@ -33,16 +33,21 @@ struct mptcpd_interface;
  * @param[in] dir          Directory from which plugins will be loaded.
  * @param[in] default_name Name of plugin to be considered the
  *                         default.
+ * @param[in] pm           Opaque pointer to mptcpd path manager
+ *                         object.
  *
  * @return @c true on successful load, @c false otherwise.
  */
 MPTCPD_API bool mptcpd_plugin_load(char const *dir,
-                                   char const *default_name);
+                                   char const *default_name,
+                                   struct mptcpd_pm *pm);
 
 /**
  * @brief Unload mptcpd plugins.
+ *
+ * @param[in] pm Opaque pointer to mptcpd path manager object.
  */
-MPTCPD_API void mptcpd_plugin_unload(void);
+MPTCPD_API void mptcpd_plugin_unload(struct mptcpd_pm *pm);
 
 /**
  * @brief Notify plugin of new MPTCP connection pending completion.

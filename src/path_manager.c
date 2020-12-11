@@ -1103,7 +1103,8 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
          *      @c mptcpd_plugin_unload() is called.
          */
         if (!mptcpd_plugin_load(config->plugin_dir,
-                                config->default_plugin)) {
+                                config->default_plugin,
+                                pm)) {
                 l_error("Unable to load path manager plugins.");
 
                 return NULL;
@@ -1122,7 +1123,7 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
          *      exit, or at least after the last @c mptcpd_pm object
          *      has been destroyed.
          */
-        mptcpd_plugin_unload();
+        mptcpd_plugin_unload(pm);
 
         mptcpd_nm_destroy(pm->nm);
         l_timeout_remove(pm->timeout);
