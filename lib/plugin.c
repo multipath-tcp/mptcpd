@@ -433,6 +433,7 @@ bool mptcpd_plugin_load(char const *dir,
                     || l_hashmap_isempty(_pm_plugins)) {
                         l_hashmap_destroy(_pm_plugins, NULL);
                         _pm_plugins = NULL;
+                        unload_plugins(pm);
 
                         return false;  // Plugin load and registration
                                        // failed.
