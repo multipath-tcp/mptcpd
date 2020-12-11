@@ -13,7 +13,6 @@
 
 #include <netinet/in.h>
 
-#include <ell/plugin.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
 #include <ell/queue.h>
