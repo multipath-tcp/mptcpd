@@ -98,20 +98,18 @@ static struct mptcpd_plugin_ops const *_default_ops;
  * and group.  Verify that the "other" write mode bit, @c S_IWOTH,
  * isn't set.
  *
- * @param[in] dir Name of directory to check for expected
+ * @param[in] dir Name of plugin directory to check for expected
  *                permissions.
- *
- * @note There is a TOCTOU race condition between this directory
- *       permissions check and subsequent calls to functions that
- *       access the given directory @a dir, such as the call to
- *       @c load_plugins().
+ * @param[in] fd  File descriptor of opened plugin directory to check
+ *                for expected permissions.
  */
-static bool check_directory_perms(char const *dir)
+static bool check_directory_perms(char const *dir,
+                                  int fd)
 {
         struct stat sb;
 
         bool const perms_ok =
-                stat(dir, &sb) == 0
+                fstat(fd, &sb) == 0
                 && S_ISDIR(sb.st_mode)
                 && (sb.st_mode & S_IWOTH) == 0;
 
@@ -269,7 +267,7 @@ static void load_plugin(char const *filename)
 
         /**
          * @note We assume that plugin names stored in the plugin
-         *       descriptor will be unique .  Path management events
+         *       descriptor will be unique.  Path management events
          *       could potentially be dispatched to the wrong plugin
          *       with the same name, otherwise.
          */
@@ -325,6 +323,12 @@ static int load_plugins(char const *dir, struct mptcpd_pm *pm)
                 return -1;
         }
 
+        // Plugin directory permissions sanity check.
+        if (!check_directory_perms(dir, fd)) {
+                (void) close(fd);
+                return -1;
+        }
+
         DIR *const ds = fdopendir(fd);
 
         errno = 0;
@@ -355,7 +359,7 @@ static int load_plugins(char const *dir, struct mptcpd_pm *pm)
         if (error != 0)
                 report_error(error, "Error during plugin directory read");
 
-        // Initialize all load plugins.
+        // Initialize all loaded plugins.
         l_queue_foreach(_plugin_infos, init_plugin, pm);
 
         return error;  // 0 on success
@@ -397,10 +401,6 @@ bool mptcpd_plugin_load(char const *dir,
                 l_error("No plugin directory specified.");
                 return false;
         }
-
-        // Plugin directory permissions sanity check.
-        if (!check_directory_perms(dir))
-                return false;
 
         if (_plugin_infos == NULL)
                 _plugin_infos = l_queue_new();
