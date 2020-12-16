@@ -28,6 +28,7 @@
 #include <mptcpd/path_manager_private.h>
 #include <mptcpd/plugin_private.h>
 #include <mptcpd/network_monitor.h>
+#include <mptcpd/id_manager.h>
 #include <mptcpd/mptcp_private.h>
 #include <mptcpd/sockaddr_private.h>
 
@@ -1119,6 +1120,15 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
+        // Listen for network device changes.
+        pm->idm = mptcpd_idm_create();
+
+        if (pm->idm == NULL) {
+                mptcpd_pm_destroy(pm);
+                l_error("Unable to create ID manager.");
+                return NULL;
+        }
+
         /**
          * @bug Mptcpd plugins should only be loaded once at process
          *      start.  The @c mptcpd_plugin_load() function only
@@ -1147,6 +1157,7 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
          */
         mptcpd_plugin_unload();
 
+        mptcpd_idm_destroy(pm->idm);
         mptcpd_nm_destroy(pm->nm);
         l_timeout_remove(pm->timeout);
         l_genl_family_free(pm->family);
