@@ -229,6 +229,16 @@ MPTCPD_API int mptcpd_pm_remove_subflow(
 MPTCPD_API struct mptcpd_nm const *
 mptcpd_pm_get_nm(struct mptcpd_pm const *pm);
 
+/**
+ * @brief Get pointer to the underlying MPTCP address ID manager.
+ *
+ * @param[in] pm Mptcpd path manager.
+ *
+ * @return Mptcpd MPTCP address ID manager.
+ */
+MPTCPD_API struct mptcpd_idm *
+mptcpd_pm_get_idm(struct mptcpd_pm const *pm);
+
 #ifdef __cplusplus
 }
 #endif
