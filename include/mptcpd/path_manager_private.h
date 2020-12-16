@@ -27,6 +27,7 @@ struct mptcpd_pm_cmd_ops;
 struct mptcpd_addr_info;
 struct mptcpd_limit;
 struct mptcpd_nm;
+struct mptcpd_idm;
 
 /**
  * @struct mptcpd_pm path_manager_private.h <mptcpd/path_manager_private.h>
@@ -76,6 +77,14 @@ struct mptcpd_pm
          * detect changes to network devices.
          */
         struct mptcpd_nm *nm;
+
+        /**
+         * @brief MPTCP address ID manager.
+         *
+         * Manager that maps IP addresses to MPTCP address IDs, and
+         * generated IDs as needed..
+         */
+        struct mptcpd_idm *idm;
 };
 
 /**
