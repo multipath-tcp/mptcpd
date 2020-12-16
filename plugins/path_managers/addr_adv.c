@@ -21,13 +21,12 @@
 #include <mptcpd/plugin.h>
 
 
-static struct mptcpd_idm *_idm;
-
 static void addr_adv_new_local_address(struct mptcpd_interface const *i,
                                        struct sockaddr const *sa,
                                        struct mptcpd_pm *pm)
 {
-        mptcpd_aid_t const id = mptcpd_idm_get_id(_idm, sa);
+        struct mptcpd_idm *const idm = mptcpd_pm_get_idm(pm);
+        mptcpd_aid_t const id = mptcpd_idm_get_id(idm, sa);
 
         if (id == 0) {
                 l_error("Unable to map addr to ID.");
@@ -48,7 +47,8 @@ static void addr_adv_delete_local_address(
 {
         (void) i;
 
-        mptcpd_aid_t const id = mptcpd_idm_remove_id(_idm, sa);
+        struct mptcpd_idm *const idm = mptcpd_pm_get_idm(pm);
+        mptcpd_aid_t const id = mptcpd_idm_remove_id(idm, sa);
 
         if (id == 0) {
                 // Not necessarily an error.
@@ -78,8 +78,6 @@ static int addr_adv_init(void)
                 return -1;
         }
 
-        _idm = mptcpd_idm_create();
-
         l_info("MPTCP address advertiser path manager initialized.");
 
         return 0;
@@ -87,8 +85,6 @@ static int addr_adv_init(void)
 
 static void addr_adv_exit(void)
 {
-        mptcpd_idm_destroy(_idm);
-
         l_info("MPTCP address advertiser path manager exited.");
 }
 
