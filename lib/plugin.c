@@ -225,27 +225,6 @@ static void init_plugin(void *data, void *user_data)
                        p->desc->name);
 }
 
-static bool file_ends_in_so(char const *filename)
-{
-        static char const so[] = ".so";
-
-        /*
-          strlen(".so") == 3, which is the expected position of the
-          period relative to the end of the plugin filename.
-        */
-        static size_t const ppos = L_ARRAY_SIZE(so) - 1;
-
-        size_t const len = strlen(filename);
-
-        /*
-          The last three characters in the filename should be the
-          ".so" extension.
-        */
-        char const *const ext = filename + len - ppos;
-
-        return strcmp(ext, so) == 0;
-}
-
 static void load_plugin(char const *filename)
 {
         void *const handle = dlopen(filename, RTLD_NOW);
@@ -336,7 +315,7 @@ static int load_plugins(char const *dir, struct mptcpd_pm *pm)
              d != NULL;
              d = readdir(ds)) {
                 if ((d->d_type == DT_REG || d->d_type == DT_UNKNOWN)
-                    && file_ends_in_so(d->d_name)) {
+                    && l_str_has_suffix(d->d_name, ".so")) {
                         char *const path = l_strdup_printf("%s/%s",
                                                            dir,
                                                            d->d_name);
