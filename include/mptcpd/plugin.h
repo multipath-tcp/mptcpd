@@ -11,7 +11,6 @@
 #define MPTCPD_PLUGIN_H
 
 #include <stdbool.h>
-#include <limits.h>
 
 #include <mptcpd/export.h>
 #include <mptcpd/types.h>
@@ -65,14 +64,14 @@ struct mptcpd_interface;
                 exit                                                    \
         };
 
-/// Lowest priority value.
-#define MPTCPD_PLUGIN_PRIORITY_LOW     INT_MIN
+/// Lowest priority value, i.e. highest priority
+#define MPTCPD_PLUGIN_PRIORITY_LOW     -20
 
-/// Default priority.
-#define MPTCPD_PLUGIN_PRIORITY_DEFAULT 0
+/// Default priority
+#define MPTCPD_PLUGIN_PRIORITY_DEFAULT   0
 
-/// Higher priority value.
-#define MPTCPD_PLUGIN_PRIORITY_HIGH    INT_MAX
+/// Higher priority value, i.e. lowest priority
+#define MPTCPD_PLUGIN_PRIORITY_HIGH     19
 
 /**
  * @struct mptcpd_plugin_desc
