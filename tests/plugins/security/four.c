@@ -172,7 +172,7 @@ static void plugin_four_exit(struct mptcpd_pm *pm)
 
 MPTCPD_PLUGIN_DEFINE(plugin_four,
                      "test plugin four",
-                     MPTCPD_PLUGIN_PRIORITY_HIGH,  // Unfavorable priority.
+                     MPTCPD_PLUGIN_PRIORITY_LOW,  // Unfavorable priority.
                      plugin_four_init,
                      plugin_four_exit)
 
