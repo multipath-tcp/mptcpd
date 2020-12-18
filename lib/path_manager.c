@@ -256,6 +256,11 @@ struct mptcpd_nm const * mptcpd_pm_get_nm(struct mptcpd_pm const *pm)
         return pm->nm;
 }
 
+struct mptcpd_idm * mptcpd_pm_get_idm(struct mptcpd_pm const *pm)
+{
+        return pm->idm;
+}
+
 
 /*
   Local Variables:

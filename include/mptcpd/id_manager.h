@@ -20,7 +20,12 @@ extern "C" {
 struct mptcpd_idm;
 struct sockaddr;
 
-/// Create MPTCP address ID manager.
+/**
+ * @brief Create MPTCP address ID manager.
+ *
+ * @return Pointer to MPTCP address ID manager on success.  @c NULL on
+ *         failure.
+ */
 MPTCPD_API struct mptcpd_idm *mptcpd_idm_create(void);
 
 /**
