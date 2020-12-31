@@ -207,7 +207,7 @@ static void plugin_one_exit(struct mptcpd_pm *pm)
 
 MPTCPD_PLUGIN_DEFINE(plugin_one,
                      "test plugin one",
-                     MPTCPD_PLUGIN_PRIORITY_LOW,  // favorable priority
+                     MPTCPD_PLUGIN_PRIORITY_HIGH,  // favorable priority
                      plugin_one_init,
                      plugin_one_exit)
 
