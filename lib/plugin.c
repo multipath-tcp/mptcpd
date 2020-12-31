@@ -185,9 +185,8 @@ static struct l_queue *_plugin_infos;
  * @param[in] b         Existing plugin information.
  * @param[in] user_data User data (unused).
  *
- * @return Value greater than or equal to 0 if the new plugin should
- *         be inserted after the existing plugin in the list, and a
- *         negative value otherwise.
+ * @return -1 if the plugin should inserted before the existing
+ *         plugin, or 1 otherwise.
  *
  * @see @c l_queue_insert()
  */
@@ -202,10 +201,10 @@ static int compare_plugin_priority(void const *a,
 
         /*
           Cause "new" plugin to be inserted into the plugin list
-          before the "existing" plugin if its priority is higher than
-          the existing plugin priority.
+          before the "existing" plugin if its priority is higher
+          (numerically less) than the existing plugin priority.
         */
-        return new->desc->priority - existing->desc->priority;
+        return new->desc->priority < existing->desc->priority ? -1 : 1;
 }
 
 static void report_error(int error, char const *msg)
