@@ -64,14 +64,14 @@ struct mptcpd_interface;
                 exit                                                    \
         };
 
-/// Lowest priority value, i.e. highest priority
-#define MPTCPD_PLUGIN_PRIORITY_LOW     -20
+/// Low plugin priority.
+#define MPTCPD_PLUGIN_PRIORITY_LOW     19
 
-/// Default priority
-#define MPTCPD_PLUGIN_PRIORITY_DEFAULT   0
+/// Default plugin priority.
+#define MPTCPD_PLUGIN_PRIORITY_DEFAULT 0
 
-/// Higher priority value, i.e. lowest priority
-#define MPTCPD_PLUGIN_PRIORITY_HIGH     19
+/// High plugin priority.
+#define MPTCPD_PLUGIN_PRIORITY_HIGH    -20
 
 /**
  * @struct mptcpd_plugin_desc
