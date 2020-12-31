@@ -311,6 +311,13 @@ static int load_plugins(char const *dir, struct mptcpd_pm *pm)
 
         DIR *const ds = fdopendir(fd);
 
+        if (unlikely(ds == NULL)) {
+                report_error(errno,
+                             "fdopendir() on plugin directory failed");
+
+                return -1;
+        }
+
         errno = 0;
         for (struct dirent const *d = readdir(ds);
              d != NULL;
