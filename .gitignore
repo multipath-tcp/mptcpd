@@ -47,6 +47,7 @@ tests/test-path-manager
 tests/test-commands
 tests/test-configuration
 tests/test-cxx-build
+tests/test-id-manager
 tests/*.log
 tests/*.trs
 tests/test-suite.log
