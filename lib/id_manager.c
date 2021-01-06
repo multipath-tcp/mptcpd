@@ -4,7 +4,7 @@
  *
  * @brief Map of network address to MPTCP address ID.
  *
- * Copyright (c) 2020, Intel Corporation
+ * Copyright (c) 2020, 2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -20,6 +20,7 @@
 #include <ell/uintset.h>
 #include <ell/util.h>
 
+#include <mptcpd/id_manager_private.h>
 #include <mptcpd/id_manager.h>
 
 #define MPTCPD_INVALID_ID 0
@@ -184,6 +185,29 @@ void mptcpd_idm_destroy(struct mptcpd_idm *idm)
         l_free(idm);
 }
 
+bool mptcpd_idm_map_id(struct mptcpd_idm *idm,
+                       struct sockaddr const *sa,
+                       mptcpd_aid_t id)
+{
+        if (idm == NULL || sa == NULL)
+                return false;
+
+        if (sa->sa_family != AF_INET && sa->sa_family != AF_INET6)
+                return false;
+
+        if (id == MPTCPD_INVALID_ID
+            || !l_uintset_put(idm->ids, id))
+                return false;
+
+        if (!l_hashmap_replace(idm->map, sa, L_UINT_TO_PTR(id), NULL)) {
+                (void) l_uintset_take(idm->ids, id);
+
+                return false;
+        }
+
+        return true;
+}
+
 mptcpd_aid_t mptcpd_idm_get_id(struct mptcpd_idm *idm,
                                struct sockaddr const *sa)
 {
@@ -199,14 +223,11 @@ mptcpd_aid_t mptcpd_idm_get_id(struct mptcpd_idm *idm,
         // Create a new addr/ID mapping.
         id = l_uintset_find_unused_min(idm->ids);
 
-        if (id == MPTCPD_MAX_ID + 1 || !l_uintset_put(idm->ids, id))
-                return MPTCPD_INVALID_ID;
+        if (id == MPTCPD_INVALID_ID || id == MPTCPD_MAX_ID + 1)
+                return false;
 
-        if (!l_hashmap_insert(idm->map, sa, L_UINT_TO_PTR(id))) {
-                (void) l_uintset_take(idm->ids, id);
-
+        if (!mptcpd_idm_map_id(idm, sa, id))
                 return MPTCPD_INVALID_ID;
-        }
 
         return (mptcpd_aid_t) id;
 }
