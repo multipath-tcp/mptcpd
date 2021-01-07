@@ -224,7 +224,7 @@ mptcpd_aid_t mptcpd_idm_get_id(struct mptcpd_idm *idm,
         id = l_uintset_find_unused_min(idm->ids);
 
         if (id == MPTCPD_INVALID_ID || id == MPTCPD_MAX_ID + 1)
-                return false;
+                return MPTCPD_INVALID_ID;
 
         if (!mptcpd_idm_map_id(idm, sa, id))
                 return MPTCPD_INVALID_ID;
