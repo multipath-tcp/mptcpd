@@ -4,7 +4,7 @@
  *
  * @brief mptcpd ID manager test.
  *
- * Copyright (c) 2020 Intel Corporation
+ * Copyright (c) 2020-2021, Intel Corporation
  */
 
 #undef NDEBUG
@@ -14,6 +14,7 @@
 #include <ell/log.h>
 #include <ell/test.h>
 
+#include <mptcpd/id_manager_private.h>
 #include <mptcpd/id_manager.h>
 
 #include "test-plugin.h"  // For test sockaddrs
@@ -24,12 +25,32 @@ static struct mptcpd_idm *_idm;
 /// Obtained MPTCP address IDs
 static mptcpd_aid_t _id[4];
 
+/// Expected MPTCP address ID after ID update.
+static mptcpd_aid_t const _updated_id = 222;
 
 static void test_create(void const *test_data)
 {
         (void) test_data;
 
         _idm = mptcpd_idm_create();
+}
+
+static void test_map_id(void const *test_data)
+{
+        (void) test_data;
+
+        mptcpd_aid_t const id = 245;
+
+        assert(id != _updated_id);  // sanity check
+
+        assert(mptcpd_idm_map_id(_idm,
+                                 (struct sockaddr *) &test_laddr_4,
+                                 id));
+
+        // Update previously set ID for the same IP address.
+        assert(mptcpd_idm_map_id(_idm,
+                                 (struct sockaddr *) &test_laddr_4,
+                                 _updated_id));
 }
 
 static void test_get_id(void const *test_data)
@@ -51,6 +72,12 @@ static void test_get_id(void const *test_data)
         _id[3] = mptcpd_idm_get_id(_idm,
                                    (struct sockaddr *) &test_raddr_1);
         assert(_id[3] != 0 && _id[3] != _id[0] && _id[3] != _id[1]);
+
+        // ID that was updated in test_map_id().
+        mptcpd_aid_t const id =
+                mptcpd_idm_get_id(_idm,
+                                  (struct sockaddr *) &test_laddr_4);
+        assert(id == _updated_id);
 }
 
 static void test_remove_id(void const *test_data)
@@ -83,6 +110,7 @@ int main(int argc, char *argv[])
         l_test_init(&argc, &argv);
 
         l_test_add("create ID manager",  test_create,    NULL);
+        l_test_add("map ID",             test_map_id,    NULL);
         l_test_add("get ID",             test_get_id,    NULL);
         l_test_add("remove ID",          test_remove_id, NULL);
         l_test_add("destroy ID manager", test_destroy,   NULL);
