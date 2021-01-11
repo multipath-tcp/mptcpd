@@ -978,9 +978,8 @@ static void complete_pm_init(struct mptcpd_pm *pm)
         if (pm->cmd_ops->dump_addrs != NULL
             && pm->cmd_ops->dump_addrs(pm,
                                        dump_addrs_callback,
-                                       pm->idm) != 0) {
-
-        }
+                                       pm->idm) != 0)
+                l_error("Unable to synchronize ID manager with kernel.");
 
         /**
          * @todo Register a callback once the kernel MPTCP path
