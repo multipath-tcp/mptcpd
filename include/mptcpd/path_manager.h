@@ -105,14 +105,15 @@ MPTCPD_API int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
  * @brief Get list (array) of MPTCP network addresses.
  *
  * @param[in] pm       The mptcpd path manager object.
- * @param[in] callback Function to be called when a dump of network
- *                     addresses has been retrieved.
+ * @param[in] callback Function to be called when a network address
+ *                     has been retrieved.  This function will be
+ *                     called once per dumped network address.
  * @param[in] data     Data to be passed to the @a callback function.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
-                                    mptcpd_pm_dump_addrs_cb callback,
+                                    mptcpd_pm_get_addr_cb callback,
                                     void *data);
 
 /**
