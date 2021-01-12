@@ -111,12 +111,12 @@ AC_SUBST([mptcpd_logger],[$enable_logging])
 # Allow the user to set the default path manager plugin at 'configure-time'.
 AC_ARG_WITH([path-manager],
      [AS_HELP_STRING([--with-path-manager[=PLUGIN]],
-                     [Set default path manager plugin to PLUGIN (sspi, reject_join) @<:@default=sspi@:>@])],
+                     [Set default path manager plugin to PLUGIN (addr_adv, sspi) @<:@default=addr_adv@:>@])],
      [AS_CASE([$withval],
-              [sspi | reject_join],
+              [addr_adv | sspi],
               [with_path_manager=$withval],
               [AC_MSG_ERROR([invalid path manager plugin: $withval])])],
-     [with_path_manager=sspi])
+     [with_path_manager=addr_adv])
 
 AC_SUBST([mptcpd_default_pm],[$with_path_manager])
 
@@ -178,10 +178,9 @@ AM_CONDITIONAL([BUILDING_DLL], [test "x$enable_shared" = xyes])
 # ---------------------------------------------------------------
 # Checks for libraries.
 # ---------------------------------------------------------------
-ELL_MIN_VERSION=0.27  dnl Minimum required version of ELL.
-ELL_MAX_VERSION=0.33  dnl Maximum required version of ELL.
+ELL_VERSION=0.27  dnl Minimum required version of ELL.
 PKG_CHECK_MODULES([ELL],
-                  [ell >= $ELL_MIN_VERSION ell <= $ELL_MAX_VERSION])
+                  [ell >= $ELL_VERSION])
 AC_SUBST([ELL_VERSION])
 
 # ---------------------------------------------------------------
@@ -206,6 +205,12 @@ AC_SEARCH_LIBS(
     [argp],
     [],
     [AC_MSG_ERROR([library with argp_parse() could not be found])])
+
+AC_SEARCH_LIBS(
+    [dlopen],
+    [dl],
+    [],
+    [AC_MSG_ERROR([library with dlopen() could not be found])])
 
 # ---------------------------------------------------------------
 # Enable additional C compiler warnings.  We do this after all

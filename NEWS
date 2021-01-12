@@ -1,3 +1,14 @@
+- Mptcpd now supports versions of the Embedded Linux Library (ELL)
+  greater than 0.33.
+
+- Plugins should use the new MPTCPD_PLUGIN_DEFINE() preprocessor macro
+  instead of L_PLUGIN_DEFINE().
+
+- A pointer to the mptcpd path manager object, i.e. struct mptcpd *pm,
+  is now passed to the plugin init and exit functions.  This allows
+  plugins to potentially perform mptcpd path manager related
+  operations during initialization and finalization.
+
 - Support for the MPTCP netlink path manager in the upstream Linux
   kernel is now available.  A new set of path management command
   functions corresponding to those available in the kernel netlink

@@ -4,14 +4,13 @@
  *
  * @brief MPTCP test plugin.
  *
- * Copyright (c) 2019, Intel Corporation
+ * Copyright (c) 2019-2020, Intel Corporation
  */
 
 #undef NDEBUG
 
 #include <assert.h>
 
-#include <ell/plugin.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
 
@@ -165,8 +164,10 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .subflow_priority       = plugin_two_subflow_priority
 };
 
-static int plugin_two_init(void)
+static int plugin_two_init(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         static char const name[] = TEST_PLUGIN;
 
         if (!mptcpd_plugin_register_ops(name, &pm_ops)) {
@@ -179,21 +180,21 @@ static int plugin_two_init(void)
         return 0;
 }
 
-static void plugin_two_exit(void)
+static void plugin_two_exit(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         assert(call_count_is_sane(&call_count));
         assert(call_count_is_equal(&call_count, &test_count_2));
 
         call_count_reset(&call_count);
 }
 
-L_PLUGIN_DEFINE(MPTCPD_PLUGIN_DESC,
-                plugin_two,
-                "test plugin two",
-                VERSION,
-                L_PLUGIN_PRIORITY_HIGH,  // unfavorable priority
-                plugin_two_init,
-                plugin_two_exit)
+MPTCPD_PLUGIN_DEFINE(plugin_two,
+                     "test plugin two",
+                     MPTCPD_PLUGIN_PRIORITY_LOW,  // unfavorable priority
+                     plugin_two_init,
+                     plugin_two_exit)
 
 
 /*

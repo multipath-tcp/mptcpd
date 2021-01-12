@@ -11,7 +11,6 @@
 # include <mptcpd/config-private.h>
 #endif
 
-#include <ell/plugin.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by ELL log macros.
 #include <ell/log.h>
 
@@ -67,8 +66,10 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .delete_local_address = addr_adv_delete_local_address
 };
 
-static int addr_adv_init(void)
+static int addr_adv_init(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         static char const name[] = "addr_adv";
 
         if (!mptcpd_plugin_register_ops(name, &pm_ops)) {
@@ -83,18 +84,16 @@ static int addr_adv_init(void)
         return 0;
 }
 
-static void addr_adv_exit(void)
+static void addr_adv_exit(struct mptcpd_pm *pm)
 {
         l_info("MPTCP address advertiser path manager exited.");
 }
 
-L_PLUGIN_DEFINE(MPTCPD_PLUGIN_DESC,
-                addr_adv,
-                "Address advertiser path manager",
-                VERSION,
-                L_PLUGIN_PRIORITY_DEFAULT,
-                addr_adv_init,
-                addr_adv_exit)
+MPTCPD_PLUGIN_DEFINE(addr_adv,
+                     "Address advertiser path manager",
+                     MPTCPD_PLUGIN_PRIORITY_DEFAULT,
+                     addr_adv_init,
+                     addr_adv_exit)
 
 
 /*
