@@ -86,6 +86,8 @@ static int addr_adv_init(struct mptcpd_pm *pm)
 
 static void addr_adv_exit(struct mptcpd_pm *pm)
 {
+        (void) pm;
+
         l_info("MPTCP address advertiser path manager exited.");
 }
 
