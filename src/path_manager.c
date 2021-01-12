@@ -1041,6 +1041,19 @@ static void family_appeared(struct l_genl_family_info const *info,
                 complete_mptcp_org_kernel_pm_init(pm);
 
         complete_pm_init(pm);
+        /**
+         * @bug Mptcpd plugins should only be loaded once at process
+         *      start.  The @c mptcpd_plugin_load() function only
+         *      loads the functions once, and only reloads after
+         *      @c mptcpd_plugin_unload() is called.
+         */
+        if (!mptcpd_plugin_load(config->plugin_dir,
+                                config->default_plugin,
+                                pm)) {
+                l_error("Unable to load path manager plugins.");
+
+                return NULL;
+        }
 }
 
 /**
@@ -1204,20 +1217,6 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         if (pm->idm == NULL) {
                 mptcpd_pm_destroy(pm);
                 l_error("Unable to create ID manager.");
-                return NULL;
-        }
-
-        /**
-         * @bug Mptcpd plugins should only be loaded once at process
-         *      start.  The @c mptcpd_plugin_load() function only
-         *      loads the functions once, and only reloads after
-         *      @c mptcpd_plugin_unload() is called.
-         */
-        if (!mptcpd_plugin_load(config->plugin_dir,
-                                config->default_plugin,
-                                pm)) {
-                l_error("Unable to load path manager plugins.");
-
                 return NULL;
         }
 
