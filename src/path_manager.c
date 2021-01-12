@@ -991,6 +991,21 @@ static void complete_pm_init(struct mptcpd_pm *pm)
 }
 
 /**
+ * @struct family_cb_data
+ *
+ * User data passed to the @c family_appeared() and
+ * @c family_vanished() callback functions.
+ */
+struct family_cb_data
+{
+        /// Mptcpd configuration information.
+        struct mptcpd_config const *config;
+
+        /// Mptcpd path manager information.
+        struct mptcpd_pm *pm;
+};
+
+/**
  * @brief Handle MPTCP generic netlink family appearing on us.
  *
  * This function performs operations that must occur after the MPTCP
@@ -999,8 +1014,9 @@ static void complete_pm_init(struct mptcpd_pm *pm)
  * groups exposed by the generic netlink family, etc.
  *
  * @param[in]     info      Generic netlink family information.
- * @param[in,out] user_data Pointer to @c mptcp_pm object to which the
- *                          @c l_genl_family watch belongs.
+ * @param[in,out] user_data Pointer to @c family_cb_data object
+ *                          containing mptcpd path manager
+ *                          information.
  */
 static void family_appeared(struct l_genl_family_info const *info,
                             void *user_data)
@@ -1022,7 +1038,10 @@ static void family_appeared(struct l_genl_family_info const *info,
 
         l_debug("\"%s\" generic netlink family appeared", name);
 
-        struct mptcpd_pm *const pm = user_data;
+        struct family_cb_data      *const data   = user_data;
+        struct mptcpd_config const *const config = data->config;
+        struct mptcpd_pm           *const pm     = data->pm;
+
         /*
           This function could be called in either of two cases, (1)
           handling the appearance of the MPTCP generic netlink family
@@ -1051,8 +1070,7 @@ static void family_appeared(struct l_genl_family_info const *info,
                                 config->default_plugin,
                                 pm)) {
                 l_error("Unable to load path manager plugins.");
-
-                return NULL;
+                exit(EXIT_FAILURE);
         }
 }
 
@@ -1060,12 +1078,14 @@ static void family_appeared(struct l_genl_family_info const *info,
  * @brief Handle MPTCP generic netlink family disappearing on us.
  *
  * @param[in]     name      Generic netlink family name.
- * @param[in,out] user_data Pointer to @c mptcp_pm object to which the
- *                          @c l_genl_family watch belongs.
+ * @param[in,out] user_data Pointer to @c family_cb_data object
+ *                          containing mptcpd path manager
+ *                          information.
  */
 static void family_vanished(char const *name, void *user_data)
 {
-        struct mptcpd_pm *const pm = user_data;
+        struct family_cb_data *const data = user_data;
+        struct mptcpd_pm      *const pm   = data->pm;
 
         l_debug("%s generic netlink family vanished", name);
 
@@ -1167,17 +1187,21 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
+        struct family_cb_data *const data = l_malloc(sizeof(*data));
+        data->config = config;
+        data->pm     = pm;
+
         if (l_genl_add_family_watch(pm->genl,
                                     name,
                                     family_appeared,
                                     family_vanished,
-                                    pm,
-                                    NULL) == 0
+                                    data,
+                                    l_free) == 0
             || !l_genl_request_family(pm->genl,
                                       name,
                                       family_appeared,
-                                      pm,
-                                      NULL)) {
+                                      data,
+                                      l_free)) {
                 mptcpd_pm_destroy(pm);
                 l_error("Unable to watch or request \"%s\" "
                         "generic netlink family.",
