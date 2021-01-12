@@ -1070,6 +1070,10 @@ static void family_appeared(struct l_genl_family_info const *info,
                                 config->default_plugin,
                                 pm)) {
                 l_error("Unable to load path manager plugins.");
+
+                l_free(data);
+                mptcpd_pm_destroy(pm);
+
                 exit(EXIT_FAILURE);
         }
 }
