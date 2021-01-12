@@ -176,7 +176,7 @@ struct mptcpd_pm_cmd_ops
          *         otherwise.
          */
         int (*dump_addrs)(struct mptcpd_pm *pm,
-                          mptcpd_pm_dump_addrs_cb callback,
+                          mptcpd_pm_get_addr_cb callback,
                           void *data);
 
         /**
