@@ -967,8 +967,26 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
                 l_error("ID sync failed: %u | %s", info->id, addrstr);
 }
 
-static void complete_pm_init(struct mptcpd_pm *pm)
+/**
+ * @struct family_cb_data
+ *
+ * User data passed to the @c family_appeared() and
+ * @c family_vanished() callback functions.
+ */
+struct family_cb_data
 {
+        /// Mptcpd configuration information.
+        struct mptcpd_config const *config;
+
+        /// Mptcpd path manager information.
+        struct mptcpd_pm *pm;
+};
+
+static void complete_pm_init(struct family_cb_data *data)
+{
+        struct mptcpd_config const *const config = data->config;
+        struct mptcpd_pm           *const pm     = data->pm;
+
         /*
           MPTCP address IDs may already be assigned prior to mptcpd
           start by other applications or previous runs of mptcpd.
@@ -988,22 +1006,24 @@ static void complete_pm_init(struct mptcpd_pm *pm)
          *       ID manager state can be synchronized with the kernel
          *       dynamically.
          */
+
+        /**
+         * @bug Mptcpd plugins should only be loaded once at process
+         *      start.  The @c mptcpd_plugin_load() function only
+         *      loads the functions once, and only reloads after
+         *      @c mptcpd_plugin_unload() is called.
+         */
+        if (!mptcpd_plugin_load(config->plugin_dir,
+                                config->default_plugin,
+                                pm)) {
+                l_error("Unable to load path manager plugins.");
+
+                l_free(data);
+                mptcpd_pm_destroy(pm);
+
+                exit(EXIT_FAILURE);
+        }
 }
-
-/**
- * @struct family_cb_data
- *
- * User data passed to the @c family_appeared() and
- * @c family_vanished() callback functions.
- */
-struct family_cb_data
-{
-        /// Mptcpd configuration information.
-        struct mptcpd_config const *config;
-
-        /// Mptcpd path manager information.
-        struct mptcpd_pm *pm;
-};
 
 /**
  * @brief Handle MPTCP generic netlink family appearing on us.
@@ -1039,7 +1059,6 @@ static void family_appeared(struct l_genl_family_info const *info,
         l_debug("\"%s\" generic netlink family appeared", name);
 
         struct family_cb_data      *const data   = user_data;
-        struct mptcpd_config const *const config = data->config;
         struct mptcpd_pm           *const pm     = data->pm;
 
         /*
@@ -1059,23 +1078,7 @@ static void family_appeared(struct l_genl_family_info const *info,
         if (is_mptcp_org_kernel_pm(name))
                 complete_mptcp_org_kernel_pm_init(pm);
 
-        complete_pm_init(pm);
-        /**
-         * @bug Mptcpd plugins should only be loaded once at process
-         *      start.  The @c mptcpd_plugin_load() function only
-         *      loads the functions once, and only reloads after
-         *      @c mptcpd_plugin_unload() is called.
-         */
-        if (!mptcpd_plugin_load(config->plugin_dir,
-                                config->default_plugin,
-                                pm)) {
-                l_error("Unable to load path manager plugins.");
-
-                l_free(data);
-                mptcpd_pm_destroy(pm);
-
-                exit(EXIT_FAILURE);
-        }
+        complete_pm_init(data);
 }
 
 /**
