@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2017-2020, Intel Corporation
+## Copyright (c) 2017-2021, Intel Corporation
 
 pkginclude_HEADERS =		\
 	addr_info.h		\
@@ -14,6 +14,7 @@ pkginclude_HEADERS =		\
 
 noinst_HEADERS =		\
 	config-private.h	\
+	id_manager_private.h	\
 	mptcp_private.h		\
 	path_manager_private.h 	\
 	plugin_private.h	\

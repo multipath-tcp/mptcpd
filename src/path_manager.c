@@ -4,7 +4,7 @@
  *
  * @brief mptcpd path manager framework.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <arpa/inet.h>   // For inet_ntop().
 #include <netinet/in.h>
 
 #include <ell/genl.h>
@@ -28,9 +29,11 @@
 #include <mptcpd/path_manager_private.h>
 #include <mptcpd/plugin_private.h>
 #include <mptcpd/network_monitor.h>
+#include <mptcpd/id_manager_private.h>
 #include <mptcpd/id_manager.h>
 #include <mptcpd/mptcp_private.h>
 #include <mptcpd/sockaddr_private.h>
+#include <mptcpd/addr_info.h>
 
 #include "path_manager.h"
 #include "configuration.h"
@@ -914,6 +917,79 @@ static void complete_mptcp_org_kernel_pm_init(struct mptcpd_pm *pm)
         check_kernel_mptcp_path_manager();
 }
 
+static void dump_addrs_callback(struct mptcpd_addr_info const *info,
+                                size_t len,
+                                void *callback_data)
+{
+        /**
+         * @todo The kernel's pm_netlink path manager doesn't generate
+         *       dump reply containing an array.  Rather a separate
+         *       dump is sent for each set of address/ID information.
+         *       In particular, this callback will be called once per
+         *       address/ID.  There is no need for the @a len
+         *       parameter and should be entirely removed from the
+         *       API.
+         */
+        (void) len;
+
+        char addrstr[INET6_ADDRSTRLEN];  // Long enough for both IPv4
+                                         // and IPv6 addresses.
+
+
+
+        struct mptcpd_idm *const idm = callback_data;
+
+        /**
+         * @todo The user would have to perform a similar cast when
+         *       retrieving the @c sockaddr.  Perhaps we should export
+         *       a new set of @c mptcpd_addr_info_get_foo() functions
+         *       for each of the @c mptcpd_addr_info fields.
+         */
+        struct sockaddr const *const sa =
+                (struct sockaddr const *) &info->addr;
+
+        void const *src = NULL;
+        if (sa->sa_family == AF_INET)
+                src = &((struct sockaddr_in  const *) sa)->sin_addr;
+        else
+                src = &((struct sockaddr_in6 const *) sa)->sin6_addr;
+
+        (void) inet_ntop(sa->sa_family,
+                         src,
+                         addrstr,
+                         sizeof(addrstr));
+
+        if (mptcpd_idm_map_id(idm,
+                              sa,
+                              info->id))
+                l_debug("ID sync: %u | %s", info->id, addrstr);
+        else
+                l_error("ID sync failed: %u | %s", info->id, addrstr);
+}
+
+static void complete_pm_init(struct mptcpd_pm *pm)
+{
+        /*
+          MPTCP address IDs may already be assigned prior to mptcpd
+          start by other applications or previous runs of mptcpd.
+          Synchronize mptcpd address ID manager with address IDs
+          maintained by the kernel.
+         */
+        if (pm->cmd_ops->dump_addrs != NULL
+            && pm->cmd_ops->dump_addrs(pm,
+                                       dump_addrs_callback,
+                                       pm->idm) != 0)
+                l_error("Unable to synchronize ID manager with kernel.");
+
+        /**
+         * @todo Register a callback once the kernel MPTCP path
+         *       management generic netlink API supports
+         *       new/removed address notifications so that the mptcpd
+         *       ID manager state can be synchronized with the kernel
+         *       dynamically.
+         */
+}
+
 /**
  * @brief Handle MPTCP generic netlink family appearing on us.
  *
@@ -963,6 +1039,8 @@ static void family_appeared(struct l_genl_family_info const *info,
 
         if (is_mptcp_org_kernel_pm(name))
                 complete_mptcp_org_kernel_pm_init(pm);
+
+        complete_pm_init(pm);
 }
 
 /**
@@ -1120,7 +1198,7 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
-        // Listen for network device changes.
+        // Create mptcpd address ID manager.
         pm->idm = mptcpd_idm_create();
 
         if (pm->idm == NULL) {
