@@ -31,20 +31,20 @@
 
 
 /**
- * @struct get_addr_user_callbacks
+ * @struct get_addr_user_callback
  *
- * @brief Convenience struct for passing addr(s) to user callback.
+ * @brief Convenience struct for passing addr to user callback.
  */
-struct get_addr_user_callbacks
+struct get_addr_user_callback
 {
-        /// User supplied get_addr callback.
+        /// User supplied get_addr/dump_addrs callback.
         mptcpd_pm_get_addr_cb get_addr;
-
-        /// User supplied dump_addrs callback.
-        mptcpd_pm_dump_addrs_cb dump_addrs;
 
         /// User data to be passed to one of the above callback.
         void *data;
+
+        /// Callback is for a dump_addrs call.
+        bool dump;
 };
 
 /**
@@ -165,22 +165,20 @@ static bool get_addr_callback_recurse(struct l_genl_attr *attr,
 
 static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
 {
-        struct get_addr_user_callbacks const *const cb = user_data;
-        struct mptcpd_addr_info *addrs = NULL;
-        size_t addrs_len = 0;
+        struct get_addr_user_callback const *const cb = user_data;
 
         if (!mptcpd_check_genl_error(msg,
-                                     cb->get_addr
-                                     ? "get_addr"
-                                     : "dump_addrs"))
-                goto get_addr_out;
+                                     cb->dump
+                                     ? "dump_addrs"
+                                     : "get_addr"))
+                return;
 
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
                 l_error("get_addr: "
                         "Unable to initialize genl attribute");
 
-                goto get_addr_out;
+                return;
         }
 
         /*
@@ -195,34 +193,34 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
         uint16_t len;
         void const *data = NULL;
 
+        struct mptcpd_addr_info addr = { .id = 0 };
+
         while (l_genl_attr_next(&attr, &type, &len, &data)) {
-                if (type != MPTCP_PM_ATTR_ADDR) {
-                        // Sanity check.  This condition should never occur.
-                        l_error("get_addr: unexpected data");
-                        continue;
-                }
+                /*
+                  Sanity check.  The attribute sent by the kernel
+                  should always be of type MPTCP_PM_ATTR_ADDR.
+                */
+                if (type == MPTCP_PM_ATTR_ADDR) {
+                        if (!get_addr_callback_recurse(&attr, &addr))
+                                return;
 
-                size_t const offset = addrs_len++;
-
-                addrs = l_realloc(addrs, sizeof(*addrs) * addrs_len);
-
-                if (!get_addr_callback_recurse(&attr, addrs + offset)) {
-                        l_free(addrs);
-                        addrs = NULL;
-                        addrs_len = 0;
+                        // Only one addr is sent per get/dump.
                         break;
+                } else {
+                        /*
+                          This should only occur if the kernel
+                          get_addr/dump_addrs API changed.
+                        */
+                        l_error("%s: unexpected attribute of type %u",
+                                cb->dump
+                                ? "dump_addrs"
+                                : "get_addr",
+                                type);
                 }
         }
 
-get_addr_out:
-
         // Pass the results to the user.
-        if (cb->get_addr)
-                cb->get_addr(addrs, cb->data);
-        else
-                cb->dump_addrs(addrs, addrs_len, cb->data);
-
-        l_free(addrs);
+        cb->get_addr(&addr, cb->data);
 }
 
 static bool append_addr_attr(struct l_genl_msg *msg,
@@ -465,11 +463,12 @@ static int upstream_get_addr(struct mptcpd_pm *pm,
                 return ENOMEM;
         }
 
-        struct get_addr_user_callbacks *const cb =
-                l_new(struct get_addr_user_callbacks, 1);
+        struct get_addr_user_callback *const cb =
+                l_new(struct get_addr_user_callback, 1);
 
         cb->get_addr = callback;
         cb->data     = data;
+        cb->dump     = false;
 
         return l_genl_family_send(pm->family,
                                   msg,
@@ -479,7 +478,7 @@ static int upstream_get_addr(struct mptcpd_pm *pm,
 }
 
 static int upstream_dump_addrs(struct mptcpd_pm *pm,
-                               mptcpd_pm_dump_addrs_cb callback,
+                               mptcpd_pm_get_addr_cb callback,
                                void *data)
 {
         /*
@@ -490,11 +489,12 @@ static int upstream_dump_addrs(struct mptcpd_pm *pm,
         struct l_genl_msg *const msg =
                 l_genl_msg_new(MPTCP_PM_CMD_GET_ADDR);
 
-        struct get_addr_user_callbacks *const cb =
-                l_new(struct get_addr_user_callbacks, 1);
+        struct get_addr_user_callback *const cb =
+                l_new(struct get_addr_user_callback, 1);
 
-        cb->dump_addrs = callback;
-        cb->data       = data;
+        cb->get_addr = callback;
+        cb->data     = data;
+        cb->dump     = true;
 
         return l_genl_family_dump(pm->family,
                                   msg,

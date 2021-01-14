@@ -104,7 +104,6 @@ static void get_addr_callback(struct mptcpd_addr_info const *info,
 }
 
 static void dump_addrs_callback(struct mptcpd_addr_info const *info,
-                                size_t len,
                                 void *user_data)
 {
         mptcpd_aid_t const id = L_PTR_TO_UINT(user_data);
@@ -115,13 +114,12 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
          *      previously added through @c mptcpd_pm_add_addr() would
          *      end up not being removed prior to test exit.
          */
-        assert(len == 1);
         assert(info != NULL);
-        assert(info[0].id == id);
+        assert(info->id == id);
 
         struct sockaddr const *const addr = laddr1;
         assert(sockaddr_is_equal(addr,
-                                 (struct sockaddr *) &info[0].addr));
+                                 (struct sockaddr *) &info->addr));
 }
 
 static void get_limits_callback(struct mptcpd_limit const *limits,

@@ -108,7 +108,7 @@ int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
 }
 
 int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
-                         mptcpd_pm_dump_addrs_cb callback,
+                         mptcpd_pm_get_addr_cb callback,
                          void *data)
 {
         if (pm == NULL || callback == NULL)
