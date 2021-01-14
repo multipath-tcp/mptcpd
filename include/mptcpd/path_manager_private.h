@@ -43,7 +43,7 @@ struct mptcpd_pm
         /**
          * @privatesection
          */
-        ///
+        /// MPTCP path management generic netlink command functions.
         struct mptcpd_pm_cmd_ops const *cmd_ops;
 
         /// Core ELL generic netlink object.
