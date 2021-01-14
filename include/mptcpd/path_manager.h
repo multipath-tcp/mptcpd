@@ -4,7 +4,7 @@
  *
  * @brief mptcpd generic netlink commands.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2021, Intel Corporation
  */
 
 #ifndef MPTCPD_LIB_PATH_MANAGER_H
@@ -47,7 +47,7 @@ MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
  *                  ignored if it is zero.
  * @param[in] id    MPTCP local address ID.
  * @param[in] flags Bitset of MPTCP flags associated with the network
- *                  address, e.g. @c MPTCP_ADDR_FLAG_BACKUP @c |
+ *                  address, e.g. @c MPTCP_PM_ADDR_FLAG_BACKUP @c |
  *                   @c MPTCP_PM_ADDR_FLAG_SUBFLOW.  Optional for
  *                  upstream kernel.  Unused by the multipath-tcp.org
  *                  Linux kernel (e.g. set to zero).
