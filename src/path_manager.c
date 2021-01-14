@@ -1209,6 +1209,7 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                                       family_appeared,
                                       data,
                                       l_free)) {
+                l_free(data);
                 mptcpd_pm_destroy(pm);
                 l_error("Unable to watch or request \"%s\" "
                         "generic netlink family.",
