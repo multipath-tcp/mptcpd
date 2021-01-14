@@ -935,8 +935,6 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
         char addrstr[INET6_ADDRSTRLEN];  // Long enough for both IPv4
                                          // and IPv6 addresses.
 
-
-
         struct mptcpd_idm *const idm = callback_data;
 
         /**
