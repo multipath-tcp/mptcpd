@@ -4,7 +4,7 @@
  *
  * @brief mptcpd path manager private interface.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2021, Intel Corporation
  */
 
 #ifndef MPTCPD_PATH_MANAGER_PRIVATE_H
