@@ -43,6 +43,9 @@ struct mptcpd_pm
         /**
          * @privatesection
          */
+        /// Mptcpd configuration.
+        struct mptcpd_config const *config;
+
         ///
         struct mptcpd_pm_cmd_ops const *cmd_ops;
 
