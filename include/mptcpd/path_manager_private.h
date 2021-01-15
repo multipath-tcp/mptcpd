@@ -4,7 +4,7 @@
  *
  * @brief mptcpd path manager private interface.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2021, Intel Corporation
  */
 
 #ifndef MPTCPD_PATH_MANAGER_PRIVATE_H
@@ -43,6 +43,9 @@ struct mptcpd_pm
         /**
          * @privatesection
          */
+        /// Mptcpd configuration.
+        struct mptcpd_config const *config;
+
         /// MPTCP path management generic netlink command functions.
         struct mptcpd_pm_cmd_ops const *cmd_ops;
 
