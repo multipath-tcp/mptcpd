@@ -918,7 +918,6 @@ static void complete_mptcp_org_kernel_pm_init(struct mptcpd_pm *pm)
 }
 
 static void dump_addrs_callback(struct mptcpd_addr_info const *info,
-                                size_t len,
                                 void *callback_data)
 {
         /**
@@ -930,7 +929,6 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
          *       parameter and should be entirely removed from the
          *       API.
          */
-        (void) len;
 
         char addrstr[INET6_ADDRSTRLEN];  // Long enough for both IPv4
                                          // and IPv6 addresses.
