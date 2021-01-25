@@ -147,7 +147,12 @@ AS_IF([test "x$ax_enable_debug" != "xyes"],
        dnl AX_ENABLE_DEBUG macro disables the autoconf default of
        dnl implicitly adding it.
        AS_IF([test "x$enable_code_coverage" != "xyes"],
-             [AX_APPEND_COMPILE_FLAGS([-O2])])
+             [AX_APPEND_COMPILE_FLAGS([-O2])
+
+	      AC_LANG_PUSH([C++])
+              AX_APPEND_COMPILE_FLAGS([-O2])
+              AC_LANG_POP([C++])
+	     ])
 
        dnl AX_CODE_COVERAGE will define NDEBUG on the command line,
        dnl equivalent to #define NDEBUG 1, if code coverage is
