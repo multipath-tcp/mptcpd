@@ -3,9 +3,13 @@
 
 # Test bad mptcpd "--plugin-dir" command line option.
 #
-# Copyright (c) 2019, Intel Corporation
+# Copyright (c) 2019, 2021, Intel Corporation
 
-
-set -e
 
 ../src/mptcpd --plugin-dir=
+
+# Command line usage error exit code.  See <sysexits.h>.
+EX_USAGE=64
+
+# mptcpd should have exited with an EX_USAGE exit code.
+test $? != $EX_USAGE
