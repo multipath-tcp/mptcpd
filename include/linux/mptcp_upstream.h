@@ -36,7 +36,7 @@ enum {
 /* netlink interface */
 #define MPTCP_PM_NAME		"mptcp_pm"
 #define MPTCP_PM_CMD_GRP_NAME	"mptcp_pm_cmds"
-#define MPTCP_PM_EV_GRP_NAME    "mptcp_events"
+#define MPTCP_PM_EV_GRP_NAME    "mptcp_pm_events"
 #define MPTCP_PM_VER		0x1
 
 /*
@@ -107,34 +107,37 @@ struct mptcp_info {
 
 /*
  * MPTCP_EVENT_CREATED: token, family, saddr4 | saddr6, daddr4 | daddr6,
- *                         sport, dport
- *    A new MPTCP connection has been created. It is the good time to allocate
- *    memory and send ADD_ADDR if needed. Depending on the traffic-patterns
- *    it can take a long time until the MPTCP_EVENT_ESTABLISHED is sent.
+ *                      sport, dport
+ * A new MPTCP connection has been created. It is the good time to allocate
+ * memory and send ADD_ADDR if needed. Depending on the traffic-patterns
+ * it can take a long time until the MPTCP_EVENT_ESTABLISHED is sent.
  *
  * MPTCP_EVENT_ESTABLISHED: token, family, saddr4 | saddr6, daddr4 | daddr6,
  *			    sport, dport
- *    A MPTCP connection is established (can start new subflows).
+ * A MPTCP connection is established (can start new subflows).
  *
  * MPTCP_EVENT_CLOSED: token
- *    A MPTCP connection has stopped.
+ * A MPTCP connection has stopped.
  *
  * MPTCP_EVENT_ANNOUNCED: token, rem_id, family, daddr4 | daddr6 [, dport]
- *    A new address has been announced by the peer.
+ * A new address has been announced by the peer.
  *
  * MPTCP_EVENT_REMOVED: token, rem_id
- *    An address has been lost by the peer.
+ * An address has been lost by the peer.
  *
  * MPTCP_EVENT_SUB_ESTABLISHED: token, family, saddr4 | saddr6,
  *                              daddr4 | daddr6, sport, dport, backup,
- *                              if_idx
+ *                              if_idx [, error]
+ * A new subflow has been established. 'error' should not be set.
  *
  * MPTCP_EVENT_SUB_CLOSED: token, family, saddr4 | saddr6, daddr4 | daddr6,
- *                         sport, dport, backup, if_idx
- *    A subflow has been closed.
+ *                         sport, dport, backup, if_idx [, error]
+ * A subflow has been closed. An error (copy of sk_err) could be set if an
+ * error has been detected for this subflow.
  *
  * MPTCP_EVENT_SUB_PRIORITY: token, family, saddr4 | saddr6, daddr4 | daddr6,
- *                              sport, dport, backup, if_idx
+ *                           sport, dport, backup, if_idx [, error]
+ *       The priority of a subflow has changed. 'error' should not be set.
  */
 enum mptcp_event_type {
 	MPTCP_EVENT_UNSPEC = 0,
@@ -172,6 +175,7 @@ enum mptcp_event_attr {
 
 	__MPTCP_ATTR_AFTER_LAST
 };
+
 #define MPTCP_ATTR_MAX (__MPTCP_ATTR_AFTER_LAST - 1)
 
 #endif /* _UAPI_MPTCP_H */
