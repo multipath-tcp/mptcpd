@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2017-2020, Intel Corporation
+## Copyright (c) 2017-2021, Intel Corporation
 
 include $(top_srcdir)/aminclude_static.am
 
@@ -28,17 +28,14 @@ check_PROGRAMS =		\
 	test-configuration	\
 	test-id-manager
 
-## Test scripts expected to fail due to intentionally bad mptcpd
-## command line options.  Successful exit will be treated as failure.
-xfail_test_scripts =		\
+dist_check_SCRIPTS =		\
 	test-bad-log-empty	\
 	test-bad-log-long	\
 	test-bad-log-short	\
 	test-bad-option		\
 	test-bad-path-manager	\
-	test-bad-plugin-dir
-
-dist_check_SCRIPTS = test-start-stop $(xfail_test_scripts)
+	test-bad-plugin-dir	\
+	test-start-stop
 
 test_plugin_SOURCES = test-plugin.c
 test_plugin_CPPFLAGS =							\
@@ -113,7 +110,7 @@ endif
 
 AM_TESTS_ENVIRONMENT = TEST_PLUGIN_DIR=$(TEST_PLUGIN_DIR_NOOP)
 TESTS = $(check_PROGRAMS) $(dist_check_SCRIPTS)
-XFAIL_TESTS = $(xfail_test_scripts)
+XFAIL_TESTS = test-commands
 
 # Clean up code coverage related generated files.
 clean-local: code-coverage-clean

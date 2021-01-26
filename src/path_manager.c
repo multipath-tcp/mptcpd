@@ -920,16 +920,6 @@ static void complete_mptcp_org_kernel_pm_init(struct mptcpd_pm *pm)
 static void dump_addrs_callback(struct mptcpd_addr_info const *info,
                                 void *callback_data)
 {
-        /**
-         * @todo The kernel's pm_netlink path manager doesn't generate
-         *       dump reply containing an array.  Rather a separate
-         *       dump is sent for each set of address/ID information.
-         *       In particular, this callback will be called once per
-         *       address/ID.  There is no need for the @a len
-         *       parameter and should be entirely removed from the
-         *       API.
-         */
-
         char addrstr[INET6_ADDRSTRLEN];  // Long enough for both IPv4
                                          // and IPv6 addresses.
 
