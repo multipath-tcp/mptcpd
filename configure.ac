@@ -2,7 +2,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (c) 2017-2020, Intel Corporation
+# Copyright (c) 2017-2021, Intel Corporation
 
 AC_PREREQ([2.69])
 AC_INIT([mptcpd],
@@ -149,10 +149,10 @@ AS_IF([test "x$ax_enable_debug" != "xyes"],
        AS_IF([test "x$enable_code_coverage" != "xyes"],
              [AX_APPEND_COMPILE_FLAGS([-O2])
 
-	      AC_LANG_PUSH([C++])
+              AC_LANG_PUSH([C++])
               AX_APPEND_COMPILE_FLAGS([-O2])
               AC_LANG_POP([C++])
-	     ])
+             ])
 
        dnl AX_CODE_COVERAGE will define NDEBUG on the command line,
        dnl equivalent to #define NDEBUG 1, if code coverage is
