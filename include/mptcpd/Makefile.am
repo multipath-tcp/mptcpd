@@ -14,7 +14,6 @@ pkginclude_HEADERS =		\
 noinst_HEADERS =			\
 	private/config.h		\
 	private/id_manager.h		\
-	mptcp_private.h			\
 	private/mptcp_org.h		\
 	private/mptcp_upstream.h	\
 	private/netlink_pm.h		\

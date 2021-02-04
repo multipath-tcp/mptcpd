@@ -194,7 +194,26 @@ AC_SUBST([ELL_VERSION])
 # @todo mptcpd ships with a copies of the upstream and
 #       multipath-tcp.org kernel <linux/mptcp.h> header files. Ideally
 #       it should not. Consider removing them from mptcpd.
-AC_CHECK_HEADERS([linux/mptcp.h], [],
+AH_TEMPLATE([HAVE_LINUX_MPTCP_H_UPSTREAM],
+            [Define to 1 if you have the upstream kernel
+            <linux/mptcp.h> header.])
+AH_TEMPLATE([HAVE_LINUX_MPTCP_H_MPTCP_ORG],
+            [Define to 1 if you have the multipath-tcp.org kernel
+            <linux/mptcp.h> header.])
+AC_CHECK_HEADERS([linux/mptcp.h],
+   [
+    AX_CHECK_DEFINE(
+        [linux/mptcp.h],
+        [MPTCP_PM_NAME],
+        [AC_DEFINE([HAVE_LINUX_MPTCP_H_UPSTREAM], [1])],
+        [
+         AX_CHECK_DEFINE(
+             [linux/mptcp.h],
+             [MPTCP_GENL_NAME],
+             [AC_DEFINE([HAVE_LINUX_MPTCP_H_MPTCP_ORG], [1])],
+             [AC_MSG_ERROR([Discrepancy in <linux/mptcp.h>.])])
+        ])
+   ],
    [AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])])
 
 # ---------------------------------------------------------------
