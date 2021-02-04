@@ -11,6 +11,10 @@
 #define MPTCPD_PRIVATE_NETLINK_PM_H
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @struct mptcpd_netlink_pm
  *
@@ -31,6 +35,10 @@ struct mptcpd_netlink_pm
 
 
 #endif /* MPTCPD_PRIVATE_NETLINK_PM_H */
+
+#ifdef __cplusplus
+}
+#endif
 
 
 /*
