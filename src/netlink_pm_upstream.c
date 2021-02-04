@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file commands_upstream.c
+ * @file netlink_pm_upstream.c
  *
- * @brief Upstream kernel MPTCP generic netlink commands.
+ * @brief Upstream kernel generic netlink path manager details.
  *
- * Copyright (c) 2020, Intel Corporation
+ * Copyright (c) 2020-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -19,7 +19,8 @@
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error(), etc.
 #include <ell/log.h>
 
-#include <mptcpd/mptcp_private.h>
+#include <mptcpd/private/mptcp_upstream.h>
+#include <mptcpd/private/netlink_pm.h>
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/path_manager.h>
 #include <mptcpd/types.h>
@@ -596,9 +597,15 @@ static struct mptcpd_pm_cmd_ops const cmd_ops =
         .get_limits  = upstream_get_limits
 };
 
-struct mptcpd_pm_cmd_ops const *mptcpd_get_upstream_cmd_ops(void)
+static struct mptcpd_netlink_pm const npm = {
+        .name    = MPTCP_PM_NAME,
+        .group   = MPTCP_PM_EV_GRP_NAME,
+        .cmd_ops = &cmd_ops
+};
+
+struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm_upstream(void)
 {
-        return &cmd_ops;
+        return &npm;
 }
 
 /*

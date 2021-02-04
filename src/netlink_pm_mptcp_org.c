@@ -4,7 +4,7 @@
  *
  * @brief mptcpd generic netlink commands.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -13,6 +13,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include <ell/genl.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error(), etc.
@@ -20,10 +21,79 @@
 
 #include "commands.h"
 
-#include <mptcpd/mptcp_private.h>
+#include <mptcpd/private/mptcp_org.h>
+#include <mptcpd/private/netlink_pm.h>
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/path_manager.h>
 
+
+/// Directory containing MPTCP sysctl variable entries.
+#define MPTCP_SYSCTL_BASE "/proc/sys/net/mptcp/"
+
+/**
+ * @brief Maximum path manager name length.
+ *
+ * @note @c MPTCP_PM_NAME_MAX is defined in the internal
+ *       @c <net/mptcp.h> header in the multipath-tcp.org kernel.
+ */
+#ifndef MPTCP_PM_NAME_MAX
+# define MPTCP_PM_NAME_MAX 16
+#endif
+
+
+/**
+ * @brief Verify that the MPTCP "netlink" path manager is selected.
+ *
+ * Mptcpd requires MPTCP the "netlink" path manager to be selected at
+ * run-time when using the multipath-tcp.org kernel.  Issue a warning
+ * if it is not selected.
+ */
+static void check_kernel_mptcp_path_manager(void)
+{
+        static char const mptcp_path_manager[] =
+                MPTCP_SYSCTL_BASE "mptcp_path_manager";
+
+        FILE *const f = fopen(mptcp_path_manager, "r");
+
+        if (f == NULL)
+                return;  // Not using multipath-tcp.org kernel.
+
+        char pm[MPTCP_PM_NAME_MAX] = { 0 };
+
+        static char const MPTCP_PM_NAME_FMT[] =
+                "%" L_STRINGIFY(MPTCP_PM_NAME_MAX) "s";
+
+        int const n = fscanf(f, MPTCP_PM_NAME_FMT, pm);
+
+        fclose(f);
+
+        if (likely(n == 1)) {
+                if (strcmp(pm, "netlink") != 0) {
+                        /*
+                          "netlink" could be set as the default.  It
+                          may not appear as "netlink", which is why
+                          "may" is used instead of "is" in the warning
+                          diagnostic below
+                        */
+                        l_warn("MPTCP 'netlink' path manager may "
+                               "not be selected in the kernel.");
+                        l_warn("Try 'sysctl -w "
+                               "net.mptcp.mptcp_path_manager=netlink'.");
+
+                        /*
+                          Mptcpd should not set this variable since it
+                          would need to be run as root in order to
+                          gain write access to files in
+                          /proc/sys/net/mptcp/ owned by root.
+                          Ideally, mptcpd should not be run as the
+                          root user.
+                        */
+                }
+        } else {
+                l_warn("Unable to determine selected MPTCP "
+                       "path manager.");
+        }
+}
 
 static uint16_t get_port_number(struct sockaddr const *addr)
 {
@@ -515,9 +585,17 @@ static struct mptcpd_pm_cmd_ops const cmd_ops =
         .set_backup     = mptcp_org_set_backup,
 };
 
-struct mptcpd_pm_cmd_ops const *mptcpd_get_mptcp_org_cmd_ops(void)
+static struct mptcpd_netlink_pm const npm = {
+        .name    = MPTCP_GENL_NAME,
+        .group   = MPTCP_GENL_EV_GRP_NAME,
+        .cmd_ops = &cmd_ops
+};
+
+struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm_mptcp_org(void)
 {
-        return &cmd_ops;
+        check_kernel_mptcp_path_manager();
+
+        return &npm;
 }
 
 

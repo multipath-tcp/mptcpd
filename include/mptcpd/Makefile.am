@@ -11,11 +11,13 @@ pkginclude_HEADERS =		\
 	plugin.h		\
 	types.h
 
-
-noinst_HEADERS =		\
-	private/config.h	\
-	private/id_manager.h	\
-	mptcp_private.h		\
-	private/path_manager.h 	\
-	private/plugin.h	\
+noinst_HEADERS =			\
+	private/config.h		\
+	private/id_manager.h		\
+	mptcp_private.h			\
+	private/mptcp_org.h		\
+	private/mptcp_upstream.h	\
+	private/netlink_pm.h		\
+	private/path_manager.h 		\
+	private/plugin.h		\
 	private/sockaddr.h

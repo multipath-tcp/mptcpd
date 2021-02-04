@@ -16,10 +16,12 @@ noinst_LTLIBRARIES = libpath_manager.la
 libpath_manager_la_SOURCES =	\
 	commands.c		\
 	commands.h		\
-	commands_mptcp_org.c	\
-	commands_upstream.c	\
 	configuration.c		\
 	configuration.h		\
+	netlink_pm.c		\
+	netlink_pm.h		\
+	netlink_pm_mptcp_org.c	\
+	netlink_pm_upstream.c	\
 	path_manager.c		\
 	path_manager.h
 
