@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file id_manager_private.h
+ * @file private/id_manager.h
  *
  * @brief Map of MPTCP address ID to network address - private API.
  *
  * Copyright (c) 2020, 2021, Intel Corporation
  */
 
-#ifndef MPTCPD_ID_MANAGER_PRIVATE_H
-#define MPTCPD_ID_MANAGER_PRIVATE_H
+#ifndef MPTCPD_PRIVATE_ID_MANAGER_H
+#define MPTCPD_PRIVATE_ID_MANAGER_H
 
 #include <mptcpd/export.h>
 #include <mptcpd/types.h>
@@ -44,7 +44,7 @@ MPTCPD_API bool mptcpd_idm_map_id(struct mptcpd_idm *idm,
 }
 #endif
 
-#endif  // MPTCPD_ID_MANAGER_PRIVATE_H
+#endif  // MPTCPD_PRIVATE_ID_MANAGER_H
 
 
 /*

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file plugin_private.h
+ * @file private/plugin.h
  *
  * @brief mptcpd private plugin interface.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2021, Intel Corporation
  */
 
-#ifndef MPTCPD_PLUGIN_PRIVATE_H
-#define MPTCPD_PLUGIN_PRIVATE_H
+#ifndef MPTCPD_PRIVATE_PLUGIN_H
+#define MPTCPD_PRIVATE_PLUGIN_H
 
 #include <stdbool.h>
 
@@ -231,7 +231,7 @@ MPTCPD_API void mptcpd_plugin_delete_local_address(
 }
 #endif
 
-#endif  // MPTCPD_PLUGIN_PRIVATE_H
+#endif  // MPTCPD_PRIVATE_PLUGIN_H
 
 
 /*
