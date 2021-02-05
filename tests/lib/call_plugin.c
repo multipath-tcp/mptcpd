@@ -11,7 +11,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include <mptcpd/plugin_private.h>
+#include <mptcpd/private/plugin.h>
 
 #include "test-plugin.h"
 

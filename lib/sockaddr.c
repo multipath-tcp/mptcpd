@@ -11,7 +11,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include <mptcpd/sockaddr_private.h>
+#include <mptcpd/private/sockaddr.h>
 
 
 bool mptcpd_sockaddr_storage_init(struct in_addr  const *addr4,

@@ -20,7 +20,7 @@
 #include <ell/test.h>
 
 #include <mptcpd/plugin.h>
-#include <mptcpd/plugin_private.h>
+#include <mptcpd/private/plugin.h>
 
 #include "test-plugin.h"
 

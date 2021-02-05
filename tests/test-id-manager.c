@@ -14,7 +14,7 @@
 #include <ell/log.h>
 #include <ell/test.h>
 
-#include <mptcpd/id_manager_private.h>
+#include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>
 
 #include "test-plugin.h"  // For test sockaddrs

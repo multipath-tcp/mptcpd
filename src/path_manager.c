@@ -26,13 +26,13 @@
 #include <ell/timeout.h>
 #include <ell/util.h>
 
-#include <mptcpd/path_manager_private.h>
-#include <mptcpd/plugin_private.h>
+#include <mptcpd/private/path_manager.h>
+#include <mptcpd/private/plugin.h>
 #include <mptcpd/network_monitor.h>
-#include <mptcpd/id_manager_private.h>
+#include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>
 #include <mptcpd/mptcp_private.h>
-#include <mptcpd/sockaddr_private.h>
+#include <mptcpd/private/sockaddr.h>
 #include <mptcpd/addr_info.h>
 
 #include "path_manager.h"

@@ -30,7 +30,7 @@ struct mptcpd_nm;
 struct mptcpd_idm;
 
 /**
- * @struct mptcpd_pm path_manager_private.h <mptcpd/path_manager_private.h>
+ * @struct mptcpd_pm path_manager_private.h <mptcpd/private/path_manager.h>
  *
  * @brief Data needed to run the path manager.
  *

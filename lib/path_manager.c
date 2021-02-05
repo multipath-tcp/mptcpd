@@ -21,7 +21,7 @@
 #include <ell/log.h>
 
 #include <mptcpd/path_manager.h>
-#include <mptcpd/path_manager_private.h>
+#include <mptcpd/private/path_manager.h>
 #include <mptcpd/plugin.h>
 #include <mptcpd/mptcp_private.h>
 

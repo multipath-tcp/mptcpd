@@ -39,7 +39,7 @@
 # define MPTCP_PM_NAME_LEN GENL_NAMSIZ
 #endif
 
-#include <mptcpd/plugin_private.h>
+#include <mptcpd/private/plugin.h>
 #include <mptcpd/plugin.h>
 #include <mptcpd/mptcp_private.h>
 

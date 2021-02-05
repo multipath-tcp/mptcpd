@@ -20,7 +20,7 @@
 #include <ell/uintset.h>
 #include <ell/util.h>
 
-#include <mptcpd/id_manager_private.h>
+#include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>
 
 #define MPTCPD_INVALID_ID 0
