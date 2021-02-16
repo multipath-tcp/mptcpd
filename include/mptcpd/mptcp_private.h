@@ -14,7 +14,7 @@
 #define MPTCPD_MPTCP_PRIVATE_H
 
 #ifdef HAVE_CONFIG_H
-# include "config-private.h"
+# include "private/config.h"
 #endif
 
 #ifdef HAVE_LINUX_MPTCP_H

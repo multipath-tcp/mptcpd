@@ -13,7 +13,7 @@ pkginclude_HEADERS =		\
 
 
 noinst_HEADERS =		\
-	config-private.h	\
+	private/config.h	\
 	private/id_manager.h	\
 	mptcp_private.h		\
 	private/path_manager.h 	\

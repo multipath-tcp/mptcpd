@@ -15,7 +15,7 @@
 #include <ell/log.h>
 
 #ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>
+# include <mptcpd/private/config.h>
 #endif
 
 #include <mptcpd/plugin.h>

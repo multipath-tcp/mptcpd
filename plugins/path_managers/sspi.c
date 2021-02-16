@@ -8,7 +8,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>  // For NDEBUG and mptcpd VERSION.
+# include <mptcpd/private/config.h>  // For NDEBUG and mptcpd VERSION.
 #endif
 
 #include <assert.h>
