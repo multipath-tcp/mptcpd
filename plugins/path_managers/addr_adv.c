@@ -4,11 +4,11 @@
  *
  * @brief MPTCP address advertiser path manager plugin.
  *
- * Copyright (c) 2020, Intel Corporation
+ * Copyright (c) 2020-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>
+# include <mptcpd/private/config.h>
 #endif
 
 #include <ell/util.h>  // For L_STRINGIFY needed by ELL log macros.

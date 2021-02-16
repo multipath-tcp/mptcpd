@@ -4,7 +4,7 @@
  *
  * @brief mptcpd plugin test.
  *
- * Copyright (c) 2018-2020, Intel Corporation
+ * Copyright (c) 2018-2021, Intel Corporation
  */
 
 #undef NDEBUG
@@ -20,7 +20,7 @@
 #include <ell/test.h>
 
 #include <mptcpd/plugin.h>
-#include <mptcpd/plugin_private.h>
+#include <mptcpd/private/plugin.h>
 
 #include "test-plugin.h"
 

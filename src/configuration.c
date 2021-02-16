@@ -4,11 +4,11 @@
  *
  * @brief Mptcpd configuration parser implementation.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>  // For NDEBUG
+# include <mptcpd/private/config.h>  // For NDEBUG
 #endif
 
 #include <stdlib.h>
@@ -28,7 +28,7 @@
 #include "configuration.h"
 
 #ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>
+# include <mptcpd/private/config.h>
 #endif
 
 /**

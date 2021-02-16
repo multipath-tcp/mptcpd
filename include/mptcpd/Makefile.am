@@ -13,9 +13,9 @@ pkginclude_HEADERS =		\
 
 
 noinst_HEADERS =		\
-	config-private.h	\
-	id_manager_private.h	\
+	private/config.h	\
+	private/id_manager.h	\
 	mptcp_private.h		\
-	path_manager_private.h 	\
-	plugin_private.h	\
-	sockaddr_private.h
+	private/path_manager.h 	\
+	private/plugin.h	\
+	private/sockaddr.h

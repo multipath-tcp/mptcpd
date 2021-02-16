@@ -8,7 +8,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>
+# include <mptcpd/private/config.h>
 #endif
 
 #include <assert.h>
@@ -20,11 +20,11 @@
 #include <ell/log.h>
 
 #include <mptcpd/mptcp_private.h>
-#include <mptcpd/path_manager_private.h>
+#include <mptcpd/private/path_manager.h>
 #include <mptcpd/path_manager.h>
 #include <mptcpd/types.h>
 #include <mptcpd/addr_info.h>
-#include <mptcpd/sockaddr_private.h>
+#include <mptcpd/private/sockaddr.h>
 
 #include "commands.h"
 #include "path_manager.h"

@@ -4,7 +4,7 @@
  *
  * @brief Verify mptcpd API can be used in C++ code.
  *
- * Copyright (c) 2019, Intel Corporation
+ * Copyright (c) 2019, 2021, Intel Corporation
  */
 
 #undef NDEBUG
@@ -20,7 +20,7 @@
 #include <mptcpd/network_monitor.h>
 #include <mptcpd/plugin.h>
 
-#include <mptcpd/plugin_private.h>
+#include <mptcpd/private/plugin.h>
 
 #include "test-plugin.h"
 

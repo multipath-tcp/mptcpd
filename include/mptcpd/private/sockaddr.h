@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file sockaddr_private.h
+ * @file private/sockaddr.h
  *
  * @brief mptcpd @c struct @c sockaddr related utility functions.
  *
- * Copyright (c) 2019-2020, Intel Corporation
+ * Copyright (c) 2019-2021, Intel Corporation
  */
 
-#ifndef MPTCPD_SOCKADDR_PRIVATE_H
-#define MPTCPD_SOCKADDR_PRIVATE_H
+#ifndef MPTCPD_PRIVATE_SOCKADDR_H
+#define MPTCPD_PRIVATE_SOCKADDR_H
 
 #include <stdbool.h>
 
@@ -48,7 +48,7 @@ mptcpd_sockaddr_storage_init(struct in_addr  const *addr4,
 #endif
 
 
-#endif  /* MPTCPD_SOCKADDR_H */
+#endif  /* MPTCPD_PRIVATE_SOCKADDR_H */
 
 
 /*

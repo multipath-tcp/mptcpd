@@ -36,7 +36,7 @@ AM_SILENT_RULES([yes])
 LT_INIT([disable-static])
 
 AC_CONFIG_SRCDIR([src/mptcpd.c])
-AC_CONFIG_HEADERS([include/mptcpd/config-private.h])
+AC_CONFIG_HEADERS([include/mptcpd/private/config.h])
 
 AC_CONFIG_MACRO_DIR([m4])
 

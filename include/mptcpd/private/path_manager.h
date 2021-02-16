@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file path_manager_private.h
+ * @file private/path_manager.h
  *
  * @brief mptcpd path manager private interface.
  *
  * Copyright (c) 2017-2021, Intel Corporation
  */
 
-#ifndef MPTCPD_PATH_MANAGER_PRIVATE_H
-#define MPTCPD_PATH_MANAGER_PRIVATE_H
+#ifndef MPTCPD_PRIVATE_PATH_MANAGER_H
+#define MPTCPD_PRIVATE_PATH_MANAGER_H
 
 #include <mptcpd/types.h>
 
@@ -30,7 +30,7 @@ struct mptcpd_nm;
 struct mptcpd_idm;
 
 /**
- * @struct mptcpd_pm path_manager_private.h <mptcpd/path_manager_private.h>
+ * @struct mptcpd_pm path_manager_private.h <mptcpd/private/path_manager.h>
  *
  * @brief Data needed to run the path manager.
  *
@@ -304,7 +304,7 @@ struct mptcpd_pm_cmd_ops
 }
 #endif
 
-#endif /* MPTCPD_PATH_MANAGER_PRIVATE_H */
+#endif /* MPTCPD_PRIVATE_PATH_MANAGER_H */
 
 /*
   Local Variables:

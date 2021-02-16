@@ -4,11 +4,11 @@
  *
  * @brief Common path manager plugin functions.
  *
- * Copyright (c) 2018-2020, Intel Corporation
+ * Copyright (c) 2018-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>
+# include <mptcpd/private/config.h>
 #endif
 
 #include <sys/types.h>
@@ -39,7 +39,7 @@
 # define MPTCP_PM_NAME_LEN GENL_NAMSIZ
 #endif
 
-#include <mptcpd/plugin_private.h>
+#include <mptcpd/private/plugin.h>
 #include <mptcpd/plugin.h>
 #include <mptcpd/mptcp_private.h>
 

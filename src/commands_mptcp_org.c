@@ -8,7 +8,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>
+# include <mptcpd/private/config.h>
 #endif
 
 #include <assert.h>
@@ -21,7 +21,7 @@
 #include "commands.h"
 
 #include <mptcpd/mptcp_private.h>
-#include <mptcpd/path_manager_private.h>
+#include <mptcpd/private/path_manager.h>
 #include <mptcpd/path_manager.h>
 
 

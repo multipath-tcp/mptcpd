@@ -4,11 +4,11 @@
  *
  * @brief MPTCP single-subflow-per-interface path manager plugin.
  *
- * Copyright (c) 2018-2020, Intel Corporation
+ * Copyright (c) 2018-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
-# include <mptcpd/config-private.h>  // For NDEBUG and mptcpd VERSION.
+# include <mptcpd/private/config.h>  // For NDEBUG and mptcpd VERSION.
 #endif
 
 #include <assert.h>

@@ -4,14 +4,14 @@
  *
  * @brief mptcpd test plugin call functions.
  *
- * Copyright (c) 2019-2020, Intel Corporation
+ * Copyright (c) 2019-2021, Intel Corporation
  */
 
 #undef NDEBUG
 #include <assert.h>
 #include <stdlib.h>
 
-#include <mptcpd/plugin_private.h>
+#include <mptcpd/private/plugin.h>
 
 #include "test-plugin.h"
 

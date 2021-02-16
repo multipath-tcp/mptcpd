@@ -30,7 +30,7 @@ ltmain.sh
 .libs
 stamp*
 config.*
-config-private.h*
+private/config.h*
 mptcpd-*/
 *.tar.*
 core*

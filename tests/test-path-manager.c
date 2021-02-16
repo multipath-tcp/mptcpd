@@ -4,7 +4,7 @@
  *
  * @brief mptcpd path manager test.
  *
- * Copyright (c) 2019-2020, Intel Corporation
+ * Copyright (c) 2019-2021, Intel Corporation
  */
 
 #undef NDEBUG
@@ -23,7 +23,7 @@
 
 #include "../src/configuration.h"        // INTERNAL!
 #include "../src/path_manager.h"         // INTERNAL!
-#include <mptcpd/path_manager_private.h> // INTERNAL!
+#include <mptcpd/private/path_manager.h> // INTERNAL!
 #include <mptcpd/path_manager.h>
 #include <mptcpd/mptcp_private.h>
 
