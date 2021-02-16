@@ -4,7 +4,7 @@
  *
  * @brief MPTCP test plugin.
  *
- * Copyright (c) 2019-2020, Intel Corporation
+ * Copyright (c) 2019-2021, Intel Corporation
  */
 
 #undef NDEBUG

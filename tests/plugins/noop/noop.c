@@ -4,7 +4,7 @@
  *
  * @brief MPTCP test plugin.
  *
- * Copyright (c) 2019-2020, Intel Corporation
+ * Copyright (c) 2019-2021, Intel Corporation
  */
 
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().

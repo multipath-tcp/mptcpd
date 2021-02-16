@@ -4,7 +4,7 @@
  *
  * @brief mptcpd plugin test.
  *
- * Copyright (c) 2018-2020, Intel Corporation
+ * Copyright (c) 2018-2021, Intel Corporation
  */
 
 #undef NDEBUG

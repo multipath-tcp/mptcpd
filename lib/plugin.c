@@ -4,7 +4,7 @@
  *
  * @brief Common path manager plugin functions.
  *
- * Copyright (c) 2018-2020, Intel Corporation
+ * Copyright (c) 2018-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H

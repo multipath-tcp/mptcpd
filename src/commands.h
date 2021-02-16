@@ -4,7 +4,7 @@
  *
  * @brief mptcpd generic netlink command utilities.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2021, Intel Corporation
  */
 
 #ifndef MPTCPD_COMMANDS_H

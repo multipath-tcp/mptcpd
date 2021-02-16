@@ -4,7 +4,7 @@
  *
  * @brief mptcpd @c struct @c sockaddr related utility functions.
  *
- * Copyright (c) 2019-2020, Intel Corporation
+ * Copyright (c) 2019-2021, Intel Corporation
  */
 
 #include <string.h>

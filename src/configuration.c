@@ -4,7 +4,7 @@
  *
  * @brief Mptcpd configuration parser implementation.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H

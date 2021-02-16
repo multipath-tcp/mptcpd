@@ -4,7 +4,7 @@
  *
  * @brief MPTCP address advertiser path manager plugin.
  *
- * Copyright (c) 2020, Intel Corporation
+ * Copyright (c) 2020-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
