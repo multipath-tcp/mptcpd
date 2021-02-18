@@ -21,6 +21,7 @@ struct sockaddr;
 
 struct l_genl;
 struct l_genl_family;
+struct l_queue;
 struct l_timeout;
 
 struct mptcpd_netlink_pm;
@@ -88,6 +89,25 @@ struct mptcpd_pm
          * generated IDs as needed..
          */
         struct mptcpd_idm *idm;
+
+        /// List of @c pm_ops_info objects.
+        struct l_queue *event_ops;
+};
+
+// -------------------------------------------------------------------
+
+/**
+ * @struct pm_ops_info
+ *
+ * @brief Path manager event tracking callback information.
+ */
+struct pm_ops_info
+{
+        /// Path manager event tracking operations.
+        struct mptcpd_pm_ops const *ops;
+
+        /// Data passed to the network event tracking operations.
+        void *user_data;
 };
 
 /**

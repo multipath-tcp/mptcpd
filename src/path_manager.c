@@ -23,9 +23,11 @@
 
 #include <ell/genl.h>
 #include <ell/log.h>
+#include <ell/queue.h>
 #include <ell/timeout.h>
 #include <ell/util.h>
 
+#include <mptcpd/path_manager.h>
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/private/plugin.h>
 #include <mptcpd/network_monitor.h>
@@ -847,6 +849,26 @@ static void complete_pm_init(struct mptcpd_pm *pm)
         }
 }
 
+static void notify_pm_ready(void *data, void *user_data)
+{
+        struct pm_ops_info         *const info = data;
+        struct mptcpd_pm_ops const *const ops  = info->ops;
+        struct mptcpd_pm           *const pm   = user_data;
+
+        if (ops->ready)
+                ops->ready(pm, info->user_data);
+}
+
+static void notify_pm_not_ready(void *data, void *user_data)
+{
+        struct pm_ops_info         *const info = data;
+        struct mptcpd_pm_ops const *const ops  = info->ops;
+        struct mptcpd_pm           *const pm   = user_data;
+
+        if (ops->not_ready)
+                ops->not_ready(pm, info->user_data);
+}
+
 /**
  * @brief Handle MPTCP generic netlink family appearing on us.
  *
@@ -896,6 +918,8 @@ static void family_appeared(struct l_genl_family_info const *info,
         pm->family = l_genl_family_new(pm->genl, name);
 
         complete_pm_init(pm);
+
+        l_queue_foreach(pm->event_ops, notify_pm_ready, pm);
 }
 
 /**
@@ -928,6 +952,8 @@ static void family_vanished(char const *name, void *user_data)
 
         // Re-arm the MPTCP generic netlink family timeout.
         l_timeout_modify(pm->timeout, FAMILY_TIMEOUT_SECONDS);
+
+        l_queue_foreach(pm->event_ops, notify_pm_not_ready, pm);
 }
 
 /**
@@ -1037,6 +1063,8 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
+        pm->event_ops = l_queue_new();
+
         return pm;
 }
 
@@ -1052,6 +1080,7 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
          */
         mptcpd_plugin_unload(pm);
 
+        l_queue_destroy(pm->event_ops, l_free);
         mptcpd_idm_destroy(pm->idm);
         mptcpd_nm_destroy(pm->nm);
         l_timeout_remove(pm->timeout);

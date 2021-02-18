@@ -17,6 +17,7 @@
 #include <netinet/in.h>
 
 #include <ell/genl.h>
+#include <ell/queue.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
 
@@ -25,6 +26,8 @@
 #include <mptcpd/plugin.h>
 #include <mptcpd/private/netlink_pm.h>
 
+
+// -------------------------------------------------------------------
 
 static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
 {
@@ -38,6 +41,28 @@ static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
 }
 
 // --------------------------------------------------------------------
+
+bool mptcpd_pm_register_ops(struct mptcpd_pm *pm,
+                            struct mptcpd_pm_ops const *ops,
+                            void *user_data)
+{
+        if (pm == NULL || ops == NULL)
+                return false;
+
+        if (ops->ready        == NULL
+            && ops->not_ready == NULL) {
+                l_error("No path manager event tracking "
+                        "ops were set.");
+
+                return false;
+        }
+
+        struct pm_ops_info *const info = l_malloc(sizeof(*info));
+        info->ops = ops;
+        info->user_data = user_data;
+
+        return l_queue_push_tail(pm->event_ops, info);
+}
 
 bool mptcpd_pm_ready(struct mptcpd_pm const *pm)
 {
