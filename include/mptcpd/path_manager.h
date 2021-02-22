@@ -28,13 +28,23 @@ struct mptcpd_addr_info;
  *
  * A set of functions to be called when changes in the path manager
  * occur.
+ *
+ * @note These callbacks will only fire if the main event loop is
+ *       running, e.g. through the ELL @c l_main_run() function.
+ *       Users only need to be concerned about this if they are
+ *       explicitly creating a @c struct @c mptcpd_pm instance instead
+ *       of relying on mptcpd to do so, such what is done in some
+ *       mptcpd unit tests.
  */
 struct mptcpd_pm_ops
 {
         /**
          * @brief Callback triggered when the path manager is ready.
          *
-         * @param[in] pm        Path manager object..
+         * This callback will be triggered when the mptcpd path
+         * manager is ready to interact with the kernel.
+         *
+         * @param[in] pm        Path manager object.
          * @param[in] user_data User-supplied data.
          */
         void (*ready)(struct mptcpd_pm *pm, void *user_data);
@@ -43,7 +53,10 @@ struct mptcpd_pm_ops
          * @brief Callback triggered when the path manager is not
          *        ready.
          *
-         * @param[in] pm        Path manager object..
+         * This callback will be triggered when the mptcpd path
+         * manager is no longer ready to interact with the kernel.
+         *
+         * @param[in] pm        Path manager object.
          * @param[in] user_data User-supplied data.
          */
         void (*not_ready)(struct mptcpd_pm *pm, void *user_data);
