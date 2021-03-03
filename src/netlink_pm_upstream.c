@@ -256,6 +256,42 @@ static bool append_addr_attr(struct l_genl_msg *msg,
 
 // --------------------------------------------------------------
 
+static uint16_t kernel_to_mptcpd_limit(uint16_t type)
+{
+        // Translate from kernel to mptcpd MPTCP limit.
+        switch(type) {
+        case MPTCP_PM_ATTR_RCV_ADD_ADDRS:
+                return MPTCPD_LIMIT_RCV_ADD_ADDRS;
+        case MPTCP_PM_ATTR_SUBFLOWS:
+                return MPTCPD_LIMIT_SUBFLOWS;
+        default:
+                // Kernel sent an unknown MPTCP limit.
+                l_warn("Unrecognized MPTCP resource "
+                       "limit type: %u.", type);
+
+                break;
+        }
+
+        return type;
+}
+
+static uint16_t mptcpd_to_kernel_limit(uint16_t type)
+{
+        switch(type) {
+        case MPTCPD_LIMIT_RCV_ADD_ADDRS:
+                return MPTCP_PM_ATTR_RCV_ADD_ADDRS;
+        case MPTCPD_LIMIT_SUBFLOWS:
+                return MPTCP_PM_ATTR_SUBFLOWS;
+        default:
+                l_warn("Unrecognized MPTCP resource "
+                       "limit type: %u.", type);
+
+                break;
+        }
+
+        return type;
+}
+
 static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
 {
         struct get_limits_user_callback const *const cb = user_data;
@@ -293,7 +329,7 @@ static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
 
                 struct mptcpd_limit *const l = limits + offset;
 
-                l->type = type;
+                l->type  = kernel_to_mptcpd_limit(type);
                 l->limit = *(uint32_t const *) data;
         }
 
@@ -544,8 +580,10 @@ static int upstream_set_limits(struct mptcpd_pm *pm,
         for (struct mptcpd_limit const *l = limits;
              l != limits + len;
              ++l) {
+                uint16_t const type = mptcpd_to_kernel_limit(l->type);
+
                 if (!l_genl_msg_append_attr(msg,
-                                            l->type,
+                                            type,
                                             sizeof(l->limit),
                                             &l->limit)) {
                         l_genl_msg_unref(msg);
