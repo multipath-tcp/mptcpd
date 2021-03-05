@@ -218,7 +218,7 @@ static void sspi_get_index(struct mptcpd_interface const *interface,
         */
         if (l_queue_find(interface->addrs,
                          sspi_sockaddr_match,
-                         &callback_data->addr) != NULL) {
+                         callback_data->addr) != NULL) {
                 callback_data->index = interface->index;
         } else {
                 /*
