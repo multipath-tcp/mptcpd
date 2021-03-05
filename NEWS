@@ -1,3 +1,5 @@
+- A network interface lookup problem in the "sspi" plugin was fixed.
+
 25 January 2021 - mptcpd 0.6
 
 - Mptcpd now supports versions of the Embedded Linux Library (ELL)
