@@ -46,7 +46,7 @@ struct mptcpd_pm
         /// Mptcpd configuration.
         struct mptcpd_config const *config;
 
-        /// Kernel MPTCP generic netlink path manager detailscommand .
+        /// Kernel MPTCP generic netlink path manager details.
         struct mptcpd_netlink_pm const *netlink_pm;
 
         /// Core ELL generic netlink object.
