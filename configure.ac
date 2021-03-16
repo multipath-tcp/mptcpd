@@ -214,7 +214,7 @@ AC_CHECK_HEADERS([linux/mptcp.h],
              [AC_MSG_ERROR([Discrepancy in <linux/mptcp.h>.])])
         ])
    ],
-   [AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])])
+   [AC_MSG_WARN([Usable <linux/mptcp.h> header not found. Using fallback.])])
 
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.
