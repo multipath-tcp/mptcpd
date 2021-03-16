@@ -209,7 +209,7 @@ AC_CHECK_HEADERS([linux/mptcp.h],
         [
          AX_CHECK_DEFINE(
              [linux/mptcp.h],
-             [MPTCP_GENL_NAME],
+             [MPTCP_GENL_EV_GRP_NAME],
              [AC_DEFINE([HAVE_LINUX_MPTCP_H_MPTCP_ORG], [1])],
              [AC_MSG_ERROR([Discrepancy in <linux/mptcp.h>.])])
         ])
