@@ -204,7 +204,7 @@ AC_CHECK_HEADERS([linux/mptcp.h],
    [
     AX_CHECK_DEFINE(
         [linux/mptcp.h],
-        [MPTCP_PM_EV_GRP_NAME],
+        [MPTCP_PM_NAME],
         [AC_DEFINE([HAVE_LINUX_MPTCP_H_UPSTREAM], [1])],
         [
          AX_CHECK_DEFINE(
@@ -214,7 +214,7 @@ AC_CHECK_HEADERS([linux/mptcp.h],
              [AC_MSG_ERROR([Discrepancy in <linux/mptcp.h>.])])
         ])
    ],
-   [AC_MSG_WARN([Usable <linux/mptcp.h> header not found. Using fallback.])])
+   [AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])])
 
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.
