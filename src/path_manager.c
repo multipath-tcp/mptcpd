@@ -31,57 +31,18 @@
 #include <mptcpd/network_monitor.h>
 #include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>
-#include <mptcpd/mptcp_private.h>
 #include <mptcpd/private/sockaddr.h>
 #include <mptcpd/addr_info.h>
 
+// For netlink events.  Same API applies to multipath-tcp.org kernel.
+#include <mptcpd/private/mptcp_upstream.h>
+
 #include "path_manager.h"
 #include "configuration.h"
-#include "commands.h"
-
-/// Directory containing MPTCP sysctl variable entries.
-#define MPTCP_SYSCTL_BASE "/proc/sys/net/mptcp/"
-
-/// Constuct full path for MPTCP sysctl variable "@a name".
-#define MPTCP_SYSCTL_VARIABLE(name) MPTCP_SYSCTL_BASE #name
-
-/**
- * @brief Maximum path manager name length.
- *
- * @note @c MPTCP_PM_NAME_MAX is defined in the internal
- *       @c <net/mptcp.h> header in the multipath-tcp.org kernel.
- */
-#ifndef MPTCP_PM_NAME_MAX
-# define MPTCP_PM_NAME_MAX 16
-#endif
+#include "netlink_pm.h"
 
 
 static unsigned int const FAMILY_TIMEOUT_SECONDS = 10;
-
-/**
- * @brief Check for multipath-tcp.org kernel path manager.
- *
- * Determine if the given generic netlink family name corresponds to
- * the multipath-tcp.org Linux kernel "netlink" path manager.
- *
- * @param[in] family_name Generic netlink family name.
- *
- * @return @c true if @a family_name corresponds to the
- *         multipath-tcp.org Linux kernel generic netlink path
- *         manager, and @c false otherwise.
- */
-static inline bool is_mptcp_org_kernel_pm(char const *family_name)
-{
-        /*
-          Sanity check:
-            We assume upstream and multipath-tcp.org
-            kernels to use different family names for their respective
-            generic netlink path management APIs.
-        */
-        assert(strcmp(MPTCP_GENL_NAME, MPTCP_PM_NAME) != 0);
-
-        return strcmp(family_name, MPTCP_GENL_NAME) == 0;
-}
 
 /**
  * @brief Validate generic netlink attribute size.
@@ -792,131 +753,6 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
         };
 }
 
-/**
- * @brief Verify that MPTCP is enabled at run-time in the kernel.
- *
- * Check that MPTCP is enabled through the @c net.mptcp.mptcp_enabled
- * @c sysctl variable if it exists.
- *
- * @note The @c net.mptcp.mptcp_enabled is supported by the
- *       multipath-tcp.org kernel.
- */
-static bool check_kernel_mptcp_enabled(char const *path,
-                                       char const *variable,
-                                       int enable_val)
-{
-        FILE *const f = fopen(path, "r");
-
-        if (f == NULL)
-                return false;  // Not using kernel that supports given
-                               // MPTCP sysctl variable.
-
-        int enabled = 0;
-        int const n = fscanf(f, "%d", &enabled);
-
-        fclose(f);
-
-        if (n == 1) {
-                if (enabled == 0) {
-                        l_error("MPTCP is not enabled in the kernel.");
-                        l_error("Try 'sysctl -w net.mptcp.%s=%d'.",
-                                variable,
-                                enable_val);
-
-                        /*
-                          Mptcpd should not set this variable since it
-                          would need to be run as root in order to
-                          gain write access to files in
-                          /proc/sys/net/mptcp/ owned by root.
-                          Ideally, mptcpd should not be run as the
-                          root user.
-                        */
-                }
-        } else {
-                l_error("Unable to determine if MPTCP is enabled.");
-        }
-
-        return enabled;
-}
-
-/**
- * @brief Verify that the MPTCP "netlink" path manager is selected.
- *
- * Mptcpd requires MPTCP the "netlink" path manager to be selected at
- * run-time when using the multipath-tcp.org kernel.  Issue a warning
- * if it is not selected.
- */
-static void check_kernel_mptcp_path_manager(void)
-{
-        static char const mptcp_path_manager[] =
-                MPTCP_SYSCTL_BASE "mptcp_path_manager";
-
-        FILE *const f = fopen(mptcp_path_manager, "r");
-
-        if (f == NULL)
-                return;  // Not using multipath-tcp.org kernel.
-
-        char pm[MPTCP_PM_NAME_MAX] = { 0 };
-
-        static char const MPTCP_PM_NAME_FMT[] =
-                "%" L_STRINGIFY(MPTCP_PM_NAME_MAX) "s";
-
-        int const n = fscanf(f, MPTCP_PM_NAME_FMT, pm);
-
-        fclose(f);
-
-        if (likely(n == 1)) {
-                if (strcmp(pm, "netlink") != 0) {
-                        /*
-                          "netlink" could be set as the default.  It
-                          may not appear as "netlink", which is why
-                          "may" is used instead of "is" in the warning
-                          diagnostic below
-                        */
-                        l_warn("MPTCP 'netlink' path manager may "
-                               "not be selected in the kernel.");
-                        l_warn("Try 'sysctl -w "
-                               "net.mptcp.mptcp_path_manager=netlink'.");
-
-                        /*
-                          Mptcpd should not set this variable since it
-                          would need to be run as root in order to
-                          gain write access to files in
-                          /proc/sys/net/mptcp/ owned by root.
-                          Ideally, mptcpd should not be run as the
-                          root user.
-                        */
-                }
-        } else {
-                l_warn("Unable to determine selected MPTCP "
-                       "path manager.");
-        }
-}
-
-static void complete_mptcp_org_kernel_pm_init(struct mptcpd_pm *pm)
-{
-        /*
-          Register callbacks for MPTCP generic netlink multicast
-          notifications.
-        */
-        pm->id = l_genl_family_register(pm->family,
-                                        MPTCP_GENL_EV_GRP_NAME,
-                                        handle_mptcp_event,
-                                        pm,
-                                        NULL /* destroy */);
-
-        if (pm->id == 0) {
-                /**
-                 * @todo Should we exit with an error instead?
-                 */
-                l_warn("Unable to register handler for "
-                       MPTCP_GENL_EV_GRP_NAME
-                       " multicast messages");
-        }
-
-        check_kernel_mptcp_path_manager();
-}
-
 static void dump_addrs_callback(struct mptcpd_addr_info const *info,
                                 void *callback_data)
 {
@@ -956,15 +792,34 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
 static void complete_pm_init(struct mptcpd_pm *pm)
 {
         /*
+          Register callbacks for MPTCP generic netlink multicast
+          notifications.
+        */
+        pm->id = l_genl_family_register(pm->family,
+                                        pm->netlink_pm->group,
+                                        handle_mptcp_event,
+                                        pm,
+                                        NULL /* destroy */);
+
+        if (pm->id == 0) {
+                /**
+                 * @todo Should we exit with an error instead?
+                 */
+                l_warn("Unable to register handler for %s "
+                       "multicast messages",
+                       pm->netlink_pm->group);
+        }
+
+        /*
           MPTCP address IDs may already be assigned prior to mptcpd
           start by other applications or previous runs of mptcpd.
           Synchronize mptcpd address ID manager with address IDs
           maintained by the kernel.
          */
-        if (pm->cmd_ops->dump_addrs != NULL
-            && pm->cmd_ops->dump_addrs(pm,
-                                       dump_addrs_callback,
-                                       pm->idm) != 0)
+        if (pm->netlink_pm->cmd_ops->dump_addrs != NULL
+            && pm->netlink_pm->cmd_ops->dump_addrs(pm,
+                                                   dump_addrs_callback,
+                                                   pm->idm) != 0)
                 l_error("Unable to synchronize ID manager with kernel.");
 
         /**
@@ -1040,9 +895,6 @@ static void family_appeared(struct l_genl_family_info const *info,
 
         pm->family = l_genl_family_new(pm->genl, name);
 
-        if (is_mptcp_org_kernel_pm(name))
-                complete_mptcp_org_kernel_pm_init(pm);
-
         complete_pm_init(pm);
 }
 
@@ -1106,40 +958,14 @@ static struct mptcpd_nm_ops const _nm_ops = {
         .delete_address   = mptcpd_plugin_delete_local_address,
 };
 
-/// Are we being run under a MPTCP-capable upstream kernel?
-static bool is_upstream_kernel(void)
-{
-        static char const path[] = MPTCP_SYSCTL_VARIABLE(enabled);
-        static char const name[] = "enabled";
-        static int  const enable_val = 1;
-
-        return check_kernel_mptcp_enabled(path, name, enable_val);
-}
-
-/// Are we being run under a MPTCP-capable multipath-tcp.org kernel?
-static bool is_mptcp_org_kernel(void)
-{
-        static char const path[] = MPTCP_SYSCTL_VARIABLE(mptcp_enabled);
-        static char const name[] = "mptcp_enabled";
-        static int  const enable_val = 2;  // or 1
-
-        return check_kernel_mptcp_enabled(path, name, enable_val);
-}
-
 struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 {
         assert(config != NULL);
 
-        char const *name = NULL;
-        struct mptcpd_pm_cmd_ops const *cmd_ops = NULL;
+        struct mptcpd_netlink_pm const *netlink_pm =
+                mptcpd_get_netlink_pm();
 
-        if (is_upstream_kernel()) {
-                name = MPTCP_PM_NAME;
-                cmd_ops = mptcpd_get_upstream_cmd_ops();
-        } else if (is_mptcp_org_kernel()) {
-                name = MPTCP_GENL_NAME;
-                cmd_ops = mptcpd_get_mptcp_org_cmd_ops();
-        } else {
+        if (netlink_pm == NULL) {
                 l_error("Required kernel MPTCP support not available.");
                 return NULL;
         }
@@ -1148,8 +974,8 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
 
         // No need to check for NULL.  l_new() abort()s on failure.
 
-        pm->config  = config;
-        pm->cmd_ops = cmd_ops;
+        pm->config     = config;
+        pm->netlink_pm = netlink_pm;
 
         pm->genl = l_genl_new();
         if (pm->genl == NULL) {
@@ -1159,20 +985,20 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         }
 
         if (l_genl_add_family_watch(pm->genl,
-                                    name,
+                                    pm->netlink_pm->name,
                                     family_appeared,
                                     family_vanished,
                                     pm,
                                     NULL) == 0
             || !l_genl_request_family(pm->genl,
-                                      name,
+                                      pm->netlink_pm->name,
                                       family_appeared,
                                       pm,
                                       NULL)) {
                 mptcpd_pm_destroy(pm);
                 l_error("Unable to watch or request \"%s\" "
                         "generic netlink family.",
-                        name);
+                        pm->netlink_pm->name);
                 return NULL;
         }
 

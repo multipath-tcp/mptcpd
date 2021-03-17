@@ -4,7 +4,7 @@
  *
  * @brief mptcpd commands API test.
  *
- * Copyright (c) 2019-2020, Intel Corporation
+ * Copyright (c) 2019-2021, Intel Corporation
  */
 
 #undef NDEBUG
@@ -27,7 +27,6 @@
 
 #include <mptcpd/path_manager.h>
 #include <mptcpd/addr_info.h>
-#include <mptcpd/mptcp_private.h>
 
 
 // -------------------------------------------------------------------

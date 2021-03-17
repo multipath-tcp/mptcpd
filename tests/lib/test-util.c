@@ -4,27 +4,37 @@
  *
  * @brief mptcpd test utilities library.
  *
- * Copyright (c) 2020, Intel Corporation
+ * Copyright (c) 2020-2021, Intel Corporation
  */
+
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/private/config.h>
+#endif
 
 #include <unistd.h>
 
-#include <mptcpd/mptcp_private.h>
+#if defined(HAVE_LINUX_MPTCP_H_UPSTREAM) \
+        || defined(HAVE_LINUX_MPTCP_H_MPTCP_ORG)
+# include <linux/mptcp.h>
+#else
+# include <mptcpd/private/mptcp_upstream.h>
+#endif
 
 #include "test-util.h"
-
-#define MPTCP_SYSCTL_BASE "/proc/sys/net/mptcp/"
 
 
 char const *tests_get_pm_family_name(void)
 {
-        static char const upstream[]  = MPTCP_SYSCTL_BASE "enabled";
-        static char const mptcp_org[] = MPTCP_SYSCTL_BASE "mptcp_enabled";
-
-        if (access(upstream, R_OK) == 0)
-                return MPTCP_PM_NAME;
-        else if (access(mptcp_org, R_OK) == 0)
-                return MPTCP_GENL_NAME;
-
-        return NULL;  // Not a MPTCP-capable kernel.
+#ifdef MPTCP_PM_NAME
+        return MPTCP_PM_NAME;
+#else
+        return MPTCP_GENL_NAME;
+#endif
 }
+
+
+/*
+  Local Variables:
+  c-file-style: "linux"
+  End:
+*/

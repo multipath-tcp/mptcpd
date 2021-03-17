@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file commands_upstream.c
+ * @file netlink_pm_upstream.c
  *
- * @brief Upstream kernel MPTCP generic netlink commands.
+ * @brief Upstream kernel generic netlink path manager details.
  *
- * Copyright (c) 2020, Intel Corporation
+ * Copyright (c) 2020-2021, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -19,7 +19,8 @@
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error(), etc.
 #include <ell/log.h>
 
-#include <mptcpd/mptcp_private.h>
+#include <mptcpd/private/mptcp_upstream.h>
+#include <mptcpd/private/netlink_pm.h>
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/path_manager.h>
 #include <mptcpd/types.h>
@@ -255,6 +256,42 @@ static bool append_addr_attr(struct l_genl_msg *msg,
 
 // --------------------------------------------------------------
 
+static uint16_t kernel_to_mptcpd_limit(uint16_t type)
+{
+        // Translate from kernel to mptcpd MPTCP limit.
+        switch(type) {
+        case MPTCP_PM_ATTR_RCV_ADD_ADDRS:
+                return MPTCPD_LIMIT_RCV_ADD_ADDRS;
+        case MPTCP_PM_ATTR_SUBFLOWS:
+                return MPTCPD_LIMIT_SUBFLOWS;
+        default:
+                // Kernel sent an unknown MPTCP limit.
+                l_warn("Unrecognized MPTCP resource "
+                       "limit type: %u.", type);
+
+                break;
+        }
+
+        return type;
+}
+
+static uint16_t mptcpd_to_kernel_limit(uint16_t type)
+{
+        switch(type) {
+        case MPTCPD_LIMIT_RCV_ADD_ADDRS:
+                return MPTCP_PM_ATTR_RCV_ADD_ADDRS;
+        case MPTCPD_LIMIT_SUBFLOWS:
+                return MPTCP_PM_ATTR_SUBFLOWS;
+        default:
+                l_warn("Unrecognized MPTCP resource "
+                       "limit type: %u.", type);
+
+                break;
+        }
+
+        return type;
+}
+
 static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
 {
         struct get_limits_user_callback const *const cb = user_data;
@@ -292,7 +329,7 @@ static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
 
                 struct mptcpd_limit *const l = limits + offset;
 
-                l->type = type;
+                l->type  = kernel_to_mptcpd_limit(type);
                 l->limit = *(uint32_t const *) data;
         }
 
@@ -543,8 +580,10 @@ static int upstream_set_limits(struct mptcpd_pm *pm,
         for (struct mptcpd_limit const *l = limits;
              l != limits + len;
              ++l) {
+                uint16_t const type = mptcpd_to_kernel_limit(l->type);
+
                 if (!l_genl_msg_append_attr(msg,
-                                            l->type,
+                                            type,
                                             sizeof(l->limit),
                                             &l->limit)) {
                         l_genl_msg_unref(msg);
@@ -596,9 +635,15 @@ static struct mptcpd_pm_cmd_ops const cmd_ops =
         .get_limits  = upstream_get_limits
 };
 
-struct mptcpd_pm_cmd_ops const *mptcpd_get_upstream_cmd_ops(void)
+static struct mptcpd_netlink_pm const npm = {
+        .name    = MPTCP_PM_NAME,
+        .group   = MPTCP_PM_EV_GRP_NAME,
+        .cmd_ops = &cmd_ops
+};
+
+struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm_upstream(void)
 {
-        return &cmd_ops;
+        return &npm;
 }
 
 /*

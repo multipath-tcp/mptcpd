@@ -23,7 +23,7 @@
 #include <mptcpd/path_manager.h>
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/plugin.h>
-#include <mptcpd/mptcp_private.h>
+#include <mptcpd/private/netlink_pm.h>
 
 
 static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
@@ -57,7 +57,8 @@ int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
         if (!is_pm_ready(pm, __func__))
                 return EAGAIN;
 
-        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
 
         if (ops->add_addr == NULL)
                 return ENOTSUP;
@@ -80,7 +81,8 @@ int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
         if (!is_pm_ready(pm, __func__))
                 return EAGAIN;
 
-        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
 
         if (ops->remove_addr == NULL)
                 return ENOTSUP;
@@ -99,7 +101,8 @@ int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
         if (!is_pm_ready(pm, __func__))
                 return EAGAIN;
 
-        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
 
         if (ops->get_addr == NULL)
                 return ENOTSUP;
@@ -117,7 +120,8 @@ int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
         if (!is_pm_ready(pm, __func__))
                 return EAGAIN;
 
-        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
 
         if (ops->dump_addrs == NULL)
                 return ENOTSUP;
@@ -133,7 +137,8 @@ int mptcpd_pm_flush_addrs(struct mptcpd_pm *pm)
         if (!is_pm_ready(pm, __func__))
                 return EAGAIN;
 
-        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
 
         if (ops->flush_addrs == NULL)
                 return ENOTSUP;
@@ -151,7 +156,8 @@ int mptcpd_pm_set_limits(struct mptcpd_pm *pm,
         if (!is_pm_ready(pm, __func__))
                 return EAGAIN;
 
-        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
 
         if (ops->set_limits == NULL)
                 return ENOTSUP;
@@ -169,7 +175,8 @@ int mptcpd_pm_get_limits(struct mptcpd_pm *pm,
         if (!is_pm_ready(pm, __func__))
                 return EAGAIN;
 
-        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
 
         if (ops->get_limits == NULL)
                 return ENOTSUP;
@@ -191,7 +198,8 @@ int mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
         if (!is_pm_ready(pm, __func__))
                 return EAGAIN;
 
-        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
 
         if (ops->add_subflow == NULL)
                 return ENOTSUP;
@@ -217,7 +225,8 @@ int mptcpd_pm_set_backup(struct mptcpd_pm *pm,
         if (!is_pm_ready(pm, __func__))
                 return EAGAIN;
 
-        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
 
         if (ops->set_backup == NULL)
                 return ENOTSUP;
@@ -240,7 +249,8 @@ int mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
         if (!is_pm_ready(pm, __func__))
                 return EAGAIN;
 
-        struct mptcpd_pm_cmd_ops const *const ops = pm->cmd_ops;
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
 
         if (ops->remove_subflow == NULL)
                 return ENOTSUP;

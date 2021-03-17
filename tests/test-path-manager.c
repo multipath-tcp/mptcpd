@@ -25,7 +25,6 @@
 #include "../src/path_manager.h"         // INTERNAL!
 #include <mptcpd/private/path_manager.h> // INTERNAL!
 #include <mptcpd/path_manager.h>
-#include <mptcpd/mptcp_private.h>
 
 // -------------------------------------------------------------------
 

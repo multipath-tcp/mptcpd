@@ -20,7 +20,6 @@ extern "C" {
 struct sockaddr;
 struct mptcpd_pm;
 struct mptcpd_addr_info;
-struct mptcpd_limits;
 
 /**
  * @brief Is mptcpd path manager ready for use?

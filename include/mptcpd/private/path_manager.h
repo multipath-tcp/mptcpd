@@ -23,7 +23,7 @@ struct l_genl;
 struct l_genl_family;
 struct l_timeout;
 
-struct mptcpd_pm_cmd_ops;
+struct mptcpd_netlink_pm;
 struct mptcpd_addr_info;
 struct mptcpd_limit;
 struct mptcpd_nm;
@@ -46,8 +46,8 @@ struct mptcpd_pm
         /// Mptcpd configuration.
         struct mptcpd_config const *config;
 
-        /// MPTCP path management generic netlink command functions.
-        struct mptcpd_pm_cmd_ops const *cmd_ops;
+        /// Kernel MPTCP generic netlink path manager details.
+        struct mptcpd_netlink_pm const *netlink_pm;
 
         /// Core ELL generic netlink object.
         struct l_genl *genl;

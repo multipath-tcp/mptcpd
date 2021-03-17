@@ -4,7 +4,7 @@
  *
  * @brief mptcpd user space path manager attribute types.
  *
- * Copyright (c) 2018-2020, Intel Corporation
+ * Copyright (c) 2018-2021, Intel Corporation
  */
 
 #ifndef MPTCPD_TYPES_H
@@ -34,12 +34,19 @@ typedef uint8_t mptcpd_aid_t;
 /// MPTCP flags type.
 typedef uint32_t mptcpd_flags_t;
 
-/// Maximum number of address advertisements to receive.
-#define MPTCPD_LIMIT_RCV_ADD_ADDRS MPTCP_PM_ATTR_RCV_ADD_ADDRS
+/**
+ * @enum mptcp_limit_types
+ *
+ * @brief MPTCP resource limit type identifiers.
+ */
+enum mptcpd_limit_types
+{
+        /// Maximum number of address advertisements to receive.
+        MPTCPD_LIMIT_RCV_ADD_ADDRS,
 
-/// Maximum number of subflows.
-#define MPTCPD_LIMIT_SUBFLOWS MPTCP_PM_ATTR_SUBFLOWS
-
+        /// Maximum number of subflows.
+        MPTCPD_LIMIT_SUBFLOWS
+};
 
 struct mptcpd_addr_info;
 

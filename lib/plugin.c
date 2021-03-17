@@ -41,7 +41,6 @@
 
 #include <mptcpd/private/plugin.h>
 #include <mptcpd/plugin.h>
-#include <mptcpd/mptcp_private.h>
 
 
 // ----------------------------------------------------------------
