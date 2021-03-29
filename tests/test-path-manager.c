@@ -17,7 +17,6 @@
 #include <ell/timeout.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
 #include <ell/log.h>
-#include <ell/test.h>
 
 #include "test-util.h"
 
@@ -36,7 +35,44 @@ struct test_info
 
         struct mptcpd_pm *pm;
 
-        bool tests_called;
+        bool internals_check_called;
+        bool pm_ready_called;
+        bool pm_not_ready_called;
+};
+
+// -------------------------------------------------------------------
+
+static void pm_ready(struct mptcpd_pm *pm, void *user_data)
+{
+        (void) pm;
+
+        struct test_info *const info = (struct test_info *) user_data;
+
+        info->pm_ready_called = true;
+
+        l_main_quit();
+}
+
+static void pm_not_ready(struct mptcpd_pm *pm, void *user_data)
+{
+        (void) pm;
+
+        /*
+          This callback should only be triggered if MPTCP generic
+          netlink family is not available.  Either the netlink path
+          manager in the kernel was enabled, or MPTCP is not supported
+          by the kernel.
+         */
+        struct test_info *const info = (struct test_info *) user_data;
+
+        info->pm_not_ready_called = true;
+
+        l_main_quit();
+}
+
+static struct mptcpd_pm_ops const pm_ops = {
+        .ready     = pm_ready,
+        .not_ready = pm_not_ready
 };
 
 // -------------------------------------------------------------------
@@ -58,6 +94,16 @@ static void test_pm_create(void const *test_data)
         */
 }
 
+static void test_pm_register_ops(void const *test_data)
+{
+        struct test_info *const info = (struct test_info *) test_data;
+
+        bool const registered =
+                mptcpd_pm_register_ops(info->pm, &pm_ops, info);
+
+        assert(registered);
+}
+
 static void test_pm_destroy(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
@@ -71,8 +117,8 @@ static void test_pm_destroy(void const *test_data)
 
 // -------------------------------------------------------------------
 
-static void run_tests(struct l_genl_family_info const *info,
-                      void *user_data)
+static void test_pm_internals(struct l_genl_family_info const *info,
+                              void *user_data)
 {
         /*
           Check if the initial request for the MPTCP generic netlink
@@ -87,11 +133,7 @@ static void run_tests(struct l_genl_family_info const *info,
         assert(strcmp(l_genl_family_info_get_name(info),
                       t->family_name) == 0);
 
-        l_test_run();
-
-        t->tests_called = true;
-
-        l_main_quit();
+        t->internals_check_called = true;
 }
 
 static void timeout_callback(struct l_timeout *timeout,
@@ -120,7 +162,6 @@ int main(void)
                 "--plugin-dir",
                 TEST_PLUGIN_DIR
         };
-        static char **args = argv;
 
         static int argc = L_ARRAY_SIZE(argv);
 
@@ -132,10 +173,8 @@ int main(void)
         assert(info.config);
         assert(info.family_name);
 
-        l_test_init(&argc, &args);
-
-        l_test_add("pm_create",  test_pm_create,  &info);
-        l_test_add("pm_destroy", test_pm_destroy, &info);
+        test_pm_create(&info);
+        test_pm_register_ops(&info);
 
         /*
           Run the path manager lifecycle tests when the "mptcp"
@@ -147,7 +186,7 @@ int main(void)
         unsigned int const watch_id =
                 l_genl_add_family_watch(genl,
                                         info.family_name,
-                                        run_tests,
+                                        test_pm_internals,
                                         NULL,
                                         &info,
                                         NULL);
@@ -156,7 +195,7 @@ int main(void)
 
         bool const requested = l_genl_request_family(genl,
                                                      info.family_name,
-                                                     run_tests,
+                                                     test_pm_internals,
                                                      &info,
                                                      NULL);
         assert(requested);
@@ -171,11 +210,15 @@ int main(void)
 
         (void) l_main_run();
 
+        test_pm_destroy(&info);
+
         /*
           The tests will have run only if the "mptcp" generic netlink
           family appeared.
          */
-        assert(info.tests_called);
+        assert(info.internals_check_called);
+        assert(info.pm_ready_called);
+        assert(!info.pm_not_ready_called);
 
         l_timeout_remove(timeout);
         l_genl_remove_family_watch(genl, watch_id);
