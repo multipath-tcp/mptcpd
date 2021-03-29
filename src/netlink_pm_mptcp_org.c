@@ -67,7 +67,7 @@ static void check_kernel_mptcp_path_manager(void)
 
         fclose(f);
 
-        if (likely(n == 1)) {
+        if (n == 1) {
                 if (strcmp(pm, "netlink") != 0) {
                         /*
                           "netlink" could be set as the default.  It
