@@ -61,7 +61,12 @@ bool mptcpd_pm_register_ops(struct mptcpd_pm *pm,
         info->ops = ops;
         info->user_data = user_data;
 
-        return l_queue_push_tail(pm->event_ops, info);
+        bool const registered = l_queue_push_tail(pm->event_ops, info);
+
+        if (!registered)
+                l_free(info);
+
+        return registered;
 }
 
 bool mptcpd_pm_ready(struct mptcpd_pm const *pm)
