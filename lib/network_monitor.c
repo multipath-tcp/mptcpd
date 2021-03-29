@@ -1281,7 +1281,12 @@ bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
         info->ops = ops;
         info->user_data = user_data;
 
-        return l_queue_push_tail(nm->ops, info);
+        bool const registered = l_queue_push_tail(nm->ops, info);
+
+        if (!registered)
+                l_free(info);
+
+        return registered;
 }
 
 
