@@ -715,7 +715,7 @@ insert_addr_return(struct mptcpd_interface *interface,
 {
         struct sockaddr *addr = mptcpd_sockaddr_create(rtm_addr);
 
-        if (unlikely(addr == NULL)
+        if (addr == NULL
             || !l_queue_insert(interface->addrs,
                                addr,
                                mptcpd_sockaddr_compare,

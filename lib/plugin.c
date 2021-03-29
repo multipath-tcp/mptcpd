@@ -150,7 +150,7 @@ static struct mptcpd_plugin_ops const *token_to_ops(mptcpd_token_t token)
                 l_hashmap_lookup(_token_to_ops,
                                  L_UINT_TO_PTR(token));
 
-        if (unlikely(ops == NULL))
+        if (ops == NULL)
                 l_error("Unable to match token to plugin.");
 
         return ops;
@@ -310,7 +310,7 @@ static int load_plugins(char const *dir, struct mptcpd_pm *pm)
 
         DIR *const ds = fdopendir(fd);
 
-        if (unlikely(ds == NULL)) {
+        if (ds == NULL) {
                 report_error(errno,
                              "fdopendir() on plugin directory failed");
 
