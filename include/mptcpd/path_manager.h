@@ -22,6 +22,67 @@ struct mptcpd_pm;
 struct mptcpd_addr_info;
 
 /**
+ * @struct mptcpd_pm_ops path_manager.h <mptcpd/path_manager.h>
+ *
+ * @brief Path manager event tracking operations.
+ *
+ * A set of functions to be called when changes in the path manager
+ * occur.
+ *
+ * @note These callbacks will only fire if the main event loop is
+ *       running, e.g. through the ELL @c l_main_run() function.
+ *       Users only need to be concerned about this if they are
+ *       explicitly creating a @c struct @c mptcpd_pm instance instead
+ *       of relying on mptcpd to do so, such what is done in some
+ *       mptcpd unit tests.
+ */
+struct mptcpd_pm_ops
+{
+        /**
+         * @brief Callback triggered when the path manager is ready.
+         *
+         * This callback will be triggered when the mptcpd path
+         * manager is ready to interact with the kernel.
+         *
+         * @param[in] pm        Path manager object.
+         * @param[in] user_data User-supplied data.
+         */
+        void (*ready)(struct mptcpd_pm *pm, void *user_data);
+
+        /**
+         * @brief Callback triggered when the path manager is not
+         *        ready.
+         *
+         * This callback will be triggered when the mptcpd path
+         * manager is no longer ready to interact with the kernel.
+         *
+         * @param[in] pm        Path manager object.
+         * @param[in] user_data User-supplied data.
+         */
+        void (*not_ready)(struct mptcpd_pm *pm, void *user_data);
+};
+
+/**
+ * @brief Subscribe to mptcpd path manager events.
+ *
+ * Register a set of operations that will be called on a corresponding
+ * mptcpd path manager event, e.g. path manager readiness.
+ *
+ * @param[in,out] pm        Pointer to the mptcpd path manager
+ *                          object.
+ * @param[in]     ops       Set of path manager event handling
+ *                          functions.
+ * @param[in]     user_data Data to be passed to the path manager
+ *                          event tracking operations.
+ *
+ * @retval true  Registration succeeded.
+ * @retval false Registration failed.
+ */
+MPTCPD_API bool mptcpd_pm_register_ops(struct mptcpd_pm *pm,
+                                       struct mptcpd_pm_ops const *ops,
+                                       void *user_data);
+
+/**
  * @brief Is mptcpd path manager ready for use?
  *
  * The mptcpd path manager is ready for use when the @c "mptcp"
