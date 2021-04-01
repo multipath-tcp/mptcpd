@@ -243,6 +243,17 @@ struct mptcpd_pm_cmd_ops
         int (*get_limits)(struct mptcpd_pm *pm,
                           mptcpd_pm_get_limits_cb callback,
                           void *data);
+
+        /**
+         * @brief
+         *
+         * @param[in] pm    The mptcpd path manager object.
+         * @param[in] addr  Local IP address information.
+         * @param[in] flags Flags to be associated with @a addr.
+         */
+        int (*set_flags)(struct mptcpd_pm *pm,
+                         struct sockaddr const *addr,
+                         mptcpd_flags_t flags);
         //@}
 
         /**
