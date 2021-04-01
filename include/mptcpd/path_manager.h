@@ -201,6 +201,19 @@ MPTCPD_API int mptcpd_pm_set_limits(struct mptcpd_pm *pm,
                                     size_t len);
 
 /**
+ * @brief Set MPTCP resource limits.
+ *
+ * @param[in] pm    The mptcpd path manager object.
+ * @param[in] addr  Local IP address.
+ * @param[in] flags Flags to be associated with @a addr.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_pm_set_flags(struct mptcpd_pm *pm,
+                                   struct sockaddr const *addr,
+                                   mptcpd_flags_t flags);
+
+/**
  * @brief Get MPTCP resource limits.
  *
  * @param[in] pm       The mptcpd path manager object.

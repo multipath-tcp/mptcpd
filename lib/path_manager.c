@@ -214,6 +214,25 @@ int mptcpd_pm_get_limits(struct mptcpd_pm *pm,
         return ops->get_limits(pm, callback, data);
 }
 
+int mptcpd_pm_set_flags(struct mptcpd_pm *pm,
+                        struct sockaddr const *addr,
+                        mptcpd_flags_t flags)
+{
+        if (pm == NULL || addr == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
+
+        if (ops->set_flags == NULL)
+                return ENOTSUP;
+
+        return ops->set_flags(pm, addr, flags);
+}
+
 int mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                           mptcpd_token_t token,
                           mptcpd_aid_t local_address_id,
