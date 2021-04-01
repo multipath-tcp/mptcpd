@@ -7,7 +7,7 @@
 AC_PREREQ([2.69])
 AC_INIT([mptcpd],
         [0.6],
-        [mptcp@lists.01.org],
+        [mptcp@lists.linux.dev],
         [],
         [https://01.org/multipath-tcp-linux])
 
