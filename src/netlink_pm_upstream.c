@@ -617,7 +617,7 @@ static int upstream_get_limits(struct mptcpd_pm *pm,
         cb->get_limits = callback;
         cb->data       = data;
 
-        return l_genl_family_dump(pm->family,
+        return l_genl_family_send(pm->family,
                                   msg,
                                   get_limits_callback,
                                   cb,     /* user data */
