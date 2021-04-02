@@ -23,6 +23,8 @@
 
 #define MPTCPD_NLA_ALIGN(v) (NLA_HDRLEN + NLA_ALIGN(sizeof(v)))
 #define MPTCPD_NLA_ALIGN_OPT(v) ((v) == 0 ? 0 : (MPTCPD_NLA_ALIGN(v)))
+#define MPTCPD_NLA_ALIGN_ADDR(v) \
+        (NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(v)))
 
 
 #ifdef __cplusplus
