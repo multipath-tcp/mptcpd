@@ -216,7 +216,7 @@ static int mptcp_org_add_addr(struct mptcpd_pm *pm,
                 MPTCPD_NLA_ALIGN(token)
                 + MPTCPD_NLA_ALIGN(id)
                 + MPTCPD_NLA_ALIGN(family)
-                + NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(addr))
+                + MPTCPD_NLA_ALIGN_ADDR(addr)
                 + MPTCPD_NLA_ALIGN_OPT(port);
 
         struct l_genl_msg *const msg =
@@ -350,11 +350,11 @@ static int mptcp_org_add_subflow(struct mptcpd_pm *pm,
                 + MPTCPD_NLA_ALIGN(remote_address_id)
                 + (local_addr == NULL
                    ? 0
-                   : (NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(local_addr))
+                   : (MPTCPD_NLA_ALIGN_ADDR(local_addr)
                       + (MPTCPD_NLA_ALIGN_OPT(local_port))))
                 + (remote_addr == NULL
                    ? 0
-                   : NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(remote_addr))
+                   : MPTCPD_NLA_ALIGN_ADDR(remote_addr)
                    + MPTCPD_NLA_ALIGN(remote_port))
                 + MPTCPD_NLA_ALIGN(backup);
 
@@ -444,9 +444,9 @@ static int mptcp_org_set_backup(struct mptcpd_pm *pm,
         size_t const payload_size =
                 MPTCPD_NLA_ALIGN(token)
                 + MPTCPD_NLA_ALIGN(family)
-                + NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(local_addr))
+                + MPTCPD_NLA_ALIGN_ADDR(local_addr)
                 + MPTCPD_NLA_ALIGN(local_port)
-                + NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(remote_addr))
+                + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
                 + MPTCPD_NLA_ALIGN(remote_port)
                 + MPTCPD_NLA_ALIGN(backup);
 
@@ -527,9 +527,9 @@ static int mptcp_org_remove_subflow(struct mptcpd_pm *pm,
         size_t const payload_size =
                 MPTCPD_NLA_ALIGN(token)
                 + MPTCPD_NLA_ALIGN(family)
-                + NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(local_addr))
+                + MPTCPD_NLA_ALIGN_ADDR(local_addr)
                 + MPTCPD_NLA_ALIGN(local_port)
-                + NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(remote_addr))
+                + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
                 + MPTCPD_NLA_ALIGN(remote_port);
 
         struct l_genl_msg *const msg =
