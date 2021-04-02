@@ -369,11 +369,9 @@ static int upstream_add_addr(struct mptcpd_pm *pm,
         // Types chosen to match MPTCP genl API.
         uint16_t const family = mptcpd_get_addr_family(addr);
 
-        size_t const addr_size = mptcpd_get_addr_size(addr);
-
         size_t const payload_size =
                 MPTCPD_NLA_ALIGN(family)
-                + MPTCPD_NLA_ALIGN(addr_size)
+                + MPTCPD_NLA_ALIGN_ADDR(addr)
                 + MPTCPD_NLA_ALIGN_OPT(address_id)
                 + MPTCPD_NLA_ALIGN_OPT(flags)
                 + MPTCPD_NLA_ALIGN_OPT(index);
