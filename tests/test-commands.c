@@ -261,6 +261,20 @@ static void test_get_limits(void const *test_data)
         assert(result == 0 || result == ENOTSUP);
 }
 
+static void test_set_flags(void const *test_data)
+{
+        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+
+        if (!is_pm_ready(pm, __func__))
+                return;
+
+        static mptcpd_flags_t const flags = MPTCPD_ADDR_FLAG_BACKUP;
+
+        int const result = mptcpd_pm_set_flags(pm, laddr1, flags);
+
+        assert(result == 0 || result == ENOTSUP);
+}
+
 static void test_add_subflow(void const *test_data)
 {
         struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
@@ -412,6 +426,7 @@ int main(void)
         l_test_add("remove_addr",    test_remove_addr,    pm);
         l_test_add("set_limits",     test_set_limits,     pm);
         l_test_add("get_limits",     test_get_limits,     pm);
+        l_test_add("set_flags",      test_set_flags,      pm);
         l_test_add("add_subflow",    test_add_subflow,    pm);
         l_test_add("set_backup",     test_set_backup,     pm);
         l_test_add("remove_subflow", test_remove_subflow, pm);
