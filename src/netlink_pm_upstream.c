@@ -30,6 +30,12 @@
 #include "commands.h"
 #include "path_manager.h"
 
+// Sanity check
+#if MPTCPD_ADDR_FLAG_SIGNAL != MPTCP_PM_ADDR_FLAG_SIGNAL                \
+        || MPTCPD_ADDR_FLAG_SUBFLOW != MPTCP_PM_ADDR_FLAG_SUBFLOW       \
+        || MPTCPD_ADDR_FLAG_BACKUP != MPTCP_PM_ADDR_FLAG_BACKUP
+# error Mismatch between mptcpd and upstream kernel addr flags.
+#endif
 
 /**
  * @struct get_addr_user_callback
