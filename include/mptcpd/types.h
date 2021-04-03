@@ -31,8 +31,34 @@ typedef uint8_t mptcpd_aid_t;
 /// MPTCP address ID format specifier.
 #define MPTCPD_PRIxAID PRIx8
 
-/// MPTCP flags type.
+/**
+ * @name MPTCP Address Flags
+ *
+ * Each MPTCP address flag is meant to be set as a bit in a
+ * @c mptcpd_flags_t variable as needed, e.g.:
+ *
+ * @code
+ * mptcpd_flags_t flags =
+ *     MPTCPD_ADDR_FLAG_SUBFLOW | MPTCPD_ADDR_FLAG_BACKUP;
+ * @endcode
+ */
+//@{
+/**
+ * @brief MPTCP flags type.
+ *
+ * MPTCP address flags integer type that contains set of flag bits.
+ */
 typedef uint32_t mptcpd_flags_t;
+
+/// 
+#define MPTCPD_ADDR_FLAG_SIGNAL  (1U << 0)
+
+/// 
+#define MPTCPD_ADDR_FLAG_SUBFLOW (1U << 1)
+
+/// 
+#define MPTCPD_ADDR_FLAG_BACKUP  (1U << 2)
+//@}
 
 /**
  * @enum mptcp_limit_types
