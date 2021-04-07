@@ -644,7 +644,7 @@ static int upstream_set_flags(struct mptcpd_pm *pm,
 
         size_t const payload_size =
                 MPTCPD_NLA_ALIGN(uint16_t) // family
-                + NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(addr))
+                + MPTCPD_NLA_ALIGN_ADDR(addr)
                 + MPTCPD_NLA_ALIGN(flags);
 
         struct l_genl_msg *const msg =
