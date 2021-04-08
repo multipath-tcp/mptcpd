@@ -129,6 +129,14 @@ struct mptcpd_pm_cmd_ops
          * Path management common to both the upstream and
          * multipath-tcp.org Linux kernels.
          *
+         * @todo Consider splitting these commands into
+         *       server-oriented and client-oriented cases.  There
+         *       shouldn't be any overlap between these use cases.
+         */
+        //@{
+        /**
+         * @brief Advertise new network address to peers.
+         *
          * @param[in] pm    The mptcpd path manager object.
          * @param[in] addr  Local IP address and port to be advertised
          *                  through the MPTCP protocol @c ADD_ADDR
@@ -139,10 +147,6 @@ struct mptcpd_pm_cmd_ops
          * @param[in] index Network interface index (optional for
          *                  upstream Linux kernel).
          * @param[in] token MPTCP connection token.
-         */
-        //@{
-        /**
-         * @brief Advertise new network address to peers.
          */
         int (*add_addr)(struct mptcpd_pm *pm,
                         struct sockaddr const *addr,
@@ -160,9 +164,10 @@ struct mptcpd_pm_cmd_ops
         //@}
 
         /**
-         * @name Upstream Kernel Path Management Commands
+         * @name Server-oriented Path Management Commands
          *
-         * Path management commands supported by the upstream Linux
+         * Server-oriented path management commands supported by the
+         * upstream Linux kernel.  Path management is handled by the
          * kernel.
          */
         //@{
@@ -246,10 +251,10 @@ struct mptcpd_pm_cmd_ops
         //@}
 
         /**
-         * @name multipath-tcp.org kernel Path Management Commands
+         * @name Client-oriented Path Management Commands
          *
-         * Path management commands supported by the multipath-tcp.org
-         * Linux kernel.
+         * Client-oriented path management commands that allow for
+         * per-connection path management.
          */
         //@{
         /**
