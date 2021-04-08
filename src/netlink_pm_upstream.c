@@ -30,6 +30,12 @@
 #include "commands.h"
 #include "path_manager.h"
 
+// Sanity check
+#if MPTCPD_ADDR_FLAG_SIGNAL != MPTCP_PM_ADDR_FLAG_SIGNAL                \
+        || MPTCPD_ADDR_FLAG_SUBFLOW != MPTCP_PM_ADDR_FLAG_SUBFLOW       \
+        || MPTCPD_ADDR_FLAG_BACKUP != MPTCP_PM_ADDR_FLAG_BACKUP
+# error Mismatch between mptcpd and upstream kernel addr flags.
+#endif
 
 /**
  * @struct get_addr_user_callback
@@ -622,6 +628,58 @@ static int upstream_get_limits(struct mptcpd_pm *pm,
                                   l_free  /* destroy */) == 0;
 }
 
+static int upstream_set_flags(struct mptcpd_pm *pm,
+                              struct sockaddr const *addr,
+                              mptcpd_flags_t flags)
+{
+        /*
+          Payload (nested):
+              Local address family
+              Local address
+              Flags
+         */
+
+        // Types chosen to match MPTCP genl API.
+        uint16_t const family = mptcpd_get_addr_family(addr);
+
+        size_t const payload_size =
+                MPTCPD_NLA_ALIGN(family)
+                + MPTCPD_NLA_ALIGN_ADDR(addr)
+                + MPTCPD_NLA_ALIGN(flags);
+
+        struct l_genl_msg *const msg =
+                l_genl_msg_new_sized(MPTCP_PM_CMD_SET_FLAGS,
+                                     payload_size);
+
+        bool const appended =
+                l_genl_msg_enter_nested(msg,
+                                        NLA_F_NESTED | MPTCP_PM_ATTR_ADDR)
+                && l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_PM_ADDR_ATTR_FAMILY,
+                        sizeof(family),  // sizeof(uint16_t)
+                        &family)
+                && append_addr_attr(msg, addr)
+                && l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_PM_ADDR_ATTR_FLAGS,
+                        sizeof(flags),  // sizeof(uint32_t)
+                        &flags)
+                && l_genl_msg_leave_nested(msg);
+
+        if (!appended) {
+                l_genl_msg_unref(msg);
+
+                return ENOMEM;
+        }
+
+        return l_genl_family_send(pm->family,
+                                  msg,
+                                  mptcpd_family_send_callback,
+                                  "set_flags", /* user data */
+                                  NULL  /* destroy */) == 0;
+}
+
 static struct mptcpd_pm_cmd_ops const cmd_ops =
 {
         .add_addr    = upstream_add_addr,
@@ -630,7 +688,8 @@ static struct mptcpd_pm_cmd_ops const cmd_ops =
         .dump_addrs  = upstream_dump_addrs,
         .flush_addrs = upstream_flush_addrs,
         .set_limits  = upstream_set_limits,
-        .get_limits  = upstream_get_limits
+        .get_limits  = upstream_get_limits,
+        .set_flags   = upstream_set_flags,
 };
 
 static struct mptcpd_netlink_pm const npm = {
