@@ -1,4 +1,27 @@
+9 April 2021 - mptcpd 0.7
+
+- MPTCP path management generic netlink events recently added to the
+  upstream Linux kernel are now supported, and propagated to mptcpd
+  plugins.  The same API is also found in the multipath-tcp.org
+  kernel.  Differences between the two kernels are transparent to
+  mptcpd plugins.
+
+- Mptcpd now supports the upstream Linux kernel server-oriented
+  MPTCP_PM_CMD_SET_FLAGS generic netlink command through the new
+  mptcpd_pm_set_flags() function.  It allows the user to set MPTCP
+  flags for a specific local IP address.
+
+- An incorrect buffer size calculation when calling
+  mptcpd_pm_add_addr() when using an IPv6 addresses on platforms
+  running the upstream Linux kernel was fixed.
+
+- An "operation not supported" error that occurred when attempting to
+  retrieve MPTCP resource limits through the mptcpd_pm_get_limits()
+  function was fixed.
+
 - A network interface lookup problem in the "sspi" plugin was fixed.
+
+- Building mptcpd against ELL 0.39 is now supported.
 
 25 January 2021 - mptcpd 0.6
 
