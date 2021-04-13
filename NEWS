@@ -1,4 +1,4 @@
-9 April 2021 - mptcpd 0.7
+13 April 2021 - mptcpd 0.7
 
 - MPTCP path management generic netlink events recently added to the
   upstream Linux kernel are now supported, and propagated to mptcpd
@@ -13,13 +13,14 @@
 
 - An incorrect buffer size calculation when calling
   mptcpd_pm_add_addr() when using an IPv6 addresses on platforms
-  running the upstream Linux kernel was fixed.
+  running the upstream Linux kernel was corrected.
 
 - An "operation not supported" error that occurred when attempting to
   retrieve MPTCP resource limits through the mptcpd_pm_get_limits()
   function was fixed.
 
-- A network interface lookup problem in the "sspi" plugin was fixed.
+- A network interface lookup problem in the "sspi" plugin was
+  corrected.
 
 - Building mptcpd against ELL 0.39 is now supported.
 
