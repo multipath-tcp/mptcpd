@@ -259,7 +259,7 @@ AX_APPEND_COMPILE_FLAGS([-Wextra -Werror -pedantic])
 AC_ARG_ENABLE(stack-protection,
 	[AS_HELP_STRING([--disable-stack-protection],
 		[Disable compiler stack protection.
-		FORTIFY_SOUCE=2 and -fstack-protector-strong]
+		FORTIFY_SOURCE=2 and -fstack-protector-strong]
 	)],
 	[],
 	[enable_stack_protection=yes])
