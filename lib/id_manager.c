@@ -23,11 +23,21 @@
 #include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>
 
+/// Invalid MPTCP address ID.
 #define MPTCPD_INVALID_ID 0
+
+/// Minimum MPTCP address ID.
 #define MPTCPD_MIN_ID 1
+
+/// Maximum MPTCP address ID.
 #define MPTCPD_MAX_ID UINT8_MAX
 
 
+/**
+ * @struct mptcpd_idm
+ *
+ * @brief Internal mptcpd address ID manager data.
+ */
 struct mptcpd_idm
 {
         /// Set of used MPTCP address IDs.
