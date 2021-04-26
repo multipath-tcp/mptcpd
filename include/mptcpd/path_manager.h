@@ -150,7 +150,7 @@ MPTCPD_API int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
  * Server-oriented path management commands supported by the upstream
  * Linux kernel.  Path management is handled by the kernel.
  */
-//@{
+///@{
 /**
  * @brief Get network address corresponding to an address ID.
  *
@@ -234,7 +234,7 @@ MPTCPD_API int mptcpd_pm_set_flags(struct mptcpd_pm *pm,
                                    struct sockaddr const *addr,
                                    mptcpd_flags_t flags);
 
-//@}
+///@}
 
 /**
  * @name Client-oriented Path Management Commands
@@ -242,7 +242,7 @@ MPTCPD_API int mptcpd_pm_set_flags(struct mptcpd_pm *pm,
  * Client-oriented path management commands that allow for
  * per-connection path management.
  */
-//@{
+///@{
 /**
  * @brief Create a new subflow.
  *
@@ -308,7 +308,7 @@ MPTCPD_API int mptcpd_pm_remove_subflow(
         mptcpd_token_t token,
         struct sockaddr const *local_addr,
         struct sockaddr const *remote_addr);
-//@}
+///@}
 
 /**
  * @brief Get pointer to the underlying network monitor.

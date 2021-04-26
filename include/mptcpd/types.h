@@ -42,7 +42,7 @@ typedef uint8_t mptcpd_aid_t;
  *     MPTCPD_ADDR_FLAG_SUBFLOW | MPTCPD_ADDR_FLAG_BACKUP;
  * @endcode
  */
-//@{
+///@{
 /**
  * @brief MPTCP flags type.
  *
@@ -58,7 +58,7 @@ typedef uint32_t mptcpd_flags_t;
 
 /// Set backup priority on the subflow.
 #define MPTCPD_ADDR_FLAG_BACKUP  (1U << 2)
-//@}
+///@}
 
 /**
  * @enum mptcpd_limit_types

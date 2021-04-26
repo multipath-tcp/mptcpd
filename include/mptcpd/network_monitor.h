@@ -36,7 +36,7 @@ struct mptcpd_interface
          *
          * @see rtnetlink(7)
          */
-        //@{
+        ///@{
         /**
          * @brief Address family, e.g @c AF_UNSPEC.
          *
@@ -71,7 +71,7 @@ struct mptcpd_interface
          * with the interface.
          */
         struct l_queue *addrs;
-        //@}
+        ///@}
 };
 
 /**

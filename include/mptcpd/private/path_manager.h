@@ -133,7 +133,7 @@ struct mptcpd_pm_cmd_ops
          *       server-oriented and client-oriented cases.  There
          *       shouldn't be any overlap between these use cases.
          */
-        //@{
+        ///@{
         /**
          * @brief Advertise new network address to peers.
          *
@@ -161,7 +161,7 @@ struct mptcpd_pm_cmd_ops
         int (*remove_addr)(struct mptcpd_pm *pm,
                            mptcpd_aid_t address_id,
                            mptcpd_token_t token);
-        //@}
+        ///@}
 
         /**
          * @name Server-oriented Path Management Commands
@@ -170,7 +170,7 @@ struct mptcpd_pm_cmd_ops
          * upstream Linux kernel.  Path management is handled by the
          * kernel.
          */
-        //@{
+        ///@{
         /**
          * @brief Get network address corresponding to an address ID.
          *
@@ -259,7 +259,7 @@ struct mptcpd_pm_cmd_ops
         int (*set_flags)(struct mptcpd_pm *pm,
                          struct sockaddr const *addr,
                          mptcpd_flags_t flags);
-        //@}
+        ///@}
 
         /**
          * @name Client-oriented Path Management Commands
@@ -267,7 +267,7 @@ struct mptcpd_pm_cmd_ops
          * Client-oriented path management commands that allow for
          * per-connection path management.
          */
-        //@{
+        ///@{
         /**
          * @brief Create a new subflow.
          *
@@ -333,7 +333,7 @@ struct mptcpd_pm_cmd_ops
                           struct sockaddr const *local_addr,
                           struct sockaddr const *remote_addr,
                           bool backup);
-        //@}
+        ///@}
 };
 
 #ifdef __cplusplus

@@ -26,7 +26,7 @@ struct mptcpd_interface;
 /**
  * @name MPTCP Path Manager Generic Netlink Event Handlers
  */
-//@{
+///@{
 /**
  * @brief Load mptcpd plugins.
  *
@@ -160,7 +160,7 @@ MPTCPD_API void mptcpd_plugin_subflow_priority(
         struct sockaddr const *raddr,
         bool backup,
         struct mptcpd_pm *pm);
-//@}
+///@}
 
 /**
  * @name Network Monitor Event Handlers
@@ -170,7 +170,7 @@ MPTCPD_API void mptcpd_plugin_subflow_priority(
  *
  * @see mptcpd_nm_ops
  */
-//@{
+///@{
 /**
  * @brief Notify plugin of new network interface.
  *
@@ -224,7 +224,7 @@ MPTCPD_API void mptcpd_plugin_delete_local_address(
         struct mptcpd_interface const *i,
         struct sockaddr const *sa,
         void *pm);
-//@}
+///@}
 
 
 #ifdef __cplusplus
