@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file src/sockaddr.c
+ * @file lib/sockaddr.c
  *
  * @brief mptcpd @c struct @c sockaddr related utility functions.
  *
