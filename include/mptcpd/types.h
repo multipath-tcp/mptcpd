@@ -61,7 +61,7 @@ typedef uint32_t mptcpd_flags_t;
 //@}
 
 /**
- * @enum mptcp_limit_types
+ * @enum mptcpd_limit_types
  *
  * @brief MPTCP resource limit type identifiers.
  */
@@ -107,7 +107,8 @@ typedef void (*mptcpd_pm_get_addr_cb)(struct mptcpd_addr_info const *info,
                                       void *callback_data);
 
 /**
- * @brief Type of function called when MPTCP resource limit are available.
+ * @brief Type of function called when MPTCP resource limits are
+ *        available.
  *
  * The mptcpd path manager will call a function of this type when
  * the result of calling @c mptcpd_pm_get_limits() is available.
