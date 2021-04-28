@@ -94,7 +94,7 @@ inline size_t mptcpd_get_addr_size(struct sockaddr const *addr)
  *
  * @param[in] addr Network address information.
  *
- * Get network address family suitable typed for use in MPTCP generic
+ * Get network address family suitably typed for use in MPTCP generic
  * netlink API calls, or zero if no address was provided.
  *
  * @return Network address family, or zero if no address family was
