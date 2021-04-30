@@ -42,7 +42,7 @@ typedef uint8_t mptcpd_aid_t;
  *     MPTCPD_ADDR_FLAG_SUBFLOW | MPTCPD_ADDR_FLAG_BACKUP;
  * @endcode
  */
-//@{
+///@{
 /**
  * @brief MPTCP flags type.
  *
@@ -50,18 +50,18 @@ typedef uint8_t mptcpd_aid_t;
  */
 typedef uint32_t mptcpd_flags_t;
 
-/// 
+/// Trigger announcement of a new local IP address.
 #define MPTCPD_ADDR_FLAG_SIGNAL  (1U << 0)
 
-/// 
+/// Create a new subflow.
 #define MPTCPD_ADDR_FLAG_SUBFLOW (1U << 1)
 
-/// 
+/// Set backup priority on the subflow.
 #define MPTCPD_ADDR_FLAG_BACKUP  (1U << 2)
-//@}
+///@}
 
 /**
- * @enum mptcp_limit_types
+ * @enum mptcpd_limit_types
  *
  * @brief MPTCP resource limit type identifiers.
  */
@@ -107,7 +107,8 @@ typedef void (*mptcpd_pm_get_addr_cb)(struct mptcpd_addr_info const *info,
                                       void *callback_data);
 
 /**
- * @brief Type of function called when MPTCP resource limit are available.
+ * @brief Type of function called when MPTCP resource limits are
+ *        available.
  *
  * The mptcpd path manager will call a function of this type when
  * the result of calling @c mptcpd_pm_get_limits() is available.

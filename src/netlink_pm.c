@@ -21,8 +21,10 @@
 /// Constuct full path for MPTCP sysctl variable "@a name".
 #define MPTCP_SYSCTL_VARIABLE(name) MPTCP_SYSCTL_BASE #name
 
-
+/// Get multipath-tcp.org kernel generic netlink PM characteristics.
 struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm_mptcp_org(void);
+
+/// Get upstream kernel generic netlink PM characteristics.
 struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm_upstream(void);
 
 /**

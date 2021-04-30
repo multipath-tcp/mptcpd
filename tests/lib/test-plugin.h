@@ -40,7 +40,7 @@ struct plugin_call_count
          * defined in @c mptcpd_plugin_ops that all mptcpd plugins
          * must implement.
          */
-        //@{
+        ///@{
         int new_connection;
         int connection_established;
         int connection_closed;
@@ -49,7 +49,7 @@ struct plugin_call_count
         int new_subflow;
         int subflow_closed;
         int subflow_priority;
-        //@}
+        ///@}
 };
 
 /**
@@ -82,7 +82,7 @@ bool call_count_is_equal(struct plugin_call_count const *lhs,
  * i.e. a "call signature", to verify that only the operations we
  * intended to call were actually called.
  */
-//@{
+///@{
 static struct plugin_call_count const test_count_1 = {
         .new_connection         = 1,
         .connection_established = 1,
@@ -115,7 +115,7 @@ static struct plugin_call_count const test_count_4 = {
         .subflow_closed         = 0,
         .subflow_priority       = 0
 };
-//@}
+///@}
 
 // ------------------------------------------------------------------
 
@@ -126,7 +126,7 @@ static struct plugin_call_count const test_count_4 = {
  * care about matching values, not if they are actually valid for the
  * types of values they correspond to.
  */
-//@{
+///@{
 static mptcpd_token_t const test_token_1    = 0x12345678;
 static mptcpd_aid_t   const test_laddr_id_1 = 0x34;
 static mptcpd_aid_t   const test_raddr_id_1 = 0x56;
@@ -229,7 +229,7 @@ static struct sockaddr_in const test_raddr_4 = {
         .sin_addr   = { .s_addr = 0x047100CB }  // 203.0.113.4
 };
 
-//@}
+///@}
 
 /**
  * @brief Compare equality of two @c sockaddr objects.

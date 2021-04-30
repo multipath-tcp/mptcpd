@@ -37,13 +37,13 @@
  * Preprocessor concatenation that expands preprocessor tokens as
  * needed by leveraging the usual indirection technique.
  */
-//@{
+///@{
 /// Underlying string concatenation macro.
 #define MPTCPD_CONCAT_IMPL(x, ...) x ## __VA_ARGS__
 
 /// Concatenate strings using the preprocessor.
 #define MPTCPD_CONCAT(x, ...) MPTCPD_CONCAT_IMPL(x, __VA_ARGS__)
-//@}
+///@}
 
 // Compile-time default logging choice
 #ifndef MPTCPD_LOGGER
@@ -153,13 +153,13 @@ static char const doc[] = "Start the Multipath TCP daemon.";
  *
  * Non-ASCII key values for options without a short option (e.g. -d).
  */
-//@{
+///@{
 /// Command line option key for "--plugin-dir".
 #define MPTCPD_PLUGIN_DIR_KEY 0x100
 
 /// Command line option key for "--path-manager".
 #define MPTCPD_PATH_MANAGER_KEY 0x101
-//@}
+///@}
 
 static struct argp_option const options[] = {
         { "debug", 'd', 0, 0, "Enable debug log messages", 0 },

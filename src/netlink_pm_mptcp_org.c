@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file commands_mptcp_org.c
+ * @file netlink_pm_mptcp_org.c
  *
  * @brief mptcpd generic netlink commands.
  *

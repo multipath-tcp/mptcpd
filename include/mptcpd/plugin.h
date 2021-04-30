@@ -132,7 +132,7 @@ struct mptcpd_plugin_ops
          * A set of functions to be called when MPTCP path management
          * related events occur.
          */
-        //@{
+        ///@{
         /**
          * @brief New MPTCP-capable connection has been created.
          *
@@ -255,7 +255,7 @@ struct mptcpd_plugin_ops
                                  struct sockaddr const *raddr,
                                  bool backup,
                                  struct mptcpd_pm *pm);
-        //@}
+        ///@}
 
         // --------------------------------------------------------
 
@@ -267,7 +267,7 @@ struct mptcpd_plugin_ops
          * A set of functions to be called when changes in network
          * interfaces and addresses occur.
          */
-        //@{
+        ///@{
         /**
          * @brief A new network interface is available.
          *
@@ -319,7 +319,7 @@ struct mptcpd_plugin_ops
         void (*delete_local_address)(struct mptcpd_interface const *i,
                                      struct sockaddr const *sa,
                                      struct mptcpd_pm *pm);
-        //@}
+        ///@}
 };
 
 /**
