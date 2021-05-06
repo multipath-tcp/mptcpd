@@ -244,6 +244,8 @@ AC_SEARCH_LIBS(
     [],
     [AC_MSG_ERROR([library with dlopen() could not be found])])
 
+mptcpd_save_libs=$LIBS
+LIBS="$LIBS $ELL_LIBS"
 dnl l_genl_msg_get_extended_error() was introduced in ELL v0.31.
 AC_CHECK_FUNC([l_genl_msg_get_extended_error],
               [AC_DEFINE([HAVE_L_GENL_MSG_GET_EXTENDED_ERROR],
@@ -255,6 +257,7 @@ AC_CHECK_FUNC([l_hashmap_replace],
               [AC_DEFINE([HAVE_L_HASHMAP_REPLACE],
 	                 [],
 			 [ELL has l_hashmap_replace()])])
+LIBS=$mptcpd_save_libs
 
 # ---------------------------------------------------------------
 # Enable additional C compiler warnings.  We do this after all
