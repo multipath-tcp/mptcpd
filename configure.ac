@@ -244,6 +244,12 @@ AC_SEARCH_LIBS(
     [],
     [AC_MSG_ERROR([library with dlopen() could not be found])])
 
+dnl l_hashmap_replace() was introduced in ELL v0.33.
+AC_CHECK_FUNC([l_hashmap_replace],
+              [AC_DEFINE([HAVE_L_HASHMAP_REPLACE],
+	                 [],
+			 [ELL has l_hashmap_replace()])])
+
 # ---------------------------------------------------------------
 # Enable additional C compiler warnings.  We do this after all
 # Autoconf tests have been run since not all autoconf macros are
