@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
-      run: sudo apt install autoconf-archive libell-dev pandoc
+      run: sudo apt-get -y install autoconf-archive libell-dev pandoc
     - name: bootstrap
       run: ./bootstrap
     - name: configure
