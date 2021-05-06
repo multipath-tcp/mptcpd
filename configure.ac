@@ -244,6 +244,12 @@ AC_SEARCH_LIBS(
     [],
     [AC_MSG_ERROR([library with dlopen() could not be found])])
 
+dnl l_genl_msg_get_extended_error() was introduced in ELL v0.31.
+AC_CHECK_FUNC([l_genl_msg_get_extended_error],
+              [AC_DEFINE([HAVE_L_GENL_MSG_GET_EXTENDED_ERROR],
+	                 [],
+			 [ELL has l_genl_msg_get_extended_error()])])
+
 dnl l_hashmap_replace() was introduced in ELL v0.33.
 AC_CHECK_FUNC([l_hashmap_replace],
               [AC_DEFINE([HAVE_L_HASHMAP_REPLACE],

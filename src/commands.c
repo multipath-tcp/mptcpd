@@ -30,7 +30,11 @@ bool mptcpd_check_genl_error(struct l_genl_msg *msg, char const *fname)
                 // Error during send.  Likely insufficient perms.
 
                 char const *const genl_errmsg =
+#ifdef HAVE_L_GENL_MSG_GET_EXTENDED_ERROR
                         l_genl_msg_get_extended_error(msg);
+#else
+                        NULL;
+#endif
 
                 if (genl_errmsg != NULL) {
                         l_error("%s: %s", fname, genl_errmsg);
