@@ -38,6 +38,7 @@ EXTRA_DIST = mptcp.service.in
 if HAVE_SYSTEMD
 systemdsystemunit_DATA = mptcp.service
 libexec_PROGRAMS = mptcpd
+bin_PROGRAMS = mptcpize
 
 ## The configure script won't fully expand $libexecdir so leverage
 ## `make' based variable expansion instead.
@@ -54,13 +55,26 @@ mptcp.service: Makefile mptcp.service.in
 
 CLEANFILES = mptcp.service
 else
-bin_PROGRAMS = mptcpd
+bin_PROGRAMS = mptcpd mptcpize
 endif
+
+pkglib_LTLIBRARIES = libmptcpwrap.la
 
 mptcpd_SOURCES  = mptcpd.c
 mptcpd_LDADD    =				\
 	$(builddir)/libpath_manager.la		\
 	$(ELL_LIBS) $(CODE_COVERAGE_LIBS)
 mptcpd_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
+
+librevision=0
+
+mptcpize_SOURCES = mptcpize.c
+mptcpize_CPPFLAGS = \
+	$(AM_CPPFLAGS)			\
+	-DPKGLIBDIR=\"$(pkglibdir)\"	\
+	-DLIBREVISION=\"$(librevision)\"
+
+libmptcpwrap_la_SOURCES = mptcpwrap.c
+libmptcpwrap_la_LDFLAGS = -version-info 0:$(librevision):0
 
 clean-local: code-coverage-clean

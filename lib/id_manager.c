@@ -209,11 +209,13 @@ bool mptcpd_idm_map_id(struct mptcpd_idm *idm,
             || !l_uintset_put(idm->ids, id))
                 return false;
 
+#if 0
         if (!l_hashmap_replace(idm->map, sa, L_UINT_TO_PTR(id), NULL)) {
                 (void) l_uintset_take(idm->ids, id);
 
                 return false;
         }
+#endif
 
         return true;
 }
