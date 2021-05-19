@@ -26,5 +26,9 @@ jobs:
       run: make check XFAIL_TESTS="test-commands test-path-manager test-start-stop"
     - name: make distcheck
       run: make distcheck XFAIL_TESTS="test-commands test-path-manager test-start-stop"
+    - name: make install
+      run: sudo make install
     - name: make installcheck
-      run: sudo make installcheck
+      run: LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH make installcheck
+    - name: make uninstall
+      run: sudo make uninstall
