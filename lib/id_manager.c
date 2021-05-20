@@ -161,6 +161,25 @@ static void *mptcpd_hashmap_key_copy(void const *p)
 
 // ----------------------------------------------------------------------
 
+static bool mptcpd_hashmap_replace(struct l_hashmap *map,
+                                   void const *key,
+                                   void *value,
+                                   void **old_value)
+{
+#ifdef HAVE_L_HASHMAP_REPLACE
+        return l_hashmap_replace(map, key, value, old_value);
+#else
+        void *const old = l_hashmap_remove(map, key);
+
+        if (old_value != NULL)
+                *old_value = old;
+
+        return l_hashmap_insert(map, key, value);
+#endif
+}
+
+// ----------------------------------------------------------------------
+
 struct mptcpd_idm *mptcpd_idm_create(void)
 {
         struct mptcpd_idm *idm = l_new(struct mptcpd_idm, 1);
@@ -209,8 +228,10 @@ bool mptcpd_idm_map_id(struct mptcpd_idm *idm,
             || !l_uintset_put(idm->ids, id))
                 return false;
 
-#if 0
-        if (!l_hashmap_replace(idm->map, sa, L_UINT_TO_PTR(id), NULL)) {
+        if (!mptcpd_hashmap_replace(idm->map,
+                                    sa,
+                                    L_UINT_TO_PTR(id),
+                                    NULL)) {
                 (void) l_uintset_take(idm->ids, id);
 
                 return false;
