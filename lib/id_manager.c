@@ -236,7 +236,6 @@ bool mptcpd_idm_map_id(struct mptcpd_idm *idm,
 
                 return false;
         }
-#endif
 
         return true;
 }
