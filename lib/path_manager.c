@@ -241,7 +241,7 @@ int mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
                           struct sockaddr const *remote_addr,
                           bool backup)
 {
-        if (pm == NULL)
+        if (pm == NULL || remote_addr == NULL)
                 return EINVAL;
 
         if (!is_pm_ready(pm, __func__))

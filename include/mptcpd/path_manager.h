@@ -252,6 +252,8 @@ MPTCPD_API int mptcpd_pm_set_flags(struct mptcpd_pm *pm,
  * @param[in] remote_address_id MPTCP remote address ID.
  * @param[in] local_addr        MPTCP subflow local address
  *                              information, including the port.
+ *                              This argument is optional and may be
+ *                              @c NULL.
  * @param[in] remote_addr       MPTCP subflow remote address
  *                              information, including the port.
  * @param[in] backup            Whether or not to set the MPTCP
