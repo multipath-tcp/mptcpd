@@ -38,6 +38,7 @@ doc/
 etc/*.conf
 lib/mptcpd.pc
 src/mptcpd
+src/mptcpize
 src/mptcp.service
 man/mptcpd.8
 test-driver
