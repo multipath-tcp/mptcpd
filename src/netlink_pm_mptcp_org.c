@@ -319,24 +319,23 @@ static int mptcp_org_add_subflow(struct mptcpd_pm *pm,
               Address family
               Local address ID
               Remote address ID
+              Remote address
+              Remote port
 
               Optional attributes:
                   Local address
                   Local port
-                  Remote address
-                  Remote port    (required if remote address is specified)
                   Backup priority flag
                   Network interface index
          */
 
-        /**
-         * @bug The address family is required but we currently base
-         *      it on the optional remote address.
-         */
         uint16_t const family      = mptcpd_get_addr_family(remote_addr);
         uint16_t const local_port  = get_port_number(local_addr);
         uint16_t const remote_port = get_port_number(remote_addr);
         // uint16_t per MPTCP genl API.
+
+        if (remote_port == 0)
+                return EINVAL;
 
         /**
          * @todo Verify that this payload size calculation is
@@ -352,10 +351,8 @@ static int mptcp_org_add_subflow(struct mptcpd_pm *pm,
                    ? 0
                    : (MPTCPD_NLA_ALIGN_ADDR(local_addr)
                       + (MPTCPD_NLA_ALIGN_OPT(local_port))))
-                + (remote_addr == NULL
-                   ? 0
-                   : MPTCPD_NLA_ALIGN_ADDR(remote_addr)
-                   + MPTCPD_NLA_ALIGN(remote_port))
+                + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
+                + MPTCPD_NLA_ALIGN(remote_port)
                 + MPTCPD_NLA_ALIGN(backup);
 
         struct l_genl_msg *const msg =
@@ -383,18 +380,15 @@ static int mptcp_org_add_subflow(struct mptcpd_pm *pm,
                                                       MPTCP_ATTR_SPORT,
                                                       sizeof(local_port),
                                                       &local_port))))
-                && (remote_addr == NULL
-                    || (l_genl_msg_append_attr(
-                                msg,
-                                MPTCP_ATTR_FAMILY,
-                                sizeof(family),
-                                &family)
-                        && append_remote_addr_attr(msg, remote_addr)
-                        && remote_port != 0
-                        && l_genl_msg_append_attr(msg,
-                                                  MPTCP_ATTR_DPORT,
-                                                  sizeof(remote_port),
-                                                  &remote_port)))
+                && l_genl_msg_append_attr(msg,
+                                          MPTCP_ATTR_FAMILY,
+                                          sizeof(family),
+                                          &family)
+                && append_remote_addr_attr(msg, remote_addr)
+                && l_genl_msg_append_attr(msg,
+                                          MPTCP_ATTR_DPORT,
+                                          sizeof(remote_port),
+                                          &remote_port)
                 && l_genl_msg_append_attr(msg,
                                           MPTCP_ATTR_BACKUP,
                                           sizeof(backup),
