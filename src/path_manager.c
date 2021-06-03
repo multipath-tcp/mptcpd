@@ -761,7 +761,7 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
         char addrstr[INET6_ADDRSTRLEN];  // Long enough for both IPv4
                                          // and IPv6 addresses.
 
-        struct mptcpd_idm *const idm = callback_data;
+        struct mptcpd_pm *const pm = callback_data;
 
         /**
          * @todo The user would have to perform a similar cast when
@@ -783,12 +783,58 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
                          addrstr,
                          sizeof(addrstr));
 
-        if (mptcpd_idm_map_id(idm,
+        if (mptcpd_idm_map_id(pm->idm,
                               sa,
                               info->id))
                 l_debug("ID sync: %u | %s", info->id, addrstr);
         else
                 l_error("ID sync failed: %u | %s", info->id, addrstr);
+
+        /**
+         * @todo The sync timeout could be re-armed multiple times
+         *       within a short period of time since this callback
+         *       will be called for each address managed by the
+         *       in-kernel path manager, up to 255 (@c UINT8_MAX)
+         *       times.  Should we be concerned?  Alternatively, we
+         *       could re-arm the timeout immediately after the
+         *       @c dump_addr is initiated but before the @c dump_addr
+         *       replies are handled in the sync_timeout() in this
+         *       file.  That would minimize the number of times the
+         *       sync timeout is re-armed, but in that case we could
+         *       also run into a situation where the sync timeout
+         *       fires immediately after long running sequence of
+         *       @c dump_addr callbacks are completed, potentially
+         *       resulting in @c dump_addr command thrashing where
+         *       back-to-back @c dump_addr commands are executed in a
+         *       short period of time.
+         */
+        /*
+          Re-arm the synchronization timeout.
+
+          Re-arming here prevents the synchronization timeout from
+          firing soon after a user (e.g. plugin) initiated dump of
+          addrs, minimizing the number of dump_addr calls to the
+          kernel in a given amount of time, which is what we want.
+        */
+        l_timeout_modify(pm->sync_timeout, pm->sync_interval);
+}
+
+/**
+ * @brief Synchronize kernel and mptcpd address ID mappings.
+ *
+ * MPTCP address IDs may already be assigned prior to mptcpd start by
+ * other applications or previous runs of mptcpd.  Synchronize mptcpd
+ * address ID manager with address IDs maintained by the kernel.
+ *
+ * @param[in] pm  The mptcpd path manager object.
+ */
+static void sync_addrs(struct mptcpd_pm *pm)
+{
+        if (pm->netlink_pm->cmd_ops->dump_addrs != NULL
+            && pm->netlink_pm->cmd_ops->dump_addrs(pm,
+                                                   dump_addrs_callback,
+                                                   pm) != 0)
+                l_error("Unable to synchronize ID manager with kernel.");
 }
 
 static void complete_pm_init(struct mptcpd_pm *pm)
@@ -812,17 +858,8 @@ static void complete_pm_init(struct mptcpd_pm *pm)
                        pm->netlink_pm->group);
         }
 
-        /*
-          MPTCP address IDs may already be assigned prior to mptcpd
-          start by other applications or previous runs of mptcpd.
-          Synchronize mptcpd address ID manager with address IDs
-          maintained by the kernel.
-         */
-        if (pm->netlink_pm->cmd_ops->dump_addrs != NULL
-            && pm->netlink_pm->cmd_ops->dump_addrs(pm,
-                                                   dump_addrs_callback,
-                                                   pm->idm) != 0)
-                l_error("Unable to synchronize ID manager with kernel.");
+        // Synchronize kernel and mptcpd address ID mappings.
+        sync_addrs(pm);
 
         /**
          * @todo Register a callback once the kernel MPTCP path
@@ -951,7 +988,7 @@ static void family_vanished(char const *name, void *user_data)
         pm->family = NULL;
 
         // Re-arm the MPTCP generic netlink family timeout.
-        l_timeout_modify(pm->timeout, FAMILY_TIMEOUT_SECONDS);
+        l_timeout_modify(pm->family_timeout, FAMILY_TIMEOUT_SECONDS);
 
         l_queue_foreach(pm->event_ops, notify_pm_not_ready, pm);
 }
@@ -974,6 +1011,33 @@ static void family_timeout(struct l_timeout *timeout, void *user_data)
 
         l_warn("MPTCP generic netlink family has not appeared.");
         l_warn("Verify MPTCP netlink path manager kernel support.");
+}
+
+/**
+ * @brief Handle kernel state synchronization timeout.
+ *
+ * @param[in] timeout   Timeout information.
+ * @param[in] user_data Pointer to @c mptcp_pm object to which the
+ *                      timeout belongs.
+ *
+ * @todo Ideally we shouldn't have to poll like this but the upstream
+ *       kernel MPTCP generic netlink API currently does not provide a
+ *       notification mechanism that could be used to implement
+ *       callbacks.
+ */
+static void sync_timeout(struct l_timeout *timeout, void *user_data)
+{
+        (void) timeout;
+
+        struct mptcpd_pm *const pm =  user_data;
+
+        /*
+          Fire off a dump_addr command through the MPTCP genl API to
+          synchronize the address ID mappings in the kernel with those
+          in mptcpd since other applications may cause the state to be
+          modified through call to the MPTCP generic netlink API.
+         */
+        sync_addrs(pm);
 }
 
 static struct mptcpd_nm_ops const _nm_ops = {
@@ -1032,17 +1096,35 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
           Warn the user if the MPTCP generic netlink family doesn't
           appear within a reasonable amount of time.
         */
-        pm->timeout =
+        pm->family_timeout =
                 l_timeout_create(FAMILY_TIMEOUT_SECONDS,
                                  family_timeout,
                                  pm,
                                  NULL);
 
-        if (pm->timeout == NULL) {
+        if (pm->family_timeout == NULL) {
                 mptcpd_pm_destroy(pm);
                 l_error("Unable to create timeout handler.");
                 return NULL;
         }
+
+        /*
+          Periodically synchronize kernel state with mptcpd, such as
+          address IDs managed by the in-kernel path manager.
+        */
+        pm->sync_timeout =
+                l_timeout_create(config->sync_interval,
+                                 sync_timeout,
+                                 pm,
+                                 NULL);
+
+        if (pm->sync_timeout == NULL) {
+                mptcpd_pm_destroy(pm);
+                l_error("Unable to create timeout handler.");
+                return NULL;
+        }
+
+        pm->sync_interval = config->sync_interval;
 
         // Listen for network device changes.
         pm->nm = mptcpd_nm_create();
@@ -1083,7 +1165,8 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
         l_queue_destroy(pm->event_ops, l_free);
         mptcpd_idm_destroy(pm->idm);
         mptcpd_nm_destroy(pm->nm);
-        l_timeout_remove(pm->timeout);
+        l_timeout_remove(pm->sync_timeout);
+        l_timeout_remove(pm->family_timeout);
         l_genl_family_free(pm->family);
         l_genl_unref(pm->genl);
         l_free(pm);
