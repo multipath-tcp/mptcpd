@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2018, 2019, Intel Corporation
+## Copyright (c) 2018-2019, 2021, Intel Corporation
 
 EXTRA_DIST = mptcpd.conf.in
 
