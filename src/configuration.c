@@ -159,6 +159,9 @@ static char const doc[] = "Start the Multipath TCP daemon.";
 
 /// Command line option key for "--path-manager".
 #define MPTCPD_PATH_MANAGER_KEY 0x101
+
+/// Command line option key for "--sync-interval".
+#define MPTCPD_SYNC_INTERVAL_KEY 0x102
 ///@}
 
 static struct argp_option const options[] = {
@@ -182,6 +185,13 @@ static struct argp_option const options[] = {
           "Set default path manager to PLUGIN, e.g. --path-manager=sspi, "
           "overriding plugin priorities",
           0 },
+        { "sync-interval",
+          MPTCPD_SYNC_INTERVAL_KEY,
+          "SECS",
+          0,
+          "Set kernel synchronization interval to given "
+          "amount of SECS seconds",
+          0 },
         { 0 }
 };
 
@@ -189,6 +199,8 @@ static struct argp_option const options[] = {
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
         struct mptcpd_config *const config = state->input;
+        char *endptr = NULL;
+        long interval = 0;
 
         switch (key) {
         case 'd':
@@ -217,6 +229,28 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
                                    "plugin command line option.");
 
                 set_default_plugin(config, l_strdup(arg));
+                break;
+        case MPTCPD_SYNC_INTERVAL_KEY:
+                if (strlen(arg) == 0)
+                        argp_error(state,
+                                   "Empty kernel synchronization "
+                                   "interval command line option.");
+
+                errno = 0;
+
+                interval = strtol(arg, &endptr, 10);
+
+                if ((errno == ERANGE
+                     && (interval == LONG_MIN || interval == LONG_MAX))
+                    || (errno != 0 && interval == 0)
+                    || interval < 0 || interval > UINT_MAX
+                    || endptr == arg)
+                        argp_error(state,
+                                   "Invalid kernel synchronization "
+                                   "command line option.");
+
+                config->sync_interval = (unsigned int) interval;
+
                 break;
         default:
                 return ARGP_ERR_UNKNOWN;
@@ -352,6 +386,21 @@ static bool parse_config_file(struct mptcpd_config *config,
                                                       "path-manager");
 
                         set_default_plugin(config, default_plugin);
+                }
+
+                // Kernel sync interval
+                unsigned int interval = 0;
+
+                if (!l_settings_get_uint(settings,
+                                        group,
+                                        "sync-interval",
+                                        &interval)) {
+                        l_error("Invalid kernel synchronization interval in "
+                                "mptcpd configuration.");
+
+                        parsed = false;
+                } else {
+                        config->sync_interval = interval;
                 }
         } else {
                 l_debug("Unable to mptcpd load settings from file '%s'",

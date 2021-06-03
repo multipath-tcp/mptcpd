@@ -52,6 +52,21 @@ struct mptcpd_config
          * MPTCP connection.
          */
         char const *default_plugin;
+
+        /**
+         * @brief Kernel/mptcpd state sync interval in seconds.
+         *
+         * The amount of time in seconds between periodic
+         * synchronizations of the kernel and mptcpd state, e.g. MPTCP
+         * address ID mappings.
+         *
+         * @note An coarse grained interval resolution in seconds is
+         *       used instead of finer resolutions like milliseconds
+         *       since we don't want to have a large amount of
+         *       kernel/user-space communication in a short period of
+         *       time.
+         */
+        unsigned int sync_interval;
 };
 
 /**
