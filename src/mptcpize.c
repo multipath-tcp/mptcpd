@@ -136,6 +136,9 @@ static char *locate_unit(const char *name)
 		if (strncmp(line, SYSTEMD_UNIT_VAR, strlen(SYSTEMD_UNIT_VAR)) == 0) {
 			char *ret = strdup(&line[strlen(SYSTEMD_UNIT_VAR)]);
 
+			if (!ret)
+				error(1, errno, "failed to duplicate string");
+
 			// trim trailing newline, if any
 			len = strlen(ret);
 			if (len > 0 && ret[len - 1] == '\n')
