@@ -135,6 +135,8 @@ static char *locate_unit(const char *name)
 	while ((read = getline(&line, &len, systemctl)) != -1) {
 		if (strncmp(line, SYSTEMD_UNIT_VAR, strlen(SYSTEMD_UNIT_VAR)) == 0) {
 			char *ret = strdup(&line[strlen(SYSTEMD_UNIT_VAR)]);
+			if (!ret)
+				error(1, errno, "failed to duplicate string");
 
 			// trim trailing newline, if any
 			len = strlen(ret);
