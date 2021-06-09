@@ -1,8 +1,8 @@
 13 April 2021 - mptcpd 0.7
 
 - MPTCP path management generic netlink events recently added to the
-  upstream Linux kernel are now supported, and propagated to mptcpd
-  plugins.  The same API is also found in the multipath-tcp.org
+  upstream Linux kernel (v5.12) are now supported, and propagated to
+  mptcpd plugins.  The same API is also found in the multipath-tcp.org
   kernel.  Differences between the two kernels are transparent to
   mptcpd plugins.
 
