@@ -121,7 +121,7 @@ AC_ARG_WITH([path-manager],
 AC_SUBST([mptcpd_default_pm],[$with_path_manager])
 
 dnl Default kernel sync interval in seconds.
-default_sync_interval=5
+default_sync_interval=60
 AC_SUBST([mptcpd_default_sync],[$default_sync_interval])
 
 # Systemd unit directory detection and handling.
