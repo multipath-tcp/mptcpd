@@ -1108,23 +1108,26 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
-        /*
-          Periodically synchronize kernel state with mptcpd, such as
-          address IDs managed by the in-kernel path manager.
-        */
-        pm->sync_timeout =
-                l_timeout_create(config->sync_interval,
-                                 sync_timeout,
-                                 pm,
-                                 NULL);
+        if (config->sync_interval != 0) {
+                /*
+                  Periodically synchronize kernel state with mptcpd,
+                  such as address IDs managed by the in-kernel path
+                  manager.
+                */
+                pm->sync_timeout =
+                        l_timeout_create(config->sync_interval,
+                                         sync_timeout,
+                                         pm,
+                                         NULL);
 
-        if (pm->sync_timeout == NULL) {
-                mptcpd_pm_destroy(pm);
-                l_error("Unable to create timeout handler.");
-                return NULL;
+                if (pm->sync_timeout == NULL) {
+                        mptcpd_pm_destroy(pm);
+                        l_error("Unable to create timeout handler.");
+                        return NULL;
+                }
+
+                pm->sync_interval = config->sync_interval;
         }
-
-        pm->sync_interval = config->sync_interval;
 
         // Listen for network device changes.
         pm->nm = mptcpd_nm_create();
