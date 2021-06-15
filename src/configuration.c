@@ -200,6 +200,7 @@ static struct argp_option const options[] = {
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
         struct mptcpd_config *const config = state->input;
+        static int const base = 0;  // Automatically choose base.
         char *endptr = NULL;
         long interval = 0;
 
@@ -239,7 +240,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
                 errno = 0;
 
-                interval = strtol(arg, &endptr, 10);
+                interval = strtol(arg, &endptr, base);
 
                 if ((errno == ERANGE
                      && (interval == LONG_MIN || interval == LONG_MAX))
