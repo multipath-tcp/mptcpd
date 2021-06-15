@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sysexits.h>
 
 #include <ell/log.h>
 #include <ell/util.h>
@@ -245,9 +246,11 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
                     || (errno != 0 && interval == 0)
                     || interval < 0 || interval > UINT_MAX
                     || endptr == arg)
-                        argp_error(state,
-                                   "Invalid kernel synchronization "
-                                   "command line option.");
+                        argp_failure(state,
+                                     EX_DATAERR,
+                                     errno,
+                                     "Invalid kernel synchronization "
+                                     "interval: %s", arg);
 
                 config->sync_interval = (unsigned int) interval;
 
