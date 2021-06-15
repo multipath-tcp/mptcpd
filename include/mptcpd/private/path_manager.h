@@ -71,7 +71,19 @@ struct mptcpd_pm
          * netlink family needed by mptcpd does not appear within a
          * certain amount of time.
          */
-        struct l_timeout *timeout;
+        struct l_timeout *family_timeout;
+
+        /**
+         * @brief Kernel state synchronization timeout object.
+         *
+         * The timeout used to periodically synchronize kernel state
+         * with mptcpd, such as address IDs managed by the in-kernel
+         * path manager.
+         */
+        struct l_timeout *sync_timeout;
+
+        /// Kernel/mptcpd state sync interval in seconds.
+        unsigned int sync_interval;
 
         /**
          * @brief Network device monitor.

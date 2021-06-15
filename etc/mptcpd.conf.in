@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
-# Copyright (c) 2018, 2019, Intel Corporation
+# Copyright (c) 2018-2019, 2021, Intel Corporation
 
 # ------------------------------------------------------------------
 #                     mptcpd Configuration File
@@ -23,7 +23,18 @@ plugin-dir=@pkglibdir@
 
 # -------------------
 # Path manager plugin
-# ---------------------
+# -------------------
 # The plugin found with the most favorable (lowest) priority will be
 # used if one is not specified.
 path-manager=@mptcpd_default_pm@
+
+# -------------------------------
+# Kernel Synchronization Interval
+# -------------------------------
+# Periodically synchronize mptcpd state, such as MPTCP address ID and
+# local address mappings, with the corresponding state in the kernel
+# since the kernel state may be altered by other programs besides
+# mptcpd without mptcpd knowing.  This is useful for older kernels
+# that do not issue notifications when global ID/address properties in
+# the in-kernel path manager change.
+sync-interval=@mptcpd_default_sync@

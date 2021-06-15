@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2018, 2019, Intel Corporation
+## Copyright (c) 2018-2019, 2021, Intel Corporation
 
 EXTRA_DIST = mptcpd.conf.in
 
@@ -17,6 +17,7 @@ mptcpd.conf: Makefile mptcpd.conf.in
 			-e 's,@pkglibdir[@],$(pkglibdir),g' \
 			-e 's,@mptcpd_logger[@],$(mptcpd_logger),g' \
 			-e 's,@mptcpd_default_pm[@],$(mptcpd_default_pm),g' \
+			-e 's,@mptcpd_default_sync[@],$(mptcpd_default_sync),g' \
 			$${srcdir}$@.in >$@.tmp; \
 	chmod 644 $@.tmp; \
 	mv $@.tmp $@
