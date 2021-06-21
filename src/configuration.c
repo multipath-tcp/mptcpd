@@ -292,6 +292,57 @@ static bool check_file_perms(char const *f)
         return perms_ok;
 }
 
+static void parse_config_log(struct mptcpd_config *config,
+                             struct l_settings const *settings,
+                             char const *group)
+{
+        if (config->log_set != NULL)
+                return;  // Previously set, e.g. via command line.
+
+        char *const log =
+                l_settings_get_string(settings, group, "log");
+
+        if (log != NULL) {
+                config->log_set = get_log_set_function(log);
+
+                l_free(log);
+        }
+}
+
+static void parse_config_plugin_dir(struct mptcpd_config *config,
+                                    struct l_settings const *settings,
+                                    char const *group)
+{
+        if (config->plugin_dir != NULL)
+                return;  // Previously set, e.g. via command line.
+
+        char *const plugin_dir =
+                l_settings_get_string(settings,
+                                      group,
+                                      "plugin-dir");
+
+        set_plugin_dir(config,
+                       plugin_dir ? plugin_dir :
+                       l_strdup(MPTCPD_DEFAULT_PLUGINDIR));
+}
+
+static void parse_config_default_plugin(struct mptcpd_config *config,
+                                        struct l_settings const *settings,
+                                        char const *group)
+{
+        if (config->default_plugin != NULL)
+                return;  // Previously set, e.g. via command line.
+
+        // Default plugin name.
+        char *const default_plugin =
+                l_settings_get_string(settings,
+                                      group,
+                                      "path-manager");
+
+        if (default_plugin != NULL)
+                set_default_plugin(config, default_plugin);
+}
+
 /**
  * @brief Parse configuration file.
  *
@@ -320,34 +371,15 @@ static bool parse_config_file(struct mptcpd_config *config,
                 static char const group[] = "core";
 
                 // Logging mechanism.
-                char *const log =
-                        l_settings_get_string(settings, group, "log");
-
-                if (log != NULL) {
-                        config->log_set = get_log_set_function(log);
-
-                        l_free(log);
-                }
+                parse_config_log(config, settings, group);
 
                 // Plugin directory.
-                char *const plugin_dir =
-                        l_settings_get_string(settings,
-                                              group,
-                                              "plugin-dir");
+                parse_config_plugin_dir(config, settings, group);
 
-                set_plugin_dir(config,
-			       plugin_dir ? plugin_dir :
-					    l_strdup(MPTCPD_DEFAULT_PLUGINDIR));
-
-                // Default plugin name.  Can be NULL.
-                char *const default_plugin =
-                        l_settings_get_string(settings,
-                                              group,
-                                              "path-manager");
-
-                set_default_plugin(config, default_plugin);
+                // Default plugin.
+                parse_config_default_plugin(config, settings, group);
         } else {
-                l_debug("Unable to mptcpd load settings from file '%s'",
+                l_debug("Unable to load mptcpd settings from file '%s'",
                         filename);
         }
 
@@ -393,6 +425,60 @@ static bool parse_config_files(struct mptcpd_config *config)
         return parsed;
 }
 
+/**
+ * @brief Merge command line and configuration file settings.
+ *
+ * Merge the command line and system configurations.  The command line
+ * configuration takes precedence over those in the system
+ * configuration.
+ *
+ * @param[in,out] config     Mptcpd command line configuration.
+ * @param[in]     sys_config Mptcpd system configuration file.
+ *
+ * @return @c true on successful merge and @c false otherwise.
+ */
+static bool merge_config(struct mptcpd_config       *config,
+                         struct mptcpd_config const *sys_config)
+{
+        if (config->log_set == NULL)
+                config->log_set = sys_config->log_set;
+
+        if (config->plugin_dir == NULL) {
+                config->plugin_dir = sys_config->plugin_dir;
+
+                l_debug("path manager plugin directory: %s",
+                        config->plugin_dir);
+        }
+
+        if (config->default_plugin == NULL) {
+                config->default_plugin = sys_config->default_plugin;
+
+                l_debug("default path manager plugin: %s",
+                        config->default_plugin);
+        }
+
+        return true;
+}
+
+/**
+ * @brief Verify that the mptcpd configuration is valid.
+ *
+ * @param[in] config Mptcpd configuration.
+ *
+ * @return @c true if the mptcpd configuration parameters are valid
+ *         and @c false otherwise.
+ */
+static bool check_config(struct mptcpd_config const *config)
+{
+        if (config->plugin_dir == NULL) {
+                l_error("mptcpd plugin directory was not configured.");
+
+                return false;
+        }
+
+        return true;
+}
+
 // ---------------------------------------------------------------
 // Public Mptcpd Configuration API
 // ---------------------------------------------------------------
@@ -406,14 +492,22 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
 
         // No need to check for NULL.  l_new() abort()s on failure.
 
+        // System configuration, e.g. /etc/mptcpd/mptcpd.conf.
+        struct mptcpd_config sys_config = { .log_set = NULL };
+
         /*
           Configuration priority:
                   1) Command line
                   2) System config
                   3) Compile-time (configure script choice)
          */
-        if (!parse_config_files(config)
-            || !parse_options(config, argc, argv)) {
+        bool const parsed =
+                parse_options(config, argc, argv)
+                && parse_config_files(&sys_config)
+                && merge_config(config, &sys_config)
+                && check_config(config);
+
+        if (!parsed) {
                 // Failed to parse configuration.
                 mptcpd_config_destroy(config);
 
@@ -423,13 +517,6 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
         // Inform ELL which logger we're going to use.
         if (config->log_set != NULL)
                 config->log_set();
-
-        if (config->plugin_dir != NULL)
-                l_debug("plugin directory: %s", config->plugin_dir);
-
-        if (config->default_plugin != NULL)
-                l_debug("default path manager plugin: %s",
-                        config->default_plugin);
 
         return config;
 }
