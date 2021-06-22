@@ -23,9 +23,9 @@ jobs:
       run: make
     - name: make check
       # The kernel in Ubuntu 20.04 doesn't support MPTCP.  Expect failures.
-      run: make check XFAIL_TESTS="test-commands test-path-manager test-start-stop"
+      run: make check XFAIL_TESTS="test-commands"
     - name: make distcheck
-      run: make distcheck XFAIL_TESTS="test-commands test-path-manager test-start-stop"
+      run: make distcheck XFAIL_TESTS="test-commands"
     - name: make install
       run: sudo make install
     - name: make installcheck
