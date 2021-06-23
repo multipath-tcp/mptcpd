@@ -321,9 +321,8 @@ static void parse_config_plugin_dir(struct mptcpd_config *config,
                                       group,
                                       "plugin-dir");
 
-        set_plugin_dir(config,
-                       plugin_dir ? plugin_dir :
-                       l_strdup(MPTCPD_DEFAULT_PLUGINDIR));
+        if (plugin_dir != NULL)
+                set_plugin_dir(config, plugin_dir);
 }
 
 static void parse_config_default_plugin(struct mptcpd_config *config,
