@@ -304,8 +304,6 @@ static bool check_file_perms(char const *f)
 static bool parse_config_file(struct mptcpd_config *config,
                               char const *filename)
 {
-        bool parsed = true;
-
         assert(filename != NULL);
 
         if (!check_file_perms(filename))
@@ -337,22 +335,17 @@ static bool parse_config_file(struct mptcpd_config *config,
                                               group,
                                               "plugin-dir");
 
-                if (plugin_dir == NULL) {
-                        l_error("No plugin directory set in mptcpd "
-                                "configuration.");
+                set_plugin_dir(config,
+			       plugin_dir ? plugin_dir :
+					    l_strdup(MPTCPD_DEFAULT_PLUGINDIR));
 
-                        parsed = false;
-                } else {
-                        set_plugin_dir(config, plugin_dir);
+                // Default plugin name.  Can be NULL.
+                char *const default_plugin =
+                        l_settings_get_string(settings,
+                                              group,
+                                              "path-manager");
 
-                        // Default plugin name.  Can be NULL.
-                        char *const default_plugin =
-                                l_settings_get_string(settings,
-                                                      group,
-                                                      "path-manager");
-
-                        set_default_plugin(config, default_plugin);
-                }
+                set_default_plugin(config, default_plugin);
         } else {
                 l_debug("Unable to mptcpd load settings from file '%s'",
                         filename);
@@ -360,7 +353,7 @@ static bool parse_config_file(struct mptcpd_config *config,
 
         l_settings_free(settings);
 
-        return parsed;
+        return true;
 }
 
 /**

@@ -31,7 +31,8 @@ libpath_manager_la_LIBADD =			\
 
 libpath_manager_la_CPPFLAGS =	\
 	$(AM_CPPFLAGS)		\
-	-DMPTCPD_CONFIG_FILE='"$(sysconfdir)/@PACKAGE@/@PACKAGE@.conf"'
+	-DMPTCPD_CONFIG_FILE='"$(sysconfdir)/@PACKAGE@/@PACKAGE@.conf"' \
+	-DMPTCPD_DEFAULT_PLUGINDIR='"$(libdir)/@PACKAGE@"'
 
 EXTRA_DIST = mptcp.service.in
 
