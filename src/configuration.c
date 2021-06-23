@@ -516,8 +516,9 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
         l_debug("path manager plugin directory: %s",
                 config->plugin_dir);
 
-        l_debug("default path manager plugin: %s",
-                config->default_plugin);
+        if (config->default_plugin != NULL)
+                l_debug("default path manager plugin: %s",
+                        config->default_plugin);
 
         return config;
 }
