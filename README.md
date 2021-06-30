@@ -1,5 +1,7 @@
 <!-- SPDX-License-Identifier: BSD-3-Clause
-     Copyright (c) 2017-2020, Intel Corporation -->
+     Copyright (c) 2017-2021, Intel Corporation -->
+
+[![C/C++ CI](https://github.com/intel/mptcpd/actions/workflows/ccpp.yml/badge.svg)](https://github.com/intel/mptcpd/actions/workflows/ccpp.yml)
 
 # Multipath TCP Daemon
 The Multipath TCP Daemon - `mptcpd` - is a daemon for Linux based
