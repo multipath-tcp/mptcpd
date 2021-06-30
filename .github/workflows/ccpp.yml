@@ -18,7 +18,7 @@ jobs:
     - name: bootstrap
       run: ./bootstrap
     - name: configure
-      run: ./configure
+      run: ./configure CFLAGS=-fanalyzer CXXFLAGS=-fanalyzer
     - name: make
       run: make -k
     - name: make check
