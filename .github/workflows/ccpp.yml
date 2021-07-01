@@ -18,12 +18,12 @@ jobs:
     - name: bootstrap
       run: ./bootstrap
     - name: configure
-      run: ./configure
+      run: ./configure CFLAGS=-fanalyzer CXXFLAGS=-fanalyzer
     - name: make
-      run: make
+      run: make -k
     - name: make check
       # The kernel in Ubuntu 20.04 doesn't support MPTCP.  Expect failures.
-      run: make check XFAIL_TESTS="test-commands"
+      run: make -k check XFAIL_TESTS="test-commands"
     - name: make distcheck
       run: make distcheck XFAIL_TESTS="test-commands"
     - name: make install
