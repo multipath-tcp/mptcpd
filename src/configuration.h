@@ -45,6 +45,14 @@ struct mptcpd_config
         char const *plugin_dir;
 
         /**
+         * @brief flags for addresses create
+         *
+         * When the plugin advertize an address, will use the specified
+         * flags. Only relevant for the upstream kernel.
+         */
+        uint32_t addr_flags;
+
+        /**
          * @brief Name of default plugin.
          *
          * Use the operations associated with the plugin of this name
