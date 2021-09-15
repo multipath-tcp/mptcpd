@@ -27,7 +27,7 @@
 
 #include <mptcpd/types.h>
 
-#include "configuration.h"
+#include <mptcpd/private/configuration.h>
 
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>

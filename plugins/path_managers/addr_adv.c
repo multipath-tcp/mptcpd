@@ -14,6 +14,9 @@
 #include <ell/util.h>  // For L_STRINGIFY needed by ELL log macros.
 #include <ell/log.h>
 
+
+#include <mptcpd/private/path_manager.h>
+#include <mptcpd/private/configuration.h>
 #include <mptcpd/id_manager.h>
 #include <mptcpd/network_monitor.h>
 #include <mptcpd/path_manager.h>
@@ -32,7 +35,7 @@ static void addr_adv_new_local_address(struct mptcpd_interface const *i,
                 return;
         }
 
-        uint32_t       const flags = 0;
+        uint32_t       const flags = pm->config->addr_flags;
         mptcpd_token_t const token = 0;
 
         if (mptcpd_pm_add_addr(pm, sa, id, flags, i->index, token) != 0)
