@@ -27,6 +27,8 @@
 #include <ell/util.h>
 #include <ell/queue.h>
 
+#include <mptcpd/private/path_manager.h>
+#include <mptcpd/private/configuration.h>
 #include <mptcpd/network_monitor.h>
 
 
@@ -754,6 +756,14 @@ static void insert_addr(struct mptcpd_nm *nm,
         (void) insert_addr_return(interface, rtm_addr);
 }
 
+static const struct mptcpd_config *pm_config(struct mptcpd_nm *nm)
+{
+        struct nm_ops_info            *const info = l_queue_peek_head(nm->ops);
+        struct mptcpd_pm        const *const pm   = info->user_data;
+
+        return pm->config;
+}
+
 /**
  * @brief Register or update network address with network monitor.
  *
@@ -767,6 +777,16 @@ static void update_addr(struct mptcpd_nm *nm,
                         struct mptcpd_interface *interface,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
+        const struct mptcpd_config *config = pm_config(nm);
+
+        if ((config->notify_flags & MPTCPD_NOTIFY_FLAG_SKIP_LL) &&
+             (rtm_addr->ifa->ifa_scope == RT_SCOPE_LINK))
+                return;
+
+        if ((config->notify_flags & MPTCPD_NOTIFY_FLAG_SKIP_HOST) &&
+             (rtm_addr->ifa->ifa_scope == RT_SCOPE_HOST))
+                return;
+
         struct sockaddr *addr =
                 l_queue_find(interface->addrs,
                              mptcpd_sockaddr_match,
@@ -1077,6 +1097,7 @@ static void handle_rtm_getaddr(int error,
 
         struct ifaddrmsg const *const ifa = data;
         struct mptcpd_nm       *const nm  = user_data;
+        const struct mptcpd_config *config = pm_config(nm);
 
         struct mptcpd_interface *const interface =
                 get_mptcpd_interface(ifa, nm);
@@ -1084,7 +1105,11 @@ static void handle_rtm_getaddr(int error,
         if (interface == NULL)
                 return;
 
-        foreach_ifaddr(ifa, len, nm, interface, insert_addr);
+        handle_ifaddr_func_t handler = insert_addr;
+        if (config->notify_flags & MPTCPD_NOTIFY_FLAG_EXISTING)
+                handler = update_addr;
+
+        foreach_ifaddr(ifa, len, nm, interface, handler);
 }
 
 /**
