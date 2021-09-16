@@ -52,6 +52,9 @@ struct mptcpd_config
          */
         uint32_t addr_flags;
 
+        /// various flag to control new address notification
+        uint32_t notify_flags;
+
         /**
          * @brief Name of default plugin.
          *
