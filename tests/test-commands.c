@@ -8,6 +8,7 @@
  */
 
 #undef NDEBUG
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -125,6 +126,20 @@ static void get_limits_callback(struct mptcpd_limit const *limits,
                                 size_t len,
                                 void *user_data)
 {
+        uint32_t addrs_limit = max_addrs;
+        uint32_t subflows_limit = max_subflows;
+
+        if (geteuid() != 0) {
+                /*
+                  if the current user is not root, the previous set_limit()
+                  call is failied with ENOPERM, but libell APIs don't
+                  allow reporting such error to the caller.
+                  Just assume set_limits has no effect
+                */
+                addrs_limit = 0;
+                subflows_limit = 0;
+        }
+
         (void) user_data;
 
         assert(limits != NULL);
@@ -134,9 +149,9 @@ static void get_limits_callback(struct mptcpd_limit const *limits,
              l != limits + len;
              ++l) {
                 if (l->type == MPTCPD_LIMIT_RCV_ADD_ADDRS) {
-                        assert(l->limit == max_addrs);
+                        assert(l->limit == addrs_limit);
                 } else if (l->type == MPTCPD_LIMIT_SUBFLOWS) {
-                        assert(l->limit == max_subflows);
+                        assert(l->limit == subflows_limit);
                 } else {
                         /*
                           Unless more MPTCP limit types are added to
