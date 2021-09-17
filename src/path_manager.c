@@ -34,13 +34,13 @@
 #include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>
 #include <mptcpd/private/sockaddr.h>
+#include <mptcpd/private/configuration.h>
 #include <mptcpd/addr_info.h>
 
 // For netlink events.  Same API applies to multipath-tcp.org kernel.
 #include <mptcpd/private/mptcp_upstream.h>
 
 #include "path_manager.h"
-#include "configuration.h"
 #include "netlink_pm.h"
 
 

@@ -4,7 +4,7 @@
  *
  * @brief mptcpd configuration test.
  *
- * Copyright (c) 2019 Intel Corporation
+ * Copyright (c) 2019, 2021, Intel Corporation
  */
 
 #undef NDEBUG
@@ -15,7 +15,7 @@
 #include <ell/log.h>
 #include <ell/test.h>
 
-#include "../src/configuration.h"    // INTERNAL!
+#include <mptcpd/private/configuration.h>  // INTERNAL!
 
 
 #define TEST_PROGRAM_NAME "test-configuration"

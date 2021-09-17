@@ -19,8 +19,8 @@
 #include <ell/log.h>
 #include <ell/test.h>
 
-#include "../src/configuration.h"   // INTERNAL!
-#include "../src/path_manager.h"    // INTERNAL!
+#include <mptcpd/private/configuration.h>  // INTERNAL!
+#include "../src/path_manager.h"           // INTERNAL!
 
 #include "test-plugin.h"
 #include "test-util.h"
