@@ -90,26 +90,30 @@ static mptcpd_set_log_func_t get_log_set_function(char const *l)
         return log_set;
 }
 
-static int append_tok(char *str, int len, const char *sep, const char *tok)
+static size_t append_tok(char *str,
+                         size_t len,
+                         char const *sep,
+                         char const *tok)
 {
-        int tok_len = strlen(tok);
-        int sep_len = strlen(sep);
+        size_t const tok_len = strlen(tok);
+        size_t const sep_len = strlen(sep);
 
         if (len <= tok_len + sep_len)
                 return len;
 
         l_strlcpy(str, sep, len);
         l_strlcpy(str + sep_len, tok, len - sep_len);
+
         return tok_len + sep_len;
 }
 
 struct tok_entry
 {
-        uint32_t id;
-        const char *string;
+        uint32_t const id;
+        char const *const string;
 };
 
-static struct tok_entry addr_flags_toks[] = {
+static struct tok_entry const addr_flags_toks[] = {
         { MPTCPD_ADDR_FLAG_SUBFLOW, "subflow" },
         { MPTCPD_ADDR_FLAG_SIGNAL, "signal" },
         { MPTCPD_ADDR_FLAG_BACKUP, "backup" },
@@ -118,31 +122,33 @@ static struct tok_entry addr_flags_toks[] = {
 
 
 /**
- * @brief converts the flags into a string representation
+ * @brief Converts the flags into a string representation.
  *
- * Given a flags bitmask converts it to string representation
- * using the specified token list and storing it into the
- * provided string buffer.
+ * Given a @a flags bitmask converts it to string representation using
+ * the specified token list and store it into the provided string
+ * buffer.
  *
- * @param[in]     toks mapping from flag to token
+ * @param[in]  toks  Mapping from flag to token.
  *
- * @param[in]    flags address flags to be converted
+ * @param[in]  flags Address flags to be converted.
  *
- * @param[out]     str place the corresponding string representation
- *                     in this buffer
- * @param[in]      len length of the string buffer @c str
+ * @param[out] str   Place the corresponding string representation
+ *                   in this buffer.
+ * @param[in]  len   Length of the string buffer @a str.
  */
-static const char *flags_string(const struct tok_entry *toks,
-                                uint32_t flags, char *str, int len)
+static const char *flags_string(struct tok_entry const *toks,
+                                uint32_t flags,
+                                char *str,
+                                size_t len)
 {
         const struct tok_entry *tok;
-        const char *sep="";
-        int ret;
+        const char *sep= "";
 
         str[0] = 0;
         for (tok = toks; tok->id; tok++) {
                if (flags & tok->id) {
-                       ret = append_tok(str, len, sep, tok->string);
+                       size_t ret =
+                               append_tok(str, len, sep, tok->string);
                        str += ret;
                        len -= ret;
                        sep = ",";
@@ -151,19 +157,23 @@ static const char *flags_string(const struct tok_entry *toks,
         return str;
 }
 
-static const char *addr_flags_string(uint32_t flags, char *str, int len)
+static const char *addr_flags_string(uint32_t flags,
+                                     char *str,
+                                     size_t len)
 {
         return flags_string(addr_flags_toks, flags, str, len);
 }
 
-struct tok_entry notify_flags_toks[] = {
+struct tok_entry const notify_flags_toks[] = {
         { MPTCPD_NOTIFY_FLAG_EXISTING, "existing" },
         { MPTCPD_NOTIFY_FLAG_SKIP_LL, "skip_link_local" },
         { MPTCPD_NOTIFY_FLAG_SKIP_HOST, "skip_loopback" },
         { 0, NULL },
 };
 
-static const char *notify_flags_string(uint32_t flags, char *str, int len)
+static const char *notify_flags_string(uint32_t flags,
+                                       char *str,
+                                       size_t len)
 {
         return flags_string(notify_flags_toks, flags, str, len);
 }
@@ -175,29 +185,33 @@ static const char *notify_flags_string(uint32_t flags, char *str, int len)
  * String typed fields in the @c mptcpd_config structure contain
  * dynamically allocated string
  *
- * @param[in]   toks mapping from flag to token
+ * @param[in] toks Mapping from flag to token.
  *
- * @param[in]    str the address flags string to be converted
+ * @param[in] str  The address flags string to be converted.
  */
-static uint32_t flags_from_string(const struct tok_entry *toks, const char *str)
+static uint32_t flags_from_string(struct tok_entry const *toks,
+                                  char const *str)
 {
-        const struct tok_entry *tok;
-        int len = strlen(str);
+        struct tok_entry const *tok;
+        size_t len = strlen(str);
         uint32_t ret = 0;
 
         while (len > 0) {
                 for (tok = toks; tok->id; tok++) {
-                      int tok_len = strlen(tok->string);
+                      size_t tok_len = strlen(tok->string);
 
-                      if (strncmp(str, tok->string, tok_len) ||
-                          (str[tok_len] != 0 && str[tok_len] != ','))
+                      if (strncmp(str, tok->string, tok_len)
+                          || (str[tok_len] != 0 && str[tok_len] != ','))
                               continue;
 
                       ret |= tok->id;
+
                       if (str[tok_len] == ',')
                               tok_len++;
+
                       len -= tok_len;
                       str += tok_len;
+
                       break;
                 }
 
@@ -206,15 +220,16 @@ static uint32_t flags_from_string(const struct tok_entry *toks, const char *str)
                       return ret;
                 }
         }
+
         return ret;
 }
 
-static uint32_t addr_flags_from_string(const char *str)
+static uint32_t addr_flags_from_string(char const *str)
 {
         return flags_from_string(addr_flags_toks, str);
 }
 
-static uint32_t notify_flags_from_string(const char *str)
+static uint32_t notify_flags_from_string(char const *str)
 {
         return flags_from_string(notify_flags_toks, str);
 }
