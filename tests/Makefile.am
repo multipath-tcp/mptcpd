@@ -110,7 +110,6 @@ endif
 
 AM_TESTS_ENVIRONMENT = TEST_PLUGIN_DIR=$(TEST_PLUGIN_DIR_NOOP)
 TESTS = $(check_PROGRAMS) $(dist_check_SCRIPTS)
-XFAIL_TESTS = test-commands
 
 # Clean up code coverage related generated files.
 clean-local: code-coverage-clean

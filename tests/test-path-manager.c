@@ -20,9 +20,9 @@
 
 #include "test-util.h"
 
-#include "../src/configuration.h"        // INTERNAL!
-#include "../src/path_manager.h"         // INTERNAL!
-#include <mptcpd/private/path_manager.h> // INTERNAL!
+#include "../src/path_manager.h"           // INTERNAL!
+#include <mptcpd/private/configuration.h>  // INTERNAL!
+#include <mptcpd/private/path_manager.h>   // INTERNAL!
 #include <mptcpd/path_manager.h>
 
 // -------------------------------------------------------------------

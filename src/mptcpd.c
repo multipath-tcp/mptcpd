@@ -19,7 +19,8 @@
 #include <ell/log.h>
 #include <ell/main.h>
 
-#include "configuration.h"
+#include <mptcpd/private/configuration.h>
+
 #include "path_manager.h"
 
 

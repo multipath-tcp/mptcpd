@@ -25,7 +25,9 @@
 #include <ell/util.h>
 #include <ell/settings.h>
 
-#include "configuration.h"
+#include <mptcpd/types.h>
+
+#include <mptcpd/private/configuration.h>
 
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>
@@ -87,6 +89,148 @@ static mptcpd_set_log_func_t get_log_set_function(char const *l)
 
         return log_set;
 }
+
+static size_t append_tok(char *str,
+                         size_t len,
+                         char const *sep,
+                         char const *tok)
+{
+        size_t const tok_len = strlen(tok);
+        size_t const sep_len = strlen(sep);
+
+        if (len <= tok_len + sep_len)
+                return len;
+
+        l_strlcpy(str, sep, len);
+        l_strlcpy(str + sep_len, tok, len - sep_len);
+
+        return tok_len + sep_len;
+}
+
+struct tok_entry
+{
+        uint32_t const id;
+        char const *const string;
+};
+
+static struct tok_entry const addr_flags_toks[] = {
+        { MPTCPD_ADDR_FLAG_SUBFLOW, "subflow" },
+        { MPTCPD_ADDR_FLAG_SIGNAL, "signal" },
+        { MPTCPD_ADDR_FLAG_BACKUP, "backup" },
+        { 0, NULL },
+};
+
+
+/**
+ * @brief Converts the flags into a string representation.
+ *
+ * Given a @a flags bitmask converts it to string representation using
+ * the specified token list and store it into the provided string
+ * buffer.
+ *
+ * @param[in]  toks  Mapping from flag to token.
+ * @param[in]  flags Address flags to be converted.
+ * @param[out] str   Place the corresponding string representation
+ *                   in this buffer.
+ * @param[in]  len   Length of the string buffer @a str.
+ */
+static char const *flags_string(struct tok_entry const *toks,
+                                uint32_t flags,
+                                char *str,
+                                size_t len)
+{
+        struct tok_entry const *tok;
+        char const *sep= "";
+
+        str[0] = 0;
+        for (tok = toks; tok->id; tok++) {
+               if (flags & tok->id) {
+                       size_t ret =
+                               append_tok(str, len, sep, tok->string);
+                       str += ret;
+                       len -= ret;
+                       sep = ",";
+               }
+        }
+        return str;
+}
+
+static char const *addr_flags_string(uint32_t flags,
+                                     char *str,
+                                     size_t len)
+{
+        return flags_string(addr_flags_toks, flags, str, len);
+}
+
+struct tok_entry const notify_flags_toks[] = {
+        { MPTCPD_NOTIFY_FLAG_EXISTING, "existing" },
+        { MPTCPD_NOTIFY_FLAG_SKIP_LL, "skip_link_local" },
+        { MPTCPD_NOTIFY_FLAG_SKIP_HOST, "skip_loopback" },
+        { 0, NULL },
+};
+
+static char const *notify_flags_string(uint32_t flags,
+                                       char *str,
+                                       size_t len)
+{
+        return flags_string(notify_flags_toks, flags, str, len);
+}
+
+
+/**
+ * @brief converts the addr-flags string into numeric rep
+ *
+ * String typed fields in the @c mptcpd_config structure contain
+ * dynamically allocated string
+ *
+ * @param[in] toks Mapping from flag to token.
+ * @param[in] str  The address flags string to be converted.
+ */
+static uint32_t flags_from_string(struct tok_entry const *toks,
+                                  char const *str)
+{
+        struct tok_entry const *tok;
+        size_t len = strlen(str);
+        uint32_t ret = 0;
+
+        while (len > 0) {
+                for (tok = toks; tok->id; tok++) {
+                      size_t tok_len = strlen(tok->string);
+
+                      if (strncmp(str, tok->string, tok_len)
+                          || (str[tok_len] != 0 && str[tok_len] != ','))
+                              continue;
+
+                      ret |= tok->id;
+
+                      if (str[tok_len] == ',')
+                              tok_len++;
+
+                      len -= tok_len;
+                      str += tok_len;
+
+                      break;
+                }
+
+                if (!tok->id) {
+                      l_warn("unknown flag %s", str);
+                      return ret;
+                }
+        }
+
+        return ret;
+}
+
+static uint32_t addr_flags_from_string(char const *str)
+{
+        return flags_from_string(addr_flags_toks, str);
+}
+
+static uint32_t notify_flags_from_string(char const *str)
+{
+        return flags_from_string(notify_flags_toks, str);
+}
+
 
 // ---------------------------------------------------------------
 // Set configuration values
@@ -159,6 +303,12 @@ static char const doc[] = "Start the Multipath TCP daemon.";
 
 /// Command line option key for "--path-manager".
 #define MPTCPD_PATH_MANAGER_KEY 0x101
+
+/// Command line option key for "--addr-flags" 
+#define MPTCPD_ADDR_FLAGS_KEY 0x102
+
+/// Command line option key for "--notify-flags"
+#define MPTCPD_NOTIFY_FLAGS_KEY 0x103
 ///@}
 
 static struct argp_option const options[] = {
@@ -168,6 +318,13 @@ static struct argp_option const options[] = {
           "DEST",
           0,
           "Log to DEST (stderr, syslog or journal), e.g. --log=journal",
+          0 },
+        { "notify-flags",
+          MPTCPD_NOTIFY_FLAGS_KEY,
+          "FLAGS",
+          0,
+          "Address notification flags, "
+          "e.g. --notify-flags=existing,skip_link_local,skip_loopback",
           0 },
         { "plugin-dir",
           MPTCPD_PLUGIN_DIR_KEY,
@@ -181,6 +338,12 @@ static struct argp_option const options[] = {
           0,
           "Set default path manager to PLUGIN, e.g. --path-manager=sspi, "
           "overriding plugin priorities",
+          0 },
+        { "addr-flags",
+          MPTCPD_ADDR_FLAGS_KEY,
+          "FLAGS",
+          0,
+          "Set flags for announced address, e.g. --addr-flags=subflow",
           0 },
         { 0 }
 };
@@ -217,6 +380,12 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
                                    "plugin command line option.");
 
                 set_default_plugin(config, l_strdup(arg));
+                break;
+        case MPTCPD_ADDR_FLAGS_KEY:
+                config->addr_flags = addr_flags_from_string(arg);
+                break;
+        case MPTCPD_NOTIFY_FLAGS_KEY:
+                config->notify_flags = notify_flags_from_string(arg);
                 break;
         default:
                 return ARGP_ERR_UNKNOWN;
@@ -325,6 +494,38 @@ static void parse_config_plugin_dir(struct mptcpd_config *config,
                 set_plugin_dir(config, plugin_dir);
 }
 
+static void parse_config_addr_flags(struct mptcpd_config *config,
+                                    struct l_settings const *settings,
+                                    char const *group)
+{
+        if (config->addr_flags != 0)
+                return;  // Previously set, e.g. via command line.
+
+        char *const addr_flags =
+                l_settings_get_string(settings,
+                                      group,
+                                      "addr-flags");
+
+        if (addr_flags != NULL)
+                config->addr_flags = addr_flags_from_string(addr_flags);
+}
+
+static void parse_config_notify_flags(struct mptcpd_config *config,
+                                      struct l_settings const *settings,
+                                      char const *group)
+{
+        if (config->notify_flags != 0)
+                return;  // Previously set, e.g. via command line.
+
+        char *const notify_flags =
+                l_settings_get_string(settings,
+                                      group,
+                                      "notify-flags");
+
+        if (notify_flags != NULL)
+                config->notify_flags = notify_flags_from_string(notify_flags);
+}
+
 static void parse_config_default_plugin(struct mptcpd_config *config,
                                         struct l_settings const *settings,
                                         char const *group)
@@ -374,6 +575,12 @@ static bool parse_config_file(struct mptcpd_config *config,
 
                 // Plugin directory.
                 parse_config_plugin_dir(config, settings, group);
+
+                // Notification for existing addresses.
+                parse_config_notify_flags(config, settings, group);
+
+                // Address flags.
+                parse_config_addr_flags(config, settings, group);
 
                 // Default plugin.
                 parse_config_default_plugin(config, settings, group);
@@ -443,6 +650,12 @@ static bool merge_config(struct mptcpd_config       *dst,
         if (dst->plugin_dir == NULL)
                 dst->plugin_dir = l_strdup(src->plugin_dir);
 
+        if (dst->addr_flags == 0)
+                dst->addr_flags = src->addr_flags;
+
+        if (dst->notify_flags == 0)
+                dst->notify_flags = src->notify_flags;
+
         if (dst->default_plugin == NULL)
                 dst->default_plugin = l_strdup(src->default_plugin);
 
@@ -485,6 +698,7 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
         struct mptcpd_config sys_config = { .log_set = NULL };
         static struct mptcpd_config const def_config = {
                 .plugin_dir = MPTCPD_DEFAULT_PLUGINDIR };
+        char flags[128];
 
         /*
           Configuration priority:
@@ -519,6 +733,14 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
         if (config->default_plugin != NULL)
                 l_debug("default path manager plugin: %s",
                         config->default_plugin);
+
+        if (config->addr_flags)
+                l_debug("address flags: %s",
+                        addr_flags_string(config->addr_flags, flags, sizeof(flags)));
+
+        if (config->notify_flags)
+                l_debug("notify flags: %s",
+                        notify_flags_string(config->notify_flags, flags, sizeof(flags)));
 
         return config;
 }

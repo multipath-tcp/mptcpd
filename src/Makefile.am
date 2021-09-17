@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2017-2019, Intel Corporation
+## Copyright (c) 2017-2019, 2021, Intel Corporation
 
 include $(top_srcdir)/aminclude_static.am
 
@@ -17,7 +17,6 @@ libpath_manager_la_SOURCES =	\
 	commands.c		\
 	commands.h		\
 	configuration.c		\
-	configuration.h		\
 	netlink_pm.c		\
 	netlink_pm.h		\
 	netlink_pm_mptcp_org.c	\

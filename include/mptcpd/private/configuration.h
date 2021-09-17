@@ -4,7 +4,7 @@
  *
  * @brief Mptcpd configuration parser header.
  *
- * Copyright (c) 2018, 2019, Intel Corporation
+ * Copyright (c) 2018, 2019, 2021, Intel Corporation
  */
 
 #ifndef MPTCPD_CONFIGURATION_H
@@ -43,6 +43,17 @@ struct mptcpd_config
 
         /// Location of mptcpd plugins.
         char const *plugin_dir;
+
+        /**
+         * @brief flags for addresses create
+         *
+         * Flags to be used when the plugin advertises an address.
+         * Only relevant for the upstream kernel.
+         */
+        uint32_t addr_flags;
+
+        /// Various flags to control new address notification.
+        uint32_t notify_flags;
 
         /**
          * @brief Name of default plugin.

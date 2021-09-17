@@ -34,13 +34,13 @@
 #include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>
 #include <mptcpd/private/sockaddr.h>
+#include <mptcpd/private/configuration.h>
 #include <mptcpd/addr_info.h>
 
 // For netlink events.  Same API applies to multipath-tcp.org kernel.
 #include <mptcpd/private/mptcp_upstream.h>
 
 #include "path_manager.h"
-#include "configuration.h"
 #include "netlink_pm.h"
 
 
@@ -1045,7 +1045,7 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         }
 
         // Listen for network device changes.
-        pm->nm = mptcpd_nm_create();
+        pm->nm = mptcpd_nm_create(config->notify_flags);
 
         if (pm->nm == NULL
             || !mptcpd_nm_register_ops(pm->nm, &_nm_ops, pm)) {

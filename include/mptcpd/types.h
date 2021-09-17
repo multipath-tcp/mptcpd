@@ -60,6 +60,15 @@ typedef uint32_t mptcpd_flags_t;
 #define MPTCPD_ADDR_FLAG_BACKUP  (1U << 2)
 ///@}
 
+/// Notify even the addresses already existing at startup-time.
+#define MPTCPD_NOTIFY_FLAG_EXISTING  (1U << 0)
+
+/// Ignore link-local addresses.
+#define MPTCPD_NOTIFY_FLAG_SKIP_LL (1U << 1)
+
+/// Ignore host (loopback) addresses.
+#define MPTCPD_NOTIFY_FLAG_SKIP_HOST (1U << 2)
+
 /**
  * @enum mptcpd_limit_types
  *

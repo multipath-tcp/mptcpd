@@ -27,6 +27,7 @@
 #include <ell/util.h>
 #include <ell/queue.h>
 
+#include <mptcpd/private/path_manager.h>
 #include <mptcpd/network_monitor.h>
 
 
@@ -68,6 +69,9 @@ struct mptcpd_nm
 
         /// List of @c nm_ops_info objects.
         struct l_queue *ops;
+
+        /// Flags controlling address notification.
+        uint32_t notify_flags;
 };
 
 // -------------------------------------------------------------------
@@ -767,6 +771,14 @@ static void update_addr(struct mptcpd_nm *nm,
                         struct mptcpd_interface *interface,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
+        if ((nm->notify_flags & MPTCPD_NOTIFY_FLAG_SKIP_LL)
+            && (rtm_addr->ifa->ifa_scope == RT_SCOPE_LINK))
+                return;
+
+        if ((nm->notify_flags & MPTCPD_NOTIFY_FLAG_SKIP_HOST)
+            && (rtm_addr->ifa->ifa_scope == RT_SCOPE_HOST))
+                return;
+
         struct sockaddr *addr =
                 l_queue_find(interface->addrs,
                              mptcpd_sockaddr_match,
@@ -1075,8 +1087,8 @@ static void handle_rtm_getaddr(int error,
         (void) type;
         assert(type == RTM_NEWADDR);
 
-        struct ifaddrmsg const *const ifa = data;
-        struct mptcpd_nm       *const nm  = user_data;
+        struct ifaddrmsg     const *const ifa    = data;
+        struct mptcpd_nm           *const nm     = user_data;
 
         struct mptcpd_interface *const interface =
                 get_mptcpd_interface(ifa, nm);
@@ -1084,7 +1096,11 @@ static void handle_rtm_getaddr(int error,
         if (interface == NULL)
                 return;
 
-        foreach_ifaddr(ifa, len, nm, interface, insert_addr);
+        handle_ifaddr_func_t handler = insert_addr;
+        if (nm->notify_flags & MPTCPD_NOTIFY_FLAG_EXISTING)
+                handler = update_addr;
+
+        foreach_ifaddr(ifa, len, nm, interface, handler);
 }
 
 /**
@@ -1128,7 +1144,7 @@ static void send_getaddr_command(void *user_data)
 //                            Public API
 // -------------------------------------------------------------------
 
-struct mptcpd_nm *mptcpd_nm_create(void)
+struct mptcpd_nm *mptcpd_nm_create(uint32_t flags)
 {
         struct mptcpd_nm *const nm = l_new(struct mptcpd_nm, 1);
 
@@ -1180,8 +1196,9 @@ struct mptcpd_nm *mptcpd_nm_create(void)
                 return NULL;
         }
 
-        nm->interfaces = l_queue_new();
-        nm->ops        = l_queue_new();
+        nm->notify_flags = flags;
+        nm->interfaces   = l_queue_new();
+        nm->ops          = l_queue_new();
 
         /**
          * Get network interface information.

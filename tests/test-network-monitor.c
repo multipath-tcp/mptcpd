@@ -244,7 +244,7 @@ int main(void)
         l_log_set_stderr();
         l_debug_enable("*");
 
-        struct mptcpd_nm *const nm = mptcpd_nm_create();
+        struct mptcpd_nm *const nm = mptcpd_nm_create(0);
         assert(nm);
 
         struct mptcpd_nm_ops const nm_events[] = {
