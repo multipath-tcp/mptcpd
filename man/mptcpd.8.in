@@ -1,11 +1,11 @@
 .\" SPDX-License-Identifier: BSD-3-Clause
 .\"
-.\" Copyright (c) 2017-2020, Intel Corporation
+.\" Copyright (c) 2017-2021, Intel Corporation
 
 .\" Process this file with
 .\" groff -man -Tascii mptcpd.8
 .\"
-.TH MPTCPD 8 "2020-07-10" "Multipath TCP Daemon" "System Management Commands"
+.TH MPTCPD 8 "2021-09-17" "Multipath TCP Daemon" "System Management Commands"
 .SH NAME
 mptcpd \- multipath TCP daemon
 .SH SYNOPSIS
@@ -13,6 +13,8 @@ mptcpd \- multipath TCP daemon
 .OP \-d?V
 .OP \-l DEST
 .OP \-\-debug
+.BI [\-\-addr\-flags= FLAGS ]
+.BI [\-\-notify\-flags= FLAGS ]
 .BI [\-\-plugin\-dir= DIR ]
 .BI [\-\-path\-manager= PLUGIN ]
 .OP \-\-help
@@ -62,6 +64,32 @@ or
 .I journal
 
 .TP
+.BI \-\-addr\-flags= FLAGS
+set flags for announced address, where
+.I FLAGS
+is a comma separated list containing one or more of the flags
+.IR subflow ,
+.IR signal ,
+and
+.I backup
+that plugins that deal with the in-kernel path manager may use when
+advertising addresses, e.g.
+.B --addr-flags=subflow
+
+.TP
+.BI \-\-notify\-flags= FLAGS
+address notification flags, where
+.I FLAGS
+is a comma separated list containing one or more of the flags
+.IR existing ,
+.IR skip_link_local ,
+and
+.I skip_loopback
+that determine whether mptpcd plugins will be notified when related
+addresses are updated, e.g.
+.B --notify-flags=existing,skip_link_local
+
+.TP
 .BI \-\-plugin\-dir= DIR
 set plugin directory to
 .I DIR
@@ -84,10 +112,14 @@ version information
 Location of the mptcpd system configuration file.
 .\" TODO: Describe systemd unit file
 
-.SH BUGS
+.SH REPORTING BUGS
 Report bugs to
 .MT @PACKAGE_BUGREPORT@
 .ME .
 
 .SH SEE ALSO
-genl(8)
+ip-mptcp(8)
+
+.\" Local Variables:
+.\" mode: nroff
+.\" End:
