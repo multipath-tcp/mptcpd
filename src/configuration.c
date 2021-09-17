@@ -136,13 +136,13 @@ static struct tok_entry const addr_flags_toks[] = {
  *                   in this buffer.
  * @param[in]  len   Length of the string buffer @a str.
  */
-static const char *flags_string(struct tok_entry const *toks,
+static char const *flags_string(struct tok_entry const *toks,
                                 uint32_t flags,
                                 char *str,
                                 size_t len)
 {
-        const struct tok_entry *tok;
-        const char *sep= "";
+        struct tok_entry const *tok;
+        char const *sep= "";
 
         str[0] = 0;
         for (tok = toks; tok->id; tok++) {
@@ -157,7 +157,7 @@ static const char *flags_string(struct tok_entry const *toks,
         return str;
 }
 
-static const char *addr_flags_string(uint32_t flags,
+static char const *addr_flags_string(uint32_t flags,
                                      char *str,
                                      size_t len)
 {
@@ -171,7 +171,7 @@ struct tok_entry const notify_flags_toks[] = {
         { 0, NULL },
 };
 
-static const char *notify_flags_string(uint32_t flags,
+static char const *notify_flags_string(uint32_t flags,
                                        char *str,
                                        size_t len)
 {
@@ -326,7 +326,7 @@ static struct argp_option const options[] = {
           MPTCPD_NOTIFY_FLAGS_KEY,
           "FLAGS",
           0,
-          "FLags for address notify notification, e.g. --notify-flags=existing,skip_link_local,skip_loopback",
+          "Flags for address notify notification, e.g. --notify-flags=existing,skip_link_local,skip_loopback",
           0 },
         { "plugin-dir",
           MPTCPD_PLUGIN_DIR_KEY,
