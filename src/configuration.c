@@ -129,9 +129,7 @@ static struct tok_entry const addr_flags_toks[] = {
  * buffer.
  *
  * @param[in]  toks  Mapping from flag to token.
- *
  * @param[in]  flags Address flags to be converted.
- *
  * @param[out] str   Place the corresponding string representation
  *                   in this buffer.
  * @param[in]  len   Length of the string buffer @a str.
@@ -186,7 +184,6 @@ static char const *notify_flags_string(uint32_t flags,
  * dynamically allocated string
  *
  * @param[in] toks Mapping from flag to token.
- *
  * @param[in] str  The address flags string to be converted.
  */
 static uint32_t flags_from_string(struct tok_entry const *toks,
@@ -326,7 +323,8 @@ static struct argp_option const options[] = {
           MPTCPD_NOTIFY_FLAGS_KEY,
           "FLAGS",
           0,
-          "Flags for address notify notification, e.g. --notify-flags=existing,skip_link_local,skip_loopback",
+          "Address notification flags, "
+          "e.g. --notify-flags=existing,skip_link_local,skip_loopback",
           0 },
         { "plugin-dir",
           MPTCPD_PLUGIN_DIR_KEY,
