@@ -1045,7 +1045,7 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
         }
 
         // Listen for network device changes.
-        pm->nm = mptcpd_nm_create();
+        pm->nm = mptcpd_nm_create(config->notify_flags);
 
         if (pm->nm == NULL
             || !mptcpd_nm_register_ops(pm->nm, &_nm_ops, pm)) {

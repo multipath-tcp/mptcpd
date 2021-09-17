@@ -143,13 +143,19 @@ struct mptcpd_nm_ops
 /**
  * @brief Create a network monitor.
  *
+ * @param[in] flags            flags controlling address notification,
+ *                             any of:
+ *                             MPTCPD_NOTIFY_FLAG_EXISTING,,
+ *                             MPTCPD_NOTIFY_FLAG_SKIP_LL,
+ *                             MPTCPD_NOTIFY_FLAG_SKIP_HOST
+ *
  * @todo As currently implemented, one could create multiple network
  *       monitors.  Is that useful?
  *
  * @return Pointer to new network monitor on success.  @c NULL on
  *         failure.
  */
-MPTCPD_API struct mptcpd_nm *mptcpd_nm_create(void);
+MPTCPD_API struct mptcpd_nm *mptcpd_nm_create(uint32_t flags);
 
 /**
  * @brief Destroy a network monitor.

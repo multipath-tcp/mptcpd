@@ -38,7 +38,7 @@ class test_nm
 {
 public:
 
-        test_nm() : nm_(mptcpd_nm_create()) { assert(this->nm_); }
+        test_nm() : nm_(mptcpd_nm_create(0)) { assert(this->nm_); }
         ~test_nm() { mptcpd_nm_destroy (this->nm_); }
 
 private:

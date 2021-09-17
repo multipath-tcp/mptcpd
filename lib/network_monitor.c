@@ -28,7 +28,6 @@
 #include <ell/queue.h>
 
 #include <mptcpd/private/path_manager.h>
-#include <mptcpd/private/configuration.h>
 #include <mptcpd/network_monitor.h>
 
 
@@ -70,6 +69,9 @@ struct mptcpd_nm
 
         /// List of @c nm_ops_info objects.
         struct l_queue *ops;
+
+        /// Flags controlling address notification.
+        uint32_t notify_flags;
 };
 
 // -------------------------------------------------------------------
@@ -756,14 +758,6 @@ static void insert_addr(struct mptcpd_nm *nm,
         (void) insert_addr_return(interface, rtm_addr);
 }
 
-static struct mptcpd_config const *pm_config(struct mptcpd_nm *nm)
-{
-        struct nm_ops_info     *const info = l_queue_peek_head(nm->ops);
-        struct mptcpd_pm const *const pm   = info->user_data;
-
-        return pm->config;
-}
-
 /**
  * @brief Register or update network address with network monitor.
  *
@@ -777,13 +771,11 @@ static void update_addr(struct mptcpd_nm *nm,
                         struct mptcpd_interface *interface,
                         struct mptcpd_rtm_addr const *rtm_addr)
 {
-        struct mptcpd_config const *const config = pm_config(nm);
-
-        if ((config->notify_flags & MPTCPD_NOTIFY_FLAG_SKIP_LL)
+        if ((nm->notify_flags & MPTCPD_NOTIFY_FLAG_SKIP_LL)
             && (rtm_addr->ifa->ifa_scope == RT_SCOPE_LINK))
                 return;
 
-        if ((config->notify_flags & MPTCPD_NOTIFY_FLAG_SKIP_HOST)
+        if ((nm->notify_flags & MPTCPD_NOTIFY_FLAG_SKIP_HOST)
             && (rtm_addr->ifa->ifa_scope == RT_SCOPE_HOST))
                 return;
 
@@ -1097,7 +1089,6 @@ static void handle_rtm_getaddr(int error,
 
         struct ifaddrmsg     const *const ifa    = data;
         struct mptcpd_nm           *const nm     = user_data;
-        struct mptcpd_config const *const config = pm_config(nm);
 
         struct mptcpd_interface *const interface =
                 get_mptcpd_interface(ifa, nm);
@@ -1106,7 +1097,7 @@ static void handle_rtm_getaddr(int error,
                 return;
 
         handle_ifaddr_func_t handler = insert_addr;
-        if (config->notify_flags & MPTCPD_NOTIFY_FLAG_EXISTING)
+        if (nm->notify_flags & MPTCPD_NOTIFY_FLAG_EXISTING)
                 handler = update_addr;
 
         foreach_ifaddr(ifa, len, nm, interface, handler);
@@ -1153,7 +1144,7 @@ static void send_getaddr_command(void *user_data)
 //                            Public API
 // -------------------------------------------------------------------
 
-struct mptcpd_nm *mptcpd_nm_create(void)
+struct mptcpd_nm *mptcpd_nm_create(uint32_t flags)
 {
         struct mptcpd_nm *const nm = l_new(struct mptcpd_nm, 1);
 
@@ -1205,8 +1196,9 @@ struct mptcpd_nm *mptcpd_nm_create(void)
                 return NULL;
         }
 
-        nm->interfaces = l_queue_new();
-        nm->ops        = l_queue_new();
+        nm->notify_flags = flags;
+        nm->interfaces   = l_queue_new();
+        nm->ops          = l_queue_new();
 
         /**
          * Get network interface information.
