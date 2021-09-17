@@ -50,8 +50,13 @@ path-manager=@mptcpd_default_pm@
 # A comma separated list containing one or more of the flags:
 #
 #   existing
+#     Notify plugins of the addresses that exist at mptcpd start
+#
 #   skip_link_local
+#     Ignore (do not notify) [ipv6] link local address updates
+#
 #   skip_loopback
+#     Ignore (do not notify) host (loopback) address updates
 #
 # These flags determine whether mptpcd plugins will be notified when
 # related addresses are updated.

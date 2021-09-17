@@ -80,14 +80,29 @@ advertising addresses, e.g.
 .BI \-\-notify\-flags= FLAGS
 address notification flags, where
 .I FLAGS
-is a comma separated list containing one or more of the flags
-.IR existing ,
-.IR skip_link_local ,
-and
+is a comma separated list containing one or more of the following
+flags:
+.RS
+.TP
+.I existing
+notify plugins of the addresses that exist at mptcpd start
+.RE
+.RS
+.TP
+.I skip_link_local
+ignore (do not notify) [ipv6] link local address updates
+.RE
+.RS
+.TP
 .I skip_loopback
-that determine whether mptpcd plugins will be notified when related
-addresses are updated, e.g.
+ignore (do not notify) host (loopback) address updates
+.RE
+.P
+.RS
+These flags determine whether mptpcd plugins will be notified when
+related addresses are updated, e.g.
 .B --notify-flags=existing,skip_link_local
+.RE
 
 .TP
 .BI \-\-plugin\-dir= DIR
