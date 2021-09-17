@@ -33,12 +33,12 @@
 
 static struct mptcpd_limit _limits[] = {
         {
-        .type  = MPTCPD_LIMIT_SUBFLOWS,
-        .limit = 0,
+                .type  = MPTCPD_LIMIT_SUBFLOWS,
+                .limit = 0,
         },
         {
-        .type  = MPTCPD_LIMIT_RCV_ADD_ADDRS,
-        .limit = 0,
+                .type  = MPTCPD_LIMIT_RCV_ADD_ADDRS,
+                .limit = 0,
         }
 };
 
@@ -48,11 +48,13 @@ static void update_limits(struct mptcpd_pm *pm, int delta)
 
         _limits[0].limit += delta;
         subflows = _limits[0].limit;
-        if (subflows < MPTCP_MIN_SUBFLOWS || subflows > MPTCP_MAX_SUBFLOWS)
+        if (subflows < MPTCP_MIN_SUBFLOWS
+            || subflows > MPTCP_MAX_SUBFLOWS)
                 return;
 
-        /* if the pm creates outgoing subflows, we assume this is
-         * the client side, and accepts add_addrs from the server
+        /*
+          If the pm creates outgoing subflows, we assume this is
+          the client side, and accepts add_addrs from the server.
          */
         if (pm->config->addr_flags & MPTCPD_ADDR_FLAG_SUBFLOW)
                 _limits[1].limit = _limits[0].limit;
