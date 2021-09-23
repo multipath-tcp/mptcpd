@@ -1,0 +1,81 @@
+.\" SPDX-License-Identifier: BSD-3-Clause
+.\"
+.\" Copyright (c) 2021, Intel Corporation
+
+.\" Process this file with
+.\" groff -man -Tascii mptcpize.8
+.\"
+.TH MPTCPIZE 8 "2021-09-23" "Multipath TCP Daemon" "System Management Commands"
+.SH NAME
+mptcpize \- enable MPTCP on existing services
+.SH SYNOPSIS
+.SY mptcpize
+.OP \-?V
+.OP \-\-help
+.OP \-\-usage
+.OP \-\-version
+.B COMMAND
+.YS
+
+.SH DESCRIPTION
+.B mptcpize
+is a program that enables multipath TCP on existing legacy services,
+where
+.B COMMAND
+is one of the following:
+
+.SS
+.BI run\ [ -d ]\  prog \ [ args ]
+Run target program with the specified command line arguments, forcing
+MPTCP socket usage instead of TCP.  If the
+.B -d
+argument is provided, dump messages on
+.B stderr
+when a TCP socket is forced to use MPTCP.
+
+.SS
+.BI enable\  unit
+Update the systemd
+.I unit
+file, forcing the given service to run under the above launcher.
+
+.SS
+.BI disable\  unit
+Update the systemd
+.I unit
+file, removing the above launcher.
+
+
+.SH OPTIONS
+.B mptcpize
+accepts the following command line options:
+
+.TP
+.BR \-? , \-\-help
+display
+.B mptcpize
+help information
+
+.TP
+.B \-\-usage
+display brief
+.B mptcpize
+usage information
+
+.TP
+.BR \-V , \-\-version
+display
+.B mptcpize
+version information
+
+.SH REPORTING BUGS
+Report bugs to
+.MT @PACKAGE_BUGREPORT@
+.ME .
+
+.SH SEE ALSO
+ip-mptcp(8), mptcpd(8)
+
+.\" Local Variables:
+.\" mode: nroff
+.\" End:
