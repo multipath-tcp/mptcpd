@@ -36,25 +36,27 @@
 #define MPTCPWRAP_ENV		"LD_PRELOAD="PKGLIBDIR"/libmptcpwrap.so.0.0."LIBREVISION
 
 /* Program documentation. */
-static char argp_doc[] =
-		"mptcpize - a tool to enable MPTCP usage on unmodified legacy services\v"
-		"syntax:\n"
-		"\t mptcpize <options> <cmd>\n"
-		"avaliable <cmd>:\n"
-		"\trun [-d] prog [<args>]    run target program with specified arguments "
-		"forcing MPTCP socket usage instead of TCP"
-		"if the '-d' argument is provided, dump messages on stderr"
-		" when a TCP socket is forced to MPTCP\n"
-		"\tenable <unit>             update the systemd <unit>, forcing"
-		"the given service to run under the above launcher\n"
-		"\tdisable <unit>            update the systemd <unit>, removing"
-		"the above launcher\n";
+static char args_doc[] = "CMD";
 
-static struct argp argp = { 0, 0, 0, argp_doc, 0, 0, 0 };
+static char doc[] =
+        "mptcpize - a tool to enable MPTCP usage on unmodified legacy services\v"
+        "available CMDs:\n"
+        "\trun [-d] prog [<args>]    Run target program with specified\n"
+        "\t                          arguments, forcing MPTCP socket usage\n"
+        "\t                          instead of TCP.  If the '-d' argument\n"
+        "\t                          is provided, dump messages on stderr\n"
+        "\t                          when a TCP socket is forced to MPTCP.\n\n"
+        "\tenable <unit>             Update the systemd <unit>, forcing\n"
+        "\t                          the given service to run under the\n"
+        "\t                          above launcher.\n\n"
+        "\tdisable <unit>            Update the systemd <unit>, removing\n"
+        "\t                          the above launcher.\n";
 
-void help(void)
+static struct argp const argp = { 0, 0, args_doc, doc, 0, 0, 0 };
+
+static void help(void)
 {
-	fprintf(stderr, "%s", argp_doc);
+	argp_help(&argp, stderr, ARGP_HELP_STD_HELP, "mptcpize");
 }
 
 static int run(int argc, char *av[])
