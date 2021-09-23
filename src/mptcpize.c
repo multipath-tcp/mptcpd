@@ -40,7 +40,7 @@ static char args_doc[] = "CMD";
 
 static char doc[] =
         "mptcpize - a tool to enable MPTCP usage on unmodified legacy services\v"
-        "available CMDs:\n"
+        "Available CMDs:\n"
         "\trun [-d] prog [<args>]    Run target program with specified\n"
         "\t                          arguments, forcing MPTCP socket usage\n"
         "\t                          instead of TCP.  If the '-d' argument\n"
