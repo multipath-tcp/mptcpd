@@ -91,7 +91,7 @@ int mptcpd_kpm_add_addr(struct mptcpd_pm *pm,
         struct mptcpd_kpm_cmd_ops const *const ops =
                 pm->netlink_pm->kcmd_ops;
 
-        if (ops->add_addr == NULL)
+        if (ops == NULL || ops->add_addr == NULL)
                 return ENOTSUP;
 
         return ops->add_addr(pm,
