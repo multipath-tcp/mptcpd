@@ -79,7 +79,7 @@ bool mptcpd_pm_ready(struct mptcpd_pm const *pm)
 int mptcpd_kpm_add_addr(struct mptcpd_pm *pm,
                         struct sockaddr const *addr,
                         mptcpd_aid_t address_id,
-                        uint32_t flags,
+                        mptcpd_flags_t flags,
                         int index)
 {
         if (pm == NULL || addr == NULL || address_id == 0)

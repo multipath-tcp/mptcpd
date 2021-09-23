@@ -113,10 +113,7 @@ MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
  *                  option.  The port is optional, and is
  *                  ignored if it is zero.
  * @param[in] id    MPTCP local address ID.
- * @param[in] token MPTCP connection token..
- *
- * @todo Should we define corresponding mptcpd flags instead of
- *       exposing the flags in <linux/mptcp.h>?
+ * @param[in] token MPTCP connection token.
  *
  * @return @c 0 if operation was successful. @c errno otherwise.
  */
@@ -228,21 +225,18 @@ MPTCPD_API int mptcpd_pm_remove_subflow(
  *                  ignored if it is zero.
  * @param[in] id    MPTCP local address ID.
  * @param[in] flags Bitset of MPTCP flags associated with the network
- *                  address, e.g. @c MPTCP_PM_ADDR_FLAG_BACKUP @c |
- *                   @c MPTCP_PM_ADDR_FLAG_SUBFLOW.  Optional for
+ *                  address, e.g. @c MPTCPD_ADDR_FLAG_SUBFLOW @c |
+ *                   @c MPTCPD_ADDR_FLAG_BACKUP.  Optional for
  *                  upstream kernel (e.g. set to zero).
  * @param[in] index Network interface index.  Optional for upstream
  *                  Linux kernel (e.g. set to zero).
- *
- * @todo Should we define corresponding mptcpd flags instead of
- *       exposing the flags in <linux/mptcp.h>?
  *
  * @return @c 0 if operation was successful. @c errno otherwise.
  */
 MPTCPD_API int mptcpd_kpm_add_addr(struct mptcpd_pm *pm,
                                    struct sockaddr const *addr,
                                    mptcpd_aid_t id,
-                                   uint32_t flags,
+                                   mptcpd_flags_t flags,
                                    int index);
 
 /**
