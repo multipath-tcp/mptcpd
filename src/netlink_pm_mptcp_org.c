@@ -176,24 +176,8 @@ static bool append_remote_addr_attr(struct l_genl_msg *msg,
 static int mptcp_org_add_addr(struct mptcpd_pm *pm,
                               struct sockaddr const *addr,
                               mptcpd_aid_t id,
-                              uint32_t const flags,
-                              int index,
                               mptcpd_token_t token)
 {
-        /*
-          MPTCP flags are not needed by multipath-tcp.org kernel to
-          add network address.
-        */
-        if (flags != 0)
-                l_warn("add_addr: MPTCP flags are ignored.");
-
-        /*
-          Network interface index is not needed by multipath-tcp.org
-          kernel to add network address.
-        */
-        if (index != 0)
-                l_warn("add_addr: Network interface index is ignored.");
-
         /*
           Payload:
               Token

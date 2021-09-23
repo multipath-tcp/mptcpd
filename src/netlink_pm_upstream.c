@@ -353,16 +353,8 @@ static int upstream_add_addr(struct mptcpd_pm *pm,
                              struct sockaddr const *addr,
                              mptcpd_aid_t address_id,
                              uint32_t flags,
-                             int index,
-                             mptcpd_token_t token)
+                             int index)
 {
-        /*
-          MPTCP connection token is not currently needed by upstream
-          kernel to add network address.
-        */
-        if (token != 0)
-                l_warn("add_addr: MPTCP connection token is ignored.");
-
         /*
           Payload (nested):
               Local address family
@@ -428,17 +420,8 @@ static int upstream_add_addr(struct mptcpd_pm *pm,
 }
 
 static int upstream_remove_addr(struct mptcpd_pm *pm,
-                                mptcpd_aid_t address_id,
-                                mptcpd_token_t token)
+                                mptcpd_aid_t address_id)
 {
-        /*
-          MPTCP connection token is not currently needed by upstream
-          kernel to remove network address.
-        */
-        if (token != 0)
-                l_warn("remove_addr: MPTCP connection token "
-                       "is ignored.");
-
         /*
           Payload (nested):
                   Local address ID
@@ -680,7 +663,7 @@ static int upstream_set_flags(struct mptcpd_pm *pm,
                                   NULL  /* destroy */) == 0;
 }
 
-static struct mptcpd_pm_cmd_ops const cmd_ops =
+static struct mptcpd_kpm_cmd_ops const cmd_ops =
 {
         .add_addr    = upstream_add_addr,
         .remove_addr = upstream_remove_addr,
@@ -693,9 +676,9 @@ static struct mptcpd_pm_cmd_ops const cmd_ops =
 };
 
 static struct mptcpd_netlink_pm const npm = {
-        .name    = MPTCP_PM_NAME,
-        .group   = MPTCP_PM_EV_GRP_NAME,
-        .cmd_ops = &cmd_ops
+        .name     = MPTCP_PM_NAME,
+        .group    = MPTCP_PM_EV_GRP_NAME,
+        .kcmd_ops = &cmd_ops
 };
 
 struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm_upstream(void)
