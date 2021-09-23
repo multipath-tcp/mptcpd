@@ -31,6 +31,15 @@ struct mptcpd_netlink_pm
 
         /// MPTCP path management generic netlink command functions.
         struct mptcpd_pm_cmd_ops const *const cmd_ops;
+
+        /**
+         * @brief In-kernel MPTCP path management generic netlink command
+         *        functions.
+         *
+         * Generic netlink command functions specific to the in-kernel
+         * path manager.
+         */
+        struct mptcpd_kpm_cmd_ops const *const kcmd_ops;
 };
 
 
