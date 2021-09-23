@@ -343,6 +343,9 @@ struct mptcpd_kpm_cmd_ops
          * @param[in] pm    The mptcpd path manager object.
          * @param[in] addr  Local IP address information.
          * @param[in] flags Flags to be associated with @a addr.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
          */
         int (*set_flags)(struct mptcpd_pm *pm,
                          struct sockaddr const *addr,
