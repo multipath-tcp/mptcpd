@@ -338,7 +338,7 @@ struct mptcpd_kpm_cmd_ops
                           void *data);
 
         /**
-         * @brief
+         * @brief Set MPTCP flags for a local IP address.
          *
          * @param[in] pm    The mptcpd path manager object.
          * @param[in] addr  Local IP address information.
