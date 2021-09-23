@@ -41,6 +41,7 @@ src/mptcpd
 src/mptcpize
 src/mptcp.service
 man/mptcpd.8
+man/mptcpize.8
 test-driver
 tests/test-network-monitor
 tests/test-plugin
