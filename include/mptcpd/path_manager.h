@@ -33,7 +33,7 @@ struct mptcpd_addr_info;
  *       running, e.g. through the ELL @c l_main_run() function.
  *       Users only need to be concerned about this if they are
  *       explicitly creating a @c struct @c mptcpd_pm instance instead
- *       of relying on mptcpd to do so, such what is done in some
+ *       of relying on mptcpd to do so, such as what is done in some
  *       mptcpd unit tests.
  */
 struct mptcpd_pm_ops
@@ -98,6 +98,13 @@ MPTCPD_API bool mptcpd_pm_register_ops(struct mptcpd_pm *pm,
 MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
 
 /**
+ * @name Client-oriented Path Management Commands
+ *
+ * Client-oriented path management commands that allow for
+ * per-connection path management.
+ */
+///@{
+/**
  * @brief Advertise new network address to peers.
  *
  * @param[in] pm    The mptcpd path manager object.
@@ -106,26 +113,13 @@ MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
  *                  option.  The port is optional, and is
  *                  ignored if it is zero.
  * @param[in] id    MPTCP local address ID.
- * @param[in] flags Bitset of MPTCP flags associated with the network
- *                  address, e.g. @c MPTCP_PM_ADDR_FLAG_BACKUP @c |
- *                   @c MPTCP_PM_ADDR_FLAG_SUBFLOW.  Optional for
- *                  upstream kernel.  Unused by the multipath-tcp.org
- *                  Linux kernel (e.g. set to zero).
- * @param[in] index Network interface index.  Optional for upstream
- *                  Linux kernel (e.g. set to zero).
- * @param[in] token MPTCP connection token.  Unused by the upstream
- *                  Linux kernel (e.g. set to zero).
- *
- * @todo Should we define corresponding mptcpd flags instead of
- *       exposing the flags in <linux/mptcp.h>?
+ * @param[in] token MPTCP connection token.
  *
  * @return @c 0 if operation was successful. @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
                                   struct sockaddr const *addr,
                                   mptcpd_aid_t id,
-                                  uint32_t flags,
-                                  int index,
                                   mptcpd_token_t token);
 
 /**
@@ -144,105 +138,6 @@ MPTCPD_API int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
                                      mptcpd_aid_t address_id,
                                      mptcpd_token_t token);
 
-/**
- * @name Server-oriented Path Management Commands
- *
- * Server-oriented path management commands supported by the upstream
- * Linux kernel.  Path management is handled by the kernel.
- */
-///@{
-/**
- * @brief Get network address corresponding to an address ID.
- *
- * @param[in] pm       The mptcpd path manager object.
- * @param[in] id       MPTCP local address ID.
- * @param[in] callback Function to be called when the network address
- *                     corresponding to the given MPTCP address @a id
- *                     has been retrieved.
- * @param[in] data     Data to be passed to the @a callback function.
- *
- * @return @c 0 if operation was successful. -1 or @c errno otherwise.
- */
-MPTCPD_API int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
-                                  mptcpd_aid_t id,
-                                  mptcpd_pm_get_addr_cb callback,
-                                  void *data);
-
-/**
- * @brief Get list (array) of MPTCP network addresses.
- *
- * @param[in] pm       The mptcpd path manager object.
- * @param[in] callback Function to be called when a network address
- *                     has been retrieved.  This function will be
- *                     called once per dumped network address.
- * @param[in] data     Data to be passed to the @a callback function.
- *
- * @return @c 0 if operation was successful. -1 or @c errno otherwise.
- */
-MPTCPD_API int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
-                                    mptcpd_pm_get_addr_cb callback,
-                                    void *data);
-
-/**
- * @brief Flush MPTCP addresses.
- *
- * @param[in] pm The mptcpd path manager object.
- *
- * @todo Improve documentation.
- *
- * @return @c 0 if operation was successful. -1 or @c errno otherwise.
- */
-MPTCPD_API int mptcpd_pm_flush_addrs(struct mptcpd_pm *pm);
-
-/**
- * @brief Set MPTCP resource limits.
- *
- * @param[in] pm     The mptcpd path manager object.
- * @param[in] limits Array of MPTCP resource type/limit pairs.
- * @param[in] len    Length of the @a limits array.
- *
- * @return @c 0 if operation was successful. -1 or @c errno otherwise.
- */
-MPTCPD_API int mptcpd_pm_set_limits(struct mptcpd_pm *pm,
-                                    struct mptcpd_limit const *limits,
-                                    size_t len);
-
-/**
- * @brief Get MPTCP resource limits.
- *
- * @param[in] pm       The mptcpd path manager object.
- * @param[in] callback Function to be called when the MPTCP resource
- *                     limits have been retrieved.
- * @param[in] data     Data to be passed to the @a callback function.
- *
- * @return @c 0 if operation was successful. -1 or @c errno otherwise.
- */
-MPTCPD_API int mptcpd_pm_get_limits(struct mptcpd_pm *pm,
-                                    mptcpd_pm_get_limits_cb callback,
-                                    void *data);
-
-/**
- * @brief Set MPTCP flags for a local IP address.
- *
- * @param[in] pm    The mptcpd path manager object.
- * @param[in] addr  Local IP address.
- * @param[in] flags Flags to be associated with @a addr.
- *
- * @return @c 0 if operation was successful. -1 or @c errno otherwise.
- */
-MPTCPD_API int mptcpd_pm_set_flags(struct mptcpd_pm *pm,
-                                   struct sockaddr const *addr,
-                                   mptcpd_flags_t flags);
-
-///@}
-
-/**
- * @name Client-oriented Path Management Commands
- *
- * Client-oriented path management commands that allow for
- * per-connection path management.
- */
-///@{
 /**
  * @brief Create a new subflow.
  *
@@ -310,6 +205,137 @@ MPTCPD_API int mptcpd_pm_remove_subflow(
         mptcpd_token_t token,
         struct sockaddr const *local_addr,
         struct sockaddr const *remote_addr);
+///@}
+
+/**
+ * @name Server-oriented Path Management Commands
+ *
+ * Server-oriented path management commands supported by the upstream
+ * Linux kernel.  Path management is handled by the in-kernel path
+ * manager.
+ */
+///@{
+/**
+ * @brief Advertise new network address to peers.
+ *
+ * @param[in] pm    The mptcpd path manager object.
+ * @param[in] addr  Local IP address and port to be advertised
+ *                  through the MPTCP protocol @c ADD_ADDR
+ *                  option.  The port is optional, and is
+ *                  ignored if it is zero.
+ * @param[in] id    MPTCP local address ID.
+ * @param[in] flags Bitset of MPTCP flags associated with the network
+ *                  address, e.g. @c MPTCPD_ADDR_FLAG_SUBFLOW @c |
+ *                   @c MPTCPD_ADDR_FLAG_BACKUP.  Optional for
+ *                  upstream kernel (e.g. set to zero).
+ * @param[in] index Network interface index.  Optional for upstream
+ *                  Linux kernel (e.g. set to zero).
+ *
+ * @return @c 0 if operation was successful. @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_kpm_add_addr(struct mptcpd_pm *pm,
+                                   struct sockaddr const *addr,
+                                   mptcpd_aid_t id,
+                                   mptcpd_flags_t flags,
+                                   int index);
+
+/**
+ * @brief Stop advertising network address to peers.
+ *
+ * @param[in] pm         The mptcpd path manager object.
+ * @param[in] address_id MPTCP local address ID to be sent in the
+ *                       MPTCP protocol @c REMOVE_ADDR option
+ *                       corresponding to the local address that will
+ *                       no longer be available.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_kpm_remove_addr(struct mptcpd_pm *pm,
+                                      mptcpd_aid_t address_id);
+
+/**
+ * @brief Get network address corresponding to an address ID.
+ *
+ * @param[in] pm       The mptcpd path manager object.
+ * @param[in] id       MPTCP local address ID.
+ * @param[in] callback Function to be called when the network address
+ *                     corresponding to the given MPTCP address @a id
+ *                     has been retrieved.
+ * @param[in] data     Data to be passed to the @a callback function.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
+                                   mptcpd_aid_t id,
+                                   mptcpd_pm_get_addr_cb callback,
+                                   void *data);
+
+/**
+ * @brief Get list (array) of MPTCP network addresses.
+ *
+ * @param[in] pm       The mptcpd path manager object.
+ * @param[in] callback Function to be called when a network address
+ *                     has been retrieved.  This function will be
+ *                     called once per dumped network address.
+ * @param[in] data     Data to be passed to the @a callback function.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_kpm_dump_addrs(struct mptcpd_pm *pm,
+                                     mptcpd_pm_get_addr_cb callback,
+                                     void *data);
+
+/**
+ * @brief Flush MPTCP addresses.
+ *
+ * @param[in] pm The mptcpd path manager object.
+ *
+ * @todo Improve documentation.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_kpm_flush_addrs(struct mptcpd_pm *pm);
+
+/**
+ * @brief Set MPTCP resource limits.
+ *
+ * @param[in] pm     The mptcpd path manager object.
+ * @param[in] limits Array of MPTCP resource type/limit pairs.
+ * @param[in] len    Length of the @a limits array.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_kpm_set_limits(struct mptcpd_pm *pm,
+                                     struct mptcpd_limit const *limits,
+                                     size_t len);
+
+/**
+ * @brief Get MPTCP resource limits.
+ *
+ * @param[in] pm       The mptcpd path manager object.
+ * @param[in] callback Function to be called when the MPTCP resource
+ *                     limits have been retrieved.
+ * @param[in] data     Data to be passed to the @a callback function.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_kpm_get_limits(struct mptcpd_pm *pm,
+                                     mptcpd_pm_get_limits_cb callback,
+                                     void *data);
+
+/**
+ * @brief Set MPTCP flags for a local IP address.
+ *
+ * @param[in] pm    The mptcpd path manager object.
+ * @param[in] addr  Local IP address.
+ * @param[in] flags Flags to be associated with @a addr.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_kpm_set_flags(struct mptcpd_pm *pm,
+                                    struct sockaddr const *addr,
+                                    mptcpd_flags_t flags);
+
 ///@}
 
 /**

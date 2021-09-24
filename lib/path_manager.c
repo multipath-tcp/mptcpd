@@ -74,11 +74,168 @@ bool mptcpd_pm_ready(struct mptcpd_pm const *pm)
         return pm->family != NULL;
 }
 
+// -------------------------------------------------------------------
+
+int mptcpd_kpm_add_addr(struct mptcpd_pm *pm,
+                        struct sockaddr const *addr,
+                        mptcpd_aid_t address_id,
+                        mptcpd_flags_t flags,
+                        int index)
+{
+        if (pm == NULL || addr == NULL || address_id == 0)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_kpm_cmd_ops const *const ops =
+                pm->netlink_pm->kcmd_ops;
+
+        if (ops == NULL || ops->add_addr == NULL)
+                return ENOTSUP;
+
+        return ops->add_addr(pm,
+                             addr,
+                             address_id,
+                             flags,
+                             index);
+}
+
+int mptcpd_kpm_remove_addr(struct mptcpd_pm *pm, mptcpd_aid_t address_id)
+{
+        if (pm == NULL || address_id == 0)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_kpm_cmd_ops const *const ops =
+                pm->netlink_pm->kcmd_ops;
+
+        if (ops == NULL || ops->remove_addr == NULL)
+                return ENOTSUP;
+
+        return ops->remove_addr(pm, address_id);
+}
+
+int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
+                        mptcpd_aid_t id,
+                        mptcpd_pm_get_addr_cb callback,
+                        void *data)
+{
+        if (pm == NULL || id == 0 || callback == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_kpm_cmd_ops const *const ops =
+                pm->netlink_pm->kcmd_ops;
+
+        if (ops == NULL || ops->get_addr == NULL)
+                return ENOTSUP;
+
+        return ops->get_addr(pm, id, callback, data);
+}
+
+int mptcpd_kpm_dump_addrs(struct mptcpd_pm *pm,
+                          mptcpd_pm_get_addr_cb callback,
+                          void *data)
+{
+        if (pm == NULL || callback == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_kpm_cmd_ops const *const ops =
+                pm->netlink_pm->kcmd_ops;
+
+        if (ops == NULL || ops->dump_addrs == NULL)
+                return ENOTSUP;
+
+        return ops->dump_addrs(pm, callback, data);
+}
+
+int mptcpd_kpm_flush_addrs(struct mptcpd_pm *pm)
+{
+        if (pm == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_kpm_cmd_ops const *const ops =
+                pm->netlink_pm->kcmd_ops;
+
+        if (ops == NULL || ops->flush_addrs == NULL)
+                return ENOTSUP;
+
+        return ops->flush_addrs(pm);
+}
+
+int mptcpd_kpm_set_limits(struct mptcpd_pm *pm,
+                          struct mptcpd_limit const *limits,
+                          size_t len)
+{
+        if (pm == NULL || limits == NULL || len == 0)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_kpm_cmd_ops const *const ops =
+                pm->netlink_pm->kcmd_ops;
+
+        if (ops == NULL || ops->set_limits == NULL)
+                return ENOTSUP;
+
+        return ops->set_limits(pm, limits, len);
+}
+
+int mptcpd_kpm_get_limits(struct mptcpd_pm *pm,
+                          mptcpd_pm_get_limits_cb callback,
+                          void *data)
+{
+        if (pm == NULL || callback == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_kpm_cmd_ops const *const ops =
+                pm->netlink_pm->kcmd_ops;
+
+        if (ops == NULL || ops->get_limits == NULL)
+                return ENOTSUP;
+
+        return ops->get_limits(pm, callback, data);
+}
+
+int mptcpd_kpm_set_flags(struct mptcpd_pm *pm,
+                         struct sockaddr const *addr,
+                         mptcpd_flags_t flags)
+{
+        if (pm == NULL || addr == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_kpm_cmd_ops const *const ops =
+                pm->netlink_pm->kcmd_ops;
+
+        if (ops == NULL || ops->set_flags == NULL)
+                return ENOTSUP;
+
+        return ops->set_flags(pm, addr, flags);
+}
+
+// -------------------------------------------------------------------
+
 int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
                        struct sockaddr const *addr,
                        mptcpd_aid_t address_id,
-                       uint32_t flags,
-                       int index,
                        mptcpd_token_t token)
 {
         if (pm == NULL || addr == NULL || address_id == 0)
@@ -90,14 +247,12 @@ int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
         struct mptcpd_pm_cmd_ops const *const ops =
                 pm->netlink_pm->cmd_ops;
 
-        if (ops->add_addr == NULL)
+        if (ops == NULL || ops->add_addr == NULL)
                 return ENOTSUP;
 
         return ops->add_addr(pm,
                              addr,
                              address_id,
-                             flags,
-                             index,
                              token);
 }
 
@@ -114,123 +269,10 @@ int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
         struct mptcpd_pm_cmd_ops const *const ops =
                 pm->netlink_pm->cmd_ops;
 
-        if (ops->remove_addr == NULL)
+        if (ops == NULL || ops->remove_addr == NULL)
                 return ENOTSUP;
 
         return ops->remove_addr(pm, address_id, token);
-}
-
-int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
-                       mptcpd_aid_t id,
-                       mptcpd_pm_get_addr_cb callback,
-                       void *data)
-{
-        if (pm == NULL || id == 0 || callback == NULL)
-                return EINVAL;
-
-        if (!is_pm_ready(pm, __func__))
-                return EAGAIN;
-
-        struct mptcpd_pm_cmd_ops const *const ops =
-                pm->netlink_pm->cmd_ops;
-
-        if (ops->get_addr == NULL)
-                return ENOTSUP;
-
-        return ops->get_addr(pm, id, callback, data);
-}
-
-int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
-                         mptcpd_pm_get_addr_cb callback,
-                         void *data)
-{
-        if (pm == NULL || callback == NULL)
-                return EINVAL;
-
-        if (!is_pm_ready(pm, __func__))
-                return EAGAIN;
-
-        struct mptcpd_pm_cmd_ops const *const ops =
-                pm->netlink_pm->cmd_ops;
-
-        if (ops->dump_addrs == NULL)
-                return ENOTSUP;
-
-        return ops->dump_addrs(pm, callback, data);
-}
-
-int mptcpd_pm_flush_addrs(struct mptcpd_pm *pm)
-{
-        if (pm == NULL)
-                return EINVAL;
-
-        if (!is_pm_ready(pm, __func__))
-                return EAGAIN;
-
-        struct mptcpd_pm_cmd_ops const *const ops =
-                pm->netlink_pm->cmd_ops;
-
-        if (ops->flush_addrs == NULL)
-                return ENOTSUP;
-
-        return ops->flush_addrs(pm);
-}
-
-int mptcpd_pm_set_limits(struct mptcpd_pm *pm,
-                         struct mptcpd_limit const *limits,
-                         size_t len)
-{
-        if (pm == NULL || limits == NULL || len == 0)
-                return EINVAL;
-
-        if (!is_pm_ready(pm, __func__))
-                return EAGAIN;
-
-        struct mptcpd_pm_cmd_ops const *const ops =
-                pm->netlink_pm->cmd_ops;
-
-        if (ops->set_limits == NULL)
-                return ENOTSUP;
-
-        return ops->set_limits(pm, limits, len);
-}
-
-int mptcpd_pm_get_limits(struct mptcpd_pm *pm,
-                         mptcpd_pm_get_limits_cb callback,
-                         void *data)
-{
-        if (pm == NULL || callback == NULL)
-                return EINVAL;
-
-        if (!is_pm_ready(pm, __func__))
-                return EAGAIN;
-
-        struct mptcpd_pm_cmd_ops const *const ops =
-                pm->netlink_pm->cmd_ops;
-
-        if (ops->get_limits == NULL)
-                return ENOTSUP;
-
-        return ops->get_limits(pm, callback, data);
-}
-
-int mptcpd_pm_set_flags(struct mptcpd_pm *pm,
-                        struct sockaddr const *addr,
-                        mptcpd_flags_t flags)
-{
-        if (pm == NULL || addr == NULL)
-                return EINVAL;
-
-        if (!is_pm_ready(pm, __func__))
-                return EAGAIN;
-
-        struct mptcpd_pm_cmd_ops const *const ops =
-                pm->netlink_pm->cmd_ops;
-
-        if (ops->set_flags == NULL)
-                return ENOTSUP;
-
-        return ops->set_flags(pm, addr, flags);
 }
 
 int mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
@@ -250,7 +292,7 @@ int mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
         struct mptcpd_pm_cmd_ops const *const ops =
                 pm->netlink_pm->cmd_ops;
 
-        if (ops->add_subflow == NULL)
+        if (ops == NULL || ops->add_subflow == NULL)
                 return ENOTSUP;
 
         return ops->add_subflow(pm,
@@ -277,7 +319,7 @@ int mptcpd_pm_set_backup(struct mptcpd_pm *pm,
         struct mptcpd_pm_cmd_ops const *const ops =
                 pm->netlink_pm->cmd_ops;
 
-        if (ops->set_backup == NULL)
+        if (ops == NULL || ops->set_backup == NULL)
                 return ENOTSUP;
 
         return ops->set_backup(pm,
@@ -301,7 +343,7 @@ int mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
         struct mptcpd_pm_cmd_ops const *const ops =
                 pm->netlink_pm->cmd_ops;
 
-        if (ops->remove_subflow == NULL)
+        if (ops == NULL || ops->remove_subflow == NULL)
                 return ENOTSUP;
 
         return ops->remove_subflow(pm,
@@ -309,6 +351,8 @@ int mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
                                    local_addr,
                                    remote_addr);
 }
+
+// -------------------------------------------------------------------
 
 struct mptcpd_nm const * mptcpd_pm_get_nm(struct mptcpd_pm const *pm)
 {

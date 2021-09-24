@@ -68,7 +68,7 @@ static struct mptcpd_limit const _limits[] = {
                 .limit = max_subflows
         }
 };
-        
+
 // -------------------------------------------------------------------
 
 static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
@@ -172,15 +172,26 @@ static void test_add_addr(void const *test_data)
         if (!is_pm_ready(pm, __func__))
                 return;
 
+        // Client-oriented path manager.
+        int result = mptcpd_pm_add_addr(pm,
+                                        laddr1,
+                                        test_laddr_id_1,
+                                        test_token_1);
+
+        assert(result == 0 || result == ENOTSUP);
+
+
+        // In-kernel (server-oriented) path manager.
         uint32_t flags = 0;
         int index = 0;
 
-        assert(mptcpd_pm_add_addr(pm,
-                                  laddr1,
-                                  test_laddr_id_1,
-                                  flags,
-                                  index,
-                                  test_token_1) == 0);
+        result = mptcpd_kpm_add_addr(pm,
+                                     laddr1,
+                                     test_laddr_id_1,
+                                     flags,
+                                     index);
+
+        assert(result == 0 || result == ENOTSUP);
 }
 
 static void test_remove_addr(void const *test_data)
@@ -190,9 +201,17 @@ static void test_remove_addr(void const *test_data)
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        assert(mptcpd_pm_remove_addr(pm,
-                                     test_laddr_id_1,
-                                     test_token_1) == 0);
+        // Client-oriented path manager.
+        int result = mptcpd_pm_remove_addr(pm,
+                                           test_laddr_id_1,
+                                           test_token_1);
+
+        assert(result == 0 || result == ENOTSUP);
+
+        // In-kernel (server-oriented) path manager.
+        result = mptcpd_kpm_remove_addr(pm, test_laddr_id_1);
+
+        assert(result == 0 || result == ENOTSUP);
 }
 
 static void test_get_addr(void const *test_data)
@@ -205,10 +224,10 @@ static void test_get_addr(void const *test_data)
         mptcpd_aid_t const id = test_laddr_id_1;
 
         int const result =
-                mptcpd_pm_get_addr(pm,
-                                   id,
-                                   get_addr_callback,
-                                   L_UINT_TO_PTR(id));
+                mptcpd_kpm_get_addr(pm,
+                                    id,
+                                    get_addr_callback,
+                                    L_UINT_TO_PTR(id));
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -223,9 +242,9 @@ static void test_dump_addrs(void const *test_data)
         mptcpd_aid_t const id = test_laddr_id_1;
 
         int const result =
-                mptcpd_pm_dump_addrs(pm,
-                                     dump_addrs_callback,
-                                     L_UINT_TO_PTR(id));
+                mptcpd_kpm_dump_addrs(pm,
+                                      dump_addrs_callback,
+                                      L_UINT_TO_PTR(id));
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -237,7 +256,7 @@ static void test_flush_addrs(void const *test_data)
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        int const result = mptcpd_pm_flush_addrs(pm);
+        int const result = mptcpd_kpm_flush_addrs(pm);
 
         /**
          * @bug We could have a resource leak in the kernel here if
@@ -255,9 +274,9 @@ static void test_set_limits(void const *test_data)
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        int const result = mptcpd_pm_set_limits(pm,
-                                                _limits,
-                                                L_ARRAY_SIZE(_limits));
+        int const result = mptcpd_kpm_set_limits(pm,
+                                                 _limits,
+                                                 L_ARRAY_SIZE(_limits));
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -269,9 +288,9 @@ static void test_get_limits(void const *test_data)
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        int const result = mptcpd_pm_get_limits(pm,
-                                                get_limits_callback,
-                                                NULL);
+        int const result = mptcpd_kpm_get_limits(pm,
+                                                 get_limits_callback,
+                                                 NULL);
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -285,7 +304,7 @@ static void test_set_flags(void const *test_data)
 
         static mptcpd_flags_t const flags = MPTCPD_ADDR_FLAG_BACKUP;
 
-        int const result = mptcpd_pm_set_flags(pm, laddr1, flags);
+        int const result = mptcpd_kpm_set_flags(pm, laddr1, flags);
 
         assert(result == 0 || result == ENOTSUP);
 }

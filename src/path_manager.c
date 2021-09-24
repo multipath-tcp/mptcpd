@@ -818,10 +818,11 @@ static void complete_pm_init(struct mptcpd_pm *pm)
           Synchronize mptcpd address ID manager with address IDs
           maintained by the kernel.
          */
-        if (pm->netlink_pm->cmd_ops->dump_addrs != NULL
-            && pm->netlink_pm->cmd_ops->dump_addrs(pm,
-                                                   dump_addrs_callback,
-                                                   pm->idm) != 0)
+        if (pm->netlink_pm->kcmd_ops != NULL
+            && pm->netlink_pm->kcmd_ops->dump_addrs != NULL
+            && pm->netlink_pm->kcmd_ops->dump_addrs(pm,
+                                                    dump_addrs_callback,
+                                                    pm->idm) != 0)
                 l_error("Unable to synchronize ID manager with kernel.");
 
         /**

@@ -59,9 +59,9 @@ static void update_limits(struct mptcpd_pm *pm, int delta)
         if (pm->config->addr_flags & MPTCPD_ADDR_FLAG_SUBFLOW)
                 _limits[1].limit = _limits[0].limit;
 
-        int const result = mptcpd_pm_set_limits(pm,
-                                                _limits,
-                                                L_ARRAY_SIZE(_limits));
+        int const result = mptcpd_kpm_set_limits(pm,
+                                                 _limits,
+                                                 L_ARRAY_SIZE(_limits));
 
         if (result != 0 && result != ENOTSUP)
                 l_warn("can't update limit to %d: %d", subflows, result);
@@ -80,11 +80,10 @@ static void addr_adv_new_local_address(struct mptcpd_interface const *i,
         }
 
         uint32_t       const flags = pm->config->addr_flags;
-        mptcpd_token_t const token = 0;
 
         update_limits(pm, 1);
 
-        if (mptcpd_pm_add_addr(pm, sa, id, flags, i->index, token) != 0)
+        if (mptcpd_kpm_add_addr(pm, sa, id, flags, i->index) != 0)
                 l_error("Unable to advertise IP address.");
 }
 
@@ -104,11 +103,9 @@ static void addr_adv_delete_local_address(
                 return;
         }
 
-        mptcpd_token_t const token = 0;
-
         update_limits(pm, -1);
 
-        if (mptcpd_pm_remove_addr(pm, id, token) != 0)
+        if (mptcpd_kpm_remove_addr(pm, id) != 0)
                 l_error("Unable to stop advertising IP address.");
 }
 

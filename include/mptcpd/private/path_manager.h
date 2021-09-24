@@ -106,7 +106,7 @@ struct pm_ops_info
         /// Path manager event tracking operations.
         struct mptcpd_pm_ops const *ops;
 
-        /// Data passed to the network event tracking operations.
+        /// Data passed to the event tracking operations.
         void *user_data;
 };
 
@@ -115,8 +115,9 @@ struct pm_ops_info
  *
  * @brief MPTCP path management generic netlink command functions.
  *
- * The set of functions that implement MPTCP path management generic
- * netlink command calls.
+ * The set of functions that implement client-oriented MPTCP path
+ * management generic netlink command calls where path management is
+ * performed in the user space.
  */
 struct mptcpd_pm_cmd_ops
 {
@@ -124,16 +125,108 @@ struct mptcpd_pm_cmd_ops
          * @privatesection
          */
         /**
-         * @name Common Path Management Commands
+         * @brief Advertise new network address to peers.
          *
-         * Path management common to both the upstream and
-         * multipath-tcp.org Linux kernels.
-         *
-         * @todo Consider splitting these commands into
-         *       server-oriented and client-oriented cases.  There
-         *       shouldn't be any overlap between these use cases.
+         * @param[in] pm    The mptcpd path manager object.
+         * @param[in] addr  Local IP address and port to be advertised
+         *                  through the MPTCP protocol @c ADD_ADDR
+         *                  option.  The port is optional, and is
+         *                  ignored if it is zero.
+         * @param[in] id    MPTCP local address ID.
+         * @param[in] token MPTCP connection token.
          */
-        ///@{
+        int (*add_addr)(struct mptcpd_pm *pm,
+                        struct sockaddr const *addr,
+                        mptcpd_aid_t id,
+                        mptcpd_token_t token);
+
+        /**
+         * @brief Stop advertising network address to peers.
+         */
+        int (*remove_addr)(struct mptcpd_pm *pm,
+                           mptcpd_aid_t address_id,
+                           mptcpd_token_t token);
+
+        /**
+         * @brief Create a new subflow.
+         *
+         * @param[in] pm                The mptcpd path manager object.
+         * @param[in] token             MPTCP connection token.
+         * @param[in] local_address_id  MPTCP local address ID.
+         * @param[in] remote_address_id MPTCP remote address ID.
+         * @param[in] local_addr        MPTCP subflow local address
+         *                              information, including the port.
+         * @param[in] remote_addr       MPTCP subflow remote address
+         *                              information, including the port.
+         * @param[in] backup            Whether or not to set the MPTCP
+         *                              subflow backup priority flag.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
+         *
+         * @todo There far too many parameters.  Reduce.
+         */
+        int (*add_subflow)(struct mptcpd_pm *pm,
+                           mptcpd_token_t token,
+                           mptcpd_aid_t local_address_id,
+                           mptcpd_aid_t remote_address_id,
+                           struct sockaddr const *local_addr,
+                           struct sockaddr const *remote_addr,
+                           bool backup);
+
+        /**
+         * @brief Remove a subflow.
+         *
+         * @param[in] pm                The mptcpd path manager object.
+         * @param[in] token             MPTCP connection token.
+         * @param[in] local_addr        MPTCP subflow local address
+         *                              information, including the port.
+         * @param[in] remote_addr       MPTCP subflow remote address
+         *                              information, including the port.
+         *
+         * @return @c 0 if operation was successful. @c errno
+         *         otherwise.
+         */
+        int (*remove_subflow)(struct mptcpd_pm *pm,
+                              mptcpd_token_t token,
+                              struct sockaddr const *local_addr,
+                              struct sockaddr const *remote_addr);
+
+        /**
+         * @brief Set priority of a subflow.
+         *
+         * @param[in] pm                The mptcpd path manager object.
+         * @param[in] token             MPTCP connection token.
+         * @param[in] local_addr        MPTCP subflow local address
+         *                              information, including the port.
+         * @param[in] remote_addr       MPTCP subflow remote address
+         *                              information, including the port.
+         * @param[in] backup            Whether or not to set the MPTCP
+         *                              subflow backup priority flag.
+         *
+         * @return @c 0 if operation was successful. @c errno
+         *         otherwise.
+         */
+        int (*set_backup)(struct mptcpd_pm *pm,
+                          mptcpd_token_t token,
+                          struct sockaddr const *local_addr,
+                          struct sockaddr const *remote_addr,
+                          bool backup);
+};
+
+/**
+ * @struct mptcpd_kpm_cmd_ops
+ *
+ * @brief Kernel-side MPTCP path management netlink commands.
+ *
+ * The set of functions that implement MPTCP path management generic
+ * netlink command calls for the in-kernel path manager.
+ */
+struct mptcpd_kpm_cmd_ops
+{
+        /**
+         * @privatesection
+         */
         /**
          * @brief Advertise new network address to peers.
          *
@@ -144,24 +237,19 @@ struct mptcpd_pm_cmd_ops
          *                  ignored if it is zero.
          * @param[in] id    MPTCP local address ID.
          * @param[in] flags
-         * @param[in] index Network interface index (optional for
-         *                  upstream Linux kernel).
-         * @param[in] token MPTCP connection token.
+         * @param[in] index Network interface index (optional).
          */
         int (*add_addr)(struct mptcpd_pm *pm,
                         struct sockaddr const *addr,
                         mptcpd_aid_t id,
                         uint32_t flags,
-                        int index,
-                        mptcpd_token_t token);
+                        int index);
 
         /**
          * @brief Stop advertising network address to peers.
          */
         int (*remove_addr)(struct mptcpd_pm *pm,
-                           mptcpd_aid_t address_id,
-                           mptcpd_token_t token);
-        ///@}
+                           mptcpd_aid_t address_id);
 
         /**
          * @name Server-oriented Path Management Commands
@@ -250,91 +338,20 @@ struct mptcpd_pm_cmd_ops
                           void *data);
 
         /**
-         * @brief
+         * @brief Set MPTCP flags for a local IP address.
          *
          * @param[in] pm    The mptcpd path manager object.
          * @param[in] addr  Local IP address information.
          * @param[in] flags Flags to be associated with @a addr.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
          */
         int (*set_flags)(struct mptcpd_pm *pm,
                          struct sockaddr const *addr,
                          mptcpd_flags_t flags);
-        ///@}
-
-        /**
-         * @name Client-oriented Path Management Commands
-         *
-         * Client-oriented path management commands that allow for
-         * per-connection path management.
-         */
-        ///@{
-        /**
-         * @brief Create a new subflow.
-         *
-         * @param[in] pm                The mptcpd path manager object.
-         * @param[in] token             MPTCP connection token.
-         * @param[in] local_address_id  MPTCP local address ID.
-         * @param[in] remote_address_id MPTCP remote address ID.
-         * @param[in] local_addr        MPTCP subflow local address
-         *                              information, including the port.
-         * @param[in] remote_addr       MPTCP subflow remote address
-         *                              information, including the port.
-         * @param[in] backup            Whether or not to set the MPTCP
-         *                              subflow backup priority flag.
-         *
-         * @return @c 0 if operation was successful. -1 or @c errno
-         *         otherwise.
-         *
-         * @todo There far too many parameters.  Reduce.
-         */
-        int (*add_subflow)(struct mptcpd_pm *pm,
-                           mptcpd_token_t token,
-                           mptcpd_aid_t local_address_id,
-                           mptcpd_aid_t remote_address_id,
-                           struct sockaddr const *local_addr,
-                           struct sockaddr const *remote_addr,
-                           bool backup);
-
-        /**
-         * @brief Remove a subflow.
-         *
-         * @param[in] pm                The mptcpd path manager object.
-         * @param[in] token             MPTCP connection token.
-         * @param[in] local_addr        MPTCP subflow local address
-         *                              information, including the port.
-         * @param[in] remote_addr       MPTCP subflow remote address
-         *                              information, including the port.
-         *
-         * @return @c 0 if operation was successful. @c errno
-         *         otherwise.
-         */
-        int (*remove_subflow)(struct mptcpd_pm *pm,
-                              mptcpd_token_t token,
-                              struct sockaddr const *local_addr,
-                              struct sockaddr const *remote_addr);
-
-        /**
-         * @brief Set priority of a subflow.
-         *
-         * @param[in] pm                The mptcpd path manager object.
-         * @param[in] token             MPTCP connection token.
-         * @param[in] local_addr        MPTCP subflow local address
-         *                              information, including the port.
-         * @param[in] remote_addr       MPTCP subflow remote address
-         *                              information, including the port.
-         * @param[in] backup            Whether or not to set the MPTCP
-         *                              subflow backup priority flag.
-         *
-         * @return @c 0 if operation was successful. @c errno
-         *         otherwise.
-         */
-        int (*set_backup)(struct mptcpd_pm *pm,
-                          mptcpd_token_t token,
-                          struct sockaddr const *local_addr,
-                          struct sockaddr const *remote_addr,
-                          bool backup);
-        ///@}
 };
+
 
 #ifdef __cplusplus
 }
