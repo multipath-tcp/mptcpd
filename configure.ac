@@ -6,7 +6,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([mptcpd],
-        [0.7],
+        [0.8],
         [mptcp@lists.linux.dev],
         [],
         [https://github.com/intel/mptcpd])
@@ -18,9 +18,9 @@ AC_INIT([mptcpd],
 # Interfaces changed:  CURRENT++ REVISION=0
 #            added:    CURRENT++ REVISION=0 AGE++
 #            removed:  CURRENT++ REVISION=0 AGE=0
-LIB_CURRENT=2
+LIB_CURRENT=3
 LIB_REVISION=0
-LIB_AGE=1
+LIB_AGE=0
 
 AC_SUBST([LIB_CURRENT])
 AC_SUBST([LIB_REVISION])
