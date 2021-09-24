@@ -1,3 +1,51 @@
+24 September 2021 - mptcpd 0.8
+
+- The mptcpd library API now splits path management operations
+  specific to the in-kernel path manager found in the upstream Linux
+  kernel into a separate "mptcpd_kpm" API namespace to differentiate
+  ADD_ADDR and REMOVE_ADDR related operations between the in-kernel
+  and user space cases.  The operations for the two are different and
+  have different use cases.
+
+- Two new mptcpd command line arguments were added: "--addr-flags" and
+  "--notify-flags", along with the equivalent settings in the mptcpd
+  system configuration file (e.g., /etc/mptcpd/mptcpd.conf).
+  "addr-flags" are used when announcing an IP address.  Similar flags
+  are used by the "ip mptcp" sub-command.  See the ip-mptcp(8) and man
+  page for further details on these address related flags.
+  "notify-flags" provides for further control over how plugins are
+  notified of changes to local IP addresses.  See the mptcpd(8) man
+  page shipped with this mptcpd release for further details.
+
+- Improve the mptcpd "addr_adv" plugin by making it set suitable MPTCP
+  resource limits in the kernel, such as expanding the maximum number
+  of subflows to allow subflows associated with advertised IP
+  addresses to be created.
+
+- The mptcpd plugin directory name in the mptcpd system configuration
+  file may now be left empty to improve "multilib" support found in
+  some Linux distributions.  A compile-time default will be used if no
+  plugin directory name is found in the mptcpd system configuration
+  file or the mptcpd command line options.
+
+- Mptcpd command line options now properly take precedence over the
+  corresponding mptcpd system configuration setting.  This addresses
+  an issue that prevented mptcpd from starting if a required setting
+  was not specified in the mptcpd system configuration file even
+  though the same setting was configured through the mptcpd command
+  line.
+
+- A new "mptcpize" program was added that allows legacy TCP-only
+  applications to transparently use MPTCP by either of the following
+  approaches:
+    - leverage library interpositioning to transparently replace TCP
+      socket calls with their MPTCP counterparts.
+    - enable or disable TCP to MPTCP socket conversion through an
+      existing systemd unit file.
+
+- Build regressions against ELL versions 0.31 and 0.33 were
+  corrected.
+
 13 April 2021 - mptcpd 0.7
 
 - MPTCP path management generic netlink events recently added to the
