@@ -38,7 +38,7 @@
 - A new "mptcpize" program was added that allows legacy TCP-only
   applications to transparently use MPTCP by either of the following
   approaches:
-    - leverage library interpositioning to transparently replace TCP
+    - leverage library inter-positioning to transparently replace TCP
       socket calls with their MPTCP counterparts.
     - enable or disable TCP to MPTCP socket conversion through an
       existing systemd unit file.
