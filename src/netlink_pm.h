@@ -23,7 +23,7 @@ struct sockaddr;
 struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm(void);
 
 /**
- * @name User Space Netlink Path Management Commands
+ * @name User Space Path Management Netlink Commands
  *
  * The set of functions that implement client-oriented MPTCP path
  * management generic netlink command calls where path management is
