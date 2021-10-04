@@ -28,6 +28,7 @@
 #include <mptcpd/private/sockaddr.h>
 
 #include "commands.h"
+#include "netlink_pm.h"
 #include "path_manager.h"
 
 // Sanity check
@@ -36,6 +37,76 @@
         || MPTCPD_ADDR_FLAG_BACKUP != MPTCP_PM_ADDR_FLAG_BACKUP
 # error Mismatch between mptcpd and upstream kernel addr flags.
 #endif
+
+
+
+static int upstream_cmd_announce(struct mptcpd_pm *pm,
+                                 struct sockaddr const *addr,
+                                 mptcpd_aid_t id,
+                                 mptcpd_token_t token)
+{
+        return netlink_pm_add_addr(MPTCP_CMD_ANNOUNCE,
+                                   pm,
+                                   addr,
+                                   id,
+                                   token);
+}
+
+static int upstream_cmd_remove(struct mptcpd_pm *pm,
+                               mptcpd_aid_t address_id,
+                               mptcpd_token_t token)
+{
+        return netlink_pm_remove_addr(MPTCP_CMD_REMOVE,
+                                      pm,
+                                      address_id,
+                                      token);
+}
+
+static int upstream_add_subflow(struct mptcpd_pm *pm,
+                                mptcpd_token_t token,
+                                mptcpd_aid_t local_address_id,
+                                mptcpd_aid_t remote_address_id,
+                                struct sockaddr const *local_addr,
+                                struct sockaddr const *remote_addr,
+                                bool backup)
+{
+        return netlink_pm_add_subflow(MPTCP_CMD_SUB_CREATE,
+                                      pm,
+                                      token,
+                                      local_address_id,
+                                      remote_address_id,
+                                      local_addr,
+                                      remote_addr,
+                                      backup);
+}
+
+static int upstream_remove_subflow(struct mptcpd_pm *pm,
+                                   mptcpd_token_t token,
+                                   struct sockaddr const *local_addr,
+                                   struct sockaddr const *remote_addr)
+{
+        return netlink_pm_remove_subflow(MPTCP_CMD_SUB_DESTROY,
+                                         pm,
+                                         token,
+                                         local_addr,
+                                         remote_addr);
+}
+
+static int upstream_set_backup(struct mptcpd_pm *pm,
+                               mptcpd_token_t token,
+                               struct sockaddr const *local_addr,
+                               struct sockaddr const *remote_addr,
+                               bool backup)
+{
+        return netlink_pm_set_backup(MPTCP_CMD_SUB_PRIORITY,
+                                     pm,
+                                     token,
+                                     local_addr,
+                                     remote_addr,
+                                     backup);
+}
+
+// --------------------------------------------------------------
 
 /**
  * @struct get_addr_user_callback
@@ -704,7 +775,18 @@ static int upstream_set_flags(struct mptcpd_pm *pm,
                                   NULL  /* destroy */) == 0;
 }
 
-static struct mptcpd_kpm_cmd_ops const cmd_ops =
+// ---------------------------------------------------------------------
+
+static struct mptcpd_pm_cmd_ops const cmd_ops =
+{
+        .add_addr       = upstream_cmd_announce,
+        .remove_addr    = upstream_cmd_remove,
+        .add_subflow    = upstream_add_subflow,
+        .remove_subflow = upstream_remove_subflow,
+        .set_backup     = upstream_set_backup,
+};
+
+static struct mptcpd_kpm_cmd_ops const kcmd_ops =
 {
         .add_addr    = upstream_add_addr,
         .remove_addr = upstream_remove_addr,
@@ -719,7 +801,8 @@ static struct mptcpd_kpm_cmd_ops const cmd_ops =
 static struct mptcpd_netlink_pm const npm = {
         .name     = MPTCP_PM_NAME,
         .group    = MPTCP_PM_EV_GRP_NAME,
-        .kcmd_ops = &cmd_ops
+        .cmd_ops  = &cmd_ops,
+        .kcmd_ops = &kcmd_ops
 };
 
 struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm_upstream(void)
