@@ -142,12 +142,13 @@ static char const *flags_string(struct tok_entry const *toks,
         struct tok_entry const *tok;
         char const *sep= "";
 
-        str[0] = 0;
+        char *tmp = str;
+        tmp[0] = 0;
         for (tok = toks; tok->id; tok++) {
                if (flags & tok->id) {
                        size_t ret =
-                               append_tok(str, len, sep, tok->string);
-                       str += ret;
+                               append_tok(tmp, len, sep, tok->string);
+                       tmp += ret;
                        len -= ret;
                        sep = ",";
                }
