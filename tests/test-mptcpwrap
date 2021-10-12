@@ -1,0 +1,10 @@
+#! /bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Test libmptcpwrap that injects MPTCP into the socket() system call.
+#
+# Copyright (c) 2021, Intel Corporation
+
+set -e
+
+LD_PRELOAD=../src/.libs/libmptcpwrap.so ./mptcpwrap-tester

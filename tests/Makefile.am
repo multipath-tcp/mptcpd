@@ -28,6 +28,8 @@ check_PROGRAMS =		\
 	test-configuration	\
 	test-id-manager
 
+noinst_PROGRAMS = mptcpwrap-tester
+
 dist_check_SCRIPTS =		\
 	test-bad-log-empty	\
 	test-bad-log-long	\
@@ -35,7 +37,8 @@ dist_check_SCRIPTS =		\
 	test-bad-option		\
 	test-bad-path-manager	\
 	test-bad-plugin-dir	\
-	test-start-stop
+	test-start-stop		\
+	test-mptcpwrap
 
 test_plugin_SOURCES = test-plugin.c
 test_plugin_CPPFLAGS =							\
@@ -93,6 +96,9 @@ test_id_manager_LDADD =				\
 	$(top_builddir)/lib/libmptcpd.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
+
+mptcpwrap_tester_SOURCES = mptcpwrap-tester.c
+mptcpwrap_tester_LDADD   = $(CODE_COVERAGE_LIBS)
 
 if HAVE_CXX
 check_PROGRAMS += test-cxx-build
