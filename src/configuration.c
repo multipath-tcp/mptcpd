@@ -139,19 +139,21 @@ static char const *flags_string(struct tok_entry const *toks,
                                 char *str,
                                 size_t len)
 {
-        struct tok_entry const *tok;
         char const *sep= "";
 
-        str[0] = 0;
-        for (tok = toks; tok->id; tok++) {
+        char *tmp = str;
+        tmp[0] = 0;
+
+        for (struct tok_entry const *tok = toks; tok->id; tok++) {
                if (flags & tok->id) {
-                       size_t ret =
-                               append_tok(str, len, sep, tok->string);
-                       str += ret;
+                       size_t const ret =
+                               append_tok(tmp, len, sep, tok->string);
+                       tmp += ret;
                        len -= ret;
                        sep = ",";
                }
         }
+
         return str;
 }
 
