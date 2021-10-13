@@ -13,6 +13,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/sendfile.h>
 
 #include <argp.h>
 #include <dlfcn.h>
@@ -163,10 +164,12 @@ static int unit_update(int argc, char *argv[], int enable)
 	char *unit, *line = NULL;
 	int append_env = enable;
 	char dst_path[PATH_MAX];
+	off_t bytes_copied = 0;
+	struct stat fileinfo;
+	int dst, unit_fd;
 	size_t len = 0;
 	ssize_t read;
 	FILE *src;
-	int dst;
 
 	if (argc < 1) {
 		fprintf(stderr, "missing unit argument\n");
@@ -210,11 +213,24 @@ static int unit_update(int argc, char *argv[], int enable)
 		error(1, errno, "can't read from %s", unit);
 	free(line);
 	fclose(src);
+
+	// copy back the modified file into the original unit
+	// note: avoid using rename, as it fails across filesystems
+	if (fstat(dst, &fileinfo) < 0)
+		error(1, errno, "can't stat %s", dst_path);
+
+	// re-open the unit file for writing
+	// mkstemp already opened the temporary file for R/W so we don't need
+	// to touch that file descriptor.
+	unit_fd = open(unit, O_TRUNC | O_RDWR);
+	if (unit_fd < 0)
+		error(1, errno, "can't open %s for writing", unit);
+
+	while (bytes_copied < fileinfo.st_size)
+		if (sendfile(unit_fd, dst, &bytes_copied, fileinfo.st_size - bytes_copied) < 0)
+			error(1, errno, "can't copy from %s to %s", dst_path, unit);
+
 	close(dst);
-
-	if (rename(dst_path, unit) < 0)
-		error(1, errno, "can't rename %s to %s", dst_path, unit);
-
 	if (system("systemctl daemon-reload") != 0)
 		error(1, errno, "can't reload unit, manual 'systemctl daemon-reload' is required");
 
