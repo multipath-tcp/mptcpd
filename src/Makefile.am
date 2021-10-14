@@ -73,8 +73,10 @@ mptcpize_CPPFLAGS = \
 	$(AM_CPPFLAGS)			\
 	-DPKGLIBDIR=\"$(pkglibdir)\"	\
 	-DLIBREVISION=\"$(librevision)\"
+mptcpize_LDADD =  $(CODE_COVERAGE_LIBS)
 
 libmptcpwrap_la_SOURCES = mptcpwrap.c
 libmptcpwrap_la_LDFLAGS = -version-info 0:$(librevision):0
+libmptcpwrap_la_LIBADD  = $(CODE_COVERAGE_LIBS)
 
 clean-local: code-coverage-clean
