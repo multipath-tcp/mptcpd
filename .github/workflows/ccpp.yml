@@ -14,17 +14,15 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
-      run: sudo apt-get -y install autoconf-archive libell-dev pandoc lcov
+      run: sudo apt-get -y install autoconf-archive libell-dev pandoc
     - name: bootstrap
       run: ./bootstrap
     - name: configure
-      run: ./configure --enable-code-coverage
+      run: ./configure
     - name: make
       run: make
     - name: make check
-      run: make check-code-coverage \
-             CODE_COVERAGE_OUTPUT_FILE=lcov.info \
-             CODE_COVERAGE_LCOV_OPTIONS="--no-external --exclude */tests/*"
+      run: make check
     - name: make distcheck
       run: make distcheck
     - name: make install
@@ -33,8 +31,3 @@ jobs:
       run: LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH make installcheck
     - name: make uninstall
       run: sudo make uninstall
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: ./lcov.info
