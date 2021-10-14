@@ -66,7 +66,7 @@ mptcpd_LDADD    =				\
 	$(ELL_LIBS) $(CODE_COVERAGE_LIBS)
 mptcpd_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
 
-librevision=0
+librevision=1
 
 mptcpize_SOURCES = mptcpize.c
 mptcpize_CPPFLAGS = \
