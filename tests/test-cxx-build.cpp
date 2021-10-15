@@ -70,7 +70,7 @@ public:
                 struct mptcpd_pm *const pm = NULL;
 
                 bool const loaded =
-                        mptcpd_plugin_load(dir, default_plugin, this->pm);
+                        mptcpd_plugin_load(dir, default_plugin, NULL, this->pm);
                 assert(loaded);
 
                 call_plugin_ops(&test_count_4,

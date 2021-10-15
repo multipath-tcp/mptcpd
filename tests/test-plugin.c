@@ -18,6 +18,7 @@
 #include <assert.h>
 
 #include <ell/test.h>
+#include <ell/queue.h>
 
 #include <mptcpd/plugin.h>
 #include <mptcpd/private/plugin.h>
@@ -25,7 +26,7 @@
 #include "test-plugin.h"
 
 
-static bool run_plugin_load(mode_t mode)
+static bool run_plugin_load(mode_t mode, struct l_queue *queue)
 {
         static char const dir[]            = TEST_PLUGIN_DIR_SECURITY;
         static char const default_plugin[] = TEST_PLUGIN_FOUR;
@@ -41,7 +42,7 @@ static bool run_plugin_load(mode_t mode)
         int const mode_ok = fchmod(fd, mode);
         assert(mode_ok == 0);
 
-        bool const loaded = mptcpd_plugin_load(dir, default_plugin, pm);
+        bool const loaded = mptcpd_plugin_load(dir, default_plugin, queue, pm);
 
         if (loaded) {
                 call_plugin_ops(&test_count_4,
@@ -75,7 +76,7 @@ static void test_good_perms(void const *test_data)
         // Owner and group read/write/execute permissions.
         mode_t const mode = S_IRWXU | S_IRWXG;
 
-        bool const loaded = run_plugin_load(mode);
+        bool const loaded = run_plugin_load(mode, NULL);
 
         assert(loaded);
 }
@@ -93,7 +94,7 @@ static void test_bad_perms(void const *test_data)
         // Owner, group, and other read/write/execute permissions.
         mode_t const mode = S_IRWXU | S_IRWXG | S_IRWXO;
 
-        bool const loaded = run_plugin_load(mode);
+        bool const loaded = run_plugin_load(mode, NULL);
 
         // Write permissions for "other" should be rejected.
         assert(!loaded);
@@ -116,9 +117,54 @@ static void test_no_plugins(void const *test_data)
         assert(dir != NULL);
 
         struct mptcpd_pm *const pm = NULL;
-        bool const loaded = mptcpd_plugin_load(dir, NULL, pm);
+        bool const loaded = mptcpd_plugin_load(dir, NULL, NULL, pm);
 
         (void) rmdir(dir);
+
+        assert(!loaded);
+}
+
+/**
+ * @brief Verify load of specific existing plugins.
+ *
+ * Confirm that specific existing plugins are loaded.
+ */
+static void test_existing_plugins(void const *test_data)
+{
+        (void) test_data;
+
+        // Owner and group read/write/execute permissions.
+        mode_t const mode = S_IRWXU | S_IRWXG;
+
+        struct l_queue *plugins_list=
+                l_queue_new();
+
+        l_queue_push_tail(plugins_list, "four");
+
+        bool const loaded = run_plugin_load(mode, plugins_list);
+
+        assert(loaded);
+}
+
+/**
+ * @brief Verify failure if specified plugins do not exist.
+ *
+ * The @c mptcpd_plugin_load() function should return with a failure
+ * if the specified plugins do not exist in the provided plugin directory.
+ */
+static void test_nonexisting_plugins(void const *test_data)
+{
+        (void) test_data;
+
+        // Owner and group read/write/execute permissions.
+        mode_t const mode = S_IRWXU | S_IRWXG;
+
+        struct l_queue *plugins_list=
+                l_queue_new();
+
+        l_queue_push_tail(plugins_list, "nonexisting_plugin");
+
+        bool const loaded = run_plugin_load(mode, plugins_list);
 
         assert(!loaded);
 }
@@ -137,7 +183,7 @@ static void test_plugin_dispatch(void const *test_data)
         static char const *const default_plugin = NULL;
         struct mptcpd_pm *const pm = NULL;
 
-        bool const loaded = mptcpd_plugin_load(dir, default_plugin, pm);
+        bool const loaded = mptcpd_plugin_load(dir, default_plugin, NULL, pm);
         assert(loaded);
 
         // Notice that we call plugin 1 twice.
@@ -207,7 +253,7 @@ static void test_null_plugin_ops(void const *test_data)
         static char const *const default_plugin = NULL;
         struct mptcpd_pm *const pm = NULL;
 
-        bool const loaded = mptcpd_plugin_load(dir, default_plugin, pm);
+        bool const loaded = mptcpd_plugin_load(dir, default_plugin, NULL, pm);
         assert(loaded);
 
         char const name[] = "null ops";
@@ -240,11 +286,13 @@ int main(int argc, char *argv[])
 {
         l_test_init(&argc, &argv);
 
-        l_test_add("good permissions", test_good_perms,      NULL);
-        l_test_add("bad  permissions", test_bad_perms,       NULL);
-        l_test_add("no plugins",       test_no_plugins,      NULL);
-        l_test_add("plugin dispatch",  test_plugin_dispatch, NULL);
-        l_test_add("null plugin ops",  test_null_plugin_ops, NULL);
+        l_test_add("good permissions",   test_good_perms,          NULL);
+        l_test_add("bad  permissions",   test_bad_perms,           NULL);
+        l_test_add("no plugins",         test_no_plugins,          NULL);
+        l_test_add("existing plugin",    test_existing_plugins,    NULL);
+        l_test_add("nonexisting plugin", test_nonexisting_plugins, NULL);
+        l_test_add("plugin dispatch",    test_plugin_dispatch,     NULL);
+        l_test_add("null plugin ops",    test_null_plugin_ops,     NULL);
 
         return l_test_run();
 }
