@@ -62,3 +62,10 @@ path-manager=@mptcpd_default_pm@
 # related addresses are updated.
 #
 # notify-flags=existing,skip_link_local,skip_loopback
+
+# --------------------------
+# Plugins to load
+# --------------------------
+# A comma separated list containing one or more plugins to load.
+#
+# load-plugins=addr_adv,sspi
