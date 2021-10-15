@@ -613,7 +613,6 @@ static void parse_config_plugins_to_load(
         if (config->plugins_to_load != NULL)
                 return;  // Previously set, e.g. via command line.
 
-        // Default plugin name.
         char *const plugins_to_load =
                 l_settings_get_string(settings,
                                       group,
