@@ -26,7 +26,7 @@ int __attribute__((visibility("default"))) socket(int family, int type, int prot
 	    (type & 0xff)  != SOCK_STREAM)
 		goto do_socket;
 
-	// socket(AF_INET, SOCK_STREM, 0) maps to TCP, too
+	// socket(AF_INET, SOCK_STREAM, 0) maps to TCP, too
 	if (protocol != 0 && protocol != IPPROTO_TCP)
 		goto do_socket;
 
