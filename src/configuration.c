@@ -185,7 +185,7 @@ static char const *plugins_to_load_string(struct l_queue const *queue)
         struct l_string *string = l_string_new(128);
 
         struct l_queue_entry const *entry = 
-                l_queue_get_entries(queue);
+                l_queue_get_entries((struct l_queue *) queue);
 
         while (entry->next) {
                 l_string_append(string, entry->data);
@@ -746,7 +746,8 @@ static bool merge_config(struct mptcpd_config       *dst,
                 dst->plugins_to_load = l_queue_new();
 
                 struct l_queue_entry const *entry =
-                        l_queue_get_entries(src->plugins_to_load);
+                        l_queue_get_entries(
+                                (struct l_queue *) src->plugins_to_load);
 
                 while (entry) {
                         l_queue_push_tail(
