@@ -24,6 +24,8 @@
 #include <ell/log.h>
 #include <ell/util.h>
 #include <ell/settings.h>
+#include <ell/queue.h>
+#include <ell/string.h>
 
 #include <mptcpd/types.h>
 
@@ -178,6 +180,24 @@ static char const *notify_flags_string(uint32_t flags,
         return flags_string(notify_flags_toks, flags, str, len);
 }
 
+static char const *plugins_to_load_string(struct l_queue const *queue)
+{
+        struct l_string *string = l_string_new(128);
+
+        struct l_queue_entry const *entry = 
+                l_queue_get_entries((struct l_queue *) queue);
+
+        while (entry->next) {
+                l_string_append(string, entry->data);
+                l_string_append_c(string, ',');
+
+                entry = entry->next;
+        }
+
+        l_string_append(string, entry->data);
+
+        return l_string_unwrap(string);
+}
 
 /**
  * @brief converts the addr-flags string into numeric rep
@@ -232,7 +252,6 @@ static uint32_t notify_flags_from_string(char const *str)
 {
         return flags_from_string(notify_flags_toks, str);
 }
-
 
 // ---------------------------------------------------------------
 // Set configuration values
@@ -289,6 +308,29 @@ static void set_default_plugin(struct mptcpd_config *config,
         reset_string(&config->default_plugin, plugin);
 }
 
+/**
+ * @brief Set plugins to load.
+ *
+ * Set the plugins that should load in the mptcpd configuration.
+ *
+ * @param[in,out] config Mptcpd configuration.
+ * @param[in]     plugins Comma separated list of plugins to load.
+ */
+static void set_plugins_to_load(struct mptcpd_config *config,
+                                char *plugins)
+{
+        config->plugins_to_load = l_queue_new();
+
+        char *token = strtok(plugins, ",");
+        while (token) {
+                l_queue_push_tail(
+                        (struct l_queue *) config->plugins_to_load,
+                        token);
+
+                token = strtok(NULL, ",");
+        }
+}
+
 // ---------------------------------------------------------------
 // Command line options
 // ---------------------------------------------------------------
@@ -311,6 +353,9 @@ static char const doc[] = "Start the Multipath TCP daemon.";
 
 /// Command line option key for "--notify-flags"
 #define MPTCPD_NOTIFY_FLAGS_KEY 0x103
+
+/// Command line option key for "--load-plugins"
+#define MPTCPD_LOAD_PLUGINS_KEY 0x104
 ///@}
 
 static struct argp_option const options[] = {
@@ -346,6 +391,13 @@ static struct argp_option const options[] = {
           "FLAGS",
           0,
           "Set flags for announced address, e.g. --addr-flags=subflow",
+          0 },
+        { "load-plugins",
+          MPTCPD_LOAD_PLUGINS_KEY,
+          "PLUGINS",
+          0,
+          "Specify which plugins to load, e.g. --load-plugins=addr_adv,"
+          "sspi",
           0 },
         { 0 }
 };
@@ -388,6 +440,14 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
                 break;
         case MPTCPD_NOTIFY_FLAGS_KEY:
                 config->notify_flags = notify_flags_from_string(arg);
+                break;
+        case MPTCPD_LOAD_PLUGINS_KEY:
+                if (strlen(arg) == 0)
+                        argp_error(state,
+                                   "Empty load plugins command"
+                                   "line option.");
+
+                set_plugins_to_load(config, l_strdup(arg));
                 break;
         default:
                 return ARGP_ERR_UNKNOWN;
@@ -545,6 +605,23 @@ static void parse_config_default_plugin(struct mptcpd_config *config,
                 set_default_plugin(config, default_plugin);
 }
 
+static void parse_config_plugins_to_load(
+        struct mptcpd_config *config,
+        struct l_settings const *settings,
+        char const *group)
+{
+        if (config->plugins_to_load != NULL)
+                return;  // Previously set, e.g. via command line.
+
+        char *const plugins_to_load =
+                l_settings_get_string(settings,
+                                      group,
+                                      "load-plugins");
+
+        if (plugins_to_load != NULL)
+                set_plugins_to_load(config, plugins_to_load);
+}
+
 /**
  * @brief Parse configuration file.
  *
@@ -586,6 +663,9 @@ static bool parse_config_file(struct mptcpd_config *config,
 
                 // Default plugin.
                 parse_config_default_plugin(config, settings, group);
+
+                // Plugins to load.
+                parse_config_plugins_to_load(config, settings, group);
         } else {
                 l_debug("Unable to load mptcpd settings from file '%s'",
                         filename);
@@ -660,6 +740,23 @@ static bool merge_config(struct mptcpd_config       *dst,
 
         if (dst->default_plugin == NULL)
                 dst->default_plugin = l_strdup(src->default_plugin);
+
+        if (dst->plugins_to_load == NULL &&
+                        src->plugins_to_load != NULL){
+                dst->plugins_to_load = l_queue_new();
+
+                struct l_queue_entry const *entry =
+                        l_queue_get_entries(
+                                (struct l_queue *) src->plugins_to_load);
+
+                while (entry) {
+                        l_queue_push_tail(
+                                (struct l_queue *) dst->plugins_to_load,
+                                entry->data);
+
+                        entry = entry->next;
+                }
+        }
 
         return true;
 }
@@ -744,6 +841,14 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
                 l_debug("notify flags: %s",
                         notify_flags_string(config->notify_flags, flags, sizeof(flags)));
 
+        if (config->plugins_to_load){
+                char const *str = 
+                        plugins_to_load_string(config->plugins_to_load);
+
+                l_debug("plugins to load: %s", str);
+                l_free((char *) str);
+        }
+
         return config;
 }
 
@@ -752,6 +857,8 @@ void mptcpd_config_destroy(struct mptcpd_config *config)
         if (config == NULL)
                 return;
 
+        l_queue_destroy((struct l_queue *) config->plugins_to_load,
+                        NULL);
         l_free((char *) config->default_plugin);
         l_free((char *) config->plugin_dir);
         l_free(config);

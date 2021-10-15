@@ -17,6 +17,7 @@ mptcpd \- multipath TCP daemon
 .BI [\-\-notify\-flags= FLAGS ]
 .BI [\-\-plugin\-dir= DIR ]
 .BI [\-\-path\-manager= PLUGIN ]
+.BI [\-\-load\-plugins= PLUGINS ]
 .OP \-\-help
 .OP \-\-usage
 .BI [\-\-log= DEST ]
@@ -114,6 +115,12 @@ set plugin directory to
 set default path manager plugin to
 .IR PLUGIN ,
 overriding plugin priorities
+
+.TP
+.BI \-\-load\-plugins= PLUGINS
+set plugins to load on startup, where
+.I PLUGINS ,
+is a comma separated list containing one or more plugin names.
 
 .TP
 .BR \-V , \-\-version
