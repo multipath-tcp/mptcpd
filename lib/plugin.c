@@ -332,7 +332,7 @@ static int load_plugins(char const *dir,
                                                            dir,
                                                            plugin_name);
 
-                        if (access(path, F_OK) == 0)
+                        if (access(path, R_OK) == 0)
                                 load_plugin(path);
                         else
                                 l_warn("Plugin %s does not exist.",
