@@ -323,7 +323,8 @@ static int load_plugins(char const *dir,
         if (plugins_to_load) {
 
                 struct l_queue_entry const *entry = 
-                        l_queue_get_entries(plugins_to_load);
+                        l_queue_get_entries(
+                                (struct l_queue *) plugins_to_load);
 
                 while (entry) {
                         char *plugin_name = (char *) entry->data;
