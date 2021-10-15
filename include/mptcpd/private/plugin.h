@@ -14,6 +14,7 @@
 
 #include <mptcpd/export.h>
 #include <mptcpd/types.h>
+#include <ell/queue.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,16 +31,18 @@ struct mptcpd_interface;
 /**
  * @brief Load mptcpd plugins.
  *
- * @param[in] dir          Directory from which plugins will be loaded.
- * @param[in] default_name Name of plugin to be considered the
- *                         default.
- * @param[in] pm           Opaque pointer to mptcpd path manager
- *                         object.
+ * @param[in] dir             Directory from which plugins will be loaded.
+ * @param[in] default_name    Name of plugin to be considered the
+ *                            default.
+ * @param[in] plugins_to_load List of plugins to be loaded.
+ * @param[in] pm              Opaque pointer to mptcpd path manager
+ *                            object.
  *
  * @return @c true on successful load, @c false otherwise.
  */
 MPTCPD_API bool mptcpd_plugin_load(char const *dir,
                                    char const *default_name,
+                                   struct l_queue const *plugins_to_load,
                                    struct mptcpd_pm *pm);
 
 /**

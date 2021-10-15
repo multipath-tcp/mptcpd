@@ -63,6 +63,9 @@ struct mptcpd_config
          * MPTCP connection.
          */
         char const *default_plugin;
+
+        /// A list of plugins to load.
+        struct l_queue const *plugins_to_load;
 };
 
 /**
