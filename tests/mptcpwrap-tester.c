@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <netdb.h>
+#include <errno.h>
 
 
 struct socket_data
@@ -52,7 +54,26 @@ static bool verify_protocol(int fd, bool expect_mptcp)
 static void test_socket_data(struct socket_data const *data)
 {
         int const fd = socket(data->domain, data->type, data->protocol);
-        assert(fd != -1);
+
+        if (fd == -1) {
+                if (errno == EPROTONOSUPPORT) {
+                        struct protoent const *const p =
+                                getprotobynumber(data->protocol);
+
+                        fprintf(stderr,
+                                "WARNING: Ignoring unsupported "
+                                "protocol: %d - %s\n",
+                                data->protocol,
+                                p->p_name);
+
+                        return;
+                }
+
+                fprintf(stderr,
+                        "socket() call failed unexpectedly.\n");
+
+                exit(EXIT_FAILURE);
+        }
 
         bool const verified = verify_protocol(fd, data->expect_mptcp);
 
