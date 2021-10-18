@@ -10,14 +10,8 @@
 #ifndef MPTCPD_NETLINK_PM_H
 #define MPTCPD_NETLINK_PM_H
 
-#include <stdbool.h>
-
 #include <mptcpd/private/netlink_pm.h>
-#include <mptcpd/types.h>
 
-
-struct mptcpd_pm;
-struct sockaddr;
 
 /// Get MPTCP generic netlink path manager characteristics.
 struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm(void);
@@ -165,7 +159,6 @@ int netlink_pm_set_backup(uint8_t cmd,
                           struct sockaddr const *remote_addr,
                           bool backup);
 //@}
-
 
 #endif /* MPTCPD_NETLINK_PM_H */
 
