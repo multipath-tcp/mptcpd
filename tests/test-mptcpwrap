@@ -7,4 +7,6 @@
 
 set -e
 
-LD_PRELOAD=../src/.libs/libmptcpwrap.so ./mptcpwrap-tester
+LD_PRELOAD=../src/.libs/libmptcpwrap.so \
+MPTCPWRAP_DEBUG=1 \
+./mptcpwrap-tester
