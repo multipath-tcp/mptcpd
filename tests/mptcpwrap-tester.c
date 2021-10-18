@@ -70,7 +70,7 @@ static void test_socket_data(struct socket_data const *data)
                 }
 
                 fprintf(stderr,
-                        "socket() call failed unexpectedly.\n");
+                        "ERROR: socket() call failed unexpectedly.\n");
 
                 exit(EXIT_FAILURE);
         }
