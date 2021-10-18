@@ -15,6 +15,8 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 
@@ -49,12 +51,6 @@ static bool verify_protocol(int fd, bool expect_mptcp)
 
 static void test_socket_data(struct socket_data const *data)
 {
-        /*
-          libmptcpwrap.so should be preloaded when running this
-          program, e.g.:
-
-          LD_PRELOAD=libmptcpwrap.so ./mptcpwrap-tester
-        */
         int const fd = socket(data->domain, data->type, data->protocol);
         assert(fd != -1);
 
@@ -67,6 +63,16 @@ static void test_socket_data(struct socket_data const *data)
 
 int main()
 {
+        /*
+          libmptcpwrap.so should be preloaded when running this
+          program, e.g.:
+
+          LD_PRELOAD=libmptcpwrap.so ./mptcpwrap-tester
+        */
+        char const *const LD_PRELOAD = getenv("LD_PRELOAD");
+        assert(LD_PRELOAD != NULL);
+        assert(strstr(LD_PRELOAD, "libmptcpwrap.so") != NULL);
+
         /*
           MPTCP is only injected when using the SOCK_STREAM socket
           type and a protocol value of 0 or IPPROTO_TCP.
