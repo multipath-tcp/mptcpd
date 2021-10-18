@@ -50,6 +50,7 @@ tests/test-commands
 tests/test-configuration
 tests/test-cxx-build
 tests/test-id-manager
+tests/test-sockaddr
 tests/mptcpwrap-tester
 tests/*.log
 tests/*.trs

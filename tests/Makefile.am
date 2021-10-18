@@ -26,7 +26,9 @@ check_PROGRAMS =		\
 	test-path-manager	\
 	test-commands		\
 	test-configuration	\
-	test-id-manager
+	test-id-manager		\
+	test-sockaddr
+
 
 noinst_PROGRAMS = mptcpwrap-tester
 
@@ -94,6 +96,13 @@ test_configuration_LDADD =			\
 test_id_manager_SOURCES = test-id-manager.c
 test_id_manager_LDADD =				\
 	$(top_builddir)/lib/libmptcpd.la	\
+	$(ELL_LIBS)				\
+	$(CODE_COVERAGE_LIBS)
+
+test_sockaddr_SOURCES = test-sockaddr.c
+test_sockaddr_LDADD =				\
+	$(top_builddir)/lib/libmptcpd.la	\
+	$(builddir)/lib/libmptcpd_test.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
 
