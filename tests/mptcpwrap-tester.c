@@ -15,6 +15,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 
 struct socket_data
@@ -80,11 +81,13 @@ int main()
                 { AF_INET6, SOCK_STREAM, IPPROTO_TCP,  true  }
         };
 
-        static struct socket_data const *const end =
-                data + (sizeof(data) / sizeof(data[0]));
+        static size_t const len = sizeof(data) / sizeof(data[0]);
 
-        for (struct socket_data const *d = data; d != end; ++d)
-                test_socket_data(d);
+        for (size_t i = 0; i < len; ++i) {
+                fprintf(stderr, "Test case %zu: ", i);
+                test_socket_data(&data[i]);
+                fprintf(stderr, "PASS\n");
+        }
 
         return 0;
 }
