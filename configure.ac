@@ -108,6 +108,20 @@ AC_DEFINE_UNQUOTED([MPTCPD_LOGGER],
                    [Log message destination.])
 AC_SUBST([mptcpd_logger],[$enable_logging])
 
+# Allow the user to choose support for either the upstream or
+# multipath-tcp.org kernel.
+AC_ARG_WITH([kernel],
+     [AS_HELP_STRING([--with-kernel[=KERNEL]],
+                     [Support a specific MPTCP capable kernel
+                      (upstream, multipath-tcp.org, auto)
+                      @<:@default=auto@:>@])],
+     [AS_CASE([$withval],
+              [upstream | multipath-tcp.org | auto],
+              [with_kernel=$withval],
+              [AC_MSG_ERROR([invalid MPTCP capable kernel: $withval])])],
+     [with_kernel=auto])
+AM_CONDITIONAL([HAVE_UPSTREAM_KERNEL], [test "x$with_kernel" = "xupstream"])
+
 # Allow the user to set the default path manager plugin at 'configure-time'.
 AC_ARG_WITH([path-manager],
      [AS_HELP_STRING([--with-path-manager[=PLUGIN]],
@@ -213,12 +227,17 @@ AC_CHECK_HEADERS([linux/mptcp.h],
                          [AC_DEFINE([HAVE_LINUX_MPTCP_H_UPSTREAM_EVENTS],
                                     [1])
                          ])
+         AS_IF([test "x$with_kernel" = "xauto"],
+               [AM_CONDITIONAL([HAVE_UPSTREAM_KERNEL], [true])])
         ],
         [
          AX_CHECK_DEFINE(
              [linux/mptcp.h],
              [MPTCP_GENL_NAME],
-             [AC_DEFINE([HAVE_LINUX_MPTCP_H_MPTCP_ORG], [1])],
+             [AC_DEFINE([HAVE_LINUX_MPTCP_H_MPTCP_ORG], [1])
+              AS_IF([test "x$with_kernel" = "xauto"],
+                    [AM_CONDITIONAL([HAVE_UPSTREAM_KERNEL], [false])])
+             ],
              [AC_MSG_ERROR([Discrepancy in <linux/mptcp.h>.])])
         ])
    ],
