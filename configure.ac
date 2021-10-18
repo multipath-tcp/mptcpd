@@ -120,7 +120,6 @@ AC_ARG_WITH([kernel],
               [with_kernel=$withval],
               [AC_MSG_ERROR([invalid MPTCP capable kernel: $withval])])],
      [with_kernel=auto])
-AM_CONDITIONAL([HAVE_UPSTREAM_KERNEL], [test "x$with_kernel" = "xupstream"])
 
 # Allow the user to set the default path manager plugin at 'configure-time'.
 AC_ARG_WITH([path-manager],
@@ -228,7 +227,7 @@ AC_CHECK_HEADERS([linux/mptcp.h],
                                     [1])
                          ])
          AS_IF([test "x$with_kernel" = "xauto"],
-               [AM_CONDITIONAL([HAVE_UPSTREAM_KERNEL], [true])])
+               [with_kernel=upstream])
         ],
         [
          AX_CHECK_DEFINE(
@@ -236,12 +235,18 @@ AC_CHECK_HEADERS([linux/mptcp.h],
              [MPTCP_GENL_NAME],
              [AC_DEFINE([HAVE_LINUX_MPTCP_H_MPTCP_ORG], [1])
               AS_IF([test "x$with_kernel" = "xauto"],
-                    [AM_CONDITIONAL([HAVE_UPSTREAM_KERNEL], [false])])
+                    [with_kernel=multipath-tcp.org])
              ],
              [AC_MSG_ERROR([Discrepancy in <linux/mptcp.h>.])])
         ])
    ],
-   [AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])])
+   [AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])
+    AS_IF([test "x$with_kernel" = "xauto"],
+          [with_kernel=upstream])
+   ])
+
+AM_CONDITIONAL([HAVE_UPSTREAM_KERNEL],
+               [test "x$with_kernel" = "xupstream"])
 
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.
