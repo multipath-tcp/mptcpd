@@ -1,0 +1,25 @@
+name: multipath-tcp.org kernel
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: dependencies
+      run: sudo apt-get -y install autoconf-archive libell-dev
+    - name: bootstrap
+      run: ./bootstrap
+    - name: configure
+      run: ./configure --with-kernel=multipath-tcp.org
+    - name: make
+      run: make
+    - name: make distcheck
+      run: make distcheck
