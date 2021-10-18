@@ -12,6 +12,11 @@
 
 #include <mptcpd/private/netlink_pm.h>
 
+#include <mptcpd/types.h>
+
+
+struct sockaddr;
+struct mptcpd_pm;
 
 /// Get MPTCP generic netlink path manager characteristics.
 struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm(void);
