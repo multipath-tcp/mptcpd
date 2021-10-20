@@ -20,6 +20,7 @@
 #include <ell/log.h>
 
 #include "commands.h"
+#include "netlink_pm.h"
 
 #include <mptcpd/private/mptcp_org.h>
 #include <mptcpd/private/netlink_pm.h>
@@ -569,8 +570,18 @@ static struct mptcpd_netlink_pm const npm = {
         .cmd_ops = &cmd_ops
 };
 
-struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm_mptcp_org(void)
+struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm(void)
 {
+        l_debug(PACKAGE " was built with support for the "
+                "multipath-tcp.org kernel.");
+
+        static char const path[] = MPTCP_SYSCTL_VARIABLE(mptcp_enabled);
+        static char const name[] = "mptcp_enabled";
+        static int  const enable_val = 2;  // or 1
+
+        if (!mptcpd_is_kernel_mptcp_enabled(path, name, enable_val))
+                return NULL;
+
         check_kernel_mptcp_path_manager();
 
         return &npm;

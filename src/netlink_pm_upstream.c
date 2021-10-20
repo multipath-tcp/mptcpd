@@ -39,27 +39,28 @@
 #endif
 
 
-
 static int upstream_cmd_announce(struct mptcpd_pm *pm,
                                  struct sockaddr const *addr,
                                  mptcpd_aid_t id,
                                  mptcpd_token_t token)
 {
-        return netlink_pm_add_addr(MPTCP_CMD_ANNOUNCE,
-                                   pm,
-                                   addr,
-                                   id,
-                                   token);
+        (void) pm;
+        (void) addr;
+        (void) id;
+        (void) token;
+
+        return -ENOTSUP;
 }
 
 static int upstream_cmd_remove(struct mptcpd_pm *pm,
                                mptcpd_aid_t address_id,
                                mptcpd_token_t token)
 {
-        return netlink_pm_remove_addr(MPTCP_CMD_REMOVE,
-                                      pm,
-                                      address_id,
-                                      token);
+        (void) pm;
+        (void) address_id;
+        (void) token;
+
+        return -ENOTSUP;
 }
 
 static int upstream_add_subflow(struct mptcpd_pm *pm,
@@ -70,14 +71,15 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
                                 struct sockaddr const *remote_addr,
                                 bool backup)
 {
-        return netlink_pm_add_subflow(MPTCP_CMD_SUB_CREATE,
-                                      pm,
-                                      token,
-                                      local_address_id,
-                                      remote_address_id,
-                                      local_addr,
-                                      remote_addr,
-                                      backup);
+        (void) pm;
+        (void) token;
+        (void) local_address_id;
+        (void) remote_address_id;
+        (void) local_addr;
+        (void) remote_addr;
+        (void) backup;
+
+        return -ENOTSUP;
 }
 
 static int upstream_remove_subflow(struct mptcpd_pm *pm,
@@ -85,11 +87,12 @@ static int upstream_remove_subflow(struct mptcpd_pm *pm,
                                    struct sockaddr const *local_addr,
                                    struct sockaddr const *remote_addr)
 {
-        return netlink_pm_remove_subflow(MPTCP_CMD_SUB_DESTROY,
-                                         pm,
-                                         token,
-                                         local_addr,
-                                         remote_addr);
+        (void) pm;
+        (void) token;
+        (void) local_addr;
+        (void) remote_addr;
+
+        return -ENOTSUP;
 }
 
 static int upstream_set_backup(struct mptcpd_pm *pm,
@@ -98,12 +101,13 @@ static int upstream_set_backup(struct mptcpd_pm *pm,
                                struct sockaddr const *remote_addr,
                                bool backup)
 {
-        return netlink_pm_set_backup(MPTCP_CMD_SUB_PRIORITY,
-                                     pm,
-                                     token,
-                                     local_addr,
-                                     remote_addr,
-                                     backup);
+        (void) pm;
+        (void) token;
+        (void) local_addr;
+        (void) remote_addr;
+        (void) backup;
+
+        return -ENOTSUP;
 }
 
 // --------------------------------------------------------------
@@ -805,8 +809,15 @@ static struct mptcpd_netlink_pm const npm = {
         .kcmd_ops = &kcmd_ops
 };
 
-struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm_upstream(void)
+struct mptcpd_netlink_pm const *mptcpd_get_netlink_pm(void)
 {
+        static char const path[] = MPTCP_SYSCTL_VARIABLE(enabled);
+        static char const name[] = "enabled";
+        static int  const enable_val = 1;
+
+        if (!mptcpd_is_kernel_mptcp_enabled(path, name, enable_val))
+                return NULL;
+
         return &npm;
 }
 
