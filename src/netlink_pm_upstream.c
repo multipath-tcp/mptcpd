@@ -49,7 +49,7 @@ static int upstream_cmd_announce(struct mptcpd_pm *pm,
         (void) id;
         (void) token;
 
-        return -ENOTSUP;
+        return ENOTSUP;
 }
 
 static int upstream_cmd_remove(struct mptcpd_pm *pm,
@@ -60,7 +60,7 @@ static int upstream_cmd_remove(struct mptcpd_pm *pm,
         (void) address_id;
         (void) token;
 
-        return -ENOTSUP;
+        return ENOTSUP;
 }
 
 static int upstream_add_subflow(struct mptcpd_pm *pm,
@@ -79,7 +79,7 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
         (void) remote_addr;
         (void) backup;
 
-        return -ENOTSUP;
+        return ENOTSUP;
 }
 
 static int upstream_remove_subflow(struct mptcpd_pm *pm,
@@ -92,7 +92,7 @@ static int upstream_remove_subflow(struct mptcpd_pm *pm,
         (void) local_addr;
         (void) remote_addr;
 
-        return -ENOTSUP;
+        return ENOTSUP;
 }
 
 static int upstream_set_backup(struct mptcpd_pm *pm,
@@ -107,7 +107,7 @@ static int upstream_set_backup(struct mptcpd_pm *pm,
         (void) remote_addr;
         (void) backup;
 
-        return -ENOTSUP;
+        return ENOTSUP;
 }
 
 // --------------------------------------------------------------
