@@ -248,6 +248,11 @@ AC_CHECK_HEADERS([linux/mptcp.h],
 AM_CONDITIONAL([HAVE_UPSTREAM_KERNEL],
                [test "x$with_kernel" = "xupstream"])
 
+AH_TEMPLATE([HAVE_UPSTREAM_KERNEL],
+            [Define to 1 if mptcpd should support the upstream kernel.])
+AS_IF([test "x$with_kernel" = "xupstream"],
+      [AC_DEFINE([HAVE_UPSTREAM_KERNEL])])
+
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.
 # ---------------------------------------------------------------
