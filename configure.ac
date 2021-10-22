@@ -251,7 +251,9 @@ AM_CONDITIONAL([HAVE_UPSTREAM_KERNEL],
 AH_TEMPLATE([HAVE_UPSTREAM_KERNEL],
             [Define to 1 if mptcpd should support the upstream kernel.])
 AS_IF([test "x$with_kernel" = "xupstream"],
-      [AC_DEFINE([HAVE_UPSTREAM_KERNEL])])
+      [AC_DEFINE([HAVE_UPSTREAM_KERNEL])
+       AC_MSG_NOTICE([Building support for upstream kernel.])],
+      [AC_MSG_NOTICE([Building support for multipath-tcp.org kernel.])])
 
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.
