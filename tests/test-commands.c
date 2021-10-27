@@ -28,6 +28,7 @@
 
 #include <mptcpd/path_manager.h>
 #include <mptcpd/addr_info.h>
+#include <mptcpd/id_manager.h>
 
 
 // -------------------------------------------------------------------
@@ -35,6 +36,14 @@
 struct test_info
 {
         char const *const family_name;
+
+        struct mptcpd_pm *const pm;
+
+        // ID used for kernel add_addr and dump_addr calls.
+        mptcpd_aid_t id;
+
+        // Address used for kernel add_addr and dump_addr calls.
+        struct sockaddr const *addr;
 
         bool tests_called;
 };
@@ -89,7 +98,7 @@ static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
 static void get_addr_callback(struct mptcpd_addr_info const *info,
                               void *user_data)
 {
-        mptcpd_aid_t const id = L_PTR_TO_UINT(user_data);
+        struct test_info *const tinfo = (struct test_info *) user_data;
 
         /**
          * @bug We could have a resource leak in the kernel here if
@@ -98,17 +107,16 @@ static void get_addr_callback(struct mptcpd_addr_info const *info,
          *      end up not being removed prior to test exit.
          */
         assert(info != NULL);
-        assert(mptcpd_addr_info_get_id(info) == id);
 
-        struct sockaddr const *const addr = laddr1;
-        assert(sockaddr_is_equal(addr,
-                                 mptcpd_addr_info_get_addr(info)));
+        assert(mptcpd_addr_info_get_id(info) == tinfo->id);
+        assert(sockaddr_is_equal(tinfo->addr,
+                                 (struct sockaddr *) &info->addr));
 }
 
 static void dump_addrs_callback(struct mptcpd_addr_info const *info,
                                 void *user_data)
 {
-        mptcpd_aid_t const id = L_PTR_TO_UINT(user_data);
+        struct test_info *const tinfo = (struct test_info *) user_data;
 
         /**
          * @bug We could have a resource leak in the kernel here if
@@ -117,11 +125,13 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
          *      end up not being removed prior to test exit.
          */
         assert(info != NULL);
-        assert(mptcpd_addr_info_get_id(info) == id);
 
-        struct sockaddr const *const addr = laddr1;
-        assert(sockaddr_is_equal(addr,
-                                 mptcpd_addr_info_get_addr(info)));
+        // Other IDs unrelated to this test could already exist.
+        if (mptcpd_addr_info_get_id(info) != tinfo->id)
+                return;
+
+        assert(sockaddr_is_equal(tinfo->addr,
+                                 (struct sockaddr *) &info->addr));
 }
 
 static void dump_addrs_complete(void *user_data)
@@ -140,10 +150,10 @@ static void get_limits_callback(struct mptcpd_limit const *limits,
 
         if (geteuid() != 0) {
                 /*
-                  if the current user is not root, the previous set_limit()
-                  call is failied with ENOPERM, but libell APIs don't
-                  allow reporting such error to the caller.
-                  Just assume set_limits has no effect
+                  If the current user is not root, the previous
+                  set_limits() call is fails with ENOPERM, but libell
+                  APIs don't allow reporting such error to the caller.
+                  Just assume set_limits() has no effect.
                 */
                 addrs_limit = 0;
                 subflows_limit = 0;
@@ -176,10 +186,13 @@ static void get_limits_callback(struct mptcpd_limit const *limits,
 
 static void test_add_addr(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
+
+        struct mptcpd_idm *const idm  = mptcpd_pm_get_idm(pm);
 
         // Client-oriented path manager.
         int result = mptcpd_pm_add_addr(pm,
@@ -191,12 +204,15 @@ static void test_add_addr(void const *test_data)
 
 
         // In-kernel (server-oriented) path manager.
+        info->addr = laddr1;
+        info->id   = mptcpd_idm_get_id(idm, info->addr);
+
         uint32_t flags = 0;
         int index = 0;
 
         result = mptcpd_kpm_add_addr(pm,
-                                     laddr1,
-                                     test_laddr_id_1,
+                                     info->addr,
+                                     info->id,
                                      flags,
                                      index);
 
@@ -205,7 +221,8 @@ static void test_add_addr(void const *test_data)
 
 static void test_remove_addr(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
@@ -218,43 +235,40 @@ static void test_remove_addr(void const *test_data)
         assert(result == 0 || result == ENOTSUP);
 
         // In-kernel (server-oriented) path manager.
-        result = mptcpd_kpm_remove_addr(pm, test_laddr_id_1);
+        result = mptcpd_kpm_remove_addr(pm, info->id);
 
         assert(result == 0 || result == ENOTSUP);
 }
 
 static void test_get_addr(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        mptcpd_aid_t const id = test_laddr_id_1;
-
         int const result =
                 mptcpd_kpm_get_addr(pm,
-                                    id,
+                                    info->id,
                                     get_addr_callback,
-                                    L_UINT_TO_PTR(id),
-                                    NULL);
+                                    info,NULL);
 
         assert(result == 0 || result == ENOTSUP);
 }
 
 static void test_dump_addrs(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
 
-        mptcpd_aid_t const id = test_laddr_id_1;
-
         int const result =
                 mptcpd_kpm_dump_addrs(pm,
                                       dump_addrs_callback,
-                                      L_UINT_TO_PTR(id),
+                                      info,
                                       dump_addrs_complete);
 
         assert(result == 0 || result == ENOTSUP);
@@ -262,7 +276,8 @@ static void test_dump_addrs(void const *test_data)
 
 static void test_flush_addrs(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
@@ -457,25 +472,26 @@ int main(void)
         assert(pm);
 
         struct test_info info = {
-                .family_name = tests_get_pm_family_name()
+                .family_name = tests_get_pm_family_name(),
+                .pm = pm
         };
 
         assert(info.family_name);
 
         l_test_init(&argc, &args);
 
-        l_test_add("add_addr",       test_add_addr,       pm);
-        l_test_add("get_addr",       test_get_addr,       pm);
-        l_test_add("dump_addrs",     test_dump_addrs,     pm);
-        l_test_add("flush_addrs",    test_flush_addrs,    pm);
-        l_test_add("remove_addr",    test_remove_addr,    pm);
-        l_test_add("set_limits",     test_set_limits,     pm);
-        l_test_add("get_limits",     test_get_limits,     pm);
-        l_test_add("set_flags",      test_set_flags,      pm);
-        l_test_add("add_subflow",    test_add_subflow,    pm);
-        l_test_add("set_backup",     test_set_backup,     pm);
-        l_test_add("remove_subflow", test_remove_subflow, pm);
-        l_test_add("get_nm",         test_get_nm,         pm);
+        l_test_add("add_addr",       test_add_addr,       &info);
+        l_test_add("get_addr",       test_get_addr,       &info);
+        l_test_add("dump_addrs",     test_dump_addrs,     &info);
+        l_test_add("flush_addrs",    test_flush_addrs,    &info);
+        l_test_add("remove_addr",    test_remove_addr,    &info);
+        l_test_add("set_limits",     test_set_limits,     &info);
+        l_test_add("get_limits",     test_get_limits,     &info);
+        l_test_add("set_flags",      test_set_flags,      &info);
+        l_test_add("add_subflow",    test_add_subflow,    &info);
+        l_test_add("set_backup",     test_set_backup,     &info);
+        l_test_add("remove_subflow", test_remove_subflow, &info);
+        l_test_add("get_nm",         test_get_nm,         &info);
 
         /*
           Prepare to run the path management generic netlink command
