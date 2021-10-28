@@ -349,11 +349,14 @@ MPTCPD_API struct mptcpd_nm const *
 mptcpd_pm_get_nm(struct mptcpd_pm const *pm);
 
 /**
- * @brief Get pointer to the underlying MPTCP address ID manager.
+ * @brief Get pointer to the global MPTCP address ID manager.
  *
- * @param[in] pm Mptcpd path manager.
+ * @param[in] pm Mptcpd path manager data.
  *
- * @return Mptcpd MPTCP address ID manager.
+ * @note The global MPTCP address ID manager is meant to track address
+ *       IDs associated with the in-kernel path manager.
+ *
+ * @return Global mptcpd MPTCP address ID manager.
  */
 MPTCPD_API struct mptcpd_idm *
 mptcpd_pm_get_idm(struct mptcpd_pm const *pm);
