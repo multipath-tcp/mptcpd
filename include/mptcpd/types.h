@@ -109,11 +109,47 @@ struct mptcpd_limit
  * @param[in]     info          Network address information.  @c NULL
  *                              on error.
  * @param[in,out] callback_data Data provided by the caller of
- *                              @c mptcpd_pm_get_addr() or
- *                              @c mptcpd_pm_dump_addrs().
+ *                              @c mptcpd_kpm_get_addr() or
+ *                              @c mptcpd_kpm_dump_addrs().
  */
-typedef void (*mptcpd_pm_get_addr_cb)(struct mptcpd_addr_info const *info,
-                                      void *callback_data);
+typedef void (*mptcpd_kpm_get_addr_cb_t)(
+        struct mptcpd_addr_info const *info,
+        void *callback_data);
+
+/**
+ * @brief Type of function called when an address is available.
+ *
+ * @deprecated Use @c mptcpd_pm_get_addr_cb_t instead.
+ */
+typedef mptcpd_kpm_get_addr_cb_t
+        mptcpd_pm_get_addr_cb __attribute__((deprecated));
+
+/**
+ * @brief Type of function called on asynchronous call completion.
+ *
+ * The mptcpd path manager API has several functions that complete
+ * asynchronously.  Those functions accept a parameter of this type to
+ * allow the caller to be notified of completion of the asynchronous
+ * functions.
+ *
+ * Functions of this type differ from user provided callbacks that are
+ * called when asynchronous results are available in that this type of
+ * function is called regardless of whether or not asynchronous
+ * results are available.  Furthermore, they are only called once at
+ * the very end of the asynchronous call, whereas those called upon
+ * availability of results may be called multiple times for a single
+ * asynchronous call, such as the case @c mptcpd_pm_dump_addrs().
+ *
+ * Functions of this type are suitable for deallocating dynamically
+ * allocated user_data passed to asynchronous calls, for example.
+ *
+ * @param [in,out] user_data Data provided the user at the time of the
+ *                           asynchronous call.
+ */
+typedef void (*mptcpd_complete_func_t)(void *user_data);
+
+/// Type of function called on async path manager call completion.
+typedef mptcpd_complete_func_t mptcpd_pm_complete_func_t;
 
 /**
  * @brief Type of function called when MPTCP resource limits are
