@@ -117,14 +117,6 @@ typedef void (*mptcpd_kpm_get_addr_cb_t)(
         void *callback_data);
 
 /**
- * @brief Type of function called when an address is available.
- *
- * @deprecated Use @c mptcpd_pm_get_addr_cb_t instead.
- */
-typedef mptcpd_kpm_get_addr_cb_t
-        mptcpd_pm_get_addr_cb __attribute__((deprecated));
-
-/**
  * @brief Type of function called on asynchronous call completion.
  *
  * The mptcpd path manager API has several functions that complete
