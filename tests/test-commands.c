@@ -227,7 +227,8 @@ static void test_get_addr(void const *test_data)
                 mptcpd_kpm_get_addr(pm,
                                     id,
                                     get_addr_callback,
-                                    L_UINT_TO_PTR(id));
+                                    L_UINT_TO_PTR(id),
+                                    NULL);
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -244,7 +245,8 @@ static void test_dump_addrs(void const *test_data)
         int const result =
                 mptcpd_kpm_dump_addrs(pm,
                                       dump_addrs_callback,
-                                      L_UINT_TO_PTR(id));
+                                      L_UINT_TO_PTR(id),
+                                      NULL);
 
         assert(result == 0 || result == ENOTSUP);
 }
