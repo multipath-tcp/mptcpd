@@ -42,13 +42,12 @@ struct mptcpd_netlink_pm
         struct mptcpd_kpm_cmd_ops const *const kcmd_ops;
 };
 
-
-#endif /* MPTCPD_PRIVATE_NETLINK_PM_H */
-
 #ifdef __cplusplus
 }
 #endif
 
+
+#endif /* MPTCPD_PRIVATE_NETLINK_PM_H */
 
 /*
   Local Variables:
