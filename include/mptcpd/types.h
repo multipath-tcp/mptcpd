@@ -149,7 +149,7 @@ typedef mptcpd_kpm_get_addr_cb_t
 typedef void (*mptcpd_complete_func_t)(void *user_data);
 
 /// Type of function called on async path manager call completion.
-typedef mptcpd_complete_func_t mptcpd_pm_complete_func_t;
+typedef mptcpd_complete_func_t mptcpd_kpm_complete_func_t;
 
 /**
  * @brief Type of function called when MPTCP resource limits are
