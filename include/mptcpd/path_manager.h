@@ -267,7 +267,7 @@ MPTCPD_API int mptcpd_kpm_remove_addr(struct mptcpd_pm *pm,
  */
 MPTCPD_API int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
                                    mptcpd_aid_t id,
-                                   mptcpd_pm_get_addr_cb callback,
+                                   mptcpd_kpm_get_addr_cb_t callback,
                                    void *data);
 
 /**
@@ -282,7 +282,7 @@ MPTCPD_API int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_kpm_dump_addrs(struct mptcpd_pm *pm,
-                                     mptcpd_pm_get_addr_cb callback,
+                                     mptcpd_kpm_get_addr_cb_t callback,
                                      void *data);
 
 /**

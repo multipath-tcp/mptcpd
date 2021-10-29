@@ -120,7 +120,7 @@ int mptcpd_kpm_remove_addr(struct mptcpd_pm *pm, mptcpd_aid_t address_id)
 
 int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
                         mptcpd_aid_t id,
-                        mptcpd_pm_get_addr_cb callback,
+                        mptcpd_kpm_get_addr_cb_t callback,
                         void *data)
 {
         if (pm == NULL || id == 0 || callback == NULL)
@@ -139,7 +139,7 @@ int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
 }
 
 int mptcpd_kpm_dump_addrs(struct mptcpd_pm *pm,
-                          mptcpd_pm_get_addr_cb callback,
+                          mptcpd_kpm_get_addr_cb_t callback,
                           void *data)
 {
         if (pm == NULL || callback == NULL)
