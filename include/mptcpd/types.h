@@ -103,8 +103,8 @@ struct mptcpd_limit
  * @brief Type of function called when an address is available.
  *
  * The mptcpd path manager will call a function of this type when
- * the result of calling @c mptcpd_pm_get_addr() or
- * @c mptcpd_pm_dump_addrs() is available.
+ * the result of calling @c mptcpd_kpm_get_addr() or
+ * @c mptcpd_kpm_dump_addrs() is available.
  *
  * @param[in]     info          Network address information.  @c NULL
  *                              on error.
@@ -130,7 +130,7 @@ typedef void (*mptcpd_kpm_get_addr_cb_t)(
  * results are available.  Furthermore, they are only called once at
  * the very end of the asynchronous call, whereas those called upon
  * availability of results may be called multiple times for a single
- * asynchronous call, such as the case @c mptcpd_pm_dump_addrs().
+ * asynchronous call, such as the @c mptcpd_kpm_dump_addrs() case.
  *
  * Functions of this type are suitable for deallocating dynamically
  * allocated user_data passed to asynchronous calls, for example.
@@ -148,14 +148,14 @@ typedef mptcpd_complete_func_t mptcpd_kpm_complete_func_t;
  *        available.
  *
  * The mptcpd path manager will call a function of this type when
- * the result of calling @c mptcpd_pm_get_limits() is available.
+ * the result of calling @c mptcpd_kpm_get_limits() is available.
  *
  * @param[in]     limits        Array of MPTCP resource type/limit
  *                              pairs.  @c NULL on error.
  * @param[in]     len           Length of the @a limits array.  Zero
  *                              on error.
  * @param[in,out] callback_data Data provided by the caller of
- *                              @c mptcpd_pm_get_limits().
+ *                              @c mptcpd_kpm_get_limits().
  */
 typedef void (*mptcpd_pm_get_limits_cb)(
         struct mptcpd_limit const *limits,
