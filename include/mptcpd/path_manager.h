@@ -262,13 +262,16 @@ MPTCPD_API int mptcpd_kpm_remove_addr(struct mptcpd_pm *pm,
  *                     corresponding to the given MPTCP address @a id
  *                     has been retrieved.
  * @param[in] data     Data to be passed to the @a callback function.
+ * @param[in] complete Function called when the asynchronous
+ *                     @c get_addr call completes.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
                                    mptcpd_aid_t id,
                                    mptcpd_kpm_get_addr_cb_t callback,
-                                   void *data);
+                                   void *data,
+                                   mptcpd_kpm_complete_func_t complete);
 
 /**
  * @brief Get list (array) of MPTCP network addresses.
@@ -278,12 +281,15 @@ MPTCPD_API int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
  *                     has been retrieved.  This function will be
  *                     called once per dumped network address.
  * @param[in] data     Data to be passed to the @a callback function.
+ * @param[in] complete Function called when the asynchronous
+ *                     @c dump_addrs call completes.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_kpm_dump_addrs(struct mptcpd_pm *pm,
                                      mptcpd_kpm_get_addr_cb_t callback,
-                                     void *data);
+                                     void *data,
+                                     mptcpd_kpm_complete_func_t complete);
 
 /**
  * @brief Flush MPTCP addresses.
