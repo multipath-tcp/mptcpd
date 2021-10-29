@@ -270,14 +270,17 @@ struct mptcpd_kpm_cmd_ops
          *                     retrieved.
          * @param[in] data     Data to be passed to the @a callback
          *                     function.
+         * @param[in] complete Function called when the asynchronous
+         *                     @c get_addr call completes.
          *
          * @return @c 0 if operation was successful. -1 or @c errno
          *         otherwise.
          */
         int (*get_addr)(struct mptcpd_pm *pm,
                         mptcpd_aid_t id,
-                        mptcpd_pm_get_addr_cb callback,
-                        void *data);
+                        mptcpd_kpm_get_addr_cb_t callback,
+                        void *data,
+                        mptcpd_kpm_complete_func_t complete);
 
         /**
          * @brief Dump list of network addresses.
@@ -285,15 +288,20 @@ struct mptcpd_kpm_cmd_ops
          * @param[in] pm       The mptcpd path manager object.
          * @param[in] callback Function to be called when a dump of
          *                     network addresses has been retrieved.
+         *                     This function will only be called when
+         *                     an address dump is available.
          * @param[in] data     Data to be passed to the @a callback
          *                     function.
+         * @param[in] complete Function called when the asynchronous
+         *                     @c dump_addrs call completes.
          *
          * @return @c 0 if operation was successful. -1 or @c errno
          *         otherwise.
          */
         int (*dump_addrs)(struct mptcpd_pm *pm,
-                          mptcpd_pm_get_addr_cb callback,
-                          void *data);
+                          mptcpd_kpm_get_addr_cb_t callback,
+                          void *data,
+                          mptcpd_kpm_complete_func_t complete);
 
         /**
          * @brief Flush MPTCP addresses.
