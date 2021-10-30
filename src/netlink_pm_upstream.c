@@ -58,7 +58,7 @@ struct get_addr_user_callback
          * called once, whereas the above @c get_addr callback may be
          * called multiple times during a @c dump_addrs call.
          */
-        mptcpd_kpm_complete_func_t complete;
+        mptcpd_complete_func_t complete;
 
         /// Callback is for a dump_addrs call.
         bool dump;
@@ -494,7 +494,7 @@ static int upstream_get_addr(struct mptcpd_pm *pm,
                              mptcpd_aid_t address_id,
                              mptcpd_kpm_get_addr_cb_t callback,
                              void *data,
-                             mptcpd_kpm_complete_func_t complete)
+                             mptcpd_complete_func_t complete)
 {
         /*
           Payload (nested):
@@ -542,7 +542,7 @@ static int upstream_get_addr(struct mptcpd_pm *pm,
 static int upstream_dump_addrs(struct mptcpd_pm *pm,
                                mptcpd_kpm_get_addr_cb_t callback,
                                void *data,
-                               mptcpd_kpm_complete_func_t complete)
+                               mptcpd_complete_func_t complete)
 {
         /*
           Payload:

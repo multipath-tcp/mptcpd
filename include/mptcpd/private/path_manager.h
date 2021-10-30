@@ -280,7 +280,7 @@ struct mptcpd_kpm_cmd_ops
                         mptcpd_aid_t id,
                         mptcpd_kpm_get_addr_cb_t callback,
                         void *data,
-                        mptcpd_kpm_complete_func_t complete);
+                        mptcpd_complete_func_t complete);
 
         /**
          * @brief Dump list of network addresses.
@@ -301,7 +301,7 @@ struct mptcpd_kpm_cmd_ops
         int (*dump_addrs)(struct mptcpd_pm *pm,
                           mptcpd_kpm_get_addr_cb_t callback,
                           void *data,
-                          mptcpd_kpm_complete_func_t complete);
+                          mptcpd_complete_func_t complete);
 
         /**
          * @brief Flush MPTCP addresses.

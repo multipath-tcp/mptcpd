@@ -122,7 +122,7 @@ int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
                         mptcpd_aid_t id,
                         mptcpd_kpm_get_addr_cb_t callback,
                         void *data,
-                        mptcpd_kpm_complete_func_t complete)
+                        mptcpd_complete_func_t complete)
 {
         if (pm == NULL || id == 0 || callback == NULL)
                 return EINVAL;
@@ -142,7 +142,7 @@ int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
 int mptcpd_kpm_dump_addrs(struct mptcpd_pm *pm,
                           mptcpd_kpm_get_addr_cb_t callback,
                           void *data,
-                          mptcpd_kpm_complete_func_t complete)
+                          mptcpd_complete_func_t complete)
 {
         if (pm == NULL || callback == NULL)
                 return EINVAL;
