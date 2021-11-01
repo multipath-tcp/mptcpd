@@ -288,8 +288,9 @@ struct mptcpd_kpm_cmd_ops
          * @param[in] pm       The mptcpd path manager object.
          * @param[in] callback Function to be called when a dump of
          *                     network addresses has been retrieved.
-         *                     This function will only be called when
-         *                     an address dump is available.
+         *                     This function will be called when each
+         *                     address dump is available, or possibly
+         *                     not at all.
          * @param[in] data     Data to be passed to the @a callback
          *                     function.
          * @param[in] complete Function called when the asynchronous

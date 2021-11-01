@@ -279,7 +279,8 @@ MPTCPD_API int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
  * @param[in] pm       The mptcpd path manager object.
  * @param[in] callback Function to be called when a network address
  *                     has been retrieved.  This function will be
- *                     called once per dumped network address.
+ *                     called when each address dump is available, or
+ *                     possibly not at all.
  * @param[in] data     Data to be passed to the @a callback function.
  * @param[in] complete Function called when the asynchronous
  *                     @c dump_addrs call completes.
