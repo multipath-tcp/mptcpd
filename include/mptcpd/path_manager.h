@@ -295,9 +295,9 @@ MPTCPD_API int mptcpd_kpm_dump_addrs(struct mptcpd_pm *pm,
 /**
  * @brief Flush MPTCP addresses.
  *
- * @param[in] pm The mptcpd path manager object.
+ * Purge all MPTCP addresses.
  *
- * @todo Improve documentation.
+ * @param[in] pm The mptcpd path manager object.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
