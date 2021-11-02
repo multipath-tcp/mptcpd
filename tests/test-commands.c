@@ -295,7 +295,8 @@ static void test_flush_addrs(void const *test_data)
 
 static void test_set_limits(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
@@ -309,7 +310,8 @@ static void test_set_limits(void const *test_data)
 
 static void test_get_limits(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
@@ -337,7 +339,8 @@ static void test_set_flags(void const *test_data)
 
 static void test_add_subflow(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
@@ -355,11 +358,11 @@ static void test_add_subflow(void const *test_data)
 
 void test_set_backup(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
-
 
         int const result = mptcpd_pm_set_backup(pm,
                                                 test_token_1,
@@ -372,7 +375,8 @@ void test_set_backup(void const *test_data)
 
 void test_remove_subflow(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
@@ -387,7 +391,8 @@ void test_remove_subflow(void const *test_data)
 
 void test_get_nm(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         assert(mptcpd_pm_get_nm(pm) != NULL);
 }
