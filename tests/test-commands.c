@@ -87,8 +87,8 @@ static void get_addr_callback(struct mptcpd_addr_info const *info,
         /**
          * @bug We could have a resource leak in the kernel here if
          *      the below assert()s are triggered since addresses
-         *      previously added through @c mptcpd_pm_add_addr() would
-         *      end up not being removed prior to test exit.
+         *      previously added through @c mptcpd_kpm_add_addr()
+         *      would end up not being removed prior to test exit.
          */
         assert(info != NULL);
 
@@ -105,8 +105,8 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
         /**
          * @bug We could have a resource leak in the kernel here if
          *      the below assert()s are triggered since addresses
-         *      previously added through @c mptcpd_pm_add_addr() would
-         *      end up not being removed prior to test exit.
+         *      previously added through @c mptcpd_kpm_add_addr()
+         *      would end up not being removed prior to test exit.
          */
         assert(info != NULL);
 
@@ -254,8 +254,8 @@ static void test_flush_addrs(void const *test_data)
         /**
          * @bug We could have a resource leak in the kernel here if
          *      the below assert()s are triggered since addresses
-         *      previously added through @c mptcpd_pm_add_addr() would
-         *      end up not being removed prior to test exit.
+         *      previously added through @c mptcpd_kpm_add_addr()
+         *      would end up not being removed prior to test exit.
          */
         assert(result == 0 || result == ENOTSUP);
 }
