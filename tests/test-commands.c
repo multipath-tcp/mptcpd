@@ -151,7 +151,7 @@ static void get_limits_callback(struct mptcpd_limit const *limits,
         if (geteuid() != 0) {
                 /*
                   If the current user is not root, the previous
-                  set_limits() call is fails with ENOPERM, but libell
+                  set_limits() call fails with ENOPERM, but libell
                   APIs don't allow reporting such error to the caller.
                   Just assume set_limits() has no effect.
                 */
