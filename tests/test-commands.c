@@ -432,11 +432,11 @@ int main(void)
         l_test_add("add_addr",       test_add_addr,       &info);
         l_test_add("get_addr",       test_get_addr,       &info);
         l_test_add("dump_addrs",     test_dump_addrs,     &info);
-        l_test_add("flush_addrs",    test_flush_addrs,    &info);
         l_test_add("remove_addr",    test_remove_addr,    &info);
         l_test_add("set_limits",     test_set_limits,     &info);
         l_test_add("get_limits",     test_get_limits,     &info);
         l_test_add("set_flags",      test_set_flags,      &info);
+        l_test_add("flush_addrs",    test_flush_addrs,    &info);
         l_test_add("add_subflow",    test_add_subflow,    &info);
         l_test_add("set_backup",     test_set_backup,     &info);
         l_test_add("remove_subflow", test_remove_subflow, &info);
