@@ -262,13 +262,16 @@ MPTCPD_API int mptcpd_kpm_remove_addr(struct mptcpd_pm *pm,
  *                     corresponding to the given MPTCP address @a id
  *                     has been retrieved.
  * @param[in] data     Data to be passed to the @a callback function.
+ * @param[in] complete Function called when the asynchronous
+ *                     @c get_addr call completes.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
                                    mptcpd_aid_t id,
-                                   mptcpd_pm_get_addr_cb callback,
-                                   void *data);
+                                   mptcpd_kpm_get_addr_cb_t callback,
+                                   void *data,
+                                   mptcpd_complete_func_t complete);
 
 /**
  * @brief Get list (array) of MPTCP network addresses.
@@ -276,14 +279,18 @@ MPTCPD_API int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
  * @param[in] pm       The mptcpd path manager object.
  * @param[in] callback Function to be called when a network address
  *                     has been retrieved.  This function will be
- *                     called once per dumped network address.
+ *                     called when each address dump is available, or
+ *                     possibly not at all.
  * @param[in] data     Data to be passed to the @a callback function.
+ * @param[in] complete Function called when the asynchronous
+ *                     @c dump_addrs call completes.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_kpm_dump_addrs(struct mptcpd_pm *pm,
-                                     mptcpd_pm_get_addr_cb callback,
-                                     void *data);
+                                     mptcpd_kpm_get_addr_cb_t callback,
+                                     void *data,
+                                     mptcpd_complete_func_t complete);
 
 /**
  * @brief Flush MPTCP addresses.
@@ -349,11 +356,14 @@ MPTCPD_API struct mptcpd_nm const *
 mptcpd_pm_get_nm(struct mptcpd_pm const *pm);
 
 /**
- * @brief Get pointer to the underlying MPTCP address ID manager.
+ * @brief Get pointer to the global MPTCP address ID manager.
  *
- * @param[in] pm Mptcpd path manager.
+ * @param[in] pm Mptcpd path manager data.
  *
- * @return Mptcpd MPTCP address ID manager.
+ * @note The global MPTCP address ID manager is meant to track address
+ *       IDs associated with the in-kernel path manager.
+ *
+ * @return Global mptcpd MPTCP address ID manager.
  */
 MPTCPD_API struct mptcpd_idm *
 mptcpd_pm_get_idm(struct mptcpd_pm const *pm);

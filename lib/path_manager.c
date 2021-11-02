@@ -120,8 +120,9 @@ int mptcpd_kpm_remove_addr(struct mptcpd_pm *pm, mptcpd_aid_t address_id)
 
 int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
                         mptcpd_aid_t id,
-                        mptcpd_pm_get_addr_cb callback,
-                        void *data)
+                        mptcpd_kpm_get_addr_cb_t callback,
+                        void *data,
+                        mptcpd_complete_func_t complete)
 {
         if (pm == NULL || id == 0 || callback == NULL)
                 return EINVAL;
@@ -135,12 +136,13 @@ int mptcpd_kpm_get_addr(struct mptcpd_pm *pm,
         if (ops == NULL || ops->get_addr == NULL)
                 return ENOTSUP;
 
-        return ops->get_addr(pm, id, callback, data);
+        return ops->get_addr(pm, id, callback, data, complete);
 }
 
 int mptcpd_kpm_dump_addrs(struct mptcpd_pm *pm,
-                          mptcpd_pm_get_addr_cb callback,
-                          void *data)
+                          mptcpd_kpm_get_addr_cb_t callback,
+                          void *data,
+                          mptcpd_complete_func_t complete)
 {
         if (pm == NULL || callback == NULL)
                 return EINVAL;
@@ -154,7 +156,7 @@ int mptcpd_kpm_dump_addrs(struct mptcpd_pm *pm,
         if (ops == NULL || ops->dump_addrs == NULL)
                 return ENOTSUP;
 
-        return ops->dump_addrs(pm, callback, data);
+        return ops->dump_addrs(pm, callback, data, complete);
 }
 
 int mptcpd_kpm_flush_addrs(struct mptcpd_pm *pm)

@@ -45,10 +45,20 @@
 struct get_addr_user_callback
 {
         /// User supplied get_addr/dump_addrs callback.
-        mptcpd_pm_get_addr_cb get_addr;
+        mptcpd_kpm_get_addr_cb_t get_addr;
 
         /// User data to be passed to one of the above callback.
         void *data;
+
+        /**
+         * Function to be called upon completion of the
+         * get_addr/dump_addrs call.  This function is called
+         * regardless of whether or not the get_addr/dump_addrs call
+         * asynchronously returns a network address.  It is also only
+         * called once, whereas the above @c get_addr callback may be
+         * called multiple times during a @c dump_addrs call.
+         */
+        mptcpd_complete_func_t complete;
 
         /// Callback is for a dump_addrs call.
         bool dump;
@@ -228,6 +238,16 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
 
         // Pass the results to the user.
         cb->get_addr(&addr, cb->data);
+}
+
+static void get_addr_user_callback_free(void *data)
+{
+        struct get_addr_user_callback *const cb = data;
+
+        if (cb->complete != NULL)
+                cb->complete(cb->data);
+
+        l_free(cb);
 }
 
 static bool append_addr_attr(struct l_genl_msg *msg,
@@ -472,8 +492,9 @@ static int upstream_remove_addr(struct mptcpd_pm *pm,
 
 static int upstream_get_addr(struct mptcpd_pm *pm,
                              mptcpd_aid_t address_id,
-                             mptcpd_pm_get_addr_cb callback,
-                             void *data)
+                             mptcpd_kpm_get_addr_cb_t callback,
+                             void *data,
+                             mptcpd_complete_func_t complete)
 {
         /*
           Payload (nested):
@@ -507,18 +528,21 @@ static int upstream_get_addr(struct mptcpd_pm *pm,
 
         cb->get_addr = callback;
         cb->data     = data;
+        cb->complete = complete;
         cb->dump     = false;
 
-        return l_genl_family_send(pm->family,
-                                  msg,
-                                  get_addr_callback,
-                                  cb,     /* user data */
-                                  l_free  /* destroy */) == 0;
+        return l_genl_family_send(
+                pm->family,
+                msg,
+                get_addr_callback,
+                cb,     /* user data */
+                get_addr_user_callback_free  /* destroy */) == 0;
 }
 
 static int upstream_dump_addrs(struct mptcpd_pm *pm,
-                               mptcpd_pm_get_addr_cb callback,
-                               void *data)
+                               mptcpd_kpm_get_addr_cb_t callback,
+                               void *data,
+                               mptcpd_complete_func_t complete)
 {
         /*
           Payload:
@@ -533,13 +557,15 @@ static int upstream_dump_addrs(struct mptcpd_pm *pm,
 
         cb->get_addr = callback;
         cb->data     = data;
+        cb->complete = complete;
         cb->dump     = true;
 
-        return l_genl_family_dump(pm->family,
-                                  msg,
-                                  get_addr_callback,
-                                  cb,     /* user data */
-                                  l_free  /* destroy */) == 0;
+        return l_genl_family_dump(
+                pm->family,
+                msg,
+                get_addr_callback,
+                cb,     /* user data */
+                get_addr_user_callback_free  /* destroy */) == 0;
 }
 
 static int upstream_flush_addrs(struct mptcpd_pm *pm)

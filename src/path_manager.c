@@ -761,7 +761,8 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
         char addrstr[INET6_ADDRSTRLEN];  // Long enough for both IPv4
                                          // and IPv6 addresses.
 
-        struct mptcpd_idm *const idm = callback_data;
+        struct mptcpd_pm  *const pm  = callback_data;
+        struct mptcpd_idm *const idm = pm->idm;
 
         /**
          * @todo The user would have to perform a similar cast when
@@ -791,8 +792,47 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
                 l_error("ID sync failed: %u | %s", info->id, addrstr);
 }
 
-static void complete_pm_init(struct mptcpd_pm *pm)
+static void notify_pm_ready(void *data, void *user_data)
 {
+        struct pm_ops_info         *const info = data;
+        struct mptcpd_pm_ops const *const ops  = info->ops;
+        struct mptcpd_pm           *const pm   = user_data;
+
+        if (ops->ready)
+                ops->ready(pm, info->user_data);
+}
+
+static void notify_pm_not_ready(void *data, void *user_data)
+{
+        struct pm_ops_info         *const info = data;
+        struct mptcpd_pm_ops const *const ops  = info->ops;
+        struct mptcpd_pm           *const pm   = user_data;
+
+        if (ops->not_ready)
+                ops->not_ready(pm, info->user_data);
+}
+
+static void complete_pm_init(void *data)
+{
+        struct mptcpd_pm *const pm = data;
+
+        /**
+         * @bug Mptcpd plugins should only be loaded once at process
+         *      start.  The @c mptcpd_plugin_load() function only
+         *      loads the functions once, and only reloads after
+         *      @c mptcpd_plugin_unload() is called.
+         */
+        if (!mptcpd_plugin_load(pm->config->plugin_dir,
+                                pm->config->default_plugin,
+                                pm->config->plugins_to_load,
+                                pm)) {
+                l_error("Unable to load path manager plugins.");
+
+                mptcpd_pm_destroy(pm);
+
+                exit(EXIT_FAILURE);
+        }
+
         /*
           Register callbacks for MPTCP generic netlink multicast
           notifications.
@@ -812,63 +852,7 @@ static void complete_pm_init(struct mptcpd_pm *pm)
                        pm->netlink_pm->group);
         }
 
-        /*
-          MPTCP address IDs may already be assigned prior to mptcpd
-          start by other applications or previous runs of mptcpd.
-          Synchronize mptcpd address ID manager with address IDs
-          maintained by the kernel.
-         */
-        if (pm->netlink_pm->kcmd_ops != NULL
-            && pm->netlink_pm->kcmd_ops->dump_addrs != NULL
-            && pm->netlink_pm->kcmd_ops->dump_addrs(pm,
-                                                    dump_addrs_callback,
-                                                    pm->idm) != 0)
-                l_error("Unable to synchronize ID manager with kernel.");
-
-        /**
-         * @todo Register a callback once the kernel MPTCP path
-         *       management generic netlink API supports
-         *       new/removed address notifications so that the mptcpd
-         *       ID manager state can be synchronized with the kernel
-         *       dynamically.
-         */
-
-        /**
-         * @bug Mptcpd plugins should only be loaded once at process
-         *      start.  The @c mptcpd_plugin_load() function only
-         *      loads the functions once, and only reloads after
-         *      @c mptcpd_plugin_unload() is called.
-         */
-        if (!mptcpd_plugin_load(pm->config->plugin_dir,
-                                pm->config->default_plugin,
-                                pm->config->plugins_to_load,
-                                pm)) {
-                l_error("Unable to load path manager plugins.");
-
-                mptcpd_pm_destroy(pm);
-
-                exit(EXIT_FAILURE);
-        }
-}
-
-static void notify_pm_ready(void *data, void *user_data)
-{
-        struct pm_ops_info         *const info = data;
-        struct mptcpd_pm_ops const *const ops  = info->ops;
-        struct mptcpd_pm           *const pm   = user_data;
-
-        if (ops->ready)
-                ops->ready(pm, info->user_data);
-}
-
-static void notify_pm_not_ready(void *data, void *user_data)
-{
-        struct pm_ops_info         *const info = data;
-        struct mptcpd_pm_ops const *const ops  = info->ops;
-        struct mptcpd_pm           *const pm   = user_data;
-
-        if (ops->not_ready)
-                ops->not_ready(pm, info->user_data);
+        l_queue_foreach(pm->event_ops, notify_pm_ready, pm);
 }
 
 /**
@@ -919,9 +903,33 @@ static void family_appeared(struct l_genl_family_info const *info,
 
         pm->family = l_genl_family_new(pm->genl, name);
 
-        complete_pm_init(pm);
+        /*
+          MPTCP address IDs may already be assigned prior to mptcpd
+          start by other applications or previous runs of mptcpd.
+          Synchronize mptcpd address ID manager with address IDs
+          maintained by the kernel.
+         */
+        if (pm->netlink_pm->kcmd_ops != NULL) {
+                if (pm->netlink_pm->kcmd_ops->dump_addrs != NULL
+                    && pm->netlink_pm->kcmd_ops->dump_addrs(
+                            pm,
+                            dump_addrs_callback,
+                            pm,
+                            complete_pm_init) != 0)
+                l_error("Unable to synchronize ID manager with kernel.");
+        } else {
+                // In-kernel path manager commands are unimplemented.
+                // Complete initialization immediately.
+                complete_pm_init(pm);
+        }
 
-        l_queue_foreach(pm->event_ops, notify_pm_ready, pm);
+        /**
+         * @todo Register a callback once the kernel MPTCP path
+         *       management generic netlink API supports
+         *       new/removed address notifications so that the mptcpd
+         *       ID manager state can be synchronized with the kernel
+         *       dynamically.
+         */
 }
 
 /**
