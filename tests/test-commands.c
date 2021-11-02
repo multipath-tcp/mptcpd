@@ -42,10 +42,10 @@ struct test_info
         // Address used for kernel add_addr and dump_addr calls.
         struct sockaddr const *addr;
 
+        int dump_addrs_complete_count;
+
         bool tests_called;
 };
-
-static int dump_addrs_complete_count;
 
 // -------------------------------------------------------------------
 
@@ -133,9 +133,9 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
 
 static void dump_addrs_complete(void *user_data)
 {
-        (void) user_data;
+        struct test_info *const info = (struct test_info *) user_data;
 
-        dump_addrs_complete_count++;
+        info->dump_addrs_complete_count++;
 }
 
 static void get_limits_callback(struct mptcpd_limit const *limits,
@@ -501,7 +501,7 @@ int main(void)
          */
         assert(info.tests_called);
 
-        assert(dump_addrs_complete_count == 1);
+        assert(info.dump_addrs_complete_count == 1);
 
         l_idle_remove(idle);
         mptcpd_pm_destroy(pm);
