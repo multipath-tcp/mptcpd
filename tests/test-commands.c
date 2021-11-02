@@ -39,6 +39,8 @@ struct test_info
         bool tests_called;
 };
 
+static int dump_addrs_complete_count;
+
 // -------------------------------------------------------------------
 
 static struct sockaddr const *const laddr1 =
@@ -120,6 +122,13 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
         struct sockaddr const *const addr = laddr1;
         assert(sockaddr_is_equal(addr,
                                  (struct sockaddr *) &info->addr));
+}
+
+static void dump_addrs_complete(void *user_data)
+{
+        (void) user_data;
+
+        dump_addrs_complete_count++;
 }
 
 static void get_limits_callback(struct mptcpd_limit const *limits,
@@ -246,7 +255,7 @@ static void test_dump_addrs(void const *test_data)
                 mptcpd_kpm_dump_addrs(pm,
                                       dump_addrs_callback,
                                       L_UINT_TO_PTR(id),
-                                      NULL);
+                                      dump_addrs_complete);
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -502,6 +511,8 @@ int main(void)
           family appeared.
          */
         assert(info.tests_called);
+
+        assert(dump_addrs_complete_count == 1);
 
         l_idle_remove(idle);
         l_genl_remove_family_watch(genl, watch_id);
