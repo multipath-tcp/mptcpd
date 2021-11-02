@@ -34,8 +34,6 @@
 
 struct test_info
 {
-        char const *const family_name;
-
         struct mptcpd_pm *const pm;
 
         // ID used for kernel add_addr and dump_addr calls.
