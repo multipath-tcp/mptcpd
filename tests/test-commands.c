@@ -14,7 +14,6 @@
 #include <stdlib.h>
 
 #include <ell/main.h>
-#include <ell/genl.h>
 #include <ell/idle.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
 #include <ell/log.h>
@@ -399,21 +398,11 @@ void test_get_nm(void const *test_data)
 
 // -------------------------------------------------------------------
 
-static void run_tests(struct l_genl_family_info const *info,
-                      void *user_data)
+static void run_tests(struct mptcpd_pm *pm, void *user_data)
 {
-        /*
-          Check if the initial request for the MPTCP generic netlink
-          family failed.  A subsequent family watch will be used to
-          call this function again when it appears.
-         */
-        if (info == NULL)
-                return;
+        (void) pm;
 
         struct test_info *const t = user_data;
-
-        assert(strcmp(l_genl_family_info_get_name(info),
-                      t->family_name) == 0);
 
         l_test_run();
 
@@ -476,12 +465,16 @@ int main(void)
         struct mptcpd_pm *pm = mptcpd_pm_create(config);
         assert(pm);
 
+        static struct mptcpd_pm_ops const pm_ops = { .ready = run_tests };
+
         struct test_info info = {
-                .family_name = tests_get_pm_family_name(),
                 .pm = pm
         };
 
-        assert(info.family_name);
+        bool const registered =
+                mptcpd_pm_register_ops(pm, &pm_ops, &info);
+
+        assert(registered);
 
         l_test_init(&argc, &args);
 
@@ -498,30 +491,6 @@ int main(void)
         l_test_add("remove_subflow", test_remove_subflow, &info);
         l_test_add("get_nm",         test_get_nm,         &info);
 
-        /*
-          Prepare to run the path management generic netlink command
-          tests.
-        */
-        struct l_genl *const genl = l_genl_new();
-        assert(genl != NULL);
-
-        unsigned int const watch_id =
-                l_genl_add_family_watch(genl,
-                                        info.family_name,
-                                        run_tests,
-                                        NULL,
-                                        &info,
-                                        NULL);
-
-        assert(watch_id != 0);
-
-        bool const requested = l_genl_request_family(genl,
-                                                     info.family_name,
-                                                     run_tests,
-                                                     &info,
-                                                     NULL);
-        assert(requested);
-
         struct l_idle *const idle =
                 l_idle_create(idle_callback, NULL, NULL);
 
@@ -536,8 +505,6 @@ int main(void)
         assert(dump_addrs_complete_count == 1);
 
         l_idle_remove(idle);
-        l_genl_remove_family_watch(genl, watch_id);
-        l_genl_unref(genl);
         mptcpd_pm_destroy(pm);
         mptcpd_config_destroy(config);
 
