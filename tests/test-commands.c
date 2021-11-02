@@ -79,19 +79,6 @@ static struct mptcpd_limit const _limits[] = {
 
 // -------------------------------------------------------------------
 
-static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
-{
-        bool const ready = mptcpd_pm_ready(pm);
-
-        if (!ready)
-                l_warn("Path manager not yet ready.  "
-                       "%s cannot be completed.", fname);
-
-        return ready;
-}
-
-// -------------------------------------------------------------------
-
 static void get_addr_callback(struct mptcpd_addr_info const *info,
                               void *user_data)
 {
@@ -183,12 +170,8 @@ static void get_limits_callback(struct mptcpd_limit const *limits,
 
 static void test_add_addr(void const *test_data)
 {
-        struct test_info *const info = (struct test_info *) test_data;
-        struct mptcpd_pm *const pm   = info->pm;
-
-        if (!is_pm_ready(pm, __func__))
-                return;
-
+        struct test_info  *const info = (struct test_info *) test_data;
+        struct mptcpd_pm  *const pm   = info->pm;
         struct mptcpd_idm *const idm  = mptcpd_pm_get_idm(pm);
 
         // Client-oriented path manager.
@@ -198,7 +181,6 @@ static void test_add_addr(void const *test_data)
                                         test_token_1);
 
         assert(result == 0 || result == ENOTSUP);
-
 
         // In-kernel (server-oriented) path manager.
         info->addr = laddr1;
@@ -221,9 +203,6 @@ static void test_remove_addr(void const *test_data)
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
-        if (!is_pm_ready(pm, __func__))
-                return;
-
         // Client-oriented path manager.
         int result = mptcpd_pm_remove_addr(pm,
                                            test_laddr_id_1,
@@ -242,9 +221,6 @@ static void test_get_addr(void const *test_data)
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
-        if (!is_pm_ready(pm, __func__))
-                return;
-
         int const result =
                 mptcpd_kpm_get_addr(pm,
                                     info->id,
@@ -259,9 +235,6 @@ static void test_dump_addrs(void const *test_data)
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
-        if (!is_pm_ready(pm, __func__))
-                return;
-
         int const result =
                 mptcpd_kpm_dump_addrs(pm,
                                       dump_addrs_callback,
@@ -275,9 +248,6 @@ static void test_flush_addrs(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
-
-        if (!is_pm_ready(pm, __func__))
-                return;
 
         int const result = mptcpd_kpm_flush_addrs(pm);
 
@@ -295,9 +265,6 @@ static void test_set_limits(void const *test_data)
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
-        if (!is_pm_ready(pm, __func__))
-                return;
-
         int const result = mptcpd_kpm_set_limits(pm,
                                                  _limits,
                                                  L_ARRAY_SIZE(_limits));
@@ -309,9 +276,6 @@ static void test_get_limits(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
-
-        if (!is_pm_ready(pm, __func__))
-                return;
 
         int const result = mptcpd_kpm_get_limits(pm,
                                                  get_limits_callback,
@@ -325,9 +289,6 @@ static void test_set_flags(void const *test_data)
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
-        if (!is_pm_ready(pm, __func__))
-                return;
-
         static mptcpd_flags_t const flags = MPTCPD_ADDR_FLAG_BACKUP;
 
         int const result = mptcpd_kpm_set_flags(pm, laddr1, flags);
@@ -339,9 +300,6 @@ static void test_add_subflow(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
-
-        if (!is_pm_ready(pm, __func__))
-                return;
 
         int const result = mptcpd_pm_add_subflow(pm,
                                                  test_token_2,
@@ -359,9 +317,6 @@ void test_set_backup(void const *test_data)
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
-        if (!is_pm_ready(pm, __func__))
-                return;
-
         int const result = mptcpd_pm_set_backup(pm,
                                                 test_token_1,
                                                 laddr1,
@@ -375,9 +330,6 @@ void test_remove_subflow(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
-
-        if (!is_pm_ready(pm, __func__))
-                return;
 
         int const result = mptcpd_pm_remove_subflow(pm,
                                                     test_token_1,
