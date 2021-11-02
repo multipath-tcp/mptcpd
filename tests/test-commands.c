@@ -324,7 +324,8 @@ static void test_get_limits(void const *test_data)
 
 static void test_set_flags(void const *test_data)
 {
-        struct mptcpd_pm *const pm = (struct mptcpd_pm *) test_data;
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
 
         if (!is_pm_ready(pm, __func__))
                 return;
