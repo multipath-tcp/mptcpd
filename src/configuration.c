@@ -317,11 +317,11 @@ static void set_default_plugin(struct mptcpd_config *config,
  * @param[in]     plugins Comma separated list of plugins to load.
  */
 static void set_plugins_to_load(struct mptcpd_config *config,
-                                char *plugins)
+                                char const *plugins)
 {
         config->plugins_to_load = l_queue_new();
 
-        char *token = strtok(plugins, ",");
+        char *token = strtok((char *) plugins, ",");
         while (token) {
                 l_queue_push_tail(
                         (struct l_queue *) config->plugins_to_load,
@@ -812,6 +812,8 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
                 && merge_config(config, &def_config)
                 && check_config(config);
 
+        l_queue_destroy((struct l_queue *) sys_config.plugins_to_load,
+                        NULL);
         l_free((char *) sys_config.default_plugin);
         l_free((char *) sys_config.plugin_dir);
 
