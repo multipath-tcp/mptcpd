@@ -119,7 +119,7 @@ overriding plugin priorities
 .TP
 .BI \-\-load\-plugins= PLUGINS
 set plugins to load on startup, where
-.I PLUGINS,
+.I PLUGINS 
 is a comma separated list containing one or more plugin names
 
 .TP
