@@ -19,6 +19,7 @@
 #include <assert.h>
 
 #include <linux/rtnetlink.h>
+#include <arpa/inet.h>
 #include <net/if.h>  // For standard network interface flags.
 #include <netinet/in.h>
 
@@ -26,11 +27,16 @@
 #include <ell/log.h>
 #include <ell/util.h>
 #include <ell/queue.h>
+#include <ell/timeout.h>
+#include <ell/rtnl.h>
 
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/network_monitor.h>
 
-
+// See IETF RFC 3849: IPv6 Address Prefix Reserved for Documentation.
+// 2001:DB8::/32
+static struct in6_addr test_net_v6 = { .s6_addr = {0x20, 0x01, 0x0d, 0xb8, } };
+static struct in_addr test_net_v4;
 // -------------------------------------------------------------------
 
 /**
@@ -122,6 +128,18 @@ struct mptcpd_addr_info
 
         /// Network interface index
         int index;
+
+        /// Usage counter, free this when reaches 0
+        int count;
+
+        /// Route check timeout
+        struct l_timeout *timeout;
+
+        /// Route check attemps
+        int attempts;
+
+        // Network monitor reference
+        struct mptcpd_nm *nm;
 };
 
 /**
@@ -144,16 +162,17 @@ mptcpd_addr_create(struct mptcpd_rtm_addr const *info)
         struct mptcpd_addr_info *const ai =
                         l_new(struct mptcpd_addr_info, 1);
         ai->address.ss_family = family;
+        ai->count = 1;
 
         if (family == AF_INET) {
-                struct sockaddr_in *const a = (struct sockaddr_in *const) &ai->address;
+                struct sockaddr_in *const a = (struct sockaddr_in *) &ai->address;
                 /*
                   Kernel nla_put_in_addr() inserts a big endian 32
                   bit unsigned integer, not struct in_addr.
                 */
                 a->sin_addr.s_addr = *(uint32_t const*) info->addr;
         } else {
-                struct sockaddr_in6 *const a = (struct sockaddr_in6 *const) &ai->address;
+                struct sockaddr_in6 *const a = (struct sockaddr_in6 *) &ai->address;
 
                 struct in6_addr const *const sa =
                         (struct in6_addr const*) info->addr;
@@ -164,14 +183,50 @@ mptcpd_addr_create(struct mptcpd_rtm_addr const *info)
         return ai;
 }
 
+static void mptcpd_addr_cancel_timeout(struct mptcpd_addr_info *ai)
+{
+        if (!ai->timeout)
+                return;
+
+        l_timeout_remove(ai->timeout);
+        ai->timeout = NULL;
+}
+
 /**
- * @brief Destroy a @c mptcpd_addr_info object.
+ * @brief Drop a reference to a @c mptcpd_addr_info object, ev.destroying it
+ *
+ * @param[in,out] Pointer to the @c mptcpd_addr_info object to be released.
+ */
+static void mptcpd_addr_put(void *data)
+{
+        struct mptcpd_addr_info *const ai = data;
+        if (--ai->count == 0) {
+                mptcpd_addr_cancel_timeout(ai);
+                l_free(data);
+        }
+}
+
+/**
+ * @brief Acquire a reference to a @c mptcpd_addr_info object
  *
  * @param[in,out] Pointer to the @c mptcpd_addr_info object to be destroyed.
  */
-static void mptcpd_addr_destroy(void *data)
+static void mptcpd_addr_get(struct mptcpd_addr_info *ai)
 {
-        l_free(data);
+        ai->count++;
+}
+
+static const char *mptcpd_addr_to_string(const struct mptcpd_addr_info *ai, char *out, int size)
+{
+        void const *src;
+
+        if (ai->address.ss_family == AF_INET) {
+                src = &((struct sockaddr_in const *)&ai->address)->sin_addr;
+        } else {
+                src = &((struct sockaddr_in6 const *)&ai->address)->sin6_addr;
+        }
+
+        return inet_ntop(ai->address.ss_family, src, out, size);
 }
 
 /**
@@ -384,7 +439,7 @@ static void mptcpd_interface_destroy(void *data)
 {
         struct mptcpd_interface *const i = data;
 
-        l_queue_destroy(i->addrs, mptcpd_addr_destroy);
+        l_queue_destroy(i->addrs, mptcpd_addr_put);
         l_free(i);
 }
 
@@ -681,7 +736,7 @@ static void notify_new_address(void *data, void *user_data)
 
         if (ops->new_address)
                 ops->new_address(ai->interface,
-                                 (const struct sockaddr *)&ai->address,
+                                 (struct sockaddr const *)&ai->address,
                                  info->user_data);
 }
 
@@ -699,7 +754,7 @@ static void notify_delete_address(void *data, void *user_data)
 
         if (ops->delete_address)
                 ops->delete_address(ai->interface,
-                                    (const struct sockaddr *)&ai->address,
+                                    (struct sockaddr const *)&ai->address,
                                     info->user_data);
 }
 
@@ -723,7 +778,7 @@ insert_addr_return(struct mptcpd_interface *interface,
                                addr,
                                mptcpd_addr_compare,
                                NULL)) {
-                mptcpd_addr_destroy(addr);
+                mptcpd_addr_put(addr);
                 addr = NULL;
 
                 l_error("Unable to track internet address information.");
@@ -731,6 +786,7 @@ insert_addr_return(struct mptcpd_interface *interface,
 
         addr->index = interface->index;
         addr->interface = interface;
+        addr->index = interface->index;
         return addr;
 }
 
@@ -757,6 +813,167 @@ static void insert_addr(struct mptcpd_nm *nm,
         (void) nm;
 
         (void) insert_addr_return(interface, rtm_addr);
+}
+
+static size_t raw_add_attr(struct rtattr *attr, unsigned short type,
+                           void const *data, size_t len)
+{
+        attr->rta_type = type;
+        attr->rta_len = RTA_LENGTH(len);
+        memcpy(RTA_DATA(attr), data, len);
+
+        return RTA_SPACE(len);
+}
+
+static size_t add_attr_u32(void *buf, unsigned short type, uint32_t value)
+{
+        return raw_add_attr(buf, type, &value, sizeof(uint32_t));
+}
+
+static size_t add_attr_address(void *buf, unsigned short type,
+                               bool is_ipv4, void const *addr)
+{
+        return raw_add_attr(buf, type, addr,
+                            is_ipv4 ? sizeof(struct in_addr) : sizeof(struct in6_addr));
+}
+
+static void check_default_route(struct mptcpd_addr_info *ai);
+
+static void handle_rtm_timeout(struct l_timeout *timeout,
+                               void *user_data)
+{
+        struct mptcpd_addr_info *ai = user_data;
+
+        (void) timeout;
+        check_default_route(ai);
+}
+
+#define MPTCPD_MAX_ROUTE_CHECK          3
+
+static void schedule_route_check(struct mptcpd_addr_info *ai)
+{
+        if (ai->attempts++ > MPTCPD_MAX_ROUTE_CHECK) {
+                char str[INET6_ADDRSTRLEN];
+
+                l_debug("timeout while waiting for default route on address %s",
+                        mptcpd_addr_to_string(ai, str, INET6_ADDRSTRLEN));
+                mptcpd_addr_put(ai);
+                return;
+        }
+
+        if (!ai->timeout) {
+                ai->timeout = l_timeout_create_ms(1, handle_rtm_timeout, ai, NULL);
+                if (!ai->timeout) {
+                        l_error("can't harm route re-check timeout");
+                        mptcpd_addr_put(ai);
+                }
+        } else {
+                /* Use exponential backoff */
+                l_timeout_modify_ms(ai->timeout, 1 << ai->attempts);
+        }
+}
+
+static void handle_rtm_getroute(int error,
+                                uint16_t type,
+                                void const *data,
+                                uint32_t len,
+                                void *user_data)
+{
+        struct mptcpd_addr_info *ai = user_data;
+        char str[INET6_ADDRSTRLEN];
+        uint32_t ifindex = 0;
+        char *dst = NULL;
+
+        if (error != 0) {
+                l_info("can't resolved default route from %s interface %d: %d",
+                       mptcpd_addr_to_string(ai, str, INET6_ADDRSTRLEN),
+                       ai->index, error);
+                goto again;
+        }
+
+        (void) type;
+        assert(type == RTM_NEWROUTE);
+        if (ai->address.ss_family == AF_INET) {
+                l_rtnl_route4_extract(data, len, NULL, &ifindex, &dst, NULL, NULL);
+                if (dst)
+                        goto bad_dst;
+        } else {
+                l_rtnl_route6_extract(data, len, NULL, &ifindex, &dst, NULL, NULL);
+                if (dst)
+                        goto bad_dst;
+        }
+
+        if ((int)ifindex != ai->index) {
+                l_info("interface mismatch %d:%d", ifindex, ai->index);
+                goto again;
+        }
+
+        /* default route found! try to notify address*/
+        mptcpd_addr_cancel_timeout(ai);
+
+        /* this happens asincronusly, remove_link() could have delete
+         * the relevant interface, re-check it
+         */
+        ai->interface = l_queue_find(ai->nm->interfaces,
+                                     mptcpd_interface_match,
+                                     &ai->index);
+        l_info("found default route for address %s on interface %d",
+               mptcpd_addr_to_string(ai, str, INET6_ADDRSTRLEN), ai->index);
+        if (ai->interface)
+                l_queue_foreach(ai->nm->ops,
+                                notify_new_address,
+                                ai);
+        mptcpd_addr_put(ai);
+        return;
+
+bad_dst:
+        l_info("found not default route with destination %s", dst ? dst : "");
+
+again:
+        schedule_route_check(ai);
+}
+
+static void check_default_route(struct mptcpd_addr_info *ai)
+{
+        struct {
+                struct rtmsg route_msg;
+                char buf[1024];
+        } store;
+        void const *addr;
+        bool is_ipv4;
+        char *buf;
+
+        is_ipv4 = ai->address.ss_family == AF_INET;
+        memset(&store, 0, sizeof(store));
+        store.route_msg.rtm_family = ai->address.ss_family;
+        store.route_msg.rtm_flags = RTM_F_LOOKUP_TABLE | RTM_F_FIB_MATCH;
+        store.route_msg.rtm_dst_len = is_ipv4 ? 32: 128;
+
+        buf = (char *) &store + NLMSG_ALIGN(sizeof(struct rtmsg));
+        buf += add_attr_u32(buf, RTA_OIF, ai->index);
+
+        addr = &test_net_v6;
+        if (is_ipv4)
+                addr = &test_net_v4;
+        buf += add_attr_address(buf, RTA_DST, is_ipv4, addr);
+
+        /* an address delete event can attempt to
+         * free this addr info before we get the route reply,
+         * acquire a reference, so that memory will not be
+         * released before the handler will access it
+         */
+        mptcpd_addr_get(ai);
+        if (l_netlink_send(ai->nm->rtnl,
+            RTM_GETROUTE,
+            0,
+            &store,
+            buf - (char *)&store,
+            handle_rtm_getroute,
+            ai,
+            NULL) == 0) {
+                l_debug("Route lookup failed");
+                mptcpd_addr_put(ai);
+        }
 }
 
 /**
@@ -790,9 +1007,14 @@ static void update_addr(struct mptcpd_nm *nm,
 
                 // Notify new network interface event observers.
                 if (addr != NULL) {
-                        l_queue_foreach(nm->ops,
-                                        notify_new_address,
-                                        addr);
+                        if (nm->notify_flags & MPTCPD_NOTIFY_FLAG_ROUTE_CHECK) {
+                                addr->nm = nm;
+                                check_default_route(addr);
+                        } else {
+                                l_queue_foreach(nm->ops,
+                                                notify_new_address,
+                                                addr);
+                        }
                 }
         } else {
                 /**
@@ -834,7 +1056,7 @@ static void remove_addr(struct mptcpd_nm *nm,
 
         l_queue_foreach(nm->ops, notify_delete_address, addr);
 
-        mptcpd_addr_destroy(addr);
+        mptcpd_addr_put(addr);
 }
 
 /**
@@ -1273,6 +1495,9 @@ bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
 {
         if (nm == NULL || ops == NULL)
                 return false;
+
+        // See IETF RFC 5737: IPv4 Address Blocks Reserved for Documentation.
+        test_net_v4.s_addr = htonl(0xc0000201);
 
         if (ops->new_interface       == NULL
             && ops->update_interface == NULL
