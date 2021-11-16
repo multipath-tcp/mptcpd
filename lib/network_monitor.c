@@ -103,14 +103,36 @@ struct mptcpd_rtm_addr
 };
 
 /**
+ * @struct mptcpd_addr_info
+ *
+ * @brief Convenience structure to bundle address information.
+ *
+ * Note that Network monitor users (tests and sspi plugin) assume
+ * that interface->addr is a list of sockaddr. Placing the
+ * sockaddr_storage as the first field allow expanding the address
+ * metadata without breaking that assumption
+ */
+struct mptcpd_addr_info
+{
+        /// Network address information.
+        struct sockaddr_storage address;
+
+        /// Weak reference to network interface.
+        struct mptcpd_interface const * interface;
+
+        /// Network interface index
+        int index;
+};
+
+/**
  * @brief Create an object that contains internet network
  *        address-specific information.
  *
  * @param[in] info Network address-specific information retrieved from
  *                 the @c RTM_NEWADDR message.
  */
-static struct sockaddr *
-mptcpd_sockaddr_create(struct mptcpd_rtm_addr const *info)
+static struct mptcpd_addr_info *
+mptcpd_addr_create(struct mptcpd_rtm_addr const *info)
 {
         assert(info != NULL);
 
@@ -119,52 +141,43 @@ mptcpd_sockaddr_create(struct mptcpd_rtm_addr const *info)
         if (family != AF_INET && family != AF_INET6)
                 return NULL;
 
-        struct sockaddr *addr = NULL;
+        struct mptcpd_addr_info *const ai =
+                        l_new(struct mptcpd_addr_info, 1);
+        ai->address.ss_family = family;
 
         if (family == AF_INET) {
-                struct sockaddr_in *const a =
-                        l_new(struct sockaddr_in, 1);
-
-                a->sin_family = family;
-
+                struct sockaddr_in *const a = (struct sockaddr_in *const) &ai->address;
                 /*
                   Kernel nla_put_in_addr() inserts a big endian 32
                   bit unsigned integer, not struct in_addr.
                 */
                 a->sin_addr.s_addr = *(uint32_t const*) info->addr;
-
-                addr = (struct sockaddr *) a;
         } else {
-                struct sockaddr_in6 *const a =
-                        l_new(struct sockaddr_in6, 1);
-
-                a->sin6_family = family;
+                struct sockaddr_in6 *const a = (struct sockaddr_in6 *const) &ai->address;
 
                 struct in6_addr const *const sa =
                         (struct in6_addr const*) info->addr;
 
                 memcpy(&a->sin6_addr, sa, sizeof(*sa));
-
-                addr = (struct sockaddr *) a;
         }
 
-        return addr;
+        return ai;
 }
 
 /**
- * @brief Destroy a @c sockaddr object.
+ * @brief Destroy a @c mptcpd_addr_info object.
  *
- * @param[in,out] Pointer to the @c sockaddr object to be destroyed.
+ * @param[in,out] Pointer to the @c mptcpd_addr_info object to be destroyed.
  */
-static void mptcpd_sockaddr_destroy(void *data)
+static void mptcpd_addr_destroy(void *data)
 {
         l_free(data);
 }
 
 /**
- * @brief Compare two @c sockaddr objects.
+ * @brief Compare two @c mptcpd_addr_info objects.
  *
- * Compare @c sockaddr objects to determine where in the network
+ * Compare @c mptcpd_addr_info objects to determine where in the network
  * address list the first object, @a a, will be inserted relative to
  * the second object, @a b.
  *
@@ -174,7 +187,7 @@ static void mptcpd_sockaddr_destroy(void *data)
  * @see l_queue_insert()
  */
 static int
-mptcpd_sockaddr_compare(void const *a, void const *b, void *user_data)
+mptcpd_addr_compare(void const *a, void const *b, void *user_data)
 {
         (void) a;
         (void) b;
@@ -185,14 +198,14 @@ mptcpd_sockaddr_compare(void const *a, void const *b, void *user_data)
 }
 
 /**
- * @brief Match a @c sockaddr object.
+ * @brief Match a @c mptcpd_addr_info object.
  *
- * A network address represented by @a a (@c struct @c sockaddr)
+ * A network address represented by @a a (@c struct @c mptcpd_addr_info)
  * matches if its @c family and IPv4/IPv6 address members match those
  * in @a b.
  *
  * @param[in] a Currently monitored network address of type @c struct
- *              @c sockaddr*.
+ *              @c mptcpd_addr_info*.
  * @param[in] b Network address information of type @c struct
  *              @c mptcpd_rtm_addr* to be compared against network
  *              address @a a.
@@ -203,23 +216,23 @@ mptcpd_sockaddr_compare(void const *a, void const *b, void *user_data)
  * @see l_queue_find()
  * @see l_queue_remove_if()
  */
-static bool mptcpd_sockaddr_match(void const *a, void const *b)
+static bool mptcpd_addr_match(void const *a, void const *b)
 {
-        struct sockaddr        const *const lhs = a;
+        struct mptcpd_addr_info const *const lhs = a;
         struct mptcpd_rtm_addr const *const rhs = b;
 
         assert(lhs);
         assert(rhs);
-        assert(lhs->sa_family == AF_INET || lhs->sa_family == AF_INET6);
+        assert(lhs->address.ss_family == AF_INET || lhs->address.ss_family == AF_INET6);
 
-        bool matched = (lhs->sa_family == rhs->ifa->ifa_family);
+        bool matched = (lhs->address.ss_family == rhs->ifa->ifa_family);
 
         if (!matched)
                 return matched;
 
-        if (lhs->sa_family == AF_INET) {
+        if (lhs->address.ss_family == AF_INET) {
                 struct sockaddr_in const *const addr =
-                        (struct sockaddr_in const *) lhs;
+                        (struct sockaddr_in const *) &lhs->address;
 
                 /*
                   Kernel nla_put_in_addr() inserts a big endian 32 bit
@@ -230,7 +243,7 @@ static bool mptcpd_sockaddr_match(void const *a, void const *b)
                 matched = (addr->sin_addr.s_addr == sa);
         } else {
                 struct sockaddr_in6 const *const addr =
-                        (struct sockaddr_in6 const *) lhs;
+                        (struct sockaddr_in6 const *) &lhs->address;
 
                 struct in6_addr const *const sa =
                         (struct in6_addr const*) rhs->addr;
@@ -371,7 +384,7 @@ static void mptcpd_interface_destroy(void *data)
 {
         struct mptcpd_interface *const i = data;
 
-        l_queue_destroy(i->addrs, mptcpd_sockaddr_destroy);
+        l_queue_destroy(i->addrs, mptcpd_addr_destroy);
         l_free(i);
 }
 
@@ -446,20 +459,6 @@ static void mptcpd_interface_callback(void *data, void *user_data)
 // -------------------------------------------------------------------
 //          Network Interface and Address Change Handling
 // -------------------------------------------------------------------
-
-/**
- * @struct mptcpd_addr_info
- *
- * @brief Convenience structure to bundle address information.
- */
-struct mptcpd_addr_info
-{
-        /// Network interface information.
-        struct mptcpd_interface const *const interface;
-
-        /// Network address information.
-        struct sockaddr const *const address;
-};
 
 /**
  * @brief Check if network interface is ready for use.
@@ -682,7 +681,7 @@ static void notify_new_address(void *data, void *user_data)
 
         if (ops->new_address)
                 ops->new_address(ai->interface,
-                                 ai->address,
+                                 (const struct sockaddr *)&ai->address,
                                  info->user_data);
 }
 
@@ -700,7 +699,7 @@ static void notify_delete_address(void *data, void *user_data)
 
         if (ops->delete_address)
                 ops->delete_address(ai->interface,
-                                    ai->address,
+                                    (const struct sockaddr *)&ai->address,
                                     info->user_data);
 }
 
@@ -713,23 +712,25 @@ static void notify_delete_address(void *data, void *user_data)
  * @return Inserted @c sockaddr object corresponding to the new
  *         network address.
  */
-static struct sockaddr *
+static struct mptcpd_addr_info *
 insert_addr_return(struct mptcpd_interface *interface,
                    struct mptcpd_rtm_addr const *rtm_addr)
 {
-        struct sockaddr *addr = mptcpd_sockaddr_create(rtm_addr);
+        struct mptcpd_addr_info *addr = mptcpd_addr_create(rtm_addr);
 
         if (addr == NULL
             || !l_queue_insert(interface->addrs,
                                addr,
-                               mptcpd_sockaddr_compare,
+                               mptcpd_addr_compare,
                                NULL)) {
-                mptcpd_sockaddr_destroy(addr);
+                mptcpd_addr_destroy(addr);
                 addr = NULL;
 
                 l_error("Unable to track internet address information.");
         }
 
+        addr->index = interface->index;
+        addr->interface = interface;
         return addr;
 }
 
@@ -779,9 +780,9 @@ static void update_addr(struct mptcpd_nm *nm,
             && (rtm_addr->ifa->ifa_scope == RT_SCOPE_HOST))
                 return;
 
-        struct sockaddr *addr =
+        struct mptcpd_addr_info *addr =
                 l_queue_find(interface->addrs,
-                             mptcpd_sockaddr_match,
+                             mptcpd_addr_match,
                              rtm_addr);
 
         if (addr == NULL) {
@@ -789,14 +790,9 @@ static void update_addr(struct mptcpd_nm *nm,
 
                 // Notify new network interface event observers.
                 if (addr != NULL) {
-                        struct mptcpd_addr_info info = {
-                                .interface = interface,
-                                .address   = addr
-                        };
-
                         l_queue_foreach(nm->ops,
                                         notify_new_address,
-                                        &info);
+                                        addr);
                 }
         } else {
                 /**
@@ -825,7 +821,7 @@ static void remove_addr(struct mptcpd_nm *nm,
 {
         struct sockaddr *const addr =
                 l_queue_remove_if(interface->addrs,
-                                  mptcpd_sockaddr_match,
+                                  mptcpd_addr_match,
                                   rtm_addr);
 
         if (addr == NULL) {
@@ -836,14 +832,9 @@ static void remove_addr(struct mptcpd_nm *nm,
                 return;
         }
 
-        struct mptcpd_addr_info info = {
-                .interface = interface,
-                .address   = addr
-        };
+        l_queue_foreach(nm->ops, notify_delete_address, addr);
 
-        l_queue_foreach(nm->ops, notify_delete_address, &info);
-
-        mptcpd_sockaddr_destroy(addr);
+        mptcpd_addr_destroy(addr);
 }
 
 /**
