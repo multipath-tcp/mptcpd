@@ -98,11 +98,19 @@ ignore (do not notify) [ipv6] link local address updates
 .I skip_loopback
 ignore (do not notify) host (loopback) address updates
 .RE
+.RS
+.TP.
+.I check_route
+notify address only if a default route is available from such
+address and the related device. If the route check fails, it will
+re-done after a little timeout, to allow .e.g. DHCP to configure the
+host properly. Complex Policy routing configuration may confuse or
+circumvent this check.
 .P
 .RS
 These flags determine whether mptpcd plugins will be notified when
 related addresses are updated, e.g.
-.B --notify-flags=existing,skip_link_local
+.B --notify-flags=existing,skip_link_local,check_route
 .RE
 
 .TP

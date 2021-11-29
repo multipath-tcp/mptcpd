@@ -69,6 +69,9 @@ typedef uint32_t mptcpd_flags_t;
 /// Ignore host (loopback) addresses.
 #define MPTCPD_NOTIFY_FLAG_SKIP_HOST (1U << 2)
 
+/// Notify address only if a default route is available from the given interface
+#define MPTCPD_NOTIFY_FLAG_ROUTE_CHECK (1U << 3)
+
 /**
  * @enum mptcpd_limit_types
  *
