@@ -321,7 +321,7 @@ static void set_plugins_to_load(struct mptcpd_config *config,
 {
         config->plugins_to_load = l_queue_new();
 
-        char *token = strtok((char *) plugins, ",");
+        char *token = strtok(plugins, ",");
         while (token) {
                 l_queue_push_tail(
                         (struct l_queue *) config->plugins_to_load,
