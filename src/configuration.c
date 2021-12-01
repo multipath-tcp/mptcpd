@@ -317,7 +317,7 @@ static void set_default_plugin(struct mptcpd_config *config,
  * @param[in]     plugins Comma separated list of plugins to load.
  */
 static void set_plugins_to_load(struct mptcpd_config *config,
-                                char const *plugins)
+                                char *plugins)
 {
         config->plugins_to_load = l_queue_new();
 
