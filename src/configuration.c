@@ -862,7 +862,7 @@ void mptcpd_config_destroy(struct mptcpd_config *config)
                 return;
 
         l_queue_destroy((struct l_queue *) config->plugins_to_load,
-                        l_free);
+                        free);
         l_free((char *) config->default_plugin);
         l_free((char *) config->plugin_dir);
         l_free(config);
