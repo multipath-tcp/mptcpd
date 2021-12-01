@@ -815,7 +815,7 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
                 && check_config(config);
 
         l_queue_destroy((struct l_queue *) sys_config.plugins_to_load,
-                        l_free);
+                        free);
         l_free((char *) sys_config.default_plugin);
         l_free((char *) sys_config.plugin_dir);
 
