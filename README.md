@@ -30,7 +30,7 @@ archive or from a cloned Git `mptcpd` repository, for example.
 
 * Basic `mptcpd` Build Dependencies
   * C compiler (C99 compliant)
-  * [Embedded Linux Library](https://git.kernel.org/pub/scm/libs/ell/ell.git) >= v0.27
+  * [Embedded Linux Library](https://git.kernel.org/pub/scm/libs/ell/ell.git) >= v0.30
   * Argp library (either the GNU libc
     [built-in](https://www.gnu.org/software/libc/manual/html_node/Argp.html)
     or [standalone](http://www.lysator.liu.se/~nisse/misc/))
