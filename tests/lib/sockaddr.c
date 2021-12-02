@@ -36,11 +36,6 @@ bool sockaddr_is_equal(struct sockaddr const *lhs,
                 (struct sockaddr_in6 const *) rhs;
 
         return l->sin6_port == r->sin6_port
-                /**
-                 * @todo Is memcmp() suitable in this case? Do we need
-                 * to worry about the existence of uninitialized bytes
-                 * in the IPv6 address byte array.
-                 */
                 && memcmp(&l->sin6_addr,
                           &r->sin6_addr,
                           sizeof(l->sin6_addr)) == 0;
