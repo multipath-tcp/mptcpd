@@ -303,12 +303,6 @@ static bool mptcpd_addr_match(void const *a, void const *b)
                 struct in6_addr const *const sa =
                         (struct in6_addr const*) rhs->addr;
 
-                /**
-                 * @todo Is memcmp() suitable in this case?  Do we
-                 *       need to worry about the existence of
-                 *       uninitialized bytes in the IPv6 address byte
-                 *       array.
-                 */
                 matched = (memcmp(&addr->sin6_addr,
                                   sa,
                                   sizeof(addr->sin6_addr))

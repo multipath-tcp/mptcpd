@@ -137,12 +137,6 @@ static bool sspi_sockaddr_match(void const *a, void const *b)
                 struct sockaddr_in6 const *const r =
                         (struct sockaddr_in6 const *) rhs;
 
-                /**
-                 * @todo Is memcmp() suitable in this case?
-                 *       Do we need to worry about the
-                 *       existence of uninitialized bytes in
-                 *       the IPv6 address byte array.
-                 */
                 matched = (memcmp(&l->sin6_addr,
                                   &r->sin6_addr,
                                   sizeof(l->sin6_addr))
