@@ -284,6 +284,71 @@ static void load_plugin(char const *filename)
         */
 }
 
+static void load_plugins_queue(char const *dir,
+                               struct l_queue const* plugins_to_load)
+{
+        struct l_queue_entry const *entry = 
+                l_queue_get_entries((struct l_queue *) plugins_to_load);
+
+        while (entry) {
+                char *plugin_name = (char *) entry->data;
+                char *const path = l_strdup_printf("%s/%s.so",
+                                                   dir,
+                                                   plugin_name);
+
+                load_plugin(path);
+
+                l_free(path);
+
+                entry = entry->next;
+        }
+}
+
+static int load_plugins_all(int const fd,
+                            char const *dir)
+{
+        DIR *const ds = fdopendir(fd);
+
+        if (ds == NULL) {
+                report_error(errno,
+                             "fdopendir() on plugin directory failed");
+
+                return -1;
+        }
+
+        errno = 0;
+        for (struct dirent const *d = readdir(ds);
+             d != NULL;
+             d = readdir(ds)) {
+                if ((d->d_type == DT_REG || d->d_type == DT_UNKNOWN)
+                    && l_str_has_suffix(d->d_name, ".so")) {
+                        char *const path = l_strdup_printf("%s/%s",
+                                                           dir,
+                                                           d->d_name);
+
+                        load_plugin(path);
+                        l_free(path);
+                }
+
+                // Reset to detect error on NULL readdir().
+                errno = 0;
+        }
+
+        int const error = errno;
+
+        (void) closedir(ds);
+
+        /**
+         * @todo Should a readdir() error from above be considered
+         *       fatal?
+         */
+        if (error != 0)
+                report_error(error, "Error during plugin directory read");
+
+        return error;
+}
+
+
 static int load_plugins(char const *dir, 
                         struct l_queue const *plugins_to_load, 
                         struct mptcpd_pm *pm)
@@ -310,75 +375,18 @@ static int load_plugins(char const *dir,
                 return -1;
         }
 
-        DIR *const ds = fdopendir(fd);
+        int ret = 0;
 
-        if (ds == NULL) {
-                report_error(errno,
-                             "fdopendir() on plugin directory failed");
-
-                return -1;
-        }
-
-        errno = 0;
         if (plugins_to_load) {
-
-                struct l_queue_entry const *entry = 
-                        l_queue_get_entries(
-                                (struct l_queue *) plugins_to_load);
-
-                while (entry) {
-                        char *plugin_name = (char *) entry->data;
-                        char *const path = l_strdup_printf("%s/%s.so",
-                                                           dir,
-                                                           plugin_name);
-
-                        if (access(path, R_OK) == 0)
-                                load_plugin(path);
-                        else
-                                l_warn("Plugin %s does not exist.",
-                                       plugin_name);
-
-                        l_free(path);
-
-                        errno = 0;
-
-                        entry = entry->next;
-                }
-
-        } else {
-                for (struct dirent const *d = readdir(ds);
-                     d != NULL;
-                     d = readdir(ds)) {
-                        if ((d->d_type == DT_REG || d->d_type == DT_UNKNOWN)
-                            && l_str_has_suffix(d->d_name, ".so")) {
-                                char *const path = l_strdup_printf("%s/%s",
-                                                                   dir,
-                                                                   d->d_name);
-
-                                load_plugin(path);
-                                l_free(path);
-                        }
-
-                        // Reset to detect error on NULL readdir().
-                        errno = 0;
-                }
-        }
-
-        int const error = errno;
-
-        (void) closedir(ds);
-
-        /**
-         * @todo Should a readdir() error from above be considered
-         *       fatal?
-         */
-        if (error != 0)
-                report_error(error, "Error during plugin directory read");
+                load_plugins_queue(dir, plugins_to_load);
+                (void) close(fd);
+        } else
+                ret = load_plugins_all(fd, dir);
 
         // Initialize all loaded plugins.
         l_queue_foreach(_plugin_infos, init_plugin, pm);
 
-        return error;  // 0 on success
+        return ret;  // 0 on success
 }
 
 static bool unload_plugin(void *data, void *user_data)
