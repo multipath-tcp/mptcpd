@@ -109,7 +109,7 @@ struct mptcpd_rtm_addr
 };
 
 /**
- * @struct mptcpd_addr_info
+ * @struct nm_addr_info
  *
  * @brief Convenience structure to bundle address information.
  *
@@ -118,13 +118,13 @@ struct mptcpd_rtm_addr
  * sockaddr_storage as the first field allow expanding the address
  * metadata without breaking that assumption
  */
-struct mptcpd_addr_info
+struct nm_addr_info
 {
         /// Network address information.
         struct sockaddr_storage address;
 
         /// Weak reference to network interface.
-        struct mptcpd_interface const * interface;
+        struct mptcpd_interface const *interface;
 
         /// Network interface index
         int index;
@@ -149,7 +149,7 @@ struct mptcpd_addr_info
  * @param[in] info Network address-specific information retrieved from
  *                 the @c RTM_NEWADDR message.
  */
-static struct mptcpd_addr_info *
+static struct nm_addr_info *
 mptcpd_addr_create(struct mptcpd_rtm_addr const *info)
 {
         assert(info != NULL);
@@ -159,8 +159,7 @@ mptcpd_addr_create(struct mptcpd_rtm_addr const *info)
         if (family != AF_INET && family != AF_INET6)
                 return NULL;
 
-        struct mptcpd_addr_info *const ai =
-                        l_new(struct mptcpd_addr_info, 1);
+        struct nm_addr_info *const ai = l_new(struct nm_addr_info, 1);
         ai->address.ss_family = family;
         ai->count = 1;
 
@@ -183,7 +182,7 @@ mptcpd_addr_create(struct mptcpd_rtm_addr const *info)
         return ai;
 }
 
-static void mptcpd_addr_cancel_timeout(struct mptcpd_addr_info *ai)
+static void mptcpd_addr_cancel_timeout(struct nm_addr_info *ai)
 {
         if (!ai->timeout)
                 return;
@@ -193,13 +192,16 @@ static void mptcpd_addr_cancel_timeout(struct mptcpd_addr_info *ai)
 }
 
 /**
- * @brief Drop a reference to a @c mptcpd_addr_info object, ev.destroying it
+ * @brief Drop a reference count to a @c nm_addr_info object.
  *
- * @param[in,out] Pointer to the @c mptcpd_addr_info object to be released.
+ * Drop reference count to a @c nm_addr_info object, eventually destroying
+ * it when the reference count drops to zero.
+ *
+ * @param[in,out] Pointer to the @c nm_addr_info object to be released.
  */
 static void mptcpd_addr_put(void *data)
 {
-        struct mptcpd_addr_info *const ai = data;
+        struct nm_addr_info *const ai = data;
         if (--ai->count == 0) {
                 mptcpd_addr_cancel_timeout(ai);
                 l_free(data);
@@ -207,16 +209,18 @@ static void mptcpd_addr_put(void *data)
 }
 
 /**
- * @brief Acquire a reference to a @c mptcpd_addr_info object
+ * @brief Acquire a reference to a @c nm_addr_info object
  *
- * @param[in,out] Pointer to the @c mptcpd_addr_info object to be destroyed.
+ * @param[in,out] Pointer to the @c nm_addr_info object to be destroyed.
  */
-static void mptcpd_addr_get(struct mptcpd_addr_info *ai)
+static void mptcpd_addr_get(struct nm_addr_info *ai)
 {
         ai->count++;
 }
 
-static const char *mptcpd_addr_to_string(const struct mptcpd_addr_info *ai, char *out, int size)
+static const char *mptcpd_addr_to_string(struct nm_addr_info const *ai,
+                                         char *out,
+                                         int size)
 {
         void const *src;
 
@@ -230,9 +234,9 @@ static const char *mptcpd_addr_to_string(const struct mptcpd_addr_info *ai, char
 }
 
 /**
- * @brief Compare two @c mptcpd_addr_info objects.
+ * @brief Compare two @c nm_addr_info objects.
  *
- * Compare @c mptcpd_addr_info objects to determine where in the network
+ * Compare @c nm_addr_info objects to determine where in the network
  * address list the first object, @a a, will be inserted relative to
  * the second object, @a b.
  *
@@ -253,14 +257,14 @@ mptcpd_addr_compare(void const *a, void const *b, void *user_data)
 }
 
 /**
- * @brief Match a @c mptcpd_addr_info object.
+ * @brief Match a @c nm_addr_info object.
  *
- * A network address represented by @a a (@c struct @c mptcpd_addr_info)
+ * A network address represented by @a a (@c struct @c nm_addr_info)
  * matches if its @c family and IPv4/IPv6 address members match those
  * in @a b.
  *
  * @param[in] a Currently monitored network address of type @c struct
- *              @c mptcpd_addr_info*.
+ *              @c nm_addr_info*.
  * @param[in] b Network address information of type @c struct
  *              @c mptcpd_rtm_addr* to be compared against network
  *              address @a a.
@@ -273,7 +277,7 @@ mptcpd_addr_compare(void const *a, void const *b, void *user_data)
  */
 static bool mptcpd_addr_match(void const *a, void const *b)
 {
-        struct mptcpd_addr_info const *const lhs = a;
+        struct nm_addr_info const *const lhs = a;
         struct mptcpd_rtm_addr const *const rhs = b;
 
         assert(lhs);
@@ -724,9 +728,9 @@ static void handle_link(uint16_t type,
  */
 static void notify_new_address(void *data, void *user_data)
 {
-        struct nm_ops_info            *const info = data;
-        struct mptcpd_nm_ops    const *const ops  = info->ops;
-        struct mptcpd_addr_info const *const ai   = user_data;
+        struct nm_ops_info         *const info = data;
+        struct mptcpd_nm_ops const *const ops  = info->ops;
+        struct nm_addr_info  const *const ai   = user_data;
 
         if (ops->new_address)
                 ops->new_address(ai->interface,
@@ -742,9 +746,9 @@ static void notify_new_address(void *data, void *user_data)
  */
 static void notify_delete_address(void *data, void *user_data)
 {
-        struct nm_ops_info            *const info = data;
-        struct mptcpd_nm_ops    const *const ops  = info->ops;
-        struct mptcpd_addr_info const *const ai   = user_data;
+        struct nm_ops_info         *const info = data;
+        struct mptcpd_nm_ops const *const ops  = info->ops;
+        struct nm_addr_info  const *const ai   = user_data;
 
         if (ops->delete_address)
                 ops->delete_address(ai->interface,
@@ -758,14 +762,14 @@ static void notify_delete_address(void *data, void *user_data)
  * @param[in] interface @c mptcpd network interface information.
  * @param[in] rtm_addr  New network address information.
  *
- * @return Inserted @c sockaddr object corresponding to the new
+ * @return Inserted @c nm_addr_info object corresponding to the new
  *         network address.
  */
-static struct mptcpd_addr_info *
+static struct nm_addr_info *
 insert_addr_return(struct mptcpd_interface *interface,
                    struct mptcpd_rtm_addr const *rtm_addr)
 {
-        struct mptcpd_addr_info *addr = mptcpd_addr_create(rtm_addr);
+        struct nm_addr_info *addr = mptcpd_addr_create(rtm_addr);
 
         if (addr == NULL
             || !l_queue_insert(interface->addrs,
@@ -831,12 +835,12 @@ static size_t add_attr_address(void *buf, unsigned short type,
                             is_ipv4 ? sizeof(struct in_addr) : sizeof(struct in6_addr));
 }
 
-static void check_default_route(struct mptcpd_addr_info *ai);
+static void check_default_route(struct nm_addr_info *ai);
 
 static void handle_rtm_timeout(struct l_timeout *timeout,
                                void *user_data)
 {
-        struct mptcpd_addr_info *ai = user_data;
+        struct nm_addr_info *ai = user_data;
 
         (void) timeout;
         check_default_route(ai);
@@ -844,7 +848,7 @@ static void handle_rtm_timeout(struct l_timeout *timeout,
 
 #define MPTCPD_MAX_ROUTE_CHECK          3
 
-static void schedule_route_check(struct mptcpd_addr_info *ai)
+static void schedule_route_check(struct nm_addr_info *ai)
 {
         if (ai->attempts++ > MPTCPD_MAX_ROUTE_CHECK) {
                 char str[INET6_ADDRSTRLEN];
@@ -873,7 +877,7 @@ static void handle_rtm_getroute(int error,
                                 uint32_t len,
                                 void *user_data)
 {
-        struct mptcpd_addr_info *ai = user_data;
+        struct nm_addr_info *ai = user_data;
         char str[INET6_ADDRSTRLEN];
         uint32_t ifindex = 0;
         char *dst = NULL;
@@ -927,7 +931,7 @@ again:
         schedule_route_check(ai);
 }
 
-static void check_default_route(struct mptcpd_addr_info *ai)
+static void check_default_route(struct nm_addr_info *ai)
 {
         struct {
                 struct rtmsg route_msg;
@@ -991,7 +995,7 @@ static void update_addr(struct mptcpd_nm *nm,
             && (rtm_addr->ifa->ifa_scope == RT_SCOPE_HOST))
                 return;
 
-        struct mptcpd_addr_info *addr =
+        struct nm_addr_info *addr =
                 l_queue_find(interface->addrs,
                              mptcpd_addr_match,
                              rtm_addr);
