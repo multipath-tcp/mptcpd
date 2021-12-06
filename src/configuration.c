@@ -325,7 +325,7 @@ static void set_plugins_to_load(struct mptcpd_config *config,
         while (token) {
                 l_queue_push_tail(
                         (struct l_queue *) config->plugins_to_load,
-                        strdup(token));
+                        l_strdup(token));
 
                 token = strtok(NULL, ",");
         }
@@ -815,7 +815,7 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
                 && check_config(config);
 
         l_queue_destroy((struct l_queue *) sys_config.plugins_to_load,
-                        free);
+                        l_free);
         l_free((char *) sys_config.default_plugin);
         l_free((char *) sys_config.plugin_dir);
 
@@ -862,7 +862,7 @@ void mptcpd_config_destroy(struct mptcpd_config *config)
                 return;
 
         l_queue_destroy((struct l_queue *) config->plugins_to_load,
-                        free);
+                        l_free);
         l_free((char *) config->default_plugin);
         l_free((char *) config->plugin_dir);
         l_free(config);
