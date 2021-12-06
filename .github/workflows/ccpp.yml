@@ -11,6 +11,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        debug: [yes, no]
+
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
@@ -26,7 +30,7 @@ jobs:
     - name: bootstrap
       run: ./bootstrap
     - name: configure
-      run: ./configure
+      run: ./configure --enable-debug=${{ matrix.debug }}
     - name: make
       run: make
     - name: make check
