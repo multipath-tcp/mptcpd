@@ -164,14 +164,17 @@ mptcpd_addr_create(struct mptcpd_rtm_addr const *info)
         ai->count = 1;
 
         if (family == AF_INET) {
-                struct sockaddr_in *const a = (struct sockaddr_in *) &ai->address;
+                struct sockaddr_in *const a =
+                        (struct sockaddr_in *) &ai->address;
+
                 /*
                   Kernel nla_put_in_addr() inserts a big endian 32
                   bit unsigned integer, not struct in_addr.
                 */
                 a->sin_addr.s_addr = *(uint32_t const*) info->addr;
         } else {
-                struct sockaddr_in6 *const a = (struct sockaddr_in6 *) &ai->address;
+                struct sockaddr_in6 *const a =
+                        (struct sockaddr_in6 *) &ai->address;
 
                 struct in6_addr const *const sa =
                         (struct in6_addr const*) info->addr;
@@ -282,7 +285,8 @@ static bool mptcpd_addr_match(void const *a, void const *b)
 
         assert(lhs);
         assert(rhs);
-        assert(lhs->address.ss_family == AF_INET || lhs->address.ss_family == AF_INET6);
+        assert(lhs->address.ss_family == AF_INET
+               || lhs->address.ss_family == AF_INET6);
 
         bool matched = (lhs->address.ss_family == rhs->ifa->ifa_family);
 
@@ -828,11 +832,15 @@ static size_t add_attr_u32(void *buf, unsigned short type, uint32_t value)
         return raw_add_attr(buf, type, &value, sizeof(uint32_t));
 }
 
-static size_t add_attr_address(void *buf, unsigned short type,
-                               bool is_ipv4, void const *addr)
+static size_t add_attr_address(void *buf,
+                               unsigned short type,
+                               bool is_ipv4,
+                               void const *addr)
 {
         return raw_add_attr(buf, type, addr,
-                            is_ipv4 ? sizeof(struct in_addr) : sizeof(struct in6_addr));
+                            is_ipv4
+                            ? sizeof(struct in_addr)
+                            : sizeof(struct in6_addr));
 }
 
 static void check_default_route(struct nm_addr_info *ai);
@@ -853,16 +861,22 @@ static void schedule_route_check(struct nm_addr_info *ai)
         if (ai->attempts++ > MPTCPD_MAX_ROUTE_CHECK) {
                 char str[INET6_ADDRSTRLEN];
 
-                l_debug("timeout while waiting for default route on address %s",
+                l_debug("timeout while waiting for "
+                        "default route on address %s",
                         mptcpd_addr_to_string(ai, str, INET6_ADDRSTRLEN));
                 mptcpd_addr_put(ai);
                 return;
         }
 
         if (!ai->timeout) {
-                ai->timeout = l_timeout_create_ms(1, handle_rtm_timeout, ai, NULL);
+                ai->timeout =
+                        l_timeout_create_ms(1,
+                                            handle_rtm_timeout,
+                                            ai,
+                                            NULL);
+
                 if (!ai->timeout) {
-                        l_error("can't harm route re-check timeout");
+                        l_error("can't arm route re-check timeout");
                         mptcpd_addr_put(ai);
                 }
         } else {
@@ -883,20 +897,34 @@ static void handle_rtm_getroute(int error,
         char *dst = NULL;
 
         if (error != 0) {
-                l_info("can't resolved default route from %s interface %d: %d",
+                l_info("can't resolved default route "
+                       "from %s interface %d: %d",
                        mptcpd_addr_to_string(ai, str, INET6_ADDRSTRLEN),
-                       ai->index, error);
+                       ai->index,
+                       error);
                 goto again;
         }
 
         (void) type;
         assert(type == RTM_NEWROUTE);
         if (ai->address.ss_family == AF_INET) {
-                l_rtnl_route4_extract(data, len, NULL, &ifindex, &dst, NULL, NULL);
+                l_rtnl_route4_extract(data,
+                                      len,
+                                      NULL,
+                                      &ifindex,
+                                      &dst,
+                                      NULL,
+                                      NULL);
                 if (dst)
                         goto bad_dst;
         } else {
-                l_rtnl_route6_extract(data, len, NULL, &ifindex, &dst, NULL, NULL);
+                l_rtnl_route6_extract(data,
+                                      len,
+                                      NULL,
+                                      &ifindex,
+                                      &dst,
+                                      NULL,
+                                      NULL);
                 if (dst)
                         goto bad_dst;
         }
@@ -915,17 +943,22 @@ static void handle_rtm_getroute(int error,
         ai->interface = l_queue_find(ai->nm->interfaces,
                                      mptcpd_interface_match,
                                      &ai->index);
+
         l_info("found default route for address %s on interface %d",
                mptcpd_addr_to_string(ai, str, INET6_ADDRSTRLEN), ai->index);
+
         if (ai->interface)
                 l_queue_foreach(ai->nm->ops,
                                 notify_new_address,
                                 ai);
+
         mptcpd_addr_put(ai);
+
         return;
 
 bad_dst:
-        l_info("found not default route with destination %s", dst ? dst : "");
+        l_info("found non-default route with destination %s",
+               dst ? dst : "");
 
 again:
         schedule_route_check(ai);
@@ -937,30 +970,31 @@ static void check_default_route(struct nm_addr_info *ai)
                 struct rtmsg route_msg;
                 char buf[1024];
         } store;
-        void const *addr;
-        bool is_ipv4;
-        char *buf;
 
-        is_ipv4 = ai->address.ss_family == AF_INET;
+        bool const is_ipv4 = ai->address.ss_family == AF_INET;
         memset(&store, 0, sizeof(store));
         store.route_msg.rtm_family = ai->address.ss_family;
         store.route_msg.rtm_flags = RTM_F_LOOKUP_TABLE | RTM_F_FIB_MATCH;
         store.route_msg.rtm_dst_len = is_ipv4 ? 32: 128;
 
-        buf = (char *) &store + NLMSG_ALIGN(sizeof(struct rtmsg));
+        char *buf = (char *) &store + NLMSG_ALIGN(sizeof(struct rtmsg));
         buf += add_attr_u32(buf, RTA_OIF, ai->index);
 
-        addr = &test_net_v6;
+        void const *addr = &test_net_v6;
+
         if (is_ipv4)
                 addr = &test_net_v4;
+
         buf += add_attr_address(buf, RTA_DST, is_ipv4, addr);
 
-        /* an address delete event can attempt to
-         * free this addr info before we get the route reply,
-         * acquire a reference, so that memory will not be
-         * released before the handler will access it
+        /*
+          An address delete event can attempt to free this addr info
+          before we get the route reply, acquire a reference, so that
+          memory will not be released before the handler will access
+          it.
          */
         mptcpd_addr_get(ai);
+
         if (l_netlink_send(ai->nm->rtnl,
             RTM_GETROUTE,
             0,
