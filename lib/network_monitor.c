@@ -966,16 +966,18 @@ again:
 
 static void check_default_route(struct nm_addr_info *ai)
 {
+        bool const is_ipv4 = ai->address.ss_family == AF_INET;
+
         struct {
                 struct rtmsg route_msg;
                 char buf[1024];
-        } store;
-
-        bool const is_ipv4 = ai->address.ss_family == AF_INET;
-        memset(&store, 0, sizeof(store));
-        store.route_msg.rtm_family = ai->address.ss_family;
-        store.route_msg.rtm_flags = RTM_F_LOOKUP_TABLE | RTM_F_FIB_MATCH;
-        store.route_msg.rtm_dst_len = is_ipv4 ? 32: 128;
+        } store = {
+                .route_msg = {
+                        .rtm_family  = ai->address.ss_family,
+                        .rtm_flags   = RTM_F_LOOKUP_TABLE | RTM_F_FIB_MATCH,
+                        .rtm_dst_len = is_ipv4 ? 32: 128
+                }
+        };
 
         char *buf = (char *) &store + NLMSG_ALIGN(sizeof(struct rtmsg));
         buf += add_attr_u32(buf, RTA_OIF, ai->index);
@@ -989,9 +991,8 @@ static void check_default_route(struct nm_addr_info *ai)
 
         /*
           An address delete event can attempt to free this addr info
-          before we get the route reply, acquire a reference, so that
-          memory will not be released before the handler will access
-          it.
+          before we get the route reply.  Acquire a reference so that
+          memory will not be released before the handler accesses it.
          */
         mptcpd_addr_get(ai);
 
