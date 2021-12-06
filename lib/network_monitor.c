@@ -907,6 +907,7 @@ static void handle_rtm_getroute(int error,
 
         (void) type;
         assert(type == RTM_NEWROUTE);
+
         if (ai->address.ss_family == AF_INET) {
                 l_rtnl_route4_extract(data,
                                       len,
@@ -915,8 +916,6 @@ static void handle_rtm_getroute(int error,
                                       &dst,
                                       NULL,
                                       NULL);
-                if (dst)
-                        goto bad_dst;
         } else {
                 l_rtnl_route6_extract(data,
                                       len,
@@ -925,9 +924,10 @@ static void handle_rtm_getroute(int error,
                                       &dst,
                                       NULL,
                                       NULL);
-                if (dst)
-                        goto bad_dst;
         }
+
+        if (dst)
+                goto bad_dst;
 
         if ((int)ifindex != ai->index) {
                 l_info("interface mismatch %d:%d", ifindex, ai->index);
