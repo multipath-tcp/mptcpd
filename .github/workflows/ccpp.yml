@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        debug: [yes, no]
+        debug: [enable-debug, disable-debug]
 
     steps:
     - uses: actions/checkout@v2
@@ -30,7 +30,7 @@ jobs:
     - name: bootstrap
       run: ./bootstrap
     - name: configure
-      run: ./configure --enable-debug=${{ matrix.debug }}
+      run: ./configure --${{ matrix.debug }}
     - name: make
       run: make
     - name: make check
