@@ -134,3 +134,7 @@ TESTS = $(check_PROGRAMS) $(dist_check_SCRIPTS)
 
 # Clean up code coverage related generated files.
 clean-local: code-coverage-clean
+
+@VALGRIND_CHECK_RULES@
+#VALGRIND_SUPPRESSIONS_FILES = mptcpd.supp
+#EXTRA_DIST = mptcpd.supp

@@ -58,6 +58,12 @@ AC_CONFIG_COMMANDS_PRE([
   AC_SUBST([CODE_COVERAGE_RULES])
 ])
 
+dnl Check whether to enable running unit tests through valgrind.
+AX_VALGRIND_DFLT([helgrind], [off])
+AX_VALGRIND_DFLT([drd],      [off])
+AX_VALGRIND_DFLT([sgcheck],  [off])
+AX_VALGRIND_CHECK
+
 # Check for Doxygen
 DX_DOXYGEN_FEATURE(ON)
 DX_DOT_FEATURE(ON)
