@@ -1,0 +1,37 @@
+name: Valgrind
+
+on: ["push", "pull_request"]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: dependencies
+      run: sudo apt-get -y install autoconf-archive valgrind wget pandoc git
+    - name: build and install ELL
+      run: |
+        git clone git://git.kernel.org/pub/scm/libs/ell/ell.git
+        cd ell
+        git checkout 0.30
+        ./bootstrap
+        ./configure --prefix=/usr
+        sudo make install
+    # The AX_VALGRIND_CHECK as of version (serial) 17 doesn't
+    # correctly implement Automake recursive rules.  Get the updated
+    # macro from GitHub pull request
+    # autoconf-archive/autoconf-archive#242 for the fix.
+    - name: get updated ax_valgrind_check.m4
+      run: |
+        cd m4
+        wget https://raw.githubusercontent.com/autoconf-archive/autoconf-archive/6b04d9611a0bcc5bfa61f6e5a614b3672f16d196/m4/ax_valgrind_check.m4
+    - name: bootstrap
+      run: ./bootstrap
+    - name: configure
+      run: ./configure --enable-valgrind
+    - name: make
+      run: make
+    - name: make check-valgrind
+      run: make check-valgrind
