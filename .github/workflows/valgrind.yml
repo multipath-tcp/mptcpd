@@ -19,15 +19,6 @@ jobs:
         ./bootstrap
         ./configure --prefix=/usr
         sudo make install
-    # The AX_VALGRIND_CHECK as of version (serial) 17 doesn't
-    # correctly implement Automake recursive rules.  Get the updated
-    # macro from GitHub pull request
-    #   https://github.com/autoconf-archive/autoconf-archive/pull/242
-    # for the fix.
-    - name: get updated ax_valgrind_check.m4
-      run: |
-        cd m4
-        wget https://raw.githubusercontent.com/autoconf-archive/autoconf-archive/6b04d9611a0bcc5bfa61f6e5a614b3672f16d196/m4/ax_valgrind_check.m4
     - name: bootstrap
       run: ./bootstrap
     - name: configure

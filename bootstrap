@@ -1,6 +1,61 @@
 #! /bin/sh
 # SPDX-License-Identifier: BSD-3-Clause
 
-# Copyright (c) 2019, Intel Corporation
+# Copyright (c) 2019, 2021, Intel Corporation
+
+# Check if the AX_VALGRIND_CHECK Autoconf Archive macro has the
+# recursive Makefile rule target corrections found in the GitHub pull
+# request at:
+#
+#   https://github.com/autoconf-archive/autoconf-archive/pull/242
+#
+# Download the patched `ax_valgrind_check.m4' file if the corrections
+# don't exist.
+
+local_m4_exists=0
+test -f m4/ax_valgrind_check.m4 && local_m4_exists=1
+
+do_download=no
+
+if test $local_m4_exists -eq 1
+then
+    echo Using local m4/ax_valgrind_check.m4 file.
+else
+    ac_dir=`aclocal --print-ac-dir`
+    grep --quiet check-valgrind-local $ac_dir/ax_valgrind_check.m4
+    if test $? -ne 0
+    then
+	do_download=yes
+    fi
+fi
+
+if test "x$do_download" = "xyes"
+then
+    # The expected recursive target "check-valgrind-local" doesn't
+    # exist.  Attempt to download the patch file in the GitHub pull
+    # request autoconf-archive/autoconf-archive#242 to the mptcpd/m4
+    # directory so that autoreconf will use the updated
+    # AC_VALGRIND_CHECK macro.
+    echo Patched AX_VALGRIND_CHECK autoconf archive macro not found.
+    echo -n "Attempting to download patched ax_valgrind_check.m4... "
+    cd m4
+    wget --quiet --timeout 10 https://raw.githubusercontent.com/autoconf-archive/autoconf-archive/6b04d9611a0bcc5bfa61f6e5a614b3672f16d196/m4/ax_valgrind_check.m4
+    if test $? -eq 0
+    then
+        echo done
+	# Enable AX_VALGRIND_CHECK in case it was disabled in a
+	# previous run.
+        sed -e 's/^dnl AX_VALGRIND_CHECK/AX_VALGRIND_CHECK/' \
+            ../configure.ac > ../configure.ac.NEW
+        mv ../configure.ac.NEW ../configure.ac
+    else
+	echo failed
+        echo Disabling AX_VALGRIND_CHECK in configure.ac.
+        sed -e 's/^AX_VALGRIND_CHECK/dnl AX_VALGRIND_CHECK/' \
+            ../configure.ac > ../configure.ac.NEW
+        mv ../configure.ac.NEW ../configure.ac
+    fi
+    cd ..
+fi
 
 autoreconf --install --symlink --force
