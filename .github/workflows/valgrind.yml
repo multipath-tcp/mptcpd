@@ -27,5 +27,3 @@ jobs:
       run: make
     - name: make check-valgrind
       run: make check-valgrind
-    - name: memcheck errors
-      run: cat tests/test-suite-memcheck.log
