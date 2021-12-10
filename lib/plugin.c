@@ -291,7 +291,7 @@ static void load_plugins_queue(char const *dir,
                 l_queue_get_entries((struct l_queue *) plugins_to_load);
 
         while (entry) {
-                char const *const plugin_name = (char *) entry->data;
+                char *plugin_name = (char *) entry->data;
                 char *const path = l_strdup_printf("%s/%s.so",
                                                    dir,
                                                    plugin_name);
@@ -377,12 +377,11 @@ static int load_plugins(char const *dir,
 
         int ret = 0;
 
-        if (plugins_to_load)
+        if (plugins_to_load) {
                 load_plugins_queue(dir, plugins_to_load);
-        else
+                (void) close(fd);
+        } else
                 ret = load_plugins_all(fd, dir);
-
-        (void) close(fd);
 
         // Initialize all loaded plugins.
         l_queue_foreach(_plugin_infos, init_plugin, pm);
