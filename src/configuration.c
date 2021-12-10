@@ -185,7 +185,9 @@ static char *plugins_to_load_string(struct l_queue const *queue)
 {
         struct l_string *const string = l_string_new(128);
 
-        struct l_queue_entry const *entry = l_queue_get_entries(queue);
+        // Cast is needed for ELL < 0.41.
+        struct l_queue_entry const *entry =
+                l_queue_get_entries((struct l_queue *) queue);
 
         while (entry->next) {
                 l_string_append(string, entry->data);
