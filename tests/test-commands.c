@@ -98,11 +98,11 @@ static void get_addr_callback(struct mptcpd_addr_info const *info,
          *      end up not being removed prior to test exit.
          */
         assert(info != NULL);
-        assert(info->id == id);
+        assert(mptcpd_addr_info_get_id(info) == id);
 
         struct sockaddr const *const addr = laddr1;
         assert(sockaddr_is_equal(addr,
-                                 (struct sockaddr *) &info->addr));
+                                 mptcpd_addr_info_get_addr(info)));
 }
 
 static void dump_addrs_callback(struct mptcpd_addr_info const *info,
@@ -117,11 +117,11 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
          *      end up not being removed prior to test exit.
          */
         assert(info != NULL);
-        assert(info->id == id);
+        assert(mptcpd_addr_info_get_id(info) == id);
 
         struct sockaddr const *const addr = laddr1;
         assert(sockaddr_is_equal(addr,
-                                 (struct sockaddr *) &info->addr));
+                                 mptcpd_addr_info_get_addr(info)));
 }
 
 static void dump_addrs_complete(void *user_data)
