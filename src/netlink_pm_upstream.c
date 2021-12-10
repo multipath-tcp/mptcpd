@@ -24,7 +24,7 @@
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/path_manager.h>
 #include <mptcpd/types.h>
-#include <mptcpd/addr_info.h>
+#include <mptcpd/private/addr_info.h>
 #include <mptcpd/private/sockaddr.h>
 
 #include "commands.h"
