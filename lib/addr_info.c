@@ -14,22 +14,34 @@
 struct sockaddr const *
 mptcpd_addr_info_get_addr(struct mptcpd_addr_info const *info)
 {
+        if (info == NULL)
+                return NULL;
+
         return (struct sockaddr const *) &info->addr;
 }
 
 mptcpd_aid_t mptcpd_addr_info_get_id(struct mptcpd_addr_info const *info)
 {
+        if (info == NULL)
+                return 0;  /// @todo Good value to return on error?
+
         return info->id;
 }
 
 mptcpd_flags_t
 mptcpd_addr_info_get_flags(struct mptcpd_addr_info const *info)
 {
+        if (info == NULL)
+                return 0;
+
         return info->flags;
 }
 
 int mptcpd_addr_info_get_index(struct mptcpd_addr_info const *info)
 {
+        if (info == NULL)
+                return -1;
+
         return info->index;
 }
 
