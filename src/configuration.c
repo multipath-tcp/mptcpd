@@ -181,12 +181,11 @@ static char const *notify_flags_string(uint32_t flags,
         return flags_string(notify_flags_toks, flags, str, len);
 }
 
-static char const *plugins_to_load_string(struct l_queue const *queue)
+static char *plugins_to_load_string(struct l_queue const *queue)
 {
-        struct l_string *string = l_string_new(128);
+        struct l_string *const string = l_string_new(128);
 
-        struct l_queue_entry const *entry = 
-                l_queue_get_entries((struct l_queue *) queue);
+        struct l_queue_entry const *entry = l_queue_get_entries(queue);
 
         while (entry->next) {
                 l_string_append(string, entry->data);
@@ -269,7 +268,7 @@ static uint32_t notify_flags_from_string(char const *str)
  * @param[in]     src  Dynamically allocated string to assigned
  *                     @c *dest.
  */
-static void reset_string(char const **dest, char const *src)
+static void reset_string(char **dest, char *src)
 {
         assert(dest != NULL);  // *dest may be NULL.
 
@@ -287,7 +286,7 @@ static void reset_string(char const **dest, char const *src)
  * @param[in]     dir    Mptcpd plugin directory.  Ownership of memory
  *                       is transferred to @a config.
  */
-static void set_plugin_dir(struct mptcpd_config *config, char const *dir)
+static void set_plugin_dir(struct mptcpd_config *config, char *dir)
 {
         reset_string(&config->plugin_dir, dir);
 }
@@ -304,7 +303,7 @@ static void set_plugin_dir(struct mptcpd_config *config, char const *dir)
  *                       memory is transferred to @a config.
  */
 static void set_default_plugin(struct mptcpd_config *config,
-                               char const *plugin)
+                               char *plugin)
 {
         reset_string(&config->default_plugin, plugin);
 }
@@ -324,9 +323,8 @@ static void set_plugins_to_load(struct mptcpd_config *config,
 
         char *token = strtok(plugins, ",");
         while (token) {
-                l_queue_push_tail(
-                        (struct l_queue *) config->plugins_to_load,
-                        l_strdup(token));
+                l_queue_push_tail(config->plugins_to_load,
+                                  l_strdup(token));
 
                 token = strtok(NULL, ",");
         }
@@ -351,7 +349,7 @@ static char const doc[] = "Start the Multipath TCP daemon.";
 /// Command line option key for "--path-manager".
 #define MPTCPD_PATH_MANAGER_KEY 0x101
 
-/// Command line option key for "--addr-flags" 
+/// Command line option key for "--addr-flags"
 #define MPTCPD_ADDR_FLAGS_KEY 0x102
 
 /// Command line option key for "--notify-flags"
@@ -815,10 +813,9 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
                 && merge_config(config, &def_config)
                 && check_config(config);
 
-        l_queue_destroy((struct l_queue *) sys_config.plugins_to_load,
-                        l_free);
-        l_free((char *) sys_config.default_plugin);
-        l_free((char *) sys_config.plugin_dir);
+        l_queue_destroy(sys_config.plugins_to_load, l_free);
+        l_free(sys_config.default_plugin);
+        l_free(sys_config.plugin_dir);
 
         if (!parsed) {
                 // Failed to parse configuration.
@@ -847,11 +844,11 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
                         notify_flags_string(config->notify_flags, flags, sizeof(flags)));
 
         if (config->plugins_to_load){
-                char const *str = 
+                char *const str =
                         plugins_to_load_string(config->plugins_to_load);
 
                 l_debug("plugins to load: %s", str);
-                l_free((char *) str);
+                l_free(str);
         }
 
         return config;
@@ -862,10 +859,9 @@ void mptcpd_config_destroy(struct mptcpd_config *config)
         if (config == NULL)
                 return;
 
-        l_queue_destroy((struct l_queue *) config->plugins_to_load,
-                        l_free);
-        l_free((char *) config->default_plugin);
-        l_free((char *) config->plugin_dir);
+        l_queue_destroy(config->plugins_to_load, l_free);
+        l_free(config->default_plugin);
+        l_free(config->plugin_dir);
         l_free(config);
 }
 
