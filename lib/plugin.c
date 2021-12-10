@@ -380,8 +380,14 @@ static int load_plugins(char const *dir,
         if (plugins_to_load) {
                 load_plugins_queue(dir, plugins_to_load);
                 (void) close(fd);
-        } else
+        } else {
                 ret = load_plugins_all(fd, dir);
+                /*
+                  No need call close() since the fdopendir() call in
+                  load_plugins_all() claims ownership of the file
+                  descriptor.  There is no ref count bump.
+                */
+        }
 
         // Initialize all loaded plugins.
         l_queue_foreach(_plugin_infos, init_plugin, pm);
