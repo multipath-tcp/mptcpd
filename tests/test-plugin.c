@@ -26,7 +26,7 @@
 #include "test-plugin.h"
 
 
-static bool run_plugin_load(mode_t mode, struct l_queue *queue)
+static bool run_plugin_load(mode_t mode, struct l_queue const *queue)
 {
         static char const dir[]            = TEST_PLUGIN_DIR_SECURITY;
         static char const default_plugin[] = TEST_PLUGIN_FOUR;
@@ -42,7 +42,8 @@ static bool run_plugin_load(mode_t mode, struct l_queue *queue)
         int const mode_ok = fchmod(fd, mode);
         assert(mode_ok == 0);
 
-        bool const loaded = mptcpd_plugin_load(dir, default_plugin, queue, pm);
+        bool const loaded =
+                mptcpd_plugin_load(dir, default_plugin, queue, pm);
 
         if (loaded) {
                 call_plugin_ops(&test_count_4,
@@ -136,12 +137,13 @@ static void test_existing_plugins(void const *test_data)
         // Owner and group read/write/execute permissions.
         mode_t const mode = S_IRWXU | S_IRWXG;
 
-        struct l_queue *plugins_list=
-                l_queue_new();
+        struct l_queue *const plugins_list = l_queue_new();
 
         l_queue_push_tail(plugins_list, "four");
 
         bool const loaded = run_plugin_load(mode, plugins_list);
+
+        l_queue_destroy(plugins_list, NULL);
 
         assert(loaded);
 }
@@ -159,12 +161,13 @@ static void test_nonexisting_plugins(void const *test_data)
         // Owner and group read/write/execute permissions.
         mode_t const mode = S_IRWXU | S_IRWXG;
 
-        struct l_queue *plugins_list=
-                l_queue_new();
+        struct l_queue *const plugins_list = l_queue_new();
 
         l_queue_push_tail(plugins_list, "nonexisting_plugin");
 
         bool const loaded = run_plugin_load(mode, plugins_list);
+
+        l_queue_destroy(plugins_list, NULL);
 
         assert(!loaded);
 }
@@ -183,7 +186,8 @@ static void test_plugin_dispatch(void const *test_data)
         static char const *const default_plugin = NULL;
         struct mptcpd_pm *const pm = NULL;
 
-        bool const loaded = mptcpd_plugin_load(dir, default_plugin, NULL, pm);
+        bool const loaded =
+                mptcpd_plugin_load(dir, default_plugin, NULL, pm);
         assert(loaded);
 
         // Notice that we call plugin 1 twice.
