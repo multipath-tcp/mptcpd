@@ -42,7 +42,7 @@ struct mptcpd_config
         mptcpd_set_log_func_t log_set;
 
         /// Location of mptcpd plugins.
-        char const *plugin_dir;
+        char *plugin_dir;
 
         /**
          * @brief flags for addresses create
@@ -62,10 +62,10 @@ struct mptcpd_config
          * if a path management strategy wasn't configured for a given
          * MPTCP connection.
          */
-        char const *default_plugin;
+        char *default_plugin;
 
         /// A list of plugins to load.
-        struct l_queue const *plugins_to_load;
+        struct l_queue *plugins_to_load;
 };
 
 /**
