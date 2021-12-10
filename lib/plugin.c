@@ -291,11 +291,18 @@ static void load_plugins_queue(char const *dir,
                 l_queue_get_entries((struct l_queue *) plugins_to_load);
 
         while (entry) {
-                char *plugin_name = (char *) entry->data;
+                char const *const plugin_name = (char *) entry->data;
                 char *const path = l_strdup_printf("%s/%s.so",
                                                    dir,
                                                    plugin_name);
 
+                /*
+                   No need to verify if the file exists or if it's
+                   readable since the dlopen() call in load_plugin()
+                   returns NULL if it's not the case. Additional
+                   verification, using for example access(), would only
+                   introduce a TOCTOU race condition.
+                 */
                 load_plugin(path);
 
                 l_free(path);
