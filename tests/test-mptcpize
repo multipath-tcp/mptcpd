@@ -1,0 +1,55 @@
+#! /bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Test mptcpize.
+#
+# Copyright (c) 2021, Intel Corporation
+
+
+set -e
+
+mptcpize=../src/mptcpize
+old_unit=./test-mptcpize.service.ORIG
+new_unit=./test-mptcpize.service
+mptcpwrap_regex="LD_PRELOAD=.*libmptcpwrap.*"
+
+# Sanity check
+grep -qv $mptcpwrap_regex $old_unit
+
+# Test "mptcpize run ..."
+# We can't run the "mptcpize run" test since mptcpize assigns the
+# installed path of libmptcpwrap, such as:
+#     /usr/local/lib/mptcpd/libmptcpwrap.so.0.0.1
+# to the LD_PRELOAD environment variable, ultimately resulting in a
+# "cannot be preloaded" error from the dynamic linker (ld.so).
+#
+# echo TEST: run
+# $mptcpize run -d ./mptcpwrap-tester
+
+# Test "mptcpize enable ..."
+echo TEST: enable
+if [ `id -u` -eq 0 ]
+then
+    cp $old_unit $new_unit
+    $mptcpize enable $new_unit
+    grep -q $mptcpwrap_regex $new_unit
+else
+    # mptcpize runs "systemctl daemon-reload".
+    echo \"mptcpize enable\" test requires root privileges.  Ignoring.
+fi
+
+# Test "mptcpize disable ..."
+echo TEST: disable
+if [ `id -u` -eq 0 ]
+then
+    $mptcpize disable $new_unit
+    grep -qv "$mptcpwrap_regex" $new_unit
+    rm -f $new_unit
+else
+    # mptcpize runs "systemctl daemon-reload".
+    echo \"mptcpize disable\" test requires root privileges.  Ignoring.
+fi
+
+# Test "mptcpize help ..."
+echo TEST: help
+$mptcpize help > /dev/null 2>&1

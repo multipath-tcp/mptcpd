@@ -29,7 +29,6 @@ check_PROGRAMS =		\
 	test-id-manager		\
 	test-sockaddr
 
-
 noinst_PROGRAMS = mptcpwrap-tester
 
 dist_check_SCRIPTS =		\
@@ -40,7 +39,10 @@ dist_check_SCRIPTS =		\
 	test-bad-path-manager	\
 	test-bad-plugin-dir	\
 	test-start-stop		\
-	test-mptcpwrap
+	test-mptcpwrap		\
+	test-mptcpize
+
+dist_check_DATA = test-mptcpize.service.ORIG
 
 test_plugin_SOURCES = test-plugin.c
 test_plugin_CPPFLAGS =							\
