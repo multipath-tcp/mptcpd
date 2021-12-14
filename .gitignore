@@ -52,6 +52,8 @@ tests/test-cxx-build
 tests/test-id-manager
 tests/test-sockaddr
 tests/mptcpwrap-tester
+tests/test-mptcpize
+tests/test-mptcpize.service
 tests/*.log
 tests/*.trs
 tests/test-suite.log

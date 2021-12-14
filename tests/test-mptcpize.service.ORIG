@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# Copyright (c) 2021, Intel Corporation
+
+[Unit]
+Description=mptcpize test systemd unit file
+
+[Service]
+Type=simple
+ExecStart=foo

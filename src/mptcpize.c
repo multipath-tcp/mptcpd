@@ -2,7 +2,7 @@
 /**
  * @file mptcpize.c
  *
- * @brief enable mptcp on existing services.
+ * @brief Enable MPTCP on existing services.
  *
  * Copyright (c) 2021, Red Hat, Inc.
  */
@@ -227,15 +227,26 @@ static int unit_update(int argc, char *argv[], int enable)
 		error(1, errno, "can't open %s for writing", unit);
 
 	while (bytes_copied < fileinfo.st_size)
-		if (sendfile(unit_fd, dst, &bytes_copied, fileinfo.st_size - bytes_copied) < 0)
-			error(1, errno, "can't copy from %s to %s", dst_path, unit);
+                if (sendfile(unit_fd,
+                             dst,
+                             &bytes_copied,
+                             fileinfo.st_size - bytes_copied) < 0)
+                        error(1,
+                              errno,
+                              "can't copy from %s to %s",
+                              dst_path,
+                              unit);
 
 	close(dst);
 	if (system("systemctl daemon-reload") != 0)
-		error(1, errno, "can't reload unit, manual 'systemctl daemon-reload' is required");
+		error(1,
+                      errno,
+                      "can't reload unit, manual 'systemctl daemon-reload' "
+                      "is required");
 
-	printf("mptcp successfully %s on unit %s\n",
-	       enable ? "enabled" : "disabled", unit);
+        printf("MPTCP successfully %s on unit %s\n",
+	       enable ? "enabled" : "disabled",
+               unit);
 	free(unit);
 	return 0;
 }
