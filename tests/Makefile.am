@@ -39,8 +39,11 @@ dist_check_SCRIPTS =		\
 	test-bad-path-manager	\
 	test-bad-plugin-dir	\
 	test-start-stop		\
-	test-mptcpwrap		\
-	test-mptcpize
+	test-mptcpwrap
+
+# Test scripts that should not be included in the mptcpd
+# source distribution.
+check_SCRIPTS = test-mptcpize
 
 dist_check_DATA = test-mptcpize.service.ORIG
 
@@ -126,7 +129,7 @@ test_cxx_build_LDADD =				\
 endif
 
 AM_TESTS_ENVIRONMENT = TEST_PLUGIN_DIR=$(TEST_PLUGIN_DIR_NOOP)
-TESTS = $(check_PROGRAMS) $(dist_check_SCRIPTS)
+TESTS = $(check_PROGRAMS) $(dist_check_SCRIPTS) $(check_SCRIPTS)
 
 # Clean up code coverage related generated files.
 clean-local: code-coverage-clean

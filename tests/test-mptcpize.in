@@ -9,7 +9,7 @@
 set -e
 
 mptcpize=../src/mptcpize
-old_unit=./test-mptcpize.service.ORIG
+old_unit=@srcdir@/test-mptcpize.service.ORIG
 new_unit=./test-mptcpize.service
 mptcpwrap_regex="LD_PRELOAD=.*libmptcpwrap.*"
 
@@ -38,7 +38,7 @@ else
     echo \"mptcpize enable\" test requires root privileges.  Ignoring.
 fi
 
-# Test "mptcpize disable ..."
+# Test "mptcpize diosable ..."
 echo TEST: disable
 if [ `id -u` -eq 0 ]
 then

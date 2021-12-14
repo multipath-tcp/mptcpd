@@ -345,8 +345,10 @@ AC_CONFIG_FILES([Makefile
                  scripts/Makefile
                  tests/Makefile
                  tests/lib/Makefile
+                 tests/test-mptcpize
                  tests/plugins/Makefile
                  tests/plugins/noop/Makefile
                  tests/plugins/priority/Makefile
                  tests/plugins/security/Makefile])
+AC_CONFIG_COMMANDS([test-mptcpize], [chmod 755 tests/test-mptcpize])
 AC_OUTPUT
