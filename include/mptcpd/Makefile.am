@@ -12,6 +12,7 @@ pkginclude_HEADERS =		\
 	types.h
 
 noinst_HEADERS =			\
+	private/addr_info.h		\
 	private/config.h		\
 	private/configuration.h		\
 	private/id_manager.h		\
