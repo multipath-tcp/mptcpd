@@ -5,6 +5,11 @@
 #
 # Copyright (c) 2018, 2019, 2021, Intel Corporation
 
+# Non-interactive sudo capable if exit code is 0.
+echo Running non-interactive sudo check...
+sudo -n echo "    succeeded"
+sudo_exit_code=$?
+
 set -e
 
 variable=`sysctl net.mptcp | grep enabled | sed -e 's/\(net.mptcp.*enabled\).*$/\1/'`
@@ -30,20 +35,24 @@ command="timeout --preserve-status \
                  --kill-after=5s   \
                  1s ../src/mptcpd --plugin-dir=$TEST_PLUGIN_DIR"
 
-if [ `id -u` -eq 0 ]
+
+# Only run the individual enabled/disabled MPTCP test cases if the
+# "enabled" value can be set non-interactively, i.e. sudo can be
+# executed without a password.  This is mostly useful for automated
+# builds.
+if [ $sudo_exit_code -eq 0 ]
 then
-    # Only run the test individual enabled/disabled MPTCP test cases
-    # if the test is run with root privileges.
     for value in $disable_value $enable_value
     do
 	echo "TEST CASE: $variable = $value"
-	sysctl -w $variable=$value
+	sudo -n sysctl -w $variable=$value
 	$command
     done
 
     # Reset the "enabled" value to its original value.
-    sysctl -w $variable=$old_value
+    sudo -n sysctl -w $variable=$old_value
 else
     # Non-root case.
+    echo Running test without root privileges
     $command
 fi
