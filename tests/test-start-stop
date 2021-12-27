@@ -3,15 +3,47 @@
 
 # Minimal mptcpd start/stop test.
 #
-# Copyright (c) 2018, 2019, Intel Corporation
-
+# Copyright (c) 2018, 2019, 2021, Intel Corporation
 
 set -e
+
+variable=`sysctl net.mptcp | grep enabled | sed -e 's/\(net.mptcp.*enabled\).*$/\1/'`
+old_value=`sysctl $variable | sed -e 's/.*= \(.*\)$/\1/'`
+
+disable_value=0
+enable_value=1
+
+# "Disabled" value is always 0, but the "enabled" value could be 1 or
+# 2, depending on the kernel in use.  For example, the
+# multipath-tcp.org kernel "enabled" value could be 1 or 2.  Use the
+# old "enabled" value in case it is 2 instead of 1.
+if [ $old_value -ne 0 ]
+then
+    enable_value=$old_value
+fi
 
 # @todo It would be better to have some sort of indication that
 #       mptcpd is fully up and running rather than timeout after a
 #       fixed amount of time like this.
-timeout --preserve-status \
-	--signal=TERM     \
-	--kill-after=5s   \
-         1s ../src/mptcpd --plugin-dir=$TEST_PLUGIN_DIR
+command="timeout --preserve-status \
+                 --signal=TERM     \
+                 --kill-after=5s   \
+                 1s ../src/mptcpd --plugin-dir=$TEST_PLUGIN_DIR"
+
+if [ `id -u` -eq 0 ]
+then
+    # Only run the test individual enabled/disabled MPTCP test cases
+    # if the test is run with root privileges.
+    for value in $disable_value $enable_value
+    do
+	echo "TEST CASE: $variable = $value"
+	sysctl -w $variable=$value
+	$command
+    done
+
+    # Reset the "enabled" value to its original value.
+    sysctl -w $variable=$old_value
+else
+    # Non-root case.
+    $command
+fi
