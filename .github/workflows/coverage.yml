@@ -26,7 +26,7 @@ jobs:
     - name: make
       run: make
     - name: make check
-      run: make check-code-coverage \
+      run: sudo make check-code-coverage \
              CODE_COVERAGE_OUTPUT_FILE=lcov.info \
              CODE_COVERAGE_LCOV_OPTIONS="--no-external --exclude */tests/*"
     - name: Coveralls
