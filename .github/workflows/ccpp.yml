@@ -33,7 +33,7 @@ jobs:
       run: make check
     - name: make distcheck
       run: make distcheck
-    - name: make check (root)
+    - name: sudo make check
       run: sudo make check
     - name: test log dump
       run: cat tests/test-suite.log
