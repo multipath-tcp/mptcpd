@@ -33,10 +33,10 @@ jobs:
       run: make check
     - name: make distcheck
       run: make distcheck
-    - name: sudo make check
+    - name: reset MPTCP limits
+      run: sudo ip mptcp limits set subflows 0 add_addr_accepted 0
+    - name: make check as root
       run: sudo make check
-    - name: test log dump
-      run: cat tests/test-suite.log
     - name: make install
       run: sudo make install
     - name: make installcheck
