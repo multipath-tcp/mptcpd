@@ -35,6 +35,8 @@ jobs:
       run: make distcheck
     - name: make check (root)
       run: sudo make check
+    - name: test log dump
+      run: cat tests/test-suite.log
     - name: make install
       run: sudo make install
     - name: make installcheck
