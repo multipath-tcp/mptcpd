@@ -29,10 +29,6 @@ jobs:
       run: make check-code-coverage \
              CODE_COVERAGE_OUTPUT_FILE=lcov.info \
              CODE_COVERAGE_LCOV_OPTIONS="--no-external --exclude */tests/*"
-    - name: make check as root
-      run: sudo make check-code-coverage \
-             CODE_COVERAGE_OUTPUT_FILE=lcov.info \
-             CODE_COVERAGE_LCOV_OPTIONS="--no-external --exclude */tests/*"
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
