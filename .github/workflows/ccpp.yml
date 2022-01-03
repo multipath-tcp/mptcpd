@@ -33,8 +33,6 @@ jobs:
       run: make check
     - name: make distcheck
       run: make distcheck
-    - name: reset MPTCP limits
-      run: sudo ip mptcp limits set subflows 0 add_addr_accepted 0
     - name: make check as root
       run: sudo make check
     - name: make install

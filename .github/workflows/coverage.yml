@@ -29,8 +29,6 @@ jobs:
       run: make check-code-coverage \
              CODE_COVERAGE_OUTPUT_FILE=lcov.info \
              CODE_COVERAGE_LCOV_OPTIONS="--no-external --exclude */tests/*"
-    - name: reset MPTCP limits
-      run: sudo ip mptcp limits set subflows 0 add_addr_accepted 0
     - name: make check as root
       run: sudo make check-code-coverage \
              CODE_COVERAGE_OUTPUT_FILE=lcov.info \
