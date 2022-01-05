@@ -10,8 +10,11 @@ echo Running non-interactive sudo check...
 sudo -n echo "    succeeded"
 sudo_exit_code=$?
 
-variable=`sysctl net.mptcp | grep enabled | sed -e 's/\(net.mptcp.*enabled\).*$/\1/'`
-old_value=`sysctl $variable | sed -e 's/.*= \(.*\)$/\1/'`
+# Detect MPTCP "enabled" sysctl variable name and value.
+#   upstream:          net.mptcp.enabled
+#   multipath-tcp.org: net.mptcp.mptcp_enabled
+variable=`sysctl --names --pattern 'mptcp.(|mptcp_)enabled' net.mptcp`
+old_value=`sysctl --values $variable`
 
 disable_value=0
 enable_value=1
