@@ -7,10 +7,8 @@
  * Copyright (c) 2018-2020, Intel Corporation
  */
 
-#undef NDEBUG
 #define _DEFAULT_SOURCE  // Enable IFF_... interface flags in <net/if.h>.
 
-#include <assert.h>
 #include <stdlib.h>
 
 #include <arpa/inet.h>   // For inet_ntop().
@@ -24,6 +22,10 @@
 #include <ell/queue.h>
 
 #include <mptcpd/network_monitor.h>
+
+#undef NDEBUG
+#include <assert.h>
+
 
 /// Test user "data".
 static int const coffee = 0xc0ffee;

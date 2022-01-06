@@ -7,9 +7,6 @@
  * Copyright (c) 2019-2021, Intel Corporation
  */
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <unistd.h>
 
 #include <ell/main.h>
@@ -24,6 +21,10 @@
 #include <mptcpd/private/configuration.h>  // INTERNAL!
 #include <mptcpd/private/path_manager.h>   // INTERNAL!
 #include <mptcpd/path_manager.h>
+
+#undef NDEBUG
+#include <assert.h>
+
 
 // -------------------------------------------------------------------
 

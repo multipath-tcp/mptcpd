@@ -7,10 +7,6 @@
  * Copyright (c) 2019-2021, Intel Corporation
  */
 
-#undef NDEBUG
-
-#include <assert.h>
-
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
 
@@ -21,6 +17,10 @@
 #include <mptcpd/plugin.h>
 
 #include "test-plugin.h"
+
+#undef NDEBUG
+#include <assert.h>
+
 
 // ----------------------------------------------------------------
 

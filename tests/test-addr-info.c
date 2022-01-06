@@ -7,9 +7,6 @@
  * Copyright (c) 2021, Intel Corporation
  */
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <ell/log.h>
 #include <ell/test.h>
 
@@ -17,7 +14,10 @@
 #include <mptcpd/private/addr_info.h>
 #include <mptcpd/private/sockaddr.h>
 
-    
+#undef NDEBUG
+#include <assert.h>
+
+
 static void test_bad_addr_info(void const *test_data)
 {
         (void) test_data;
