@@ -26,6 +26,9 @@ libmptcpd_test_la_LIBADD =			\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
 
+$(top_builddir)/lib/libmptcpd.la:
+	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS)
+
 # Clean up code coverage related generated files.
 clean-local: code-coverage-clean
 
