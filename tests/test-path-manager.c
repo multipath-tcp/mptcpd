@@ -75,6 +75,11 @@ static struct mptcpd_pm_ops const pm_ops = {
         .not_ready = pm_not_ready
 };
 
+static struct mptcpd_pm_ops const bad_pm_ops = {
+        .ready     = NULL,
+        .not_ready = NULL
+};
+
 // -------------------------------------------------------------------
 
 static void test_pm_create(void const *test_data)
@@ -101,7 +106,11 @@ static void test_pm_register_ops(void const *test_data)
         bool const registered =
                 mptcpd_pm_register_ops(info->pm, &pm_ops, info);
 
+        bool const not_registered =
+                !mptcpd_pm_register_ops(info->pm, &bad_pm_ops, info);
+
         assert(registered);
+        assert(not_registered);
 }
 
 static void test_pm_destroy(void const *test_data)
