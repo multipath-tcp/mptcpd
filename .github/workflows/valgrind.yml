@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
-      run: sudo apt-get -y install autoconf-archive valgrind wget pandoc git
+      run: sudo apt-get -y install autoconf-archive valgrind wget git
     - name: build and install ELL
       run: |
         git clone git://git.kernel.org/pub/scm/libs/ell/ell.git
