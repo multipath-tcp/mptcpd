@@ -7,15 +7,12 @@
  * Copyright (c) 2018-2021, Intel Corporation
  */
 
-#undef NDEBUG
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <assert.h>
 
 #include <ell/test.h>
 #include <ell/queue.h>
@@ -24,6 +21,9 @@
 #include <mptcpd/private/plugin.h>
 
 #include "test-plugin.h"
+
+#undef NDEBUG
+#include <assert.h>
 
 
 static bool run_plugin_load(mode_t mode, struct l_queue const *queue)

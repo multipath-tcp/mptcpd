@@ -7,10 +7,7 @@
  * Copyright (c) 2019, 2021, Intel Corporation
  */
 
-#undef NDEBUG
-
 #include <memory>
-#include <cassert>
 
 #include <ell/main.h>
 #include <ell/idle.h>
@@ -23,6 +20,10 @@
 #include <mptcpd/private/plugin.h>
 
 #include "test-plugin.h"
+
+#undef NDEBUG
+#include <cassert>
+
 
 /**
  * @class test_nm

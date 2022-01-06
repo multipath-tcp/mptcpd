@@ -7,9 +7,7 @@
  * Copyright (c) 2019-2021, Intel Corporation
  */
 
-#undef NDEBUG
 #include <unistd.h>
-#include <assert.h>
 #include <errno.h>
 #include <error.h>
 #include <stdlib.h>
@@ -38,6 +36,8 @@
 #include <mptcpd/addr_info.h>
 #include <mptcpd/id_manager.h>
 
+#undef NDEBUG
+#include <assert.h>
 
 // -------------------------------------------------------------------
 

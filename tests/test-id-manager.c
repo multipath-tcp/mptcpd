@@ -7,8 +7,6 @@
  * Copyright (c) 2020-2021, Intel Corporation
  */
 
-#undef NDEBUG
-#include <assert.h>
 #include <stddef.h>
 
 #include <ell/log.h>
@@ -18,6 +16,10 @@
 #include <mptcpd/id_manager.h>
 
 #include "test-plugin.h"  // For test sockaddrs
+
+#undef NDEBUG
+#include <assert.h>
+
 
 /// mptcpd ID manager.
 static struct mptcpd_idm *_idm;

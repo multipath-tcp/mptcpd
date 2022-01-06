@@ -7,13 +7,14 @@
  * Copyright (c) 2019-2021, Intel Corporation
  */
 
-#undef NDEBUG
-#include <assert.h>
 #include <stdlib.h>
 
 #include <mptcpd/private/plugin.h>
 
 #include "test-plugin.h"
+
+#undef NDEBUG
+#include <assert.h>
 
 
 void call_plugin_ops(struct plugin_call_count const *count,

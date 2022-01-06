@@ -7,9 +7,6 @@
  * Copyright (c) 2019, 2021, Intel Corporation
  */
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <ell/main.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
 #include <ell/log.h>
@@ -17,6 +14,8 @@
 
 #include <mptcpd/private/configuration.h>  // INTERNAL!
 
+#undef NDEBUG
+#include <assert.h>
 
 #define TEST_PROGRAM_NAME "test-configuration"
 

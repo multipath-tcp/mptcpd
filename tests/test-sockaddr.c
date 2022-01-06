@@ -7,15 +7,16 @@
  * Copyright (c) 2021, Intel Corporation
  */
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <ell/log.h>
 #include <ell/test.h>
 
 #include <mptcpd/private/sockaddr.h>
 
 #include "test-plugin.h"  // For test sockaddrs
+
+#undef NDEBUG
+#include <assert.h>
+
 
 static void test_bad_sockaddr_init(void const *test_data)
 {
