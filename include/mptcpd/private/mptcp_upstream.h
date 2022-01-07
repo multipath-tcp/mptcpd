@@ -16,8 +16,7 @@
 # include "mptcpd/private/config.h"
 #endif
 
-#if defined(HAVE_LINUX_MPTCP_H_UPSTREAM) \
-    && defined(HAVE_LINUX_MPTCP_H_UPSTREAM_EVENTS)
+#ifdef HAVE_LINUX_MPTCP_H_UPSTREAM
 # include <linux/mptcp.h>
 #else
 /*
