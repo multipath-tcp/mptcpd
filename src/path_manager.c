@@ -804,18 +804,11 @@ static void notify_pm_ready(void *data, void *user_data)
                 ops->ready(pm, info->user_data);
 }
 
-#ifdef HAVE_UPSTREAM_KERNEL
-        /*
-          MPTCP address IDs may already be assigned prior to mptcpd
-          start by other applications or previous runs of mptcpd.
-          Synchronize mptcpd address ID manager with address IDs
-          maintained by the kernel.
-         */
-        if (pm->netlink_pm->kcmd_ops->dump_addrs(pm,
-                                                 dump_addrs_callback,
-                                                 pm->idm) != 0)
-                l_error("Unable to synchronize ID manager with kernel.");
-#endif  // HAVE_UPSTREAM_KERNEL
+static void notify_pm_not_ready(void *data, void *user_data)
+{
+        struct pm_ops_info         *const info = data;
+        struct mptcpd_pm_ops const *const ops  = info->ops;
+        struct mptcpd_pm           *const pm   = user_data;
 
         if (ops->not_ready)
                 ops->not_ready(pm, info->user_data);
@@ -912,25 +905,25 @@ static void family_appeared(struct l_genl_family_info const *info,
 
         pm->family = l_genl_family_new(pm->genl, name);
 
+#ifdef HAVE_UPSTREAM_KERNEL
         /*
           MPTCP address IDs may already be assigned prior to mptcpd
           start by other applications or previous runs of mptcpd.
           Synchronize mptcpd address ID manager with address IDs
           maintained by the kernel.
          */
-        if (pm->netlink_pm->kcmd_ops != NULL) {
-                if (pm->netlink_pm->kcmd_ops->dump_addrs != NULL
-                    && pm->netlink_pm->kcmd_ops->dump_addrs(
-                            pm,
-                            dump_addrs_callback,
-                            pm,
-                            complete_pm_init) != 0)
+        if (pm->netlink_pm->kcmd_ops->dump_addrs(pm,
+                                                 dump_addrs_callback,
+                                                 pm,
+                                                 complete_pm_init) != 0)
                 l_error("Unable to synchronize ID manager with kernel.");
-        } else {
-                // In-kernel path manager commands are unimplemented.
-                // Complete initialization immediately.
-                complete_pm_init(pm);
-        }
+#else
+        /*
+          In-kernel path manager commands are unimplemented.
+          Complete initialization immediately.
+        */
+        complete_pm_init(pm);
+#endif  // HAVE_UPSTREAM_KERNEL
 
         /**
          * @todo Register a callback once the kernel MPTCP path
