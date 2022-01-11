@@ -134,6 +134,9 @@ struct mptcpd_pm_cmd_ops
          *                  ignored if it is zero.
          * @param[in] id    MPTCP local address ID.
          * @param[in] token MPTCP connection token.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
          */
         int (*add_addr)(struct mptcpd_pm *pm,
                         struct sockaddr const *addr,
@@ -142,6 +145,12 @@ struct mptcpd_pm_cmd_ops
 
         /**
          * @brief Stop advertising network address to peers.
+         * @param[in] pm         The mptcpd path manager object.
+         * @param[in] address_id MPTCP local address ID.
+         * @param[in] token      MPTCP connection token.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
          */
         int (*remove_addr)(struct mptcpd_pm *pm,
                            mptcpd_aid_t address_id,
@@ -177,12 +186,12 @@ struct mptcpd_pm_cmd_ops
         /**
          * @brief Remove a subflow.
          *
-         * @param[in] pm                The mptcpd path manager object.
-         * @param[in] token             MPTCP connection token.
-         * @param[in] local_addr        MPTCP subflow local address
-         *                              information, including the port.
-         * @param[in] remote_addr       MPTCP subflow remote address
-         *                              information, including the port.
+         * @param[in] pm          The mptcpd path manager object.
+         * @param[in] token       MPTCP connection token.
+         * @param[in] local_addr  MPTCP subflow local address
+         *                        information, including the port.
+         * @param[in] remote_addr MPTCP subflow remote address
+         *                        information, including the port.
          *
          * @return @c 0 if operation was successful. @c errno
          *         otherwise.
@@ -195,14 +204,14 @@ struct mptcpd_pm_cmd_ops
         /**
          * @brief Set priority of a subflow.
          *
-         * @param[in] pm                The mptcpd path manager object.
-         * @param[in] token             MPTCP connection token.
-         * @param[in] local_addr        MPTCP subflow local address
-         *                              information, including the port.
-         * @param[in] remote_addr       MPTCP subflow remote address
-         *                              information, including the port.
-         * @param[in] backup            Whether or not to set the MPTCP
-         *                              subflow backup priority flag.
+         * @param[in] pm          The mptcpd path manager object.
+         * @param[in] token       MPTCP connection token.
+         * @param[in] local_addr  MPTCP subflow local address
+         *                        information, including the port.
+         * @param[in] remote_addr MPTCP subflow remote address
+         *                        information, including the port.
+         * @param[in] backup      Whether or not to set the MPTCP
+         *                        subflow backup priority flag.
          *
          * @return @c 0 if operation was successful. @c errno
          *         otherwise.
@@ -238,6 +247,9 @@ struct mptcpd_kpm_cmd_ops
          * @param[in] id    MPTCP local address ID.
          * @param[in] flags
          * @param[in] index Network interface index (optional).
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
          */
         int (*add_addr)(struct mptcpd_pm *pm,
                         struct sockaddr const *addr,
@@ -247,6 +259,12 @@ struct mptcpd_kpm_cmd_ops
 
         /**
          * @brief Stop advertising network address to peers.
+         *
+         * @param[in] pm         The mptcpd path manager object.
+         * @param[in] address_id MPTCP local address ID.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
          */
         int (*remove_addr)(struct mptcpd_pm *pm,
                            mptcpd_aid_t address_id);

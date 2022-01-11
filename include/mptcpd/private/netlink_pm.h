@@ -15,6 +15,9 @@
 extern "C" {
 #endif
 
+struct mptcpd_pm_cmd_ops;
+struct mptcpd_kpm_cmd_ops;
+
 /**
  * @struct mptcpd_netlink_pm
  *

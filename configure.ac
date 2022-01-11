@@ -108,6 +108,19 @@ AC_DEFINE_UNQUOTED([MPTCPD_LOGGER],
                    [Log message destination.])
 AC_SUBST([mptcpd_logger],[$enable_logging])
 
+# Allow the user to choose support for either the upstream or
+# multipath-tcp.org kernel.
+AC_ARG_WITH([kernel],
+     [AS_HELP_STRING([--with-kernel[=KERNEL]],
+                     [Support a specific MPTCP capable kernel
+                      (upstream, multipath-tcp.org, auto)
+                      @<:@default=auto@:>@])],
+     [AS_CASE([$withval],
+              [upstream | multipath-tcp.org | auto],
+              [with_kernel=$withval],
+              [AC_MSG_ERROR([invalid MPTCP capable kernel: $withval])])],
+     [with_kernel=auto])
+
 # Allow the user to set the default path manager plugin at 'configure-time'.
 AC_ARG_WITH([path-manager],
      [AS_HELP_STRING([--with-path-manager[=PLUGIN]],
@@ -200,29 +213,41 @@ AH_TEMPLATE([HAVE_LINUX_MPTCP_H_UPSTREAM],
 AH_TEMPLATE([HAVE_LINUX_MPTCP_H_MPTCP_ORG],
             [Define to 1 if you have the multipath-tcp.org kernel
             <linux/mptcp.h> header.])
-AH_TEMPLATE([HAVE_LINUX_MPTCP_H_UPSTREAM_EVENTS],
-            [Define to 1 if <linux/mptcp.h> supports MPTCP genl events.])
 AC_CHECK_HEADERS([linux/mptcp.h],
-   [
-    AX_CHECK_DEFINE(
-        [linux/mptcp.h],
-        [MPTCP_PM_NAME],
-        [AC_DEFINE([HAVE_LINUX_MPTCP_H_UPSTREAM], [1])
-         AX_CHECK_DEFINE([linux/mptcp.h],
-                         [MPTCP_PM_EV_GRP_NAME],
-                         [AC_DEFINE([HAVE_LINUX_MPTCP_H_UPSTREAM_EVENTS],
-                                    [1])
-                         ])
+  [
+   MPTCPD_IF_UPSTREAM_KERNEL(
+     [
+      AC_DEFINE([HAVE_LINUX_MPTCP_H_UPSTREAM], [1])
+      AS_IF([test "x$with_kernel" = "xauto"],
+            [with_kernel=upstream])
+     ],
+     [
+      MPTCPD_IF_MPTCP_ORG_KERNEL(
+        [
+         AC_DEFINE([HAVE_LINUX_MPTCP_H_MPTCP_ORG], [1])
+         AS_IF([test "x$with_kernel" = "xauto"],
+               [with_kernel=multipath-tcp.org])
         ],
         [
-         AX_CHECK_DEFINE(
-             [linux/mptcp.h],
-             [MPTCP_GENL_NAME],
-             [AC_DEFINE([HAVE_LINUX_MPTCP_H_MPTCP_ORG], [1])],
-             [AC_MSG_ERROR([Discrepancy in <linux/mptcp.h>.])])
+         AC_MSG_WARN([Unsupported <linux/mptcp.h> header. Using fallback.])
         ])
-   ],
-   [AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])])
+      ])
+  ],
+  [
+   AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])
+  ])
+
+AS_IF([test "x$with_kernel" = "xauto"], [with_kernel=upstream])
+
+AM_CONDITIONAL([HAVE_UPSTREAM_KERNEL],
+               [test "x$with_kernel" = "xupstream"])
+
+AH_TEMPLATE([HAVE_UPSTREAM_KERNEL],
+            [Define to 1 if mptcpd should support the upstream kernel.])
+AS_IF([test "x$with_kernel" = "xupstream"],
+      [AC_DEFINE([HAVE_UPSTREAM_KERNEL])
+       AC_MSG_NOTICE([Building support for upstream kernel.])],
+      [AC_MSG_NOTICE([Building support for multipath-tcp.org kernel.])])
 
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.
@@ -249,14 +274,14 @@ LIBS="$LIBS $ELL_LIBS"
 dnl l_genl_msg_get_extended_error() was introduced in ELL v0.31.
 AC_CHECK_FUNC([l_genl_msg_get_extended_error],
               [AC_DEFINE([HAVE_L_GENL_MSG_GET_EXTENDED_ERROR],
-	                 [],
-			 [ELL has l_genl_msg_get_extended_error()])])
+                         [],
+                         [ELL has l_genl_msg_get_extended_error()])])
 
 dnl l_hashmap_replace() was introduced in ELL v0.33.
 AC_CHECK_FUNC([l_hashmap_replace],
               [AC_DEFINE([HAVE_L_HASHMAP_REPLACE],
-	                 [],
-			 [ELL has l_hashmap_replace()])])
+                         [],
+                         [ELL has l_hashmap_replace()])])
 LIBS=$mptcpd_save_libs
 
 # ---------------------------------------------------------------
@@ -272,29 +297,29 @@ AX_APPEND_COMPILE_FLAGS([-Wextra -Werror -pedantic])
 # ---------------------------------------------------------------
 
 AC_ARG_ENABLE(stack-protection,
-	[AS_HELP_STRING([--disable-stack-protection],
-		[Disable compiler stack protection.
-		FORTIFY_SOURCE=2 and -fstack-protector-strong]
-	)],
-	[],
-	[enable_stack_protection=yes])
+        [AS_HELP_STRING([--disable-stack-protection],
+                [Disable compiler stack protection.
+                FORTIFY_SOURCE=2 and -fstack-protector-strong]
+        )],
+        [],
+        [enable_stack_protection=yes])
 
 AS_IF([test "x$enable_stack_protection" = "xyes"],
-	[
-	# Fortify source
-	# Enabling optimization implies _FORTIFY_SOURCE on some platforms.
-	# Explicitly redefine to _FORTIFY_SOURCE=2 to make sure we have the
-	# desired fortification level.
-	AX_APPEND_FLAG([-U_FORTIFY_SOURCE], [CPPFLAGS])
-	AX_APPEND_FLAG([-D_FORTIFY_SOURCE=2], [CPPFLAGS])
+        [
+        # Fortify source
+        # Enabling optimization implies _FORTIFY_SOURCE on some platforms.
+        # Explicitly redefine to _FORTIFY_SOURCE=2 to make sure we have the
+        # desired fortification level.
+        AX_APPEND_FLAG([-U_FORTIFY_SOURCE], [CPPFLAGS])
+        AX_APPEND_FLAG([-D_FORTIFY_SOURCE=2], [CPPFLAGS])
 
-	# Stack-based buffer overrun detection
-	MPTCPD_ADD_COMPILE_FLAG([-fstack-protector-strong],
-	                        [# GCC < 4.9
-	                         MPTCPD_ADD_COMPILE_FLAG([-fstack-protector])
-	                        ])
-	],[]
-	)
+        # Stack-based buffer overrun detection
+        MPTCPD_ADD_COMPILE_FLAG([-fstack-protector-strong],
+                                [# GCC < 4.9
+                                 MPTCPD_ADD_COMPILE_FLAG([-fstack-protector])
+                                ])
+        ],[]
+        )
 
 # Format string vulnerabilities
 # -Wformat=2 implies:

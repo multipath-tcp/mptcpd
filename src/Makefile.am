@@ -19,10 +19,14 @@ libpath_manager_la_SOURCES =	\
 	configuration.c		\
 	netlink_pm.c		\
 	netlink_pm.h		\
-	netlink_pm_mptcp_org.c	\
-	netlink_pm_upstream.c	\
 	path_manager.c		\
 	path_manager.h
+
+if HAVE_UPSTREAM_KERNEL
+libpath_manager_la_SOURCES += netlink_pm_upstream.c
+else
+libpath_manager_la_SOURCES += netlink_pm_mptcp_org.c
+endif
 
 libpath_manager_la_LIBADD =			\
 	$(top_builddir)/lib/libmptcpd.la	\

@@ -755,6 +755,7 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
         };
 }
 
+#ifdef HAVE_UPSTREAM_KERNEL
 static void dump_addrs_callback(struct mptcpd_addr_info const *info,
                                 void *callback_data)
 {
@@ -791,6 +792,7 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
         else
                 l_error("ID sync failed: %u | %s", info->id, addrstr);
 }
+#endif  // HAVE_UPSTREAM_KERNEL
 
 static void notify_pm_ready(void *data, void *user_data)
 {
@@ -903,25 +905,25 @@ static void family_appeared(struct l_genl_family_info const *info,
 
         pm->family = l_genl_family_new(pm->genl, name);
 
+#ifdef HAVE_UPSTREAM_KERNEL
         /*
           MPTCP address IDs may already be assigned prior to mptcpd
           start by other applications or previous runs of mptcpd.
           Synchronize mptcpd address ID manager with address IDs
           maintained by the kernel.
          */
-        if (pm->netlink_pm->kcmd_ops != NULL) {
-                if (pm->netlink_pm->kcmd_ops->dump_addrs != NULL
-                    && pm->netlink_pm->kcmd_ops->dump_addrs(
-                            pm,
-                            dump_addrs_callback,
-                            pm,
-                            complete_pm_init) != 0)
+        if (pm->netlink_pm->kcmd_ops->dump_addrs(pm,
+                                                 dump_addrs_callback,
+                                                 pm,
+                                                 complete_pm_init) != 0)
                 l_error("Unable to synchronize ID manager with kernel.");
-        } else {
-                // In-kernel path manager commands are unimplemented.
-                // Complete initialization immediately.
-                complete_pm_init(pm);
-        }
+#else
+        /*
+          In-kernel path manager commands are unimplemented.
+          Complete initialization immediately.
+        */
+        complete_pm_init(pm);
+#endif  // HAVE_UPSTREAM_KERNEL
 
         /**
          * @todo Register a callback once the kernel MPTCP path
