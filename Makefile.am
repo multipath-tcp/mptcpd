@@ -16,7 +16,7 @@ MOSTLYCLEANFILES = $(DX_CLEANFILES)
 EXTRA_DIST = README.md Doxyfile mptcpd.dox LICENSES
 
 README: $(top_srcdir)/README.md
-	@test -z "$(PANDOC)" || $(PANDOC) --from gfm --to plain --output=$@ $<
+	@test -z "$(PANDOC)" || $(PANDOC) --from gfm --to plain --reference-links --reference-location=block --output=$@ $<
 
 dist-hook: README
 
