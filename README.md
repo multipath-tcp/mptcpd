@@ -259,3 +259,9 @@ configured and built from the top level source directory:
 ```
 ./libtool --mode=execute gdb ./src/mptcpd
 ```
+
+## Community Resources
+Further help is available through the Linux kernel MPTCP community:
+* E-mail: [MPTCP mailing list](https://subspace.kernel.org/lists.linux.dev.html?highlight=mptcp)
+* IRC: [#mptcp](ircs://irc.libera.chat:6697/%23mptcp) on
+       [Libera.Chat](https://libera.chat/)
