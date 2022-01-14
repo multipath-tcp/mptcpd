@@ -248,14 +248,51 @@ static int upstream_announce(struct mptcpd_pm *pm,
 }
 
 static int upstream_remove(struct mptcpd_pm *pm,
-                           mptcpd_aid_t address_id,
+                           mptcpd_aid_t id,
                            mptcpd_token_t token)
 {
-        (void) pm;
-        (void) address_id;
-        (void) token;
+        /**
+         * @todo Refactor upstream_remove() and
+         *       mptcp_org_remove_addr() functions. They only differ
+         *       by command and attribute types.
+         */
 
-        return ENOTSUP;
+        /*
+          Payload:
+              Token
+              Local address ID
+         */
+
+        size_t const payload_size =
+                MPTCPD_NLA_ALIGN(token)
+                + MPTCPD_NLA_ALIGN(id);
+
+        struct l_genl_msg *const msg =
+                l_genl_msg_new_sized(MPTCP_PM_CMD_REMOVE, payload_size);
+
+        bool const appended =
+                l_genl_msg_append_attr(msg,
+                                       MPTCP_PM_ATTR_TOKEN,
+                                       sizeof(token),
+                                       &token)
+                && l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_PM_ATTR_LOC_ID,
+                        sizeof(id),
+                        &id);
+
+        if (!appended) {
+                l_genl_msg_unref(msg);
+
+                return ENOMEM;
+        }
+
+        return l_genl_family_send(pm->family,
+                                  msg,
+                                  mptcpd_family_send_callback,
+                                  "remove_addr", /* user data */
+                                  NULL  /* destroy */)
+                == 0;
 }
 
 static int upstream_add_subflow(struct mptcpd_pm *pm,
