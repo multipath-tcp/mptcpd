@@ -42,6 +42,85 @@
 #endif
 
 
+// --------------------------------------------------------------
+//                 Common Utility Functions
+// --------------------------------------------------------------
+/**
+ * @brief Initialize a @c struct @c mptcpd_addr_info instance.
+ *
+ * Initialize a @c addr_info instance with the provided IPv4 or
+ * IPv6 address.  Only one is required and used.  The @a port, @a id,
+ * @a flags, and @a index are optional and may be set to @c NULL if
+ * not used.
+ *
+ * @param[in]     addr4 IPv4 internet address.
+ * @param[in]     addr6 IPv6 internet address.
+ * @param[in]     port  IP port.
+ * @param[in]     id    Address ID.
+ * @param[in]     flags MPTCP flags.
+ * @param[in]     index Network interface index.
+ * @param[in,out] addr  mptcpd network address information.
+ *
+ * @note This function is mostly meant for internal use.
+ *
+ * @return @c true on success.  @c false otherwise.
+ */
+static bool mptcpd_addr_info_init(struct in_addr  const *addr4,
+                                  struct in6_addr const *addr6,
+                                  in_port_t       const *port,
+                                  uint8_t         const *id,
+                                  uint32_t        const *flags,
+                                  int32_t         const *index,
+                                  struct mptcpd_addr_info *info)
+{
+        if (info == NULL
+            || !mptcpd_sockaddr_storage_init(addr4,
+                                             addr6,
+                                             port ? *port : 0,
+                                             &info->addr))
+                return false;
+
+        info->id    = (id    ? *id    : 0);
+        info->flags = (flags ? *flags : 0);
+        info->index = (index ? *index : 0);
+
+        return true;
+}
+
+
+static bool append_addr_attr(struct l_genl_msg *msg,
+                             struct sockaddr const *addr)
+{
+        assert(mptcpd_is_inet_family(addr));
+
+        uint16_t type = 0;
+        uint16_t len = 0;
+        void const *data = NULL;
+
+        if (addr->sa_family == AF_INET) {
+                type = MPTCP_PM_ADDR_ATTR_ADDR4;
+
+                struct sockaddr_in const *const addr4 =
+                        (struct sockaddr_in *) addr;
+
+                data = &addr4->sin_addr;
+                len  = sizeof(addr4->sin_addr);
+        } else {
+                type = MPTCP_PM_ADDR_ATTR_ADDR6;
+
+                struct sockaddr_in6 const *const addr6 =
+                        (struct sockaddr_in6 *) addr;
+
+                data = &addr6->sin6_addr;
+                len  = sizeof(addr6->sin6_addr);
+        }
+
+        return l_genl_msg_append_attr(msg, type, len, data);
+}
+
+// --------------------------------------------------------------
+//          User Space Path Manager Related Functions
+// --------------------------------------------------------------
 static int upstream_announce(struct mptcpd_pm *pm,
                              struct sockaddr const *addr,
                              mptcpd_aid_t id,
@@ -114,7 +193,8 @@ static int upstream_set_backup(struct mptcpd_pm *pm,
 }
 
 // --------------------------------------------------------------
-
+//          Kernel Path Manager Related Functions
+// --------------------------------------------------------------
 /**
  * @struct get_addr_user_callback
  *
@@ -155,50 +235,6 @@ struct get_limits_user_callback
         /// User data to be passed to the above callback.
         void *data;
 };
-
-// -----------------------------------------------------------------------
-
-/**
- * @brief Initialize a @c struct @c mptcpd_addr_info instance.
- *
- * Initialize a @c addr_info instance with the provided IPv4 or
- * IPv6 address.  Only one is required and used.  The @a port, @a id,
- * @a flags, and @a index are optional and may be set to @c NULL if
- * not used.
- *
- * @param[in]     addr4 IPv4 internet address (network byte order).
- * @param[in]     addr6 IPv6 internet address.
- * @param[in]     port  IP port (host byte order).
- * @param[in]     id    Address ID.
- * @param[in]     flags MPTCP flags.
- * @param[in]     index Network interface index.
- * @param[in,out] addr  mptcpd network address information.
- *
- * @note This function is mostly meant for internal use.
- *
- * @return @c true on success.  @c false otherwise.
- */
-static bool mptcpd_addr_info_init(in_addr_t       const *addr4,
-                                  struct in6_addr const *addr6,
-                                  in_port_t       const *port,
-                                  uint8_t         const *id,
-                                  uint32_t        const *flags,
-                                  int32_t         const *index,
-                                  struct mptcpd_addr_info *info)
-{
-        if (info == NULL
-            || !mptcpd_sockaddr_storage_init(addr4,
-                                             addr6,
-                                             port ? htons(*port) : 0,
-                                             &info->addr))
-                return false;
-
-        info->id    = (id    ? *id    : 0);
-        info->flags = (flags ? *flags : 0);
-        info->index = (index ? *index : 0);
-
-        return true;
-}
 
 static bool get_addr_callback_recurse(struct l_genl_attr *attr,
                                       struct mptcpd_addr_info *info)
@@ -329,38 +365,6 @@ static void get_addr_user_callback_free(void *data)
 
         l_free(cb);
 }
-
-static bool append_addr_attr(struct l_genl_msg *msg,
-                             struct sockaddr const *addr)
-{
-        assert(mptcpd_is_inet_family(addr));
-
-        uint16_t type = 0;
-        uint16_t len = 0;
-        void const *data = NULL;
-
-        if (addr->sa_family == AF_INET) {
-                type = MPTCP_PM_ADDR_ATTR_ADDR4;
-
-                struct sockaddr_in const *const addr4 =
-                        (struct sockaddr_in *) addr;
-
-                data = &addr4->sin_addr.s_addr;
-                len  = sizeof(addr4->sin_addr.s_addr);
-        } else {
-                type = MPTCP_PM_ADDR_ATTR_ADDR6;
-
-                struct sockaddr_in6 const *const addr6 =
-                        (struct sockaddr_in6 *) addr;
-
-                data = &addr6->sin6_addr;
-                len  = sizeof(addr6->sin6_addr);
-        }
-
-        return l_genl_msg_append_attr(msg, type, len, data);
-}
-
-// --------------------------------------------------------------
 
 static uint16_t kernel_to_mptcpd_limit(uint16_t type)
 {
