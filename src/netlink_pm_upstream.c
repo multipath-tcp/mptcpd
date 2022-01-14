@@ -42,10 +42,10 @@
 #endif
 
 
-static int upstream_cmd_announce(struct mptcpd_pm *pm,
-                                 struct sockaddr const *addr,
-                                 mptcpd_aid_t id,
-                                 mptcpd_token_t token)
+static int upstream_announce(struct mptcpd_pm *pm,
+                             struct sockaddr const *addr,
+                             mptcpd_aid_t id,
+                             mptcpd_token_t token)
 {
         (void) pm;
         (void) addr;
@@ -55,9 +55,9 @@ static int upstream_cmd_announce(struct mptcpd_pm *pm,
         return ENOTSUP;
 }
 
-static int upstream_cmd_remove(struct mptcpd_pm *pm,
-                               mptcpd_aid_t address_id,
-                               mptcpd_token_t token)
+static int upstream_remove(struct mptcpd_pm *pm,
+                           mptcpd_aid_t address_id,
+                           mptcpd_token_t token)
 {
         (void) pm;
         (void) address_id;
@@ -788,8 +788,8 @@ static int upstream_set_flags(struct mptcpd_pm *pm,
 
 static struct mptcpd_pm_cmd_ops const cmd_ops =
 {
-        .add_addr       = upstream_cmd_announce,
-        .remove_addr    = upstream_cmd_remove,
+        .add_addr       = upstream_announce,
+        .remove_addr    = upstream_remove,
         .add_subflow    = upstream_add_subflow,
         .remove_subflow = upstream_remove_subflow,
         .set_backup     = upstream_set_backup,
