@@ -168,7 +168,7 @@ static bool append_addr_attr(struct l_genl_msg *msg,
                             MPTCP_PM_ADDR_ATTR_IF_IDX,
                             sizeof(info->ifindex),   // sizeof(int32_t)
                             &info->ifindex))
-                        && l_genl_msg_leave_nested(msg);
+                && l_genl_msg_leave_nested(msg);
 }
 
 static bool append_local_addr_attr(struct l_genl_msg *msg,
