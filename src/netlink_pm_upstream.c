@@ -89,8 +89,6 @@ static bool mptcpd_addr_info_init(struct in_addr  const *addr4,
 
 struct addr_info
 {
-        uint8_t cmd;
-        char const *const cmd_name;
         struct sockaddr const *const addr;
         mptcpd_aid_t id;
         uint32_t flags;
@@ -230,7 +228,7 @@ static int send_add_addr(struct mptcpd_pm *pm,
                 + MPTCPD_NLA_ALIGN_OPT(token);
 
         struct l_genl_msg *const msg =
-                l_genl_msg_new_sized(info->cmd, payload_size);
+                l_genl_msg_new_sized(cmd, payload_size);
 
         bool const appended =
                 append_local_addr_attr(msg, info)
