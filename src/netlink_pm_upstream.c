@@ -87,10 +87,20 @@ static bool mptcpd_addr_info_init(struct in_addr  const *addr4,
         return true;
 }
 
-
-static bool append_addr_attr(struct l_genl_msg *msg,
-                             struct sockaddr const *addr)
+struct addr_info
 {
+        uint8_t cmd;
+        char const *const cmd_name;
+        struct sockaddr const *const addr;
+        mptcpd_aid_t id;
+        uint32_t flags;
+        int32_t ifindex;
+};
+
+static bool append_ip(struct l_genl_msg *msg, struct addr_info *info)
+{
+        struct sockaddr const *const addr = info->addr;
+
         assert(mptcpd_is_inet_family(addr));
 
         uint16_t type = 0;
@@ -118,22 +128,75 @@ static bool append_addr_attr(struct l_genl_msg *msg,
         return l_genl_msg_append_attr(msg, type, len, data);
 }
 
-struct add_addr_info
+static bool append_addr_attr(struct l_genl_msg *msg,
+                             struct addr_info *info,
+                             uint16_t nested_type)
 {
-        uint8_t cmd;
-        char const *const cmd_name;
-        struct sockaddr const *const addr;
-        mptcpd_aid_t id;
-        mptcpd_token_t token;
-        uint32_t flags;
-        int32_t ifindex;
-};
+        assert(nested_type == MPTCP_PM_ATTR_ADDR
+               || nested_type == MPTCP_PM_ATTR_ADDR_REMOTE);
+
+        // Types chosen to match MPTCP genl API.
+        uint16_t const family = mptcpd_get_addr_family(info->addr);
+        uint16_t const port   = mptcpd_get_port_number(info->addr);
+
+        return l_genl_msg_enter_nested(msg,
+                                       NLA_F_NESTED | nested_type)
+                && l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_PM_ADDR_ATTR_FAMILY,
+                        sizeof(family),  // sizeof(uint16_t)
+                        &family)
+                && append_ip(msg, info)
+                && (port == 0 ||
+                    l_genl_msg_append_attr(msg,
+                                           MPTCP_PM_ADDR_ATTR_PORT,
+                                           sizeof(port),  // sizeof(uint16_t)
+                                           &port))
+                && (info->id == 0
+                    || l_genl_msg_append_attr(
+                            msg,
+                            MPTCP_PM_ADDR_ATTR_ID,
+                            sizeof(info->id),  // sizeof(uint8_t)
+                            &info->id))
+                && (info->flags == 0
+                    || l_genl_msg_append_attr(
+                            msg,
+                            MPTCP_PM_ADDR_ATTR_FLAGS,
+                            sizeof(info->flags),  // sizeof(uint32_t)
+                            &info->flags))
+                && (info->ifindex == 0
+                    || l_genl_msg_append_attr(
+                            msg,
+                            MPTCP_PM_ADDR_ATTR_IF_IDX,
+                            sizeof(info->ifindex),   // sizeof(int32_t)
+                            &info->ifindex))
+                        && l_genl_msg_leave_nested(msg);
+}
+
+static bool append_local_addr_attr(struct l_genl_msg *msg,
+                                   struct addr_info *info)
+{
+        static uint16_t const nested_type = MPTCP_PM_ATTR_ADDR;
+
+        return append_addr_attr(msg, info, nested_type);
+}
+
+static bool append_remote_addr_attr(struct l_genl_msg *msg,
+                                    struct addr_info *info)
+{
+        static uint16_t const nested_type = MPTCP_PM_ATTR_ADDR_REMOTE;
+
+        return append_addr_attr(msg, info, nested_type);
+}
 
 static int send_add_addr(struct mptcpd_pm *pm,
-                         struct add_addr_info *info)
+                         uint8_t cmd,
+                         char const *cmd_name,
+                         struct addr_info *info,
+                         mptcpd_token_t token)
 {
-        assert(info->cmd == MPTCP_PM_CMD_ANNOUNCE
-               || info->cmd == MPTCP_PM_CMD_ADD_ADDR);
+        assert(cmd == MPTCP_PM_CMD_ANNOUNCE
+               || cmd == MPTCP_PM_CMD_ADD_ADDR);
 
         /*
           Payload (nested):
@@ -162,52 +225,21 @@ static int send_add_addr(struct mptcpd_pm *pm,
                 + MPTCPD_NLA_ALIGN_ADDR(info->addr)
                 + MPTCPD_NLA_ALIGN_OPT(port)
                 + MPTCPD_NLA_ALIGN_OPT(info->id)
-                + MPTCPD_NLA_ALIGN_OPT(info->token)
                 + MPTCPD_NLA_ALIGN_OPT(info->flags)
-                + MPTCPD_NLA_ALIGN_OPT(info->ifindex);
+                + MPTCPD_NLA_ALIGN_OPT(info->ifindex)
+                + MPTCPD_NLA_ALIGN_OPT(token);
 
         struct l_genl_msg *const msg =
                 l_genl_msg_new_sized(info->cmd, payload_size);
 
         bool const appended =
-                l_genl_msg_enter_nested(msg,
-                                        NLA_F_NESTED | MPTCP_PM_ATTR_ADDR)
-                && l_genl_msg_append_attr(
-                        msg,
-                        MPTCP_PM_ADDR_ATTR_FAMILY,
-                        sizeof(family),  // sizeof(uint16_t)
-                        &family)
-                && append_addr_attr(msg, info->addr)
-                && (port == 0 ||
-                    l_genl_msg_append_attr(msg,
-                                           MPTCP_PM_ADDR_ATTR_PORT,
-                                           sizeof(port),  // sizeof(uint16_t)
-                                           &port))
-                && (info->id == 0
-                    || l_genl_msg_append_attr(
-                            msg,
-                            MPTCP_PM_ADDR_ATTR_ID,
-                            sizeof(info->id),  // sizeof(uint8_t)
-                            &info->id))
-                && (info->flags == 0
-                    || l_genl_msg_append_attr(
-                            msg,
-                            MPTCP_PM_ADDR_ATTR_FLAGS,
-                            sizeof(info->flags),  // sizeof(uint32_t)
-                            &info->flags))
-                && (info->ifindex == 0
-                    || l_genl_msg_append_attr(
-                            msg,
-                            MPTCP_PM_ADDR_ATTR_IF_IDX,
-                            sizeof(info->ifindex),   // sizeof(int32_t)
-                            &info->ifindex))
-                && l_genl_msg_leave_nested(msg)
-                && (info->token == 0
+                append_local_addr_attr(msg, info)
+                && (token == 0
                     || l_genl_msg_append_attr(
                             msg,
                             MPTCP_PM_ATTR_TOKEN,
-                            sizeof(info->token),  // sizeof(uint32_t)
-                            &info->token));
+                            sizeof(token),  // sizeof(uint32_t)
+                            &token));
 
         if (!appended) {
                 l_genl_msg_unref(msg);
@@ -218,7 +250,7 @@ static int send_add_addr(struct mptcpd_pm *pm,
         return l_genl_family_send(pm->family,
                                   msg,
                                   mptcpd_family_send_callback,
-                                  (void *) info->cmd_name, /* user data */
+                                  (void *) cmd_name, /* user data */
                                   NULL  /* destroy */) == 0;
 }
 
@@ -234,17 +266,18 @@ static int upstream_announce(struct mptcpd_pm *pm,
          * @todo Add support for the optional network interface index
          *       attribute.
          */
-        struct add_addr_info info = {
-                .cmd      = MPTCP_PM_CMD_ANNOUNCE,
-                .cmd_name = "announce",
+        struct addr_info info = {
                 .addr     = addr,
                 .id       = id,
-                .token    = token,
                 .flags    = MPTCP_PM_ADDR_FLAG_SIGNAL,
                 // .ifindex  = ...
         };
 
-        return send_add_addr(pm, &info);
+        return send_add_addr(pm,
+                             MPTCP_PM_CMD_ANNOUNCE,
+                             "announce",
+                             &info,
+                             token);
 }
 
 static int upstream_remove(struct mptcpd_pm *pm,
@@ -297,21 +330,70 @@ static int upstream_remove(struct mptcpd_pm *pm,
 
 static int upstream_add_subflow(struct mptcpd_pm *pm,
                                 mptcpd_token_t token,
-                                mptcpd_aid_t local_address_id,
-                                mptcpd_aid_t remote_address_id,
+                                mptcpd_aid_t local_id,
+                                mptcpd_aid_t remote_id,
                                 struct sockaddr const *local_addr,
                                 struct sockaddr const *remote_addr,
                                 bool backup)
 {
-        (void) pm;
-        (void) token;
-        (void) local_address_id;
-        (void) remote_address_id;
-        (void) local_addr;
-        (void) remote_addr;
+        (void) remote_id;
         (void) backup;
 
-        return ENOTSUP;
+        /*
+          Payload (nested):
+              Token
+              Local address ID
+              Local address family
+              Local address
+              Local port
+              Remote address family
+              Remote address
+              Remote port
+
+         */
+        struct addr_info local = {
+                .addr = local_addr,
+                .id   = local_id
+        };
+
+        struct addr_info remote = {
+                .addr = remote_addr,
+        };
+
+        size_t const payload_size =
+                MPTCPD_NLA_ALIGN(token)
+                + MPTCPD_NLA_ALIGN(local_id)
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // local family
+                + MPTCPD_NLA_ALIGN_ADDR(local_addr)
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // local port
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // remote family
+                + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t));  // remote port
+
+        struct l_genl_msg *const msg =
+                l_genl_msg_new_sized(MPTCP_PM_CMD_SUBFLOW_CREATE,
+                                     payload_size);
+
+        bool const appended =
+                l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_PM_ATTR_TOKEN,
+                        sizeof(token),  // sizeof(uint32_t)
+                        &token)
+                && append_local_addr_attr(msg, &local)
+                && append_remote_addr_attr(msg, &remote);
+
+        if (!appended) {
+                l_genl_msg_unref(msg);
+
+                return ENOMEM;
+        }
+
+        return l_genl_family_send(pm->family,
+                                  msg,
+                                  mptcpd_family_send_callback,
+                                  "add_subflow", /* user data */
+                                  NULL  /* destroy */) == 0;
 }
 
 static int upstream_remove_subflow(struct mptcpd_pm *pm,
@@ -607,16 +689,20 @@ static int upstream_add_addr(struct mptcpd_pm *pm,
                              uint32_t flags,
                              int index)
 {
-        struct add_addr_info info = {
-                .cmd      = MPTCP_PM_CMD_ADD_ADDR,
-                .cmd_name = "add_addr",
+        struct addr_info info = {
                 .addr     = addr,
                 .id       = id,
                 .flags    = flags,
                 .ifindex  = index
         };
 
-        return send_add_addr(pm, &info);
+        static uint32_t const token = 0;  // Unused
+
+        return send_add_addr(pm,
+                             MPTCP_PM_CMD_ADD_ADDR,
+                             "add_addr",
+                             &info,
+                             token);
 }
 
 static int upstream_remove_addr(struct mptcpd_pm *pm,
@@ -828,11 +914,14 @@ static int upstream_set_flags(struct mptcpd_pm *pm,
               Flags
          */
 
-        // Types chosen to match MPTCP genl API.
-        uint16_t const family = mptcpd_get_addr_family(addr);
+        struct addr_info info = {
+                .addr  = addr,
+                .flags = flags
+        };
 
+        // Types chosen to match MPTCP genl API.
         size_t const payload_size =
-                MPTCPD_NLA_ALIGN(family)
+                MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // family
                 + MPTCPD_NLA_ALIGN_ADDR(addr)
                 + MPTCPD_NLA_ALIGN(flags);
 
@@ -840,23 +929,7 @@ static int upstream_set_flags(struct mptcpd_pm *pm,
                 l_genl_msg_new_sized(MPTCP_PM_CMD_SET_FLAGS,
                                      payload_size);
 
-        bool const appended =
-                l_genl_msg_enter_nested(msg,
-                                        NLA_F_NESTED | MPTCP_PM_ATTR_ADDR)
-                && l_genl_msg_append_attr(
-                        msg,
-                        MPTCP_PM_ADDR_ATTR_FAMILY,
-                        sizeof(family),  // sizeof(uint16_t)
-                        &family)
-                && append_addr_attr(msg, addr)
-                && l_genl_msg_append_attr(
-                        msg,
-                        MPTCP_PM_ADDR_ATTR_FLAGS,
-                        sizeof(flags),  // sizeof(uint32_t)
-                        &flags)
-                && l_genl_msg_leave_nested(msg);
-
-        if (!appended) {
+        if (!append_local_addr_attr(msg, &info)) {
                 l_genl_msg_unref(msg);
 
                 return ENOMEM;
