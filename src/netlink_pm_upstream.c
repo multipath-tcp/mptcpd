@@ -407,17 +407,13 @@ static int upstream_remove_subflow(struct mptcpd_pm *pm,
               Token
               Local address family
               Local address
-              Remote port
+              Local port
               Remote address family
               Remote address
               Remote port
 
          */
 
-        /**
-         * @todo The local port isn't used.  Should we explicitly set it
-         *       to zero, or at least issue a diagnostic if it isn't zero?
-         */
         struct addr_info local = {
                 .addr = local_addr,
         };
