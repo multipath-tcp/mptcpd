@@ -345,11 +345,15 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
               Local address ID
               Local address family
               Local address
-              Local port
               Remote address family
               Remote address
               Remote port
 
+         */
+
+        /**
+         * @todo The local port isn't used.  Should we explicitly set it
+         *       to zero, or at least issue a diagnostic if it isn't zero?
          */
         struct addr_info local = {
                 .addr = local_addr,
@@ -365,7 +369,6 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
                 + MPTCPD_NLA_ALIGN(local_id)
                 + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // local family
                 + MPTCPD_NLA_ALIGN_ADDR(local_addr)
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // local port
                 + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // remote family
                 + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
                 + MPTCPD_NLA_ALIGN(sizeof(uint16_t));  // remote port
@@ -401,12 +404,63 @@ static int upstream_remove_subflow(struct mptcpd_pm *pm,
                                    struct sockaddr const *local_addr,
                                    struct sockaddr const *remote_addr)
 {
-        (void) pm;
-        (void) token;
-        (void) local_addr;
-        (void) remote_addr;
+        /*
+          Payload (nested):
+              Token
+              Local address family
+              Local address
+              Remote port
+              Remote address family
+              Remote address
+              Remote port
 
-        return ENOTSUP;
+         */
+
+        /**
+         * @todo The local port isn't used.  Should we explicitly set it
+         *       to zero, or at least issue a diagnostic if it isn't zero?
+         */
+        struct addr_info local = {
+                .addr = local_addr,
+        };
+
+        struct addr_info remote = {
+                .addr = remote_addr,
+        };
+
+        size_t const payload_size =
+                MPTCPD_NLA_ALIGN(token)
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // local family
+                + MPTCPD_NLA_ALIGN_ADDR(local_addr)
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // local port
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // remote family
+                + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t));  // remote port
+
+        struct l_genl_msg *const msg =
+                l_genl_msg_new_sized(MPTCP_PM_CMD_SUBFLOW_DESTROY,
+                                     payload_size);
+
+        bool const appended =
+                l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_PM_ATTR_TOKEN,
+                        sizeof(token),  // sizeof(uint32_t)
+                        &token)
+                && append_local_addr_attr(msg, &local)
+                && append_remote_addr_attr(msg, &remote);
+
+        if (!appended) {
+                l_genl_msg_unref(msg);
+
+                return ENOMEM;
+        }
+
+        return l_genl_family_send(pm->family,
+                                  msg,
+                                  mptcpd_family_send_callback,
+                                  "remove_subflow", /* user data */
+                                  NULL  /* destroy */) == 0;
 }
 
 static int upstream_set_backup(struct mptcpd_pm *pm,
