@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
-# Copyright (c) 2017-2019, Intel Corporation
+# Copyright (c) 2017-2019, 2021, Intel Corporation
 
 [Unit]
 Description=Multipath TCP service
@@ -16,4 +16,4 @@ AmbientCapabilities=CAP_NET_ADMIN
 LimitNPROC=1
 
 [Install]
-WantedBy=sockets.target
+WantedBy=multi-user.target
