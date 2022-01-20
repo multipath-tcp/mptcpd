@@ -64,21 +64,21 @@ endif
 
 pkglib_LTLIBRARIES = libmptcpwrap.la
 
-mptcpd_SOURCES  = mptcpd.c
-mptcpd_LDADD    =				\
+mptcpd_SOURCES = mptcpd.c
+mptcpd_LDADD   =				\
 	$(builddir)/libpath_manager.la		\
 	$(ELL_LIBS) $(CODE_COVERAGE_LIBS)
-mptcpd_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
+mptcpd_LDFLAGS = $(EXECUTABLE_LDFLAGS)
 
 librevision=1
 
-mptcpize_SOURCES = mptcpize.c
+mptcpize_SOURCES  = mptcpize.c
 mptcpize_CPPFLAGS = \
 	$(AM_CPPFLAGS)			\
 	-DPKGLIBDIR=\"$(pkglibdir)\"	\
 	-DLIBREVISION=\"$(librevision)\"
-mptcpize_LDADD =  $(CODE_COVERAGE_LIBS)
-mptcpize_LDFLAGS = $(EXECUTABLE_LDFLAGS)
+mptcpize_LDADD    = $(CODE_COVERAGE_LIBS)
+mptcpize_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
 
 libmptcpwrap_la_SOURCES = mptcpwrap.c
 libmptcpwrap_la_CFLAGS  = $(CODE_COVERAGE_CFLAGS)
