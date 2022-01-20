@@ -78,6 +78,7 @@ mptcpize_CPPFLAGS = \
 	-DPKGLIBDIR=\"$(pkglibdir)\"	\
 	-DLIBREVISION=\"$(librevision)\"
 mptcpize_LDADD =  $(CODE_COVERAGE_LIBS)
+mptcpize_LDFLAGS = $(EXECUTABLE_LDFLAGS)
 
 libmptcpwrap_la_SOURCES = mptcpwrap.c
 libmptcpwrap_la_LDFLAGS = -version-info 0:$(librevision):0
