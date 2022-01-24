@@ -314,8 +314,8 @@ AS_IF([test "x$enable_stack_protection" = "xyes"],
        # implicitly defined under some levels optimization.
        #
        # Note that _FORTIFY_SOURCE is defined on the preprocessor
-       # command line instead of in <mptcpd/config.h> since the
-       # latter is not included all mptcpd source files, and may be
+       # command line instead of in <mptcpd/config.h> since the latter
+       # is not included in all mptcpd source files, and may also be
        # included after C library headers.
        AC_CHECK_DEFINE([_FORTIFY_SOURCE],
                        [],
