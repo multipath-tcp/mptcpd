@@ -863,7 +863,8 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
         // System configuration, e.g. /etc/mptcpd/mptcpd.conf.
         struct mptcpd_config sys_config = { .log_set = NULL };
         static struct mptcpd_config const def_config = {
-                .plugin_dir = MPTCPD_DEFAULT_PLUGINDIR };
+                .plugin_dir = MPTCPD_DEFAULT_PLUGINDIR,
+                .plugins_conf_dir = MPTCPD_DEFAULT_PLUGINSCONFDIR };
         char flags[128];
 
         /*
