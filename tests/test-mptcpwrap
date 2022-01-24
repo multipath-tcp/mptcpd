@@ -7,6 +7,17 @@
 
 set -e
 
+# Check if we're using the upstream kernel.
+#
+# upstream:          net.mptcp.enabled
+# multipath-tcp.org: net.mptcp.mptcp_enabled
+key=`sysctl --names --pattern 'mptcp\.enabled' net.mptcp`
+if [ -z "$key" ]; then
+    # Do not run the test if we're not using the upstream kernel.
+    echo Not running upstream kernel.  libmptcpwrap will not be tested.
+    exit 0
+fi
+
 LD_PRELOAD=../src/.libs/libmptcpwrap.so \
 MPTCPWRAP_DEBUG=1 \
 ./mptcpwrap-tester
