@@ -6,6 +6,7 @@ EXTRA_DIST = mptcpd.conf.in
 
 pkgsysconf_DATA = mptcpd.conf
 pkgsysconfdir = $(sysconfdir)/@PACKAGE@
+pluginsconfdir = $(pkgsysconfdir)/plugins.conf.d
 
 ## The configure script won't fully expand $pkglibdir so leverage
 ## `make' based variable expansion instead.
@@ -27,8 +28,11 @@ CLEANFILES = mptcpd.conf
 # writable.
 install-data-hook: installcheck-local
 	chmod o-w $(DESTDIR)$(pkgsysconfdir)
+	mkdir -p $(DESTDIR)$(pluginsconfdir)
+	chmod o-w $(DESTDIR)$(pluginsconfdir)
 
 installcheck-local:
-	$(top_srcdir)/scripts/check-permissions \
-		$(DESTDIR)$(pkgsysconfdir) \
-		$(DESTDIR)$(pkgsysconfdir)/mptcpd.conf
+	$(top_srcdir)/scripts/check-permissions 	\
+		$(DESTDIR)$(pkgsysconfdir) 		\
+		$(DESTDIR)$(pkgsysconfdir)/mptcpd.conf  \
+		$(DESTDIR)$(pluginsconfdir)
