@@ -621,7 +621,9 @@ int main(void)
          */
         assert(info.tests_called);
 
+#ifdef HAVE_UPSTREAM_KERNEL
         assert(info.dump_addrs_complete_count == 1);
+#endif
 
         l_idle_remove(idle);
         l_netlink_destroy(rtnl);
