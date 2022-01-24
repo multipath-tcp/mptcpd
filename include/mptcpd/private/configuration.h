@@ -66,6 +66,9 @@ struct mptcpd_config
 
         /// A list of plugins to load.
         struct l_queue *plugins_to_load;
+
+        /// Location of mptcpd plugins configuration files
+        char *plugins_conf_dir;
 };
 
 /**
