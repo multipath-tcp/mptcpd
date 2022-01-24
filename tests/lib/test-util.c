@@ -16,8 +16,10 @@
 #if defined(HAVE_LINUX_MPTCP_H_UPSTREAM) \
         || defined(HAVE_LINUX_MPTCP_H_MPTCP_ORG)
 # include <linux/mptcp.h>
-#else
+#elif defined(HAVE_UPSTREAM_KERNEL)
 # include <mptcpd/private/mptcp_upstream.h>
+#else
+# include <mptcpd/private/mptcp_org.h>
 #endif
 
 #include "test-util.h"
