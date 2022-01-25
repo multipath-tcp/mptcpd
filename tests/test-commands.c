@@ -4,7 +4,7 @@
  *
  * @brief mptcpd commands API test.
  *
- * Copyright (c) 2019-2021, Intel Corporation
+ * Copyright (c) 2019-2022, Intel Corporation
  */
 
 #include <unistd.h>
