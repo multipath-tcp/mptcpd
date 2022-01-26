@@ -62,7 +62,8 @@ else
 bin_PROGRAMS = mptcpd mptcpize
 endif
 
-pkglib_LTLIBRARIES = libmptcpwrap.la
+mptcpizelibdir = $(libdir)/mptcpize
+mptcpizelib_LTLIBRARIES = libmptcpwrap.la
 
 mptcpd_SOURCES = mptcpd.c
 mptcpd_LDADD   =				\
@@ -75,7 +76,7 @@ librevision=1
 mptcpize_SOURCES  = mptcpize.c
 mptcpize_CPPFLAGS = \
 	$(AM_CPPFLAGS)			\
-	-DPKGLIBDIR=\"$(pkglibdir)\"	\
+	-DPKGLIBDIR=\"$(mptcpizelibdir)\" \
 	-DLIBREVISION=\"$(librevision)\"
 mptcpize_LDADD    = $(CODE_COVERAGE_LIBS)
 mptcpize_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
