@@ -124,14 +124,12 @@ AC_ARG_WITH([kernel],
 # Allow the user to set the default path manager plugin at 'configure-time'.
 AC_ARG_WITH([path-manager],
      [AS_HELP_STRING([--with-path-manager[=PLUGIN]],
-                     [Set default path manager plugin to PLUGIN (addr_adv, sspi) @<:@default=addr_adv@:>@])],
+                     [Set default path manager plugin to PLUGIN (addr_adv, sspi) @<:@default=auto@:>@])],
      [AS_CASE([$withval],
               [addr_adv | sspi],
               [with_path_manager=$withval],
               [AC_MSG_ERROR([invalid path manager plugin: $withval])])],
-     [with_path_manager=addr_adv])
-
-AC_SUBST([mptcpd_default_pm],[$with_path_manager])
+     [with_path_manager=auto])
 
 # Systemd unit directory detection and handling.
 AC_ARG_WITH([systemdsystemunitdir],
@@ -248,6 +246,19 @@ AS_IF([test "x$with_kernel" = "xupstream"],
       [AC_DEFINE([HAVE_UPSTREAM_KERNEL])
        AC_MSG_NOTICE([Building support for upstream kernel.])],
       [AC_MSG_NOTICE([Building support for multipath-tcp.org kernel.])])
+
+dnl Set default path manager based on selected kernel as needed.
+dnl
+dnl The multipath-tcp.org kernel doesn't support the in-kernel path
+dnl manager netlink API used by the addr_adv mptcpd plugin.  Use the
+dnl sspi plugin in that case.
+AS_IF([test "x$with_path_manager" = "xauto"],
+      [AS_IF([test "x$with_kernel" = "xupstream"],
+             [with_path_manager=addr_adv],
+             [with_path_manager=sspi])
+       AC_MSG_NOTICE([Default mptcpd path manager plugin: $with_path_manager.])])
+
+AC_SUBST([mptcpd_default_pm],[$with_path_manager])
 
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.
