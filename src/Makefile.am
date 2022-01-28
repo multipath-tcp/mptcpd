@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2017-2019, 2021, Intel Corporation
+## Copyright (c) 2017-2019, 2021-2022, Intel Corporation
 
 include $(top_srcdir)/aminclude_static.am
 
@@ -62,24 +62,27 @@ else
 bin_PROGRAMS = mptcpd mptcpize
 endif
 
-pkglib_LTLIBRARIES = libmptcpwrap.la
+mptcpizelibdir = $(libdir)/mptcpize
+mptcpizelib_LTLIBRARIES = libmptcpwrap.la
 
-mptcpd_SOURCES  = mptcpd.c
-mptcpd_LDADD    =				\
+mptcpd_SOURCES = mptcpd.c
+mptcpd_LDADD   =				\
 	$(builddir)/libpath_manager.la		\
 	$(ELL_LIBS) $(CODE_COVERAGE_LIBS)
-mptcpd_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
+mptcpd_LDFLAGS = $(EXECUTABLE_LDFLAGS)
 
 librevision=1
 
-mptcpize_SOURCES = mptcpize.c
+mptcpize_SOURCES  = mptcpize.c
 mptcpize_CPPFLAGS = \
 	$(AM_CPPFLAGS)			\
-	-DPKGLIBDIR=\"$(pkglibdir)\"	\
+	-DPKGLIBDIR=\"$(mptcpizelibdir)\" \
 	-DLIBREVISION=\"$(librevision)\"
-mptcpize_LDADD =  $(CODE_COVERAGE_LIBS)
+mptcpize_LDADD    = $(CODE_COVERAGE_LIBS)
+mptcpize_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
 
 libmptcpwrap_la_SOURCES = mptcpwrap.c
+libmptcpwrap_la_CFLAGS  = $(CODE_COVERAGE_CFLAGS)
 libmptcpwrap_la_LDFLAGS = -version-info 0:$(librevision):0
 libmptcpwrap_la_LIBADD  = $(CODE_COVERAGE_LIBS)
 
