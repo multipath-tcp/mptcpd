@@ -1,3 +1,5 @@
+28 January 2022 - mptcpd 0.9
+
 - mptcpd
     - Several security hardening fixes were made including missing
       hardening flags for the `mptcpize' program and compile-time
