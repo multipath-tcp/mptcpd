@@ -4,7 +4,7 @@
  *
  * @brief mptcpd test utilities library.
  *
- * Copyright (c) 2020-2021, Intel Corporation
+ * Copyright (c) 2020-2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H

@@ -1,3 +1,64 @@
+28 January 2022 - mptcpd 0.9
+
+- mptcpd
+    - Several security hardening fixes were made including missing
+      hardening flags for the `mptcpize' program and compile-time
+      hardening (e.g. _FORTIFY_SOURCE) that was inadvertently disabled
+      in some cases.
+
+    - Systemd based start of mptcpd has been delayed until the
+      multi-user environment is fully operational.
+
+    - mptcpd will only support one kernel at run-time.  The kernel may
+      be selected through the new "--with-kernel" `configure' script
+      option, e.g. "./configure --with-kernel=upstream".  Supported
+      kernels are "upstream" and "multipath-tcp.org".  The `configure'
+      script will attempt to automatically detect the kernel, and
+      fallback on the upstream kernel if it cannot do so.
+
+    - mptcpd_addr_info is now an opaque structure.  Field accessor
+      functions were added to the <mptcpd/addr_info.h> header,
+      accordingly.
+
+    - Address filtering based on default route availability was
+      implemented in the mptcpd network monitor through a new
+      "check_route" mptcpd command line option notify flag,
+      e.g. --notify-flags=check_route.
+
+    - mptcpd initialization order issues were addressed to ensure that
+      the internal mptcpd state is stable and consistent prior to
+      invoking user provided callbacks such as "pm_ready".
+
+    - A "complete" callback parameter was added to
+      mptcpd_kpm_get_addr() and mptcpd_kpm_dump_addr() to allow the
+      user to be notified when these asynchronous calls complete.
+      This is particularly useful for the case where no results are
+      available, which consequently prevents the "results" callback
+      from being called.
+
+    - The mptcpd_kpm_add_addr() function no longer ignores the port
+      parameter.
+
+    - A new command line option "--load-plugins" was added to allow
+      the user to specify which mptcpd plugins to load instead loading
+      all plugins.
+
+    - ELL >= 0.30 is now required.
+
+    - The mptcpd unit test suite was expanded to further improve code
+      coverage.
+
+- mptcpize
+    - mptcpize will now hijack socket() calls that specify the
+      IPPROTO_IP protocol.
+
+    - An issue that prevented mptcpize from updating systemd unit
+      files on a different filesystem was corrected.
+
+    - The libmptcpwrap library is now installed in ${libdir}/mptcpize
+      instead of ${libdir}/mptcpd to differentiate it from mptcpd
+      plugins.
+
 24 September 2021 - mptcpd 0.8
 
 - The mptcpd library API now splits path management operations
