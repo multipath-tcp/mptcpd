@@ -1,6 +1,9 @@
 <map id="include/mptcpd/private/path_manager.h" name="include/mptcpd/private/path_manager.h">
-<area shape="rect" id="node1" title="mptcpd path manager private interface." alt="" coords="190,5,362,47"/>
-<area shape="rect" id="node2" href="$lib_2path__manager_8c.html" title="mptcpd generic netlink commands." alt="" coords="5,95,152,121"/>
-<area shape="rect" id="node3" href="$netlink__pm__upstream_8c.html" title="Upstream kernel generic netlink path manager details." alt="" coords="177,95,375,121"/>
-<area shape="rect" id="node4" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="399,95,548,121"/>
+<area shape="rect" id="node1" title="mptcpd path manager private interface." alt="" coords="462,5,634,47"/>
+<area shape="rect" id="node2" href="$network__monitor_8c.html" title="mptcpd network device monitoring." alt="" coords="5,102,168,129"/>
+<area shape="rect" id="node3" href="$lib_2path__manager_8c.html" title="mptcpd generic netlink commands." alt="" coords="192,102,339,129"/>
+<area shape="rect" id="node4" href="$addr__adv_8c.html" title="MPTCP address advertiser path manager plugin." alt="" coords="363,95,538,136"/>
+<area shape="rect" id="node5" href="$netlink__pm__mptcp__org_8c.html" title="mptcpd generic netlink commands." alt="" coords="562,95,729,136"/>
+<area shape="rect" id="node6" href="$netlink__pm__upstream_8c.html" title="Upstream kernel generic netlink path manager details." alt="" coords="753,102,951,129"/>
+<area shape="rect" id="node7" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="975,102,1124,129"/>
 </map>

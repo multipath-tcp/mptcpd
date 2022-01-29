@@ -1,14 +1,21 @@
 var searchData=
 [
-  ['path_5fmanager_2ec_166',['path_manager.c',['../lib_2path__manager_8c.html',1,'(Global Namespace)'],['../src_2path__manager_8c.html',1,'(Global Namespace)']]],
-  ['path_5fmanager_2eh_167',['path_manager.h',['../include_2mptcpd_2path__manager_8h.html',1,'(Global Namespace)'],['../include_2mptcpd_2private_2path__manager_8h.html',1,'(Global Namespace)'],['../src_2path__manager_8h.html',1,'(Global Namespace)']]],
-  ['plugin_2ec_168',['plugin.c',['../plugin_8c.html',1,'']]],
-  ['plugin_2eh_169',['plugin.h',['../plugin_8h.html',1,'(Global Namespace)'],['../private_2plugin_8h.html',1,'(Global Namespace)']]],
-  ['plugin_5faddress_5finfo_170',['plugin_address_info',['../structplugin__address__info.html',1,'']]],
-  ['plugin_5fdir_171',['plugin_dir',['../structmptcpd__config.html#a44337a57088993114544751bd955bcea',1,'mptcpd_config']]],
-  ['plugin_5finfo_172',['plugin_info',['../structplugin__info.html',1,'']]],
-  ['plugin_5finterface_5finfo_173',['plugin_interface_info',['../structplugin__interface__info.html',1,'']]],
-  ['pm_174',['pm',['../structplugin__address__info.html#a547b03cffa9d3c23bfda49fbb0707186',1,'plugin_address_info::pm()'],['../structplugin__interface__info.html#ae5b0447988c536d84b7ed1f88853b471',1,'plugin_interface_info::pm()'],['../structsspi__new__connection__info.html#a1ae49c34c3e042e19aeac03a8ad196e8',1,'sspi_new_connection_info::pm()']]],
-  ['pm_5fops_5finfo_175',['pm_ops_info',['../structpm__ops__info.html',1,'']]],
-  ['priority_176',['priority',['../structmptcpd__plugin__desc.html#a73e301b2b645246a866c313727109504',1,'mptcpd_plugin_desc']]]
+  ['name_192',['name',['../structmptcpd__interface.html#afb6601fb1379a7b0c0f6f178ccaae131',1,'mptcpd_interface::name()'],['../structmptcpd__plugin__desc.html#a3a90f1c7dc69a5bc828f1b0e796b96ec',1,'mptcpd_plugin_desc::name()'],['../structmptcpd__netlink__pm.html#a0878bb12c2f7e33e1d4bf225007e1b2e',1,'mptcpd_netlink_pm::name()']]],
+  ['netlink_5fpm_193',['netlink_pm',['../structmptcpd__pm.html#af04dfb9448136f016cdafad03979e068',1,'mptcpd_pm']]],
+  ['netlink_5fpm_2ec_194',['netlink_pm.c',['../netlink__pm_8c.html',1,'']]],
+  ['netlink_5fpm_2eh_195',['netlink_pm.h',['../include_2mptcpd_2private_2netlink__pm_8h.html',1,'(Global Namespace)'],['../src_2netlink__pm_8h.html',1,'(Global Namespace)']]],
+  ['netlink_5fpm_5fmptcp_5forg_2ec_196',['netlink_pm_mptcp_org.c',['../netlink__pm__mptcp__org_8c.html',1,'']]],
+  ['netlink_5fpm_5fupstream_2ec_197',['netlink_pm_upstream.c',['../netlink__pm__upstream_8c.html',1,'']]],
+  ['network_5fmonitor_2ec_198',['network_monitor.c',['../network__monitor_8c.html',1,'']]],
+  ['network_5fmonitor_2eh_199',['network_monitor.h',['../network__monitor_8h.html',1,'']]],
+  ['new_5faddress_200',['new_address',['../structmptcpd__nm__ops.html#a89289081eee96d8a569a15900d0b0bf2',1,'mptcpd_nm_ops::new_address()'],['../structmptcpd__plugin__ops.html#adeb25c178d7968563030995f2a49f24a',1,'mptcpd_plugin_ops::new_address()']]],
+  ['new_5fconnection_201',['new_connection',['../structmptcpd__plugin__ops.html#a64fa70962dcfb2639d4fd9f3ee82493b',1,'mptcpd_plugin_ops']]],
+  ['new_5finterface_202',['new_interface',['../structmptcpd__nm__ops.html#a62f7f8eb40c7441cdd9ad440e5542a3c',1,'mptcpd_nm_ops::new_interface()'],['../structmptcpd__plugin__ops.html#aed2f5075636825ec1c757788022020c7',1,'mptcpd_plugin_ops::new_interface()']]],
+  ['new_5flocal_5faddress_203',['new_local_address',['../structmptcpd__plugin__ops.html#a0bd4b6f0055f2ad74be0532fe57cb89c',1,'mptcpd_plugin_ops']]],
+  ['new_5fsubflow_204',['new_subflow',['../structmptcpd__plugin__ops.html#a91a004e67a0139b047a7f5daec764ca6',1,'mptcpd_plugin_ops']]],
+  ['nm_205',['nm',['../structmptcpd__pm.html#ac9f020687588cebb44157901c6675463',1,'mptcpd_pm']]],
+  ['nm_5faddr_5finfo_206',['nm_addr_info',['../structnm__addr__info.html',1,'']]],
+  ['nm_5fops_5finfo_207',['nm_ops_info',['../structnm__ops__info.html',1,'']]],
+  ['not_5fready_208',['not_ready',['../structmptcpd__pm__ops.html#a30001ae0f26c85d1a3fbe4ec1ce1f5bd',1,'mptcpd_pm_ops']]],
+  ['notify_5fflags_209',['notify_flags',['../structmptcpd__config.html#a552b078f7e15187544a904545e6a34a0',1,'mptcpd_config::notify_flags()'],['../structmptcpd__nm.html#af170909181094d0c7ce825af0059e6e5',1,'mptcpd_nm::notify_flags()']]]
 ];

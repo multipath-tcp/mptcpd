@@ -1,14 +1,15 @@
 var searchData=
 [
-  ['set_5fbackup_181',['set_backup',['../structmptcpd__pm__cmd__ops.html#a8e2566b8fd1cf89171b17ec9b0f4c037',1,'mptcpd_pm_cmd_ops']]],
-  ['set_5fflags_182',['set_flags',['../structmptcpd__pm__cmd__ops.html#a62979360913fd0432f9ba28876dca9fb',1,'mptcpd_pm_cmd_ops']]],
-  ['set_5flimits_183',['set_limits',['../structmptcpd__pm__cmd__ops.html#a961b36d4ba88d63169e824eb27267bd6',1,'mptcpd_pm_cmd_ops']]],
-  ['sockaddr_2eh_184',['sockaddr.h',['../sockaddr_8h.html',1,'']]],
-  ['sspi_2ec_185',['sspi.c',['../sspi_8c.html',1,'']]],
-  ['sspi_5fbad_5findex_186',['SSPI_BAD_INDEX',['../sspi_8c.html#adcc8d9d463914b9ad320bfc13cf476ec',1,'sspi.c']]],
-  ['sspi_5finterface_5finfo_187',['sspi_interface_info',['../structsspi__interface__info.html',1,'']]],
-  ['sspi_5fnew_5fconnection_5finfo_188',['sspi_new_connection_info',['../structsspi__new__connection__info.html',1,'']]],
-  ['sspi_5fnm_5fcallback_5fdata_189',['sspi_nm_callback_data',['../structsspi__nm__callback__data.html',1,'']]],
-  ['subflow_5fclosed_190',['subflow_closed',['../structmptcpd__plugin__ops.html#a559d6df5e5594dbc6fcb51a1ea00b82c',1,'mptcpd_plugin_ops']]],
-  ['subflow_5fpriority_191',['subflow_priority',['../structmptcpd__plugin__ops.html#a549aaf29f771882e90e61b8f41474429',1,'mptcpd_plugin_ops']]]
+  ['path_5fmanager_2ec_211',['path_manager.c',['../lib_2path__manager_8c.html',1,'(Global Namespace)'],['../src_2path__manager_8c.html',1,'(Global Namespace)']]],
+  ['path_5fmanager_2eh_212',['path_manager.h',['../include_2mptcpd_2path__manager_8h.html',1,'(Global Namespace)'],['../include_2mptcpd_2private_2path__manager_8h.html',1,'(Global Namespace)'],['../src_2path__manager_8h.html',1,'(Global Namespace)']]],
+  ['plugin_2ec_213',['plugin.c',['../plugin_8c.html',1,'']]],
+  ['plugin_2eh_214',['plugin.h',['../plugin_8h.html',1,'(Global Namespace)'],['../private_2plugin_8h.html',1,'(Global Namespace)']]],
+  ['plugin_5faddress_5finfo_215',['plugin_address_info',['../structplugin__address__info.html',1,'']]],
+  ['plugin_5fdir_216',['plugin_dir',['../structmptcpd__config.html#ae4c5ee3603c596172f8cce38caf3d73f',1,'mptcpd_config']]],
+  ['plugin_5finfo_217',['plugin_info',['../structplugin__info.html',1,'']]],
+  ['plugin_5finterface_5finfo_218',['plugin_interface_info',['../structplugin__interface__info.html',1,'']]],
+  ['plugins_5fto_5fload_219',['plugins_to_load',['../structmptcpd__config.html#a05d382986529bd3fb92881ca505a1028',1,'mptcpd_config']]],
+  ['pm_220',['pm',['../structplugin__address__info.html#a547b03cffa9d3c23bfda49fbb0707186',1,'plugin_address_info::pm()'],['../structplugin__interface__info.html#ae5b0447988c536d84b7ed1f88853b471',1,'plugin_interface_info::pm()'],['../structsspi__new__connection__info.html#a1ae49c34c3e042e19aeac03a8ad196e8',1,'sspi_new_connection_info::pm()']]],
+  ['pm_5fops_5finfo_221',['pm_ops_info',['../structpm__ops__info.html',1,'']]],
+  ['priority_222',['priority',['../structmptcpd__plugin__desc.html#a73e301b2b645246a866c313727109504',1,'mptcpd_plugin_desc']]]
 ];
