@@ -1,6 +1,7 @@
-<map id="src/configuration.h" name="src/configuration.h">
-<area shape="rect" id="node1" title="Mptcpd configuration parser header." alt="" coords="153,5,295,32"/>
-<area shape="rect" id="node2" href="$configuration_8c.html" title="Mptcpd configuration parser implementation." alt="" coords="5,80,147,107"/>
-<area shape="rect" id="node3" href="$mptcpd_8c.html" title="Main mptcpd source file." alt="" coords="171,80,277,107"/>
-<area shape="rect" id="node4" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="300,80,449,107"/>
+<map id="include/mptcpd/private/configuration.h" name="include/mptcpd/private/configuration.h">
+<area shape="rect" id="node1" title="Mptcpd configuration parser header." alt="" coords="263,5,435,47"/>
+<area shape="rect" id="node2" href="$addr__adv_8c.html" title="MPTCP address advertiser path manager plugin." alt="" coords="5,95,180,136"/>
+<area shape="rect" id="node3" href="$configuration_8c.html" title="Mptcpd configuration parser implementation." alt="" coords="205,102,346,129"/>
+<area shape="rect" id="node4" href="$mptcpd_8c.html" title="Main mptcpd source file." alt="" coords="371,102,476,129"/>
+<area shape="rect" id="node5" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="499,102,649,129"/>
 </map>

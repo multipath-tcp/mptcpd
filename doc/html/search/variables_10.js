@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['update_5finterface_368',['update_interface',['../structmptcpd__nm__ops.html#a1ae6e3a56c613efc3e8ac1480cf165df',1,'mptcpd_nm_ops::update_interface()'],['../structmptcpd__plugin__ops.html#a35f9fcf0a2b6f7b982ccfe3f2d939866',1,'mptcpd_plugin_ops::update_interface()']]],
-  ['user_5fdata_369',['user_data',['../structpm__ops__info.html#ad289c430bca413cae9e685b997989844',1,'pm_ops_info::user_data()'],['../structnm__ops__info.html#a6105012cbdac7563351e15d307bde1af',1,'nm_ops_info::user_data()'],['../structmptcpd__interface__callback__data.html#a118adf73495a80447bd2a492bbfb8110',1,'mptcpd_interface_callback_data::user_data()']]]
+  ['timeout_441',['timeout',['../structmptcpd__pm.html#a415489053b0eafd2b892eb6846755005',1,'mptcpd_pm::timeout()'],['../structnm__addr__info.html#a0c9e9c235d9140a4799e8630a9925ed0',1,'nm_addr_info::timeout()']]],
+  ['token_442',['token',['../structsspi__new__connection__info.html#a4ad2a176dc6534efd5227e62b0978348',1,'sspi_new_connection_info']]],
+  ['tokens_443',['tokens',['../structsspi__interface__info.html#a78f80d071f13479f7ad84515a6a6669d',1,'sspi_interface_info']]],
+  ['type_444',['type',['../structmptcpd__interface.html#abe7de8ecac479cc21a4e05bcc8ceebf1',1,'mptcpd_interface::type()'],['../structmptcpd__limit.html#ac43bb987e67f199ea72a670791a39d76',1,'mptcpd_limit::type()']]]
 ];
