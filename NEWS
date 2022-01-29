@@ -40,8 +40,8 @@
       parameter.
 
     - A new command line option "--load-plugins" was added to allow
-      the user to specify which mptcpd plugins to load instead loading
-      all plugins.
+      the user to specify which mptcpd plugins to load instead of
+      loading all plugins.
 
     - ELL >= 0.30 is now required.
 
