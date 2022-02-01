@@ -12,6 +12,7 @@
 
 #include <stddef.h>
 #include <inttypes.h>
+#include <ell/settings.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -161,6 +162,10 @@ typedef void (*mptcpd_pm_get_limits_cb)(
         struct mptcpd_limit const *limits,
         size_t len,
         void *callback_data);
+
+typedef void (*mptcpd_parse_func_t) (
+        struct l_settings *const settings,
+        void *user_data);
 
 #ifdef __cplusplus
 }

@@ -20,6 +20,7 @@ libmptcpd_la_LDFLAGS = 	\
 
 libmptcpd_la_SOURCES =		\
 	addr_info.c		\
+	configuration.c		\
 	id_manager.c		\
 	network_monitor.c	\
 	path_manager.c		\
