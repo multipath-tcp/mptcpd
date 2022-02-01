@@ -43,7 +43,7 @@ static bool run_plugin_load(mode_t mode, struct l_queue const *queue)
         assert(mode_ok == 0);
 
         bool const loaded =
-                mptcpd_plugin_load(dir, default_plugin, queue, pm);
+                mptcpd_plugin_load(dir, default_plugin, dir, queue, pm);
 
         if (loaded) {
                 call_plugin_ops(&test_count_4,
@@ -118,7 +118,7 @@ static void test_no_plugins(void const *test_data)
         assert(dir != NULL);
 
         struct mptcpd_pm *const pm = NULL;
-        bool const loaded = mptcpd_plugin_load(dir, NULL, NULL, pm);
+        bool const loaded = mptcpd_plugin_load(dir, NULL, dir, NULL, pm);
 
         (void) rmdir(dir);
 
@@ -187,7 +187,7 @@ static void test_plugin_dispatch(void const *test_data)
         struct mptcpd_pm *const pm = NULL;
 
         bool const loaded =
-                mptcpd_plugin_load(dir, default_plugin, NULL, pm);
+                mptcpd_plugin_load(dir, default_plugin, dir, NULL, pm);
         assert(loaded);
 
         // Notice that we call plugin 1 twice.
@@ -257,7 +257,11 @@ static void test_null_plugin_ops(void const *test_data)
         static char const *const default_plugin = NULL;
         struct mptcpd_pm *const pm = NULL;
 
-        bool const loaded = mptcpd_plugin_load(dir, default_plugin, NULL, pm);
+        bool const loaded = mptcpd_plugin_load(dir,
+                                               default_plugin,
+                                               dir,
+                                               NULL,
+                                               pm);
         assert(loaded);
 
         char const name[] = "null ops";
