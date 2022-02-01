@@ -826,6 +826,7 @@ static void complete_pm_init(void *data)
          */
         if (!mptcpd_plugin_load(pm->config->plugin_dir,
                                 pm->config->default_plugin,
+                                pm->config->plugins_conf_dir,
                                 pm->config->plugins_to_load,
                                 pm)) {
                 l_error("Unable to load path manager plugins.");
