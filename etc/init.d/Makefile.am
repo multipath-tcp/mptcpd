@@ -34,4 +34,5 @@ install-data-hook: installcheck-local
 
 installcheck-local:
 	$(top_srcdir)/scripts/check-permissions \
-		$(DESTDIR)$(initddir)
+		$(DESTDIR)$(initddir) \
+		$(DESTDIR)$(initddir)/mptcpd
