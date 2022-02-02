@@ -28,6 +28,8 @@ mptcpd: Makefile mptcpd.in
 
 CLEANFILES = mptcpd
 
+AM_INSTALLCHECK_STD_OPTIONS_EXEMPT = $(initd_SCRIPTS)
+
 # Make sure the system init.d directory is not world writable.
 install-data-hook: installcheck-local
 	chmod o-w $(DESTDIR)$(initddir)
