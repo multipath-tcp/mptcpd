@@ -22,6 +22,8 @@
 # include <mptcpd/private/mptcp_org.h>
 #endif
 
+#include "../src/netlink_pm.h"  // For MPTCP_SYSCTL_BASE
+
 #include "test-util.h"
 
 
@@ -32,6 +34,12 @@ char const *tests_get_pm_family_name(void)
 #else
         return MPTCP_GENL_NAME;
 #endif
+}
+
+bool tests_is_mptcp_kernel(void)
+{
+        // Kernel supports MPTCP if /proc/sys/net/mptcp exists.
+        return access(MPTCP_SYSCTL_BASE, R_OK | X_OK) == 0;
 }
 
 
