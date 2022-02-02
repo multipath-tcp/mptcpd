@@ -7,15 +7,18 @@
 
 set -e
 
+# An exit status of 77 causes the Automake test driver to consider the
+# test as skipped.
+skip_exit_status=77
+
 # Check if we're using the upstream kernel.
 #
-# upstream:          net.mptcp.enabled
-# multipath-tcp.org: net.mptcp.mptcp_enabled
-key=`sysctl --names --pattern 'mptcp\.enabled' net.mptcp`
-if [ -z "$key" ]; then
-    # Do not run the test if we're not using the upstream kernel.
+# upstream:          /proc/sys/net/mptcp/enabled
+# multipath-tcp.org: /proc/sys/net/mptcp/mptcp_enabled
+if [ ! -f /proc/sys/net/mptcp/enabled ]; then
+    # Skip the test if we're not using the upstream kernel.
     echo Not running upstream kernel.  libmptcpwrap will not be tested.
-    exit 0
+    exit $skip_exit_status
 fi
 
 LD_PRELOAD=../src/.libs/libmptcpwrap.so \
