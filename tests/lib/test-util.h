@@ -10,25 +10,20 @@
 #ifndef MPTCP_TEST_UTIL_H
 #define MPTCP_TEST_UTIL_H
 
-/**
- * @brief Automake test driver "skip" exit status.
- *
- * An exit status of 77 causes the Automake test driver, i.e. the
- * @c test-driver script, to consider the test as skipped rather than
- * passed or failed.
- *
- * Tests that should be skipped under some conditions, such as when
- * not running a MPTCP capable kernel should exit the process with
- * this value.
- */
-#define TESTS_SKIP_EXIT_STATUS 77
-
 
 /// Get MPTCP path management generic netlink API family name.
 char const *tests_get_pm_family_name(void);
 
-/// Is the kernel MPTCP capable?
-bool tests_is_mptcp_kernel(void);
+/**
+ * @brief Exit test process if the kernel does not support MPTCP.
+ *
+ * If the kernel does not support MPTCP exit the current test process
+ * with an exit status suitable for making the Automake @c test-driver
+ * script interpret the test result as @c SKIP instead of @c PASS or
+ * @c FAIL.  This is useful for tests that need MPTCP but are run on
+ * platforms with a non-MPTCP capable kernel.
+ */
+void tests_skip_if_no_mptcp(void);
 
 
 #endif  // MPTCP_TEST_UTIL_H
