@@ -5,10 +5,25 @@
 #
 # Copyright (c) 2018, 2019, 2021, Intel Corporation
 
-# Non-interactive sudo capable if exit code is 0.
+# An exit status of 77 causes the Automake test driver to consider the
+# test as skipped.
+skip_exit_status=77
+
+# Skip the test if we're not using a kernel supporting MPTCP.
+if [ ! -d /proc/sys/net/mptcp ]; then
+    echo Not running a kernel supporting MPTCP, skipping the test
+    exit $skip_exit_status
+fi
+
+# Only run the individual enabled/disabled MPTCP test cases if the
+# "enabled" value can be set non-interactively, i.e. sudo can be
+# executed without a password.  This is mostly useful for automated
+# builds.
 echo Running non-interactive sudo check...
-sudo -n echo "    succeeded"
-sudo_exit_code=$?
+if ! sudo -n echo "    succeeded"; then
+    echo "    fail, skipping the test"
+    exit $skip_exit_status
+fi
 
 # Detect MPTCP "enabled" sysctl variable name and value.
 #   upstream:          net.mptcp.enabled
@@ -39,37 +54,26 @@ command="timeout --preserve-status \
 # Exit status/code
 status=0
 
-# Only run the individual enabled/disabled MPTCP test cases if the
-# "enabled" value can be set non-interactively, i.e. sudo can be
-# executed without a password.  This is mostly useful for automated
-# builds.
-if [ $sudo_exit_code -eq 0 ]
-then
-    for value in $disable_value $enable_value
-    do
-	sudo -n sysctl -qw $variable=$value
+for value in $disable_value $enable_value
+do
+    sudo -n sysctl -qw $variable=$value
 
-	$command
-	command_exit=$?
-
-	echo -n "TEST CASE: $variable = $value ..."
-
-	if ([ $value -eq $disable_value ] && [ $command_exit -eq 0 ]) \
-	   || ([ $value -eq $enable_value ] && [ $command_exit -ne 0 ])
-	then
-	    echo failed
-	    status=1   # failure
-	else
-	    echo passed
-	fi
-    done
-
-    # Reset the "enabled" value to its original value.
-    sudo -n sysctl -qw $variable=$old_value
-else
-    # Non-root case.
-    echo Running test without root privileges
     $command
-fi
+    command_exit=$?
+
+    echo -n "TEST CASE: $variable = $value ..."
+
+    if ([ $value -eq $disable_value ] && [ $command_exit -eq 0 ]) \
+       || ([ $value -eq $enable_value ] && [ $command_exit -ne 0 ])
+    then
+	echo failed
+	status=1   # failure
+    else
+	echo passed
+    fi
+done
+
+# Reset the "enabled" value to its original value.
+sudo -n sysctl -qw $variable=$old_value
 
 exit $status
