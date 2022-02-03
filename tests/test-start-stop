@@ -9,6 +9,12 @@
 # test as skipped.
 skip_exit_status=77
 
+# Skip the test if we're not using a kernel supporting MPTCP.
+if [ ! -d /proc/sys/net/mptcp ]; then
+    echo Not running a kernel supporting MPTCP, skipping the test
+    exit $skip_exit_status
+fi
+
 # Only run the individual enabled/disabled MPTCP test cases if the
 # "enabled" value can be set non-interactively, i.e. sudo can be
 # executed without a password.  This is mostly useful for automated
