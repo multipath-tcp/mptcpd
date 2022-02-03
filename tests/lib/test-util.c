@@ -51,7 +51,7 @@ void tests_skip_if_no_mptcp(void)
           as SKIP rather than PASS or FAIL.
 
           Tests that should be skipped under some conditions, such as
-          when not running a MPTCP capable kernel should exit the
+          when not running a MPTCP capable kernel, should exit the
           process with this value.
         */
         static int const SKIP_EXIT_STATUS = 77;
