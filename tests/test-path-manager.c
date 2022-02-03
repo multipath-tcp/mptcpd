@@ -161,6 +161,9 @@ static void timeout_callback(struct l_timeout *timeout,
 
 int main(void)
 {
+        // Skip this test if the kernel is not MPTCP capable.
+        tests_skip_if_no_mptcp();
+
         if (!l_main_init())
                 return -1;
 
