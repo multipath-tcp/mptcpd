@@ -164,7 +164,7 @@ typedef void (*mptcpd_pm_get_limits_cb)(
         void *callback_data);
 
 typedef void (*mptcpd_parse_func_t) (
-        struct l_settings *const settings,
+        struct l_settings const* settings,
         void *user_data);
 
 #ifdef __cplusplus

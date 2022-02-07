@@ -646,7 +646,7 @@ static void parse_config_plugins_conf_dir(
  * @return @c true on successful configuration file parse, and
  *         @c false otherwise.
  */
-static void parse_config_file(struct l_settings *const settings,
+static void parse_config_file(struct l_settings const* settings,
                               void *user_data)
 {
         struct mptcpd_config *config = user_data;
