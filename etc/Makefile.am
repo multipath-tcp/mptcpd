@@ -28,7 +28,7 @@ CLEANFILES = mptcpd.conf
 # writable.
 install-data-hook: installcheck-local
 	chmod o-w $(DESTDIR)$(pkgsysconfdir)
-	mkdir -p $(DESTDIR)$(pluginsconfdir)
+	$(MKDIR_P) $(DESTDIR)$(pluginsconfdir)
 	chmod o-w $(DESTDIR)$(pluginsconfdir)
 
 installcheck-local:
