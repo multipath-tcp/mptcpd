@@ -39,7 +39,7 @@ then
     echo Patched AX_VALGRIND_CHECK GNU Autoconf Archive macro not found.
     echo -n "Attempting to download patched ax_valgrind_check.m4... "
     cd m4
-    wget --quiet --timeout 10 http://git.savannah.gnu.org/gitweb/?p=autoconf-archive.git;a=blob_plain;f=m4/ax_valgrind_check.m4
+    wget --quiet --timeout 10 http://git.savannah.gnu.org/cgit/autoconf-archive.git/plain/m4/ax_valgrind_check.m4
     if test $? -eq 0
     then
         echo done
