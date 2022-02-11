@@ -43,17 +43,9 @@ then
     if test $? -eq 0
     then
         echo done
-        # Enable AX_VALGRIND_CHECK in case it was disabled in a
-        # previous run.
-        sed -e 's/^dnl AX_VALGRIND_CHECK/AX_VALGRIND_CHECK/' \
-            ../configure.ac > ../configure.ac.NEW
-        mv ../configure.ac.NEW ../configure.ac
     else
         echo failed
-        echo Disabling AX_VALGRIND_CHECK in configure.ac.
-        sed -e 's/^AX_VALGRIND_CHECK/dnl AX_VALGRIND_CHECK/' \
-            ../configure.ac > ../configure.ac.NEW
-        mv ../configure.ac.NEW ../configure.ac
+        echo WARNING: "make check-valgrind" may not work properly.
     fi
     cd ..
 fi
