@@ -31,15 +31,15 @@ fi
 
 if test "x$do_download" = "xyes"
 then
-    # The expected recursive target "check-valgrind-local" doesn't
-    # exist.  Attempt to download the patch file in the GitHub pull
-    # request autoconf-archive/autoconf-archive#242 to the mptcpd/m4
-    # directory so that autoreconf will use the updated
-    # AC_VALGRIND_CHECK macro.
-    echo Patched AX_VALGRIND_CHECK autoconf archive macro not found.
+    # The expected recursive `make' target "check-valgrind-local"
+    # doesn't exist in versions of the GNU Autoconf Archive prior to
+    # v2022.02.11.  Attempt to download the patched file from the GNU
+    # Autoconf Archive git repository to the mptcpd/m4 directory so
+    # that autoreconf will use the updated AX_VALGRIND_CHECK macro.
+    echo Patched AX_VALGRIND_CHECK GNU Autoconf Archive macro not found.
     echo -n "Attempting to download patched ax_valgrind_check.m4... "
     cd m4
-    wget --quiet --timeout 10 https://raw.githubusercontent.com/autoconf-archive/autoconf-archive/6b04d9611a0bcc5bfa61f6e5a614b3672f16d196/m4/ax_valgrind_check.m4
+    wget --quiet --timeout 10 http://git.savannah.gnu.org/gitweb/?p=autoconf-archive.git;a=blob_plain;f=m4/ax_valgrind_check.m4
     if test $? -eq 0
     then
         echo done
