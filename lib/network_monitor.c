@@ -535,8 +535,8 @@ static bool is_interface_ready(struct mptcpd_nm const *nm,
         static unsigned int iff_ready = IFF_UP | IFF_RUNNING;
 
         return (ifi->ifi_flags & iff_ready) == iff_ready
-                && (nm->monitor_loopback
-                    || (ifi->ifi_flags & IFF_LOOPBACK) == 0);
+                && ((ifi->ifi_flags & IFF_LOOPBACK) == 0
+                    || nm->monitor_loopback);
 }
 
 /**
