@@ -1444,9 +1444,10 @@ struct mptcpd_nm *mptcpd_nm_create(uint32_t flags)
                 return NULL;
         }
 
-        nm->notify_flags = flags;
-        nm->interfaces   = l_queue_new();
-        nm->ops          = l_queue_new();
+        nm->notify_flags     = flags;
+        nm->interfaces       = l_queue_new();
+        nm->ops              = l_queue_new();
+        nm->monitor_loopback = false;
 
         /**
          * Get network interface information.
