@@ -78,6 +78,9 @@ struct mptcpd_nm
 
         /// Flags controlling address notification.
         uint32_t notify_flags;
+
+        /// Enable/disable loopback network interface monitoring.
+        bool monitor_loopback;
 };
 
 // -------------------------------------------------------------------
@@ -525,16 +528,15 @@ static void mptcpd_interface_callback(void *data, void *user_data)
  *
  * @return @c true if network interface is ready, and @c false other.
  */
-static bool is_interface_ready(struct ifinfomsg const *ifi)
+static bool is_interface_ready(struct mptcpd_nm const *nm,
+                               struct ifinfomsg const *ifi)
 {
-        /*
-          Only accept non-loopback network interfaces that are
-          up and running.
-        */
-        static unsigned int const iff_ready = IFF_UP | IFF_RUNNING;
+        // Only accept network interfaces that are up and running.
+        static unsigned int iff_ready = IFF_UP | IFF_RUNNING;
 
         return (ifi->ifi_flags & iff_ready) == iff_ready
-                && (ifi->ifi_flags & IFF_LOOPBACK) == 0;
+                && (nm->monitor_loopback
+                    || (ifi->ifi_flags & IFF_LOOPBACK) == 0);
 }
 
 /**
@@ -708,7 +710,7 @@ static void handle_link(uint16_t type,
 
         switch (type) {
         case RTM_NEWLINK:
-                if (is_interface_ready(ifi))
+                if (is_interface_ready(nm, ifi))
                         update_link(ifi, len, nm);
                 else
                         remove_link(ifi, nm);  // Interface disabled.
@@ -1301,7 +1303,7 @@ static void handle_rtm_getlink(int error,
         struct ifinfomsg const *const ifi = data;
         struct mptcpd_nm *const nm        = user_data;
 
-        if (is_interface_ready(ifi)) {
+        if (is_interface_ready(nm, ifi)) {
                 (void) insert_link(ifi, len, nm);
         }
 }
@@ -1555,6 +1557,15 @@ bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
         return registered;
 }
 
+bool mptcpd_nm_monitor_loopback(struct mptcpd_nm *nm, bool enable)
+{
+        if (nm == NULL)
+                return false;
+
+        nm->monitor_loopback = enable;
+
+        return true;
+}
 
 /*
   Local Variables:
