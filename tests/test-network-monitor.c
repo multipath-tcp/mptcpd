@@ -4,7 +4,7 @@
  *
  * @brief mptcpd network monitor test.
  *
- * Copyright (c) 2018-2020, Intel Corporation
+ * Copyright (c) 2018-2020, 2022, Intel Corporation
  */
 
 #define _DEFAULT_SOURCE  // Enable IFF_... interface flags in <net/if.h>.
