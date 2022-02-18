@@ -213,6 +213,27 @@ MPTCPD_API bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
                                        struct mptcpd_nm_ops const *ops,
                                        void *user_data);
 
+/**
+ * @brief Enable monitoring of the loopback network interface.
+ *
+ * Mptcpd normally only monitors non-loopback network interfaces.
+ * Call this function to enable monitoring of loopback network
+ * interfaces.
+ *
+ * @note Mptcpd monitoring of loopback network interfaces is meant
+ *       primarily for testing purposes.
+ *
+ * @param[in,out] nm     Pointer to the mptcpd network monitor
+ *                       object.
+ * @param[in]     enable Enable or disable monitoring of loopback
+ *                       network interfaces.
+ *
+ * @retval true  Successfully enable or disabled.
+ * @retval false Invalid @a nm argument.
+ */
+MPTCPD_API bool mptcpd_nm_monitor_loopback(struct mptcpd_nm *nm,
+                                           bool enable);
+
 #ifdef __cplusplus
 }
 #endif

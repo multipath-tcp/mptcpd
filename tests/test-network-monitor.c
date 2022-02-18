@@ -4,7 +4,7 @@
  *
  * @brief mptcpd network monitor test.
  *
- * Copyright (c) 2018-2020, Intel Corporation
+ * Copyright (c) 2018-2020, 2022, Intel Corporation
  */
 
 #define _DEFAULT_SOURCE  // Enable IFF_... interface flags in <net/if.h>.
@@ -115,12 +115,11 @@ static void check_interface(struct mptcpd_interface const *i, void *data)
         l_queue_foreach(i->addrs, dump_addr, NULL);
 
         /*
-          Only non-loopback interfaces that are up and running should
-          be monitored.
+          Only network interfaces that are up and running should be
+          monitored.
         */
         static unsigned int const ready = IFF_UP | IFF_RUNNING;
         assert(ready == (i->flags & ready));
-        assert(!(i->flags & IFF_LOOPBACK));
 
         if (data) {
                 struct foreach_data *const fdata = data;
@@ -248,6 +247,14 @@ int main(void)
 
         struct mptcpd_nm *const nm = mptcpd_nm_create(0);
         assert(nm);
+
+        assert(!mptcpd_nm_monitor_loopback(NULL, true)); // Bad arg
+
+        /*
+          Enable loopback network interface monitoring for this unit
+          test in case non-loopback network interfaces are unavailable.
+        */
+        assert(mptcpd_nm_monitor_loopback(nm, true));
 
         struct mptcpd_nm_ops const nm_events[] = {
                 {
