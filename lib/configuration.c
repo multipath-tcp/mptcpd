@@ -69,9 +69,7 @@ bool mptcpd_config_read(char const *filename,
                 return false;
         }
 
-        bool success = l_settings_load_from_file(settings, filename);
-
-        if (success)
+        if (l_settings_load_from_file(settings, filename))
                 fun(settings, user_data);
         else
                 l_debug("Unable to load mptcpd settings from file '%s'",
@@ -79,6 +77,6 @@ bool mptcpd_config_read(char const *filename,
 
         l_settings_free(settings);
 
-        return success;
+        return true;
 }
 
