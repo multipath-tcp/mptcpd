@@ -360,6 +360,7 @@ AC_CONFIG_FILES([Makefile
                  etc/Makefile
                  man/Makefile
                  include/Makefile
+                 include/ell/Makefile
                  include/linux/Makefile
                  include/mptcpd/Makefile
                  lib/Makefile
