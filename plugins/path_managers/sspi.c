@@ -46,6 +46,14 @@
 static struct l_queue *sspi_interfaces;
 
 /**
+ * @brief sspi plugin local address ID manager.
+ *
+ * Local address IDs are generated and managed through this
+ * @c mptcpd_idm instance.
+ */
+static struct mptcpd_idm *sspi_idm;
+
+/**
  * @struct sspi_interface_info
  *
  * @brief Network interface information.
@@ -799,6 +807,12 @@ static int sspi_init(struct mptcpd_pm *pm)
         // Create list of connection tokens on each network interface.
         sspi_interfaces = l_queue_new();
 
+        /*
+          Create local address ID manager for this user space path
+          manager plugin.
+        */
+        sspi_idm = mptcpd_idm_create();
+
         static char const name[] = "sspi";
 
         if (!mptcpd_plugin_register_ops(name, &pm_ops)) {
@@ -819,6 +833,7 @@ static void sspi_exit(struct mptcpd_pm *pm)
 {
         (void) pm;
 
+        mptcpd_idm_destroy(sspi_idm);
         l_queue_destroy(sspi_interfaces, sspi_interface_info_destroy);
 
         l_info("MPTCP single-subflow-per-interface path manager exited.");
