@@ -4,6 +4,10 @@
  *
  * @brief MPTCP single-subflow-per-interface path manager plugin.
  *
+ * The single-subflow-per-interface path manager plugin performs MPTCP
+ * path management in the user space, only allowing one subflow per
+ * local network interface.
+ *
  * Copyright (c) 2018-2022, Intel Corporation
  */
 
