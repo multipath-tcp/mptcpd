@@ -12,7 +12,6 @@
 
 #include <stddef.h>
 #include <inttypes.h>
-#include <ell/cleanup.h>
 #include <ell/settings.h>
 
 #ifdef __cplusplus
