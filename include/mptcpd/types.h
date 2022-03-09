@@ -12,11 +12,12 @@
 
 #include <stddef.h>
 #include <inttypes.h>
-#include <ell/settings.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct l_settings;
 
 /**
  * @todo These rely on MPTCP genl related implementation details in
