@@ -26,7 +26,7 @@ AM_LDFLAGS =			\
 check_LTLIBRARIES = no_name.la no_symbol.la
 
 no_name_la_SOURCES = no_name.c
-no_name_la_LIBADD = $(top_builddir)/lib/libmptcpd.la $(CODE_COVERAGE_LIBS)
+no_name_la_LIBADD = $(CODE_COVERAGE_LIBS)
 
 no_symbol_la_SOURCES = no_symbol.c
 no_symbol_la_LIBADD = $(CODE_COVERAGE_LIBS)
