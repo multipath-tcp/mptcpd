@@ -154,7 +154,7 @@ static void test_existing_plugins(void const *test_data)
  * The @c mptcpd_plugin_load() function should return with a failure
  * if the specified plugins do not exist in the provided plugin directory.
  */
-static void test_nonexisting_plugins(void const *test_data)
+static void test_nonexistent_plugins(void const *test_data)
 {
         (void) test_data;
 
@@ -163,7 +163,8 @@ static void test_nonexisting_plugins(void const *test_data)
 
         struct l_queue *const plugins_list = l_queue_new();
 
-        l_queue_push_tail(plugins_list, "nonexisting_plugin");
+        static char nonexistent_plugin[] = "nonexistent_plugin";
+        l_queue_push_tail(plugins_list, nonexistent_plugin);
 
         bool const loaded = run_plugin_load(mode, plugins_list);
 
@@ -294,7 +295,7 @@ int main(int argc, char *argv[])
         l_test_add("bad  permissions",   test_bad_perms,           NULL);
         l_test_add("no plugins",         test_no_plugins,          NULL);
         l_test_add("existing plugin",    test_existing_plugins,    NULL);
-        l_test_add("nonexisting plugin", test_nonexisting_plugins, NULL);
+        l_test_add("nonexistent plugin", test_nonexistent_plugins, NULL);
         l_test_add("plugin dispatch",    test_plugin_dispatch,     NULL);
         l_test_add("null plugin ops",    test_null_plugin_ops,     NULL);
 
