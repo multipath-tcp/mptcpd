@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file plugin_noop.c
+ * @file noop.c
  *
  * @brief MPTCP test plugin.
  *
