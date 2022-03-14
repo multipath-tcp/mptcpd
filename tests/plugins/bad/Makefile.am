@@ -23,10 +23,13 @@ AM_LDFLAGS =			\
 
 ## For mptcpd tests that require a plugin without testing the plugin
 ## itself.  The plugin will be a no-op in this case.
-check_LTLIBRARIES = no_name.la
+check_LTLIBRARIES = no_name.la no_symbol.la
 
 no_name_la_SOURCES = no_name.c
 no_name_la_LIBADD = $(top_builddir)/lib/libmptcpd.la $(CODE_COVERAGE_LIBS)
+
+no_symbol_la_SOURCES = no_symbol.c
+no_symbol_la_LIBADD = $(CODE_COVERAGE_LIBS)
 
 # Clean up code coverage related generated files.
 clean-local: code-coverage-clean
