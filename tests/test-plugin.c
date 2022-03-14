@@ -170,6 +170,16 @@ static void test_nonexistent_plugins(void const *test_data)
 
         l_queue_destroy(plugins_list, NULL);
 
+        /*
+          Force plugin name-to-ops lookup to fail excercise additional
+          error paths.
+        */
+        mptcpd_plugin_new_connection(nonexistent_plugin,
+                                     0,     // token
+                                     NULL,  // laddr
+                                     NULL,  // raddr
+                                     NULL); // pm
+
         assert(!loaded);
 }
 
