@@ -362,6 +362,7 @@ AC_CONFIG_FILES([Makefile
                  tests/Makefile
                  tests/lib/Makefile
                  tests/plugins/Makefile
+                 tests/plugins/bad/Makefile
                  tests/plugins/noop/Makefile
                  tests/plugins/priority/Makefile
                  tests/plugins/security/Makefile])

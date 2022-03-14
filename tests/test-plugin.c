@@ -317,6 +317,26 @@ static void test_null_plugin_dir(void const *test_data)
         assert(!loaded);
 }
 
+/**
+ * @brief Verify graceful handling of bad/malformed plugins.
+ */
+static void test_bad_plugins(void const *test_data)
+{
+        (void) test_data;
+
+        char const *const dir                       = TEST_PLUGIN_DIR_BAD;
+        char const *const default_plugin            = NULL;
+        struct l_queue const *const plugins_to_load = NULL;
+        struct mptcpd_pm *const pm                  = NULL;
+
+        bool const loaded =
+                mptcpd_plugin_load(dir,
+                                   default_plugin,
+                                   plugins_to_load,
+                                   pm);
+        assert(!loaded);
+}
+
 int main(int argc, char *argv[])
 {
         l_test_init(&argc, &argv);
@@ -329,6 +349,7 @@ int main(int argc, char *argv[])
         l_test_add("plugin dispatch",    test_plugin_dispatch,     NULL);
         l_test_add("null plugin ops",    test_null_plugin_ops,     NULL);
         l_test_add("null plugin dir",    test_null_plugin_dir,     NULL);
+        l_test_add("bad plugins",        test_bad_plugins,         NULL);
 
         return l_test_run();
 }
