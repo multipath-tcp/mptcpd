@@ -283,6 +283,7 @@ static void test_null_plugin_ops(void const *test_data)
         static struct sockaddr const *const laddr = NULL;
         static struct sockaddr const *const raddr = NULL;
         static bool backup = false;
+        static struct mptcpd_interface const *const interface = NULL;
 
         // No dispatch should occur in the following calls.
         mptcpd_plugin_new_connection(name, token, laddr, raddr, pm);
@@ -293,6 +294,11 @@ static void test_null_plugin_ops(void const *test_data)
         mptcpd_plugin_new_subflow(token, laddr, raddr, backup, pm);
         mptcpd_plugin_subflow_closed(token, laddr, raddr, backup, pm);
         mptcpd_plugin_subflow_priority(token, laddr, raddr, backup, pm);
+        mptcpd_plugin_new_interface(interface, pm);
+        mptcpd_plugin_update_interface(interface, pm);
+        mptcpd_plugin_delete_interface(interface, pm);
+        mptcpd_plugin_new_local_address(interface, laddr, pm);
+        mptcpd_plugin_delete_local_address(interface, laddr, pm);
 
         mptcpd_plugin_unload(pm);
 }
