@@ -4,7 +4,7 @@
  *
  * @brief mptcpd plugin test.
  *
- * Copyright (c) 2018-2021, Intel Corporation
+ * Copyright (c) 2018-2022, Intel Corporation
  */
 
 #include <sys/types.h>
@@ -297,6 +297,26 @@ static void test_null_plugin_ops(void const *test_data)
         mptcpd_plugin_unload(pm);
 }
 
+/**
+ * @brief Verify graceful handling of @c NULL plugin directory.
+ */
+static void test_null_plugin_dir(void const *test_data)
+{
+        (void) test_data;
+
+        char const *const dir                       = NULL;
+        char const *const default_plugin            = NULL;
+        struct l_queue const *const plugins_to_load = NULL;
+        struct mptcpd_pm *const pm                  = NULL;
+
+        bool const loaded =
+                mptcpd_plugin_load(dir,
+                                   default_plugin,
+                                   plugins_to_load,
+                                   pm);
+        assert(!loaded);
+}
+
 int main(int argc, char *argv[])
 {
         l_test_init(&argc, &argv);
@@ -308,6 +328,7 @@ int main(int argc, char *argv[])
         l_test_add("nonexistent plugin", test_nonexistent_plugins, NULL);
         l_test_add("plugin dispatch",    test_plugin_dispatch,     NULL);
         l_test_add("null plugin ops",    test_null_plugin_ops,     NULL);
+        l_test_add("null plugin dir",    test_null_plugin_dir,     NULL);
 
         return l_test_run();
 }
