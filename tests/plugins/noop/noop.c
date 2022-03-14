@@ -106,6 +106,45 @@ static void plugin_noop_subflow_priority(mptcpd_token_t token,
         (void) pm;
 }
 
+void plugin_noop_new_interface(struct mptcpd_interface const *i,
+                               struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+}
+
+void plugin_noop_update_interface(struct mptcpd_interface const *i,
+                                  struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+}
+
+void plugin_noop_delete_interface(struct mptcpd_interface const *i,
+                                  struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+}
+
+void plugin_noop_new_local_address(struct mptcpd_interface const *i,
+                                   struct sockaddr const *sa,
+                                   struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) sa;
+        (void) pm;
+}
+
+void plugin_noop_delete_local_address(struct mptcpd_interface const *i,
+                                      struct sockaddr const *sa,
+                                      struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) sa;
+        (void) pm;
+}
+
 static struct mptcpd_plugin_ops const pm_ops = {
         .new_connection         = plugin_noop_new_connection,
         .connection_established = plugin_noop_connection_established,
@@ -114,7 +153,12 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .address_removed        = plugin_noop_address_removed,
         .new_subflow            = plugin_noop_new_subflow,
         .subflow_closed         = plugin_noop_subflow_closed,
-        .subflow_priority       = plugin_noop_subflow_priority
+        .subflow_priority       = plugin_noop_subflow_priority,
+        .new_interface          = plugin_noop_new_interface,
+        .update_interface       = plugin_noop_update_interface,
+        .delete_interface       = plugin_noop_delete_interface,
+        .new_local_address      = plugin_noop_new_local_address,
+        .delete_local_address   = plugin_noop_delete_local_address
 };
 
 static int plugin_noop_init(struct mptcpd_pm *pm)
