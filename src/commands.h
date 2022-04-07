@@ -67,7 +67,7 @@ struct l_genl_msg;
  * @return @c true if the @a addr is an internet address, and @c false
  *         otherwise.
  */
-inline bool mptcpd_is_inet_family(struct sockaddr const *addr)
+static inline bool mptcpd_is_inet_family(struct sockaddr const *addr)
 {
         return addr->sa_family == AF_INET || addr->sa_family == AF_INET6;
 }
@@ -80,7 +80,7 @@ inline bool mptcpd_is_inet_family(struct sockaddr const *addr)
  * @return Size of the underlying internet address (e.g., @c struct
  *         @c in_addr6).
  */
-inline size_t mptcpd_get_addr_size(struct sockaddr const *addr)
+static inline size_t mptcpd_get_addr_size(struct sockaddr const *addr)
 {
         assert(mptcpd_is_inet_family(addr));
 
@@ -100,7 +100,7 @@ inline size_t mptcpd_get_addr_size(struct sockaddr const *addr)
  * @return Network address family, or zero if no address family was
  *         provided.
  */
-inline uint16_t mptcpd_get_addr_family(struct sockaddr const *addr)
+static inline uint16_t mptcpd_get_addr_family(struct sockaddr const *addr)
 {
         sa_family_t const family = (addr == NULL ? 0 : addr->sa_family);
 
