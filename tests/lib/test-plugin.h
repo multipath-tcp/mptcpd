@@ -49,6 +49,11 @@ struct plugin_call_count
         int new_subflow;
         int subflow_closed;
         int subflow_priority;
+        int new_interface;
+        int update_interface;
+        int delete_interface;
+        int new_local_address;
+        int delete_local_address;
         ///@}
 };
 
@@ -263,7 +268,7 @@ struct plugin_call_args
         struct sockaddr const *raddr;
 
         /// Network interface information.
-        struct mptcpd_interface const *i;
+        struct mptcpd_interface const *interface;
 
         /// MPTCP backup priority.
         bool backup;

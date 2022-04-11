@@ -70,6 +70,25 @@ void call_plugin_ops(struct plugin_call_count const *count,
 
         for (int i = 0; i < count->connection_closed; ++i)
                 mptcpd_plugin_connection_closed(args->token, args->pm);
+
+        for (int i = 0; i < count->new_interface; ++i)
+                mptcpd_plugin_new_interface(args->interface, args->pm);
+
+        for (int i = 0; i < count->update_interface; ++i)
+                mptcpd_plugin_update_interface(args->interface, args->pm);
+
+        for (int i = 0; i < count->delete_interface; ++i)
+                mptcpd_plugin_delete_interface(args->interface, args->pm);
+
+        for (int i = 0; i < count->new_local_address; ++i)
+                mptcpd_plugin_new_local_address(args->interface,
+                                                args->laddr,
+                                                args->pm);
+
+        for (int i = 0; i < count->delete_local_address; ++i)
+                mptcpd_plugin_delete_local_address(args->interface,
+                                                   args->laddr,
+                                                   args->pm);
 }
 
 
