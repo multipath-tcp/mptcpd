@@ -46,13 +46,15 @@ static bool run_plugin_load(mode_t mode, struct l_queue const *queue)
                 mptcpd_plugin_load(dir, default_plugin, queue, pm);
 
         if (loaded) {
-                call_plugin_ops(&test_count_4,
-                                NULL,
-                                test_token_4,
-                                test_raddr_id_4,
-                                (struct sockaddr const *) &test_laddr_4,
-                                (struct sockaddr const *) &test_raddr_4,
-                                test_backup_4);
+                static struct plugin_call_args const args = {
+                        .token    = test_token_4,
+                        .raddr_id = test_raddr_id_4,
+                        .laddr    = (struct sockaddr const *) &test_laddr_4,
+                        .raddr    = (struct sockaddr const *) &test_raddr_4,
+                        .backup   = test_backup_4
+                };
+
+                call_plugin_ops(&test_count_4, &args);
 
                 mptcpd_plugin_unload(pm);
         }
@@ -203,31 +205,39 @@ static void test_plugin_dispatch(void const *test_data)
 
         // Notice that we call plugin 1 twice.
         // Plugin 1
-        call_plugin_ops(&test_count_1,
-                        TEST_PLUGIN_ONE,
-                        test_token_1,
-                        test_raddr_id_1,
-                        (struct sockaddr const *) &test_laddr_1,
-                        (struct sockaddr const *) &test_raddr_1,
-                        test_backup_1);
+        static struct plugin_call_args const args1 = {
+                .name     = TEST_PLUGIN_ONE,
+                .token    = test_token_1,
+                .raddr_id = test_raddr_id_1,
+                .laddr    = (struct sockaddr const *) &test_laddr_1,
+                .raddr    = (struct sockaddr const *) &test_raddr_1,
+                .backup   = test_backup_1
+        };
 
-        // Plugin 1 as default
-        call_plugin_ops(&test_count_1,
-                        NULL,
-                        test_token_1,
-                        test_raddr_id_1,
-                        (struct sockaddr const *) &test_laddr_1,
-                        (struct sockaddr const *) &test_raddr_1,
-                        test_backup_1);
+        call_plugin_ops(&test_count_1, &args1);
+
+        // Plugin 1 as default (no plugin name specified)
+        static struct plugin_call_args const args1_default = {
+                .token    = test_token_1,
+                .raddr_id = test_raddr_id_1,
+                .laddr    = (struct sockaddr const *) &test_laddr_1,
+                .raddr    = (struct sockaddr const *) &test_raddr_1,
+                .backup   = test_backup_1
+        };
+
+        call_plugin_ops(&test_count_1, &args1_default);
 
         // Plugin 2
-        call_plugin_ops(&test_count_2,
-                        TEST_PLUGIN_TWO,
-                        test_token_2,
-                        test_raddr_id_2,
-                        (struct sockaddr const *) &test_laddr_2,
-                        (struct sockaddr const *) &test_raddr_2,
-                        test_backup_2);
+        static struct plugin_call_args const args2 = {
+                .name     = TEST_PLUGIN_TWO,
+                .token    = test_token_2,
+                .raddr_id = test_raddr_id_2,
+                .laddr    = (struct sockaddr const *) &test_laddr_2,
+                .raddr    = (struct sockaddr const *) &test_raddr_2,
+                .backup   = test_backup_2
+        };
+
+        call_plugin_ops(&test_count_2, &args2);
 
         /*
           Invalid MPTCP token - no plugin dispatch should occur.
