@@ -153,6 +153,55 @@ static void plugin_two_subflow_priority(mptcpd_token_t token,
         ++call_count.subflow_priority;
 }
 
+void plugin_two_new_interface(struct mptcpd_interface const *i,
+                              struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+
+        ++call_count.new_interface;
+}
+
+void plugin_two_update_interface(struct mptcpd_interface const *i,
+                                 struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+
+        ++call_count.update_interface;
+}
+
+void plugin_two_delete_interface(struct mptcpd_interface const *i,
+                                 struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+
+        ++call_count.delete_interface;
+}
+
+void plugin_two_new_local_address(struct mptcpd_interface const *i,
+                                  struct sockaddr const *sa,
+                                  struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) sa;
+        (void) pm;
+
+        ++call_count.new_local_address;
+}
+
+void plugin_two_delete_local_address(struct mptcpd_interface const *i,
+                                     struct sockaddr const *sa,
+                                     struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) sa;
+        (void) pm;
+
+        ++call_count.delete_local_address;
+}
+
 static struct mptcpd_plugin_ops const pm_ops = {
         .new_connection         = plugin_two_new_connection,
         .connection_established = plugin_two_connection_established,
@@ -161,7 +210,12 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .address_removed        = plugin_two_address_removed,
         .new_subflow            = plugin_two_new_subflow,
         .subflow_closed         = plugin_two_subflow_closed,
-        .subflow_priority       = plugin_two_subflow_priority
+        .subflow_priority       = plugin_two_subflow_priority,
+        .new_interface          = plugin_two_new_interface,
+        .update_interface       = plugin_two_update_interface,
+        .delete_interface       = plugin_two_delete_interface,
+        .new_local_address      = plugin_two_new_local_address,
+        .delete_local_address   = plugin_two_delete_local_address
 };
 
 static int plugin_two_init(struct mptcpd_pm *pm)
