@@ -107,7 +107,12 @@ static struct plugin_call_count const test_count_2 = {
         .address_removed        = 1,
         .new_subflow            = 1,
         .subflow_closed         = 1,
-        .subflow_priority       = 1
+        .subflow_priority       = 1,
+        .new_interface          = 1,
+        .update_interface       = 2,
+        .delete_interface       = 1,
+        .new_local_address      = 3,
+        .delete_local_address   = 1
 };
 
 static struct plugin_call_count const test_count_4 = {
