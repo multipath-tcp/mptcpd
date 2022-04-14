@@ -19,6 +19,7 @@ AM_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
 TEST_PLUGIN_DIR_SECURITY = $(abs_builddir)/plugins/security/.libs
 TEST_PLUGIN_DIR_PRIORITY = $(abs_builddir)/plugins/priority/.libs
 TEST_PLUGIN_DIR_NOOP     = $(abs_builddir)/plugins/noop/.libs
+TEST_PLUGIN_DIR_BAD      = $(abs_builddir)/plugins/bad/.libs
 
 check_PROGRAMS =		\
 	test-plugin		\
@@ -49,6 +50,7 @@ test_plugin_CPPFLAGS =							\
 	-DTEST_PLUGIN_DIR_SECURITY=\"$(TEST_PLUGIN_DIR_SECURITY)\"	\
 	-DTEST_PLUGIN_DIR_PRIORITY=\"$(TEST_PLUGIN_DIR_PRIORITY)\"	\
 	-DTEST_PLUGIN_DIR_NOOP=\"$(TEST_PLUGIN_DIR_NOOP)\"		\
+	-DTEST_PLUGIN_DIR_BAD=\"$(TEST_PLUGIN_DIR_BAD)\"		\
 	-DTEST_PLUGIN_ONE=\"@TEST_PLUGIN_ONE@\"				\
 	-DTEST_PLUGIN_TWO=\"@TEST_PLUGIN_TWO@\"				\
 	-DTEST_PLUGIN_FOUR=\"@TEST_PLUGIN_FOUR@\"

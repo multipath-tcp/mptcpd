@@ -4,7 +4,7 @@
  *
  * @brief mptcpd plugin test header.
  *
- * Copyright (c) 2019, 2020, Intel Corporation
+ * Copyright (c) 2019, 2020, 2022, Intel Corporation
  */
 
 #ifndef MPTCPD_TEST_PLUGIN_H
@@ -49,6 +49,11 @@ struct plugin_call_count
         int new_subflow;
         int subflow_closed;
         int subflow_priority;
+        int new_interface;
+        int update_interface;
+        int delete_interface;
+        int new_local_address;
+        int delete_local_address;
         ///@}
 };
 
@@ -102,7 +107,12 @@ static struct plugin_call_count const test_count_2 = {
         .address_removed        = 1,
         .new_subflow            = 1,
         .subflow_closed         = 1,
-        .subflow_priority       = 1
+        .subflow_priority       = 1,
+        .new_interface          = 1,
+        .update_interface       = 2,
+        .delete_interface       = 1,
+        .new_local_address      = 3,
+        .delete_local_address   = 1
 };
 
 static struct plugin_call_count const test_count_4 = {
@@ -241,22 +251,45 @@ bool sockaddr_is_equal(struct sockaddr const *lhs,
                        struct sockaddr const *rhs);
 
 /**
+ * @struct plugin_call_args
+ *
+ * @brief Arguments used when calling test plugins.
+ */
+struct plugin_call_args
+{
+        /// Plugin name.
+        char const *name;
+
+        /// MPTCP connection token.
+        mptcpd_token_t token;
+
+        /// MPTCP remote address ID.
+        mptcpd_aid_t raddr_id;
+
+        /// Local address.
+        struct sockaddr const *laddr;
+
+        /// Remote address.
+        struct sockaddr const *raddr;
+
+        /// Network interface information.
+        struct mptcpd_interface const *interface;
+
+        /// MPTCP backup priority.
+        bool backup;
+
+        /// Mptcpd path manager object.
+        struct mptcpd_pm *const pm;
+};
+
+/**
  * @brief Call plugin operations
  *
- * @param[in] count    Number of times to call each plugin operation.
- * @param[in] name     Plugin name.
- * @param[in] raddr_id Remote address ID.
- * @param[in] laddr    Local address.
- * @param[in] raddr    Remote address.
- * @param[in] backup   MPTCP backup priority.
+ * @param[in] count Number of times to call plugin operations.
+ * @param[in] args  Arguments to be passed to plugin operations.
  */
 void call_plugin_ops(struct plugin_call_count const *count,
-                     char const *name,
-                     mptcpd_token_t token,
-                     mptcpd_aid_t raddr_id,
-                     struct sockaddr const *laddr,
-                     struct sockaddr const *raddr,
-                     bool backup);
+                     struct plugin_call_args const *args);
 
 
 #ifdef __cplusplus

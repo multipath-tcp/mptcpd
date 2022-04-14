@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file plugin_one.c
+ * @file one.c
  *
  * @brief MPTCP test plugin.
  *
