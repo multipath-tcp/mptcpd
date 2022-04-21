@@ -125,8 +125,8 @@ static void handle_connection_created(struct l_genl_msg *msg,
         */
 
         mptcpd_token_t  const *token       = NULL;
-        struct in_addr  const *laddr4      = NULL;
-        struct in_addr  const *raddr4      = NULL;
+        in_addr_t       const *laddr4      = NULL;
+        in_addr_t       const *raddr4      = NULL;
         struct in6_addr const *laddr6      = NULL;
         struct in6_addr const *raddr6      = NULL;
         in_port_t       const *local_port  = NULL;
@@ -193,11 +193,11 @@ static void handle_connection_created(struct l_genl_msg *msg,
 
         struct sockaddr_storage laddr, raddr;
 
-        if (!mptcpd_sockaddr_storage_init(laddr4,
+        if (!mptcpd_sockaddr_storage_init(*laddr4,
                                           laddr6,
                                           *local_port,
                                           &laddr)
-            || !mptcpd_sockaddr_storage_init(raddr4,
+            || !mptcpd_sockaddr_storage_init(*raddr4,
                                              raddr6,
                                              *remote_port,
                                              &raddr)) {
@@ -234,8 +234,8 @@ static void handle_connection_established(struct l_genl_msg *msg,
         */
 
         mptcpd_token_t  const *token       = NULL;
-        struct in_addr  const *laddr4      = NULL;
-        struct in_addr  const *raddr4      = NULL;
+        in_addr_t       const *laddr4      = NULL;
+        in_addr_t       const *raddr4      = NULL;
         struct in6_addr const *laddr6      = NULL;
         struct in6_addr const *raddr6      = NULL;
         in_port_t       const *local_port  = NULL;
@@ -296,11 +296,11 @@ static void handle_connection_established(struct l_genl_msg *msg,
 
         struct sockaddr_storage laddr, raddr;
 
-        if (!mptcpd_sockaddr_storage_init(laddr4,
+        if (!mptcpd_sockaddr_storage_init(*laddr4,
                                           laddr6,
                                           *local_port,
                                           &laddr)
-            || !mptcpd_sockaddr_storage_init(raddr4,
+            || !mptcpd_sockaddr_storage_init(*raddr4,
                                              raddr6,
                                              *remote_port,
                                              &raddr)) {
@@ -380,7 +380,7 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
 
         mptcpd_token_t  const *token      = NULL;
         mptcpd_aid_t    const *address_id = NULL;
-        struct in_addr  const *addr4      = NULL;
+        in_addr_t       const *addr4      = NULL;
         struct in6_addr const *addr6      = NULL;
         in_port_t       const *port       = NULL;
 
@@ -422,7 +422,7 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
 
         struct sockaddr_storage addr;
 
-        if (!mptcpd_sockaddr_storage_init(addr4,
+        if (!mptcpd_sockaddr_storage_init(*addr4,
                                           addr6,
                                           port ? *port : 0,
                                           &addr)) {
@@ -535,8 +535,8 @@ static bool handle_subflow(struct l_genl_msg *msg,
          */
 
         mptcpd_token_t  const *tok         = NULL;
-        struct in_addr  const *laddr4      = NULL;
-        struct in_addr  const *raddr4      = NULL;
+        in_addr_t       const *laddr4      = NULL;
+        in_addr_t       const *raddr4      = NULL;
         struct in6_addr const *laddr6      = NULL;
         struct in6_addr const *raddr6      = NULL;
         in_port_t       const *local_port  = NULL;
@@ -595,11 +595,11 @@ static bool handle_subflow(struct l_genl_msg *msg,
 
         *token = *tok;
 
-        if (!mptcpd_sockaddr_storage_init(laddr4,
+        if (!mptcpd_sockaddr_storage_init(*laddr4,
                                           laddr6,
                                           *local_port,
                                           laddr)
-            || !mptcpd_sockaddr_storage_init(raddr4,
+            || !mptcpd_sockaddr_storage_init(*raddr4,
                                              raddr6,
                                              *remote_port,
                                              raddr)) {

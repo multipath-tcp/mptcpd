@@ -4,7 +4,7 @@
  *
  * @brief Upstream kernel generic netlink path manager details.
  *
- * Copyright (c) 2020-2021, Intel Corporation
+ * Copyright (c) 2020-2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -175,7 +175,7 @@ struct get_limits_user_callback
  *
  * @return @c true on success.  @c false otherwise.
  */
-static bool mptcpd_addr_info_init(struct in_addr  const *addr4,
+static bool mptcpd_addr_info_init(in_addr_t              addr4,
                                   struct in6_addr const *addr6,
                                   in_port_t       const *port,
                                   uint8_t         const *id,
@@ -210,7 +210,7 @@ static bool get_addr_callback_recurse(struct l_genl_attr *attr,
         uint16_t len;
         void const *data = NULL;
 
-        struct in_addr  const *addr4 = NULL;
+        in_addr_t              addr4 = 0;
         struct in6_addr const *addr6 = NULL;
         in_port_t       const *port  = NULL;
         uint8_t         const *id    = NULL;
@@ -229,7 +229,7 @@ static bool get_addr_callback_recurse(struct l_genl_attr *attr,
                         id = data;
                         break;
                 case MPTCP_PM_ADDR_ATTR_ADDR4:
-                        addr4 = data;
+                        addr4 = *(in_addr_t *) data;
                         break;
                 case MPTCP_PM_ADDR_ATTR_ADDR6:
                         addr6 = data;
