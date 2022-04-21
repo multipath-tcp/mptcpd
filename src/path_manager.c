@@ -4,7 +4,7 @@
  *
  * @brief mptcpd path manager framework.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -105,8 +105,83 @@ static char const *get_pm_name(void const *data, size_t len)
 }
 #endif // MPTCPD_ENABLE_PM_NAME
 
-static void handle_connection_created(struct l_genl_msg *msg,
-                                      void *user_data)
+
+/**
+ * @struct pm_event_attrs
+ *
+ * @brief MPTCP generic netlink attribute values.
+ */
+struct pm_event_attrs
+{
+        /// MPTCP connection token.
+        mptcpd_token_t const *token;
+
+        /// Local MPTCP address ID.
+        mptcpd_aid_t const *laddr_id;
+
+        /// Remote MPTCP address ID.
+        mptcpd_aid_t const *raddr_id;
+
+        /// Local IPv4 address.
+        in_addr_t laddr4;
+
+        /// Remote IPv4 address.
+        in_addr_t raddr4;
+
+        /// Local IPv6 address.
+        struct in6_addr const *laddr6;
+
+        /// Remote IPv6 address.
+        struct in6_addr const *raddr6;
+
+        /// Local IP port.
+        in_port_t const *local_port;
+
+        /// Remote IP port.
+        in_port_t const *remote_port;
+
+        /// Network interface index.
+        int32_t *index;
+
+        /// MPTCP subflow backup priority status.
+        uint8_t *backup;
+
+        /**
+         * @brief MPTCP subflow related event error.
+         *
+         * @note This is value is equal to the @c sk_err member of
+         *       @c struct @c sock in the Linux kernel.
+         */
+        uint8_t *error;
+
+#ifdef MPTCPD_ENABLE_PM_NAME
+        /**
+         * @brief Path manager (mptcpd plugin) name.
+         *
+         * The path manager name attribute determines which mptcpd
+         * plugin will handle the MPTCP path management generic
+         * netlink event.
+         *
+         * @note Only a very early proof of concept implementation of
+         *       MPTCP in the Linux kernel supported this attribute.
+         *       The original intent was to associate a path manager
+         *       name with a socket through a call to @c setockopt().
+         *       MPTCP capable Linux kernels currently do not support
+         *       this generic netlink attribute.
+         */
+        char const *pm_name;
+#endif
+};
+
+/**
+ * @brief Parse MPTCP path management generic netlink attributes.
+ *
+ * @param[in]     msg   Generic netlink MPTCP event message.
+ * @param[in,out] attrs Parsed MPTCP path management generic netlink
+ *                      attributes.
+ */
+static void parse_netlink_attributes(struct l_genl_msg *msg,
+                                     struct pm_event_attrs *attrs)
 {
         struct l_genl_attr attr;
         if (!l_genl_attr_init(&attr, msg)) {
@@ -114,6 +189,60 @@ static void handle_connection_created(struct l_genl_msg *msg,
                 return;
         }
 
+        uint16_t type;
+        uint16_t len;
+        void const *data = NULL;
+
+        while (l_genl_attr_next(&attr, &type, &len, &data)) {
+                switch (type) {
+                case MPTCP_ATTR_TOKEN:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->token);
+                        break;
+                case MPTCP_ATTR_SADDR4:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->laddr4);
+                        break;
+                case MPTCP_ATTR_SADDR6:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->laddr6);
+                        break;
+                case MPTCP_ATTR_SPORT:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->local_port);
+                        break;
+                case MPTCP_ATTR_DADDR4:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->raddr4);
+                        break;
+                case MPTCP_ATTR_DADDR6:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->raddr6);
+                        break;
+                case MPTCP_ATTR_DPORT:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->remote_port);
+                        break;
+                case MPTCP_ATTR_FAMILY:
+                case MPTCP_ATTR_LOC_ID:
+                case MPTCP_ATTR_REM_ID:
+                case MPTCP_ATTR_BACKUP:
+                case MPTCP_ATTR_ERROR:
+                case MPTCP_ATTR_FLAGS:
+                case MPTCP_ATTR_TIMEOUT:
+                case MPTCP_ATTR_IF_IDX:
+                case MPTCP_ATTR_RESET_REASON:
+                case MPTCP_ATTR_RESET_FLAGS:
+                        // Unused and ignored, at least for now.
+                        break;
+#ifdef MPTCPD_ENABLE_PM_NAME
+                case MPTCP_ATTR_PATH_MANAGER:
+                        attrs->pm_name = get_pm_name(data, len);
+                        break;
+#endif  // MPTCPD_ENABLE_PM_NAME
+                default:
+                        l_warn("Unknown MPTCP genl attribute: %d", type);
+                        break;
+                }
+        }
+}
+
+static void handle_connection_created(struct pm_event_attrs const *attrs,
+                                      struct mptcpd_pm *pm)
+{
         /*
           Payload:
               Token
@@ -123,68 +252,11 @@ static void handle_connection_created(struct l_genl_msg *msg,
               Remote port
               Path management strategy (optional)
         */
-
-        mptcpd_token_t  const *token       = NULL;
-        in_addr_t       const *laddr4      = NULL;
-        in_addr_t       const *raddr4      = NULL;
-        struct in6_addr const *laddr6      = NULL;
-        struct in6_addr const *raddr6      = NULL;
-        in_port_t       const *local_port  = NULL;
-        in_port_t       const *remote_port = NULL;
-        char            const *pm_name     = NULL;
-
-        uint16_t type;
-        uint16_t len;
-        void const *data = NULL;
-
-        while (l_genl_attr_next(&attr, &type, &len, &data)) {
-                switch (type) {
-                case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, token);
-                        break;
-                case MPTCP_ATTR_SADDR4:
-                        MPTCP_GET_NL_ATTR(data, len, laddr4);
-                        break;
-                case MPTCP_ATTR_SADDR6:
-                        MPTCP_GET_NL_ATTR(data, len, laddr6);
-                        break;
-                case MPTCP_ATTR_SPORT:
-                        MPTCP_GET_NL_ATTR(data, len, local_port);
-                        break;
-                case MPTCP_ATTR_DADDR4:
-                        MPTCP_GET_NL_ATTR(data, len, raddr4);
-                        break;
-                case MPTCP_ATTR_DADDR6:
-                        MPTCP_GET_NL_ATTR(data, len, raddr6);
-                        break;
-                case MPTCP_ATTR_DPORT:
-                        MPTCP_GET_NL_ATTR(data, len, remote_port);
-                        break;
-                case MPTCP_ATTR_FAMILY:
-                case MPTCP_ATTR_LOC_ID:
-                case MPTCP_ATTR_REM_ID:
-                case MPTCP_ATTR_BACKUP:
-                case MPTCP_ATTR_IF_IDX:
-                        // Unused and ignored, at least for now.
-                        break;
-#ifdef MPTCPD_ENABLE_PM_NAME
-                case MPTCP_ATTR_PATH_MANAGER:
-                        pm_name = get_pm_name(data, len);
-                        break;
-#endif  // MPTCPD_ENABLE_PM_NAME
-                default:
-                        l_warn("Unknown MPTCP_EVENT_CREATED "
-                               "attribute: %d",
-                               type);
-                        break;
-                }
-        }
-
-        if (!token
-            || !(laddr4 || laddr6)
-            || !local_port
-            || !(raddr4 || raddr6)
-            || !remote_port) {
+        if (!attrs->token
+            || !(attrs->laddr4 || attrs->laddr6)
+            || !attrs->local_port
+            || !(attrs->raddr4 || attrs->raddr6)
+            || !attrs->remote_port) {
                 l_error("Required MPTCP_EVENT_CREATED "
                         "message attributes are missing.");
 
@@ -193,37 +265,34 @@ static void handle_connection_created(struct l_genl_msg *msg,
 
         struct sockaddr_storage laddr, raddr;
 
-        if (!mptcpd_sockaddr_storage_init(*laddr4,
-                                          laddr6,
-                                          *local_port,
+        if (!mptcpd_sockaddr_storage_init(attrs->laddr4,
+                                          attrs->laddr6,
+                                          *attrs->local_port,
                                           &laddr)
-            || !mptcpd_sockaddr_storage_init(*raddr4,
-                                             raddr6,
-                                             *remote_port,
+            || !mptcpd_sockaddr_storage_init(attrs->raddr4,
+                                             attrs->raddr6,
+                                             *attrs->remote_port,
                                              &raddr)) {
                 l_error("Unable to initialize address information");
 
                 return;
         }
 
-        struct mptcpd_pm *const pm = user_data;
-
+#ifdef MPTCPD_ENABLE_PM_NAME
+        char const *const pm_name = attrs->pm_name;
+#else
+        char const *const pm_name = NULL;
+#endif
         mptcpd_plugin_new_connection(pm_name,
-                                     *token,
+                                     *attrs->token,
                                      (struct sockaddr *) &laddr,
                                      (struct sockaddr *) &raddr,
                                      pm);
 }
 
-static void handle_connection_established(struct l_genl_msg *msg,
-                                          void *user_data)
+static void handle_connection_established(struct pm_event_attrs const *attrs,
+                                          struct mptcpd_pm *pm)
 {
-        struct l_genl_attr attr;
-        if (!l_genl_attr_init(&attr, msg)) {
-                l_error("Unable to initialize genl attribute");
-                return;
-        }
-
         /*
           Payload:
               Token
@@ -232,62 +301,11 @@ static void handle_connection_established(struct l_genl_msg *msg,
               Remote address
               Remote port
         */
-
-        mptcpd_token_t  const *token       = NULL;
-        in_addr_t       const *laddr4      = NULL;
-        in_addr_t       const *raddr4      = NULL;
-        struct in6_addr const *laddr6      = NULL;
-        struct in6_addr const *raddr6      = NULL;
-        in_port_t       const *local_port  = NULL;
-        in_port_t       const *remote_port = NULL;
-
-        uint16_t type;
-        uint16_t len;
-        void const *data = NULL;
-
-        while (l_genl_attr_next(&attr, &type, &len, &data)) {
-                switch (type) {
-                case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, token);
-                        break;
-                case MPTCP_ATTR_SADDR4:
-                        MPTCP_GET_NL_ATTR(data, len, laddr4);
-                        break;
-                case MPTCP_ATTR_SADDR6:
-                        MPTCP_GET_NL_ATTR(data, len, laddr6);
-                        break;
-                case MPTCP_ATTR_SPORT:
-                        MPTCP_GET_NL_ATTR(data, len, local_port);
-                        break;
-                case MPTCP_ATTR_DADDR4:
-                        MPTCP_GET_NL_ATTR(data, len, raddr4);
-                        break;
-                case MPTCP_ATTR_DADDR6:
-                        MPTCP_GET_NL_ATTR(data, len, raddr6);
-                        break;
-                case MPTCP_ATTR_DPORT:
-                        MPTCP_GET_NL_ATTR(data, len, remote_port);
-                        break;
-                case MPTCP_ATTR_FAMILY:
-                case MPTCP_ATTR_LOC_ID:
-                case MPTCP_ATTR_REM_ID:
-                case MPTCP_ATTR_BACKUP:
-                case MPTCP_ATTR_IF_IDX:
-                        // Unused and ignored, at least for now.
-                        break;
-                default:
-                        l_warn("Unknown MPTCP_EVENT_ESTABLISHED "
-                               "attribute: %d",
-                               type);
-                        break;
-                }
-        }
-
-        if (!token
-            || !(laddr4 || laddr6)
-            || !local_port
-            || !(raddr4 || raddr6)
-            || !remote_port) {
+        if (!attrs->token
+            || !(attrs->laddr4 || attrs->laddr6)
+            || !attrs->local_port
+            || !(attrs->raddr4 || attrs->raddr6)
+            || !attrs->remote_port) {
                 l_error("Required MPTCP_EVENT_ESTABLISHED "
                         "message attributes are missing.");
 
@@ -296,80 +314,45 @@ static void handle_connection_established(struct l_genl_msg *msg,
 
         struct sockaddr_storage laddr, raddr;
 
-        if (!mptcpd_sockaddr_storage_init(*laddr4,
-                                          laddr6,
-                                          *local_port,
+        if (!mptcpd_sockaddr_storage_init(attrs->laddr4,
+                                          attrs->laddr6,
+                                          *attrs->local_port,
                                           &laddr)
-            || !mptcpd_sockaddr_storage_init(*raddr4,
-                                             raddr6,
-                                             *remote_port,
+            || !mptcpd_sockaddr_storage_init(attrs->raddr4,
+                                             attrs->raddr6,
+                                             *attrs->remote_port,
                                              &raddr)) {
                 l_error("Unable to initialize address information");
 
                 return;
         }
 
-        struct mptcpd_pm *const pm = user_data;
-
-        mptcpd_plugin_connection_established(*token,
+        mptcpd_plugin_connection_established(*attrs->token,
                                              (struct sockaddr *) &laddr,
                                              (struct sockaddr *) &raddr,
                                              pm);
 }
 
-static void handle_connection_closed(struct l_genl_msg *msg,
-                                     void *user_data)
+static void handle_connection_closed(struct pm_event_attrs const *attrs,
+                                     struct mptcpd_pm *pm)
 {
-        struct l_genl_attr attr;
-        if (!l_genl_attr_init(&attr, msg)) {
-                l_error("Unable to initialize genl attribute");
-                return;
-        }
-
         /*
           Payload:
               Token
          */
-
-        mptcpd_token_t const *token = NULL;
-
-        uint16_t type;
-        uint16_t len;
-        void const *data = NULL;
-
-        while (l_genl_attr_next(&attr, &type, &len, &data)) {
-                switch (type) {
-                case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, token);
-                        break;
-                default:
-                        l_warn("Unknown MPTCP_EVENT_CLOSED "
-                               "attribute: %d",
-                               type);
-                        break;
-                }
-        }
-
-        if (!token) {
+        if (!attrs->token) {
                 l_error("Required MPTCP_EVENT_CLOSED "
                         "message attributes are missing.");
 
                 return;
         }
 
-        struct mptcpd_pm *const pm = user_data;
-
-        mptcpd_plugin_connection_closed(*token, pm);
+        mptcpd_plugin_connection_closed(*attrs->token, pm);
 }
 
-static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
+static void handle_new_addr(struct pm_event_attrs const *attrs,
+                            struct mptcpd_pm *pm)
 {
-        struct l_genl_attr attr;
-        if (!l_genl_attr_init(&attr, msg)) {
-                l_error("Unable to initialize genl attribute");
-                return;
-        }
-
         /*
           Payload:
               Token
@@ -377,43 +360,9 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
               Remote address
               Remote port (optional)
         */
-
-        mptcpd_token_t  const *token      = NULL;
-        mptcpd_aid_t    const *address_id = NULL;
-        in_addr_t       const *addr4      = NULL;
-        struct in6_addr const *addr6      = NULL;
-        in_port_t       const *port       = NULL;
-
-        uint16_t type;
-        uint16_t len;
-        void const *data = NULL;
-
-        while (l_genl_attr_next(&attr, &type, &len, &data)) {
-                switch (type) {
-                case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, token);
-                        break;
-                case MPTCP_ATTR_REM_ID:
-                        MPTCP_GET_NL_ATTR(data, len, address_id);
-                        break;
-                case MPTCP_ATTR_DADDR4:
-                        MPTCP_GET_NL_ATTR(data, len, addr4);
-                        break;
-                case MPTCP_ATTR_DADDR6:
-                        MPTCP_GET_NL_ATTR(data, len, addr6);
-                        break;
-                case MPTCP_ATTR_DPORT:
-                        MPTCP_GET_NL_ATTR(data, len, port);
-                        break;
-                default:
-                        l_warn("Unknown MPTCP_EVENT_ANNOUNCED "
-                               "attribute: %d",
-                               type);
-                        break;
-                }
-        }
-
-        if (!token || !address_id || !(addr4 || addr6)) {
+        if (!attrs->token
+            || !attrs->raddr_id
+            || !(attrs->raddr4 || attrs->raddr6)) {
                 l_error("Required MPTCP_EVENT_ANNOUNCED "
                         "message attributes are missing.");
 
@@ -422,31 +371,25 @@ static void handle_new_addr(struct l_genl_msg *msg, void *user_data)
 
         struct sockaddr_storage addr;
 
-        if (!mptcpd_sockaddr_storage_init(*addr4,
-                                          addr6,
-                                          port ? *port : 0,
+        if (!mptcpd_sockaddr_storage_init(attrs->raddr4,
+                                          attrs->raddr6,
+                                          attrs->remote_port
+                                          ? *attrs->remote_port : 0,
                                           &addr)) {
                 l_error("Unable to initialize address information");
 
                 return;
         }
 
-        struct mptcpd_pm *const pm = user_data;
-
-        mptcpd_plugin_new_address(*token,
-                                  *address_id,
+        mptcpd_plugin_new_address(*attrs->token,
+                                  *attrs->raddr_id,
                                   (struct sockaddr *) &addr,
                                   pm);
 }
 
-static void handle_addr_removed(struct l_genl_msg *msg, void *user_data)
+static void handle_addr_removed(struct pm_event_attrs const *attrs,
+                                struct mptcpd_pm *pm)
 {
-        struct l_genl_attr attr;
-        if (!l_genl_attr_init(&attr, msg)) {
-                l_error("Unable to initialize genl attribute");
-                return;
-        }
-
         /*
           Payload:
               Token
@@ -454,72 +397,35 @@ static void handle_addr_removed(struct l_genl_msg *msg, void *user_data)
               Remote address
               Remote port (optional)
         */
-
-        mptcpd_token_t  const *token      = NULL;
-        mptcpd_aid_t    const *address_id = NULL;
-
-        uint16_t type;
-        uint16_t len;
-        void const *data = NULL;
-
-        while (l_genl_attr_next(&attr, &type, &len, &data)) {
-                switch (type) {
-                case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, token);
-                        break;
-                case MPTCP_ATTR_REM_ID:
-                        MPTCP_GET_NL_ATTR(data, len, address_id);
-                        break;
-                default:
-                        l_warn("Unknown MPTCP_EVENT_REMOVED "
-                               "attribute: %d",
-                               type);
-                        break;
-                }
-        }
-
-        if (!token || !address_id) {
+        if (!attrs->token || !attrs->raddr_id) {
                 l_error("Required MPTCP_EVENT_REMOVED "
                         "message attributes are missing.");
 
                 return;
         }
 
-        struct mptcpd_pm *const pm = user_data;
-
-        mptcpd_plugin_address_removed(*token, *address_id, pm);
+        mptcpd_plugin_address_removed(*attrs->token, *attrs->raddr_id, pm);
 }
 
 /**
  * @brief Retrieve subflow event attributes.
  *
  * All subflow events have the same payload attributes.  Share
- * attribute retrieval in one location.
+ * attribute validation and addr initialization in one location.
  *
- * @param[in]  msg    Generic netlink MPTCP subflow event message.
- * @param[out] token  MPTCP connection token.
- * @param[out] laddr  MPTCP subflow local  address and port.
- * @param[out] raddr  MPTCP subflow remote address and port.
- * @param[out] backup MPTCP subflow backup priority flag.
+ * @param[in]     attrs Generic netlink MPTCP subflow event message.
+ * @param[in,out] laddr MPTCP subflow local  address and port.
+ * @param[in,out] raddr MPTCP subflow remote address and port.
  *
  * @return @c true on success, @c false otherwise.
  */
-static bool handle_subflow(struct l_genl_msg *msg,
-                           mptcpd_token_t *token,
+static bool handle_subflow(struct pm_event_attrs const *attrs,
                            struct sockaddr_storage *laddr,
-                           struct sockaddr_storage *raddr,
-                           bool *backup)
+                           struct sockaddr_storage *raddr)
 {
-        assert(token != NULL);
+        assert(attrs != NULL);
         assert(laddr != NULL);
         assert(raddr != NULL);
-        assert(backup != NULL);
-
-        struct l_genl_attr attr;
-        if (!l_genl_attr_init(&attr, msg)) {
-                l_error("Unable to initialize genl attribute");
-                return false;
-        }
 
         /*
           Payload:
@@ -533,87 +439,36 @@ static bool handle_subflow(struct l_genl_msg *msg,
               Network interface index
               Error (optional)
          */
-
-        mptcpd_token_t  const *tok         = NULL;
-        in_addr_t       const *laddr4      = NULL;
-        in_addr_t       const *raddr4      = NULL;
-        struct in6_addr const *laddr6      = NULL;
-        struct in6_addr const *raddr6      = NULL;
-        in_port_t       const *local_port  = NULL;
-        in_port_t       const *remote_port = NULL;
-        uint8_t         const *bkup        = NULL;
-
-        uint16_t type;
-        uint16_t len;
-        void const *data = NULL;
-
-        while (l_genl_attr_next(&attr, &type, &len, &data)) {
-                switch (type) {
-                case MPTCP_ATTR_TOKEN:
-                        MPTCP_GET_NL_ATTR(data, len, tok);
-                        break;
-                case MPTCP_ATTR_SADDR4:
-                        MPTCP_GET_NL_ATTR(data, len, laddr4);
-                        break;
-                case MPTCP_ATTR_SADDR6:
-                        MPTCP_GET_NL_ATTR(data, len, laddr6);
-                        break;
-                case MPTCP_ATTR_SPORT:
-                        MPTCP_GET_NL_ATTR(data, len, local_port);
-                        break;
-                case MPTCP_ATTR_DADDR4:
-                        MPTCP_GET_NL_ATTR(data, len, raddr4);
-                        break;
-                case MPTCP_ATTR_DADDR6:
-                        MPTCP_GET_NL_ATTR(data, len, raddr6);
-                        break;
-                case MPTCP_ATTR_DPORT:
-                        MPTCP_GET_NL_ATTR(data, len, remote_port);
-                        break;
-                case MPTCP_ATTR_BACKUP:
-                        MPTCP_GET_NL_ATTR(data, len, bkup);
-                        break;
-                default:
-                        l_warn("Unknown MPTCP_EVENT_SUB_* "
-                               "attribute: %d",
-                               type);
-                        break;
-                }
-        }
-
-        if (!tok
-            || !(laddr4 || laddr6)
-            || !local_port
-            || !(raddr4 || raddr6)
-            || !remote_port
-            || !bkup) {
+        if (!attrs->token
+            || !(attrs->laddr4 || attrs->laddr6)
+            || !attrs->local_port
+            || !(attrs->raddr4 || attrs->raddr6)
+            || !attrs->remote_port
+            || !attrs->backup) {
                 l_error("Required MPTCP_EVENT_SUB_* "
                         "message attributes are missing.");
 
                 return false;
         }
 
-        *token = *tok;
-
-        if (!mptcpd_sockaddr_storage_init(*laddr4,
-                                          laddr6,
-                                          *local_port,
+        if (!mptcpd_sockaddr_storage_init(attrs->laddr4,
+                                          attrs->laddr6,
+                                          *attrs->local_port,
                                           laddr)
-            || !mptcpd_sockaddr_storage_init(*raddr4,
-                                             raddr6,
-                                             *remote_port,
+            || !mptcpd_sockaddr_storage_init(attrs->raddr4,
+                                             attrs->raddr6,
+                                             *attrs->remote_port,
                                              raddr)) {
                 l_error("Unable to initialize address information");
 
                 return false;
         }
 
-        *backup = *bkup;
-
         return true;
 }
 
-static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
+static void handle_new_subflow(struct pm_event_attrs const *attrs,
+                               struct mptcpd_pm *pm)
 {
         /*
           Payload:
@@ -627,25 +482,21 @@ static void handle_new_subflow(struct l_genl_msg *msg, void *user_data)
               Network interface index
               Error (optional)
          */
-
-        mptcpd_token_t token = 0;
         struct sockaddr_storage laddr;
         struct sockaddr_storage raddr;
-        bool backup = false;
 
-        if (!handle_subflow(msg, &token, &laddr, &raddr, &backup))
+        if (!handle_subflow(attrs, &laddr, &raddr))
                 return;
 
-        struct mptcpd_pm *const pm = user_data;
-
-        mptcpd_plugin_new_subflow(token,
+        mptcpd_plugin_new_subflow(*attrs->token,
                                   (struct sockaddr *) &laddr,
                                   (struct sockaddr *) &raddr,
-                                  backup,
+                                  attrs->backup,
                                   pm);
 }
 
-static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
+static void handle_subflow_closed(struct pm_event_attrs const *attrs,
+                                  struct mptcpd_pm *pm)
 {
         /*
           Payload:
@@ -659,26 +510,21 @@ static void handle_subflow_closed(struct l_genl_msg *msg, void *user_data)
               Network interface index
               Error (optional)
          */
-
-        mptcpd_token_t token = 0;
         struct sockaddr_storage laddr;
         struct sockaddr_storage raddr;
-        bool backup = false;
 
-        if (!handle_subflow(msg, &token, &laddr, &raddr, &backup))
+        if (!handle_subflow(attrs, &laddr, &raddr))
                 return;
 
-        struct mptcpd_pm *const pm = user_data;
-
-        mptcpd_plugin_subflow_closed(token,
+        mptcpd_plugin_subflow_closed(*attrs->token,
                                      (struct sockaddr *) &laddr,
                                      (struct sockaddr *) &raddr,
-                                     backup,
+                                     attrs->backup,
                                      pm);
 }
 
-static void handle_priority_changed(struct l_genl_msg *msg,
-                                    void *user_data)
+static void handle_priority_changed(struct pm_event_attrs const *attrs,
+                                    struct mptcpd_pm *pm)
 {
         /*
           Payload:
@@ -692,21 +538,16 @@ static void handle_priority_changed(struct l_genl_msg *msg,
               Network interface index
               Error (optional)
          */
-
-        mptcpd_token_t token = 0;
         struct sockaddr_storage laddr;
         struct sockaddr_storage raddr;
-        bool backup = false;
 
-        if (!handle_subflow(msg, &token, &laddr, &raddr, &backup))
+        if (!handle_subflow(attrs, &laddr, &raddr))
                 return;
 
-        struct mptcpd_pm *const pm = user_data;
-
-        mptcpd_plugin_subflow_priority(token,
+        mptcpd_plugin_subflow_priority(*attrs->token,
                                        (struct sockaddr *) &laddr,
                                        (struct sockaddr *) &raddr,
-                                       backup,
+                                       attrs->backup,
                                        pm);
 }
 
@@ -716,37 +557,42 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
 
         assert(cmd != 0);
 
+        struct pm_event_attrs attrs = { .token = NULL };
+        parse_netlink_attributes(msg, &attrs);
+
+        struct mptcpd_pm *const pm = user_data;
+
         switch (cmd) {
         case MPTCP_EVENT_CREATED:
-                handle_connection_created(msg, user_data);
+                handle_connection_created(&attrs, pm);
                 break;
 
         case MPTCP_EVENT_ESTABLISHED:
-                handle_connection_established(msg, user_data);
+                handle_connection_established(&attrs, pm);
                 break;
 
         case MPTCP_EVENT_CLOSED:
-                handle_connection_closed(msg, user_data);
+                handle_connection_closed(&attrs, pm);
                 break;
 
         case MPTCP_EVENT_ANNOUNCED:
-                handle_new_addr(msg, user_data);
+                handle_new_addr(&attrs, pm);
                 break;
 
         case MPTCP_EVENT_REMOVED:
-                handle_addr_removed(msg, user_data);
+                handle_addr_removed(&attrs, pm);
                 break;
 
         case MPTCP_EVENT_SUB_ESTABLISHED:
-                handle_new_subflow(msg, user_data);
+                handle_new_subflow(&attrs, pm);
                 break;
 
         case MPTCP_EVENT_SUB_CLOSED:
-                handle_subflow_closed(msg, user_data);
+                handle_subflow_closed(&attrs, pm);
                 break;
 
         case MPTCP_EVENT_SUB_PRIORITY:
-                handle_priority_changed(msg, user_data);
+                handle_priority_changed(&attrs, pm);
                 break;
 
         default:
