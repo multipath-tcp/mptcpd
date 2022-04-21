@@ -16,7 +16,7 @@
 
 bool mptcpd_sockaddr_storage_init(in_addr_t addr4,
                                   struct in6_addr const *addr6,
-                                  unsigned short port,
+                                  in_port_t port,
                                   struct sockaddr_storage *addr)
 {
         if ((addr4 == 0 && addr6 == NULL) || addr == NULL)
