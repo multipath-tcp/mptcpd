@@ -4,7 +4,7 @@
  *
  * @brief mptcpd @c struct @c sockaddr related utility functions.
  *
- * Copyright (c) 2019-2021, Intel Corporation
+ * Copyright (c) 2019-2022, Intel Corporation
  */
 
 #ifndef MPTCPD_PRIVATE_SOCKADDR_H
@@ -14,12 +14,12 @@
 
 #include <mptcpd/export.h>
 
+#include <netinet/in.h>   // For in_addr_t.
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct in_addr;
 struct in6_addr;
 struct sockaddr_storage;
 
@@ -38,7 +38,7 @@ struct sockaddr_storage;
  * @return @c true on success.  @c false otherwise.
  */
 MPTCPD_API bool
-mptcpd_sockaddr_storage_init(struct in_addr  const *addr4,
+mptcpd_sockaddr_storage_init(in_addr_t addr4,
                              struct in6_addr const *addr6,
                              unsigned short port,
                              struct sockaddr_storage *addr);
