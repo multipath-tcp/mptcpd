@@ -123,10 +123,10 @@ struct pm_event_attrs
         mptcpd_aid_t const *raddr_id;
 
         /// Local IPv4 address.
-        in_addr_t laddr4;
+        in_addr_t const *laddr4;
 
         /// Remote IPv4 address.
-        in_addr_t raddr4;
+        in_addr_t const *raddr4;
 
         /// Local IPv6 address.
         struct in6_addr const *laddr6;

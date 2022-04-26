@@ -38,7 +38,7 @@ struct sockaddr_storage;
  * @return @c true on success.  @c false otherwise.
  */
 MPTCPD_API bool
-mptcpd_sockaddr_storage_init(in_addr_t addr4,
+mptcpd_sockaddr_storage_init(in_addr_t const *addr4,
                              struct in6_addr const *addr6,
                              in_port_t port,
                              struct sockaddr_storage *addr);

@@ -52,7 +52,7 @@ static void test_addr_info(void const *test_data)
                 .index = 2
         };
 
-        assert(mptcpd_sockaddr_storage_init(addr,
+        assert(mptcpd_sockaddr_storage_init(&addr,
                                             NULL,
                                             port,
                                             &info.addr));
