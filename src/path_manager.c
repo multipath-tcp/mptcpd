@@ -85,26 +85,6 @@ static bool validate_attr_len(size_t actual, size_t expected)
                         (attr) = data;                          \
         } while(0)
 
-#ifdef MPTCPD_ENABLE_PM_NAME
-static char const *get_pm_name(void const *data, size_t len)
-{
-        char const *pm_name = NULL;
-
-        if (data != NULL) {
-                if (validate_attr_len(len, (size_t) MPTCP_PM_NAME_LEN))
-                        pm_name = data;
-                else
-                        l_error("Path manager name length (%zu) "
-                                "is not the expected length "
-                                "(%d)",
-                                len,
-                                MPTCP_PM_NAME_LEN);
-        }
-
-        return pm_name;
-}
-#endif // MPTCPD_ENABLE_PM_NAME
-
 
 /**
  * @struct pm_event_attrs
@@ -153,24 +133,6 @@ struct pm_event_attrs
          *       @c struct @c sock in the Linux kernel.
          */
         uint8_t *error;
-
-#ifdef MPTCPD_ENABLE_PM_NAME
-        /**
-         * @brief Path manager (mptcpd plugin) name.
-         *
-         * The path manager name attribute determines which mptcpd
-         * plugin will handle the MPTCP path management generic
-         * netlink event.
-         *
-         * @note Only a very early proof of concept implementation of
-         *       MPTCP in the Linux kernel supported this attribute.
-         *       The original intent was to associate a path manager
-         *       name with a socket through a call to @c setockopt().
-         *       MPTCP capable Linux kernels currently do not support
-         *       this generic netlink attribute.
-         */
-        char const *pm_name;
-#endif
 };
 
 /**
@@ -228,11 +190,6 @@ static void parse_netlink_attributes(struct l_genl_msg *msg,
                 case MPTCP_ATTR_RESET_FLAGS:
                         // Unused and ignored, at least for now.
                         break;
-#ifdef MPTCPD_ENABLE_PM_NAME
-                case MPTCP_ATTR_PATH_MANAGER:
-                        attrs->pm_name = get_pm_name(data, len);
-                        break;
-#endif  // MPTCPD_ENABLE_PM_NAME
                 default:
                         l_warn("Unknown MPTCP genl attribute: %d", type);
                         break;
@@ -278,11 +235,8 @@ static void handle_connection_created(struct pm_event_attrs const *attrs,
                 return;
         }
 
-#ifdef MPTCPD_ENABLE_PM_NAME
-        char const *const pm_name = attrs->pm_name;
-#else
-        char const *const pm_name = NULL;
-#endif
+        static char const *const pm_name = NULL;
+
         mptcpd_plugin_new_connection(pm_name,
                                      *attrs->token,
                                      (struct sockaddr *) &laddr,
