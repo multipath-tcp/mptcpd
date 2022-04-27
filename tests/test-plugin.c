@@ -173,8 +173,8 @@ static void test_nonexistent_plugins(void const *test_data)
         l_queue_destroy(plugins_list, NULL);
 
         /*
-          Exercise additional error paths by forcing plugin
-          name-to-ops lookup to fail.
+          Force plugin name-to-ops lookup to fail excercise additional
+          error paths.
         */
         mptcpd_plugin_new_connection(nonexistent_plugin,
                                      0,     // token
