@@ -786,6 +786,8 @@ insert_addr_return(struct mptcpd_interface *interface,
                 addr = NULL;
 
                 l_error("Unable to track internet address information.");
+
+                return addr;
         }
 
         addr->index = interface->index;
