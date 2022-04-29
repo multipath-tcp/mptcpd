@@ -256,7 +256,7 @@ int main(void)
         */
         assert(mptcpd_nm_monitor_loopback(nm, true));
 
-        struct mptcpd_nm_ops const nm_events[] = {
+        static struct mptcpd_nm_ops const nm_events[] = {
                 {
                         .new_interface    = handle_new_interface,
                         .update_interface = handle_update_interface,
@@ -272,14 +272,28 @@ int main(void)
                 {
                         .new_address      = handle_new_address,
                         .delete_address   = handle_delete_address
+                },
+                {
+                        .new_address      = NULL
                 }
         };
 
         // Subscribe to network monitoring related events.
-        for (size_t i = 0; i < L_ARRAY_SIZE(nm_events); ++i)
-                mptcpd_nm_register_ops(nm,
-                                       &nm_events[i],
-                                       (void *) &coffee);
+        for (struct mptcpd_nm_ops const *ops = nm_events;
+             ops != nm_events + L_ARRAY_SIZE(nm_events);
+             ++ops) {
+                bool const all_null_ops =
+                        (ops->new_interface       == NULL
+                         && ops->update_interface == NULL
+                         && ops->delete_interface == NULL
+                         && ops->new_address      == NULL
+                         && ops->delete_address   == NULL);
+
+                bool const registered =
+                        mptcpd_nm_register_ops(nm, ops, (void *) &coffee);
+
+                assert(registered || (all_null_ops && !registered));
+        }
 
         struct foreach_data data = { .nm = nm, .cup = coffee };
 
