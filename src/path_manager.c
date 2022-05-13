@@ -160,6 +160,12 @@ static void parse_netlink_attributes(struct l_genl_msg *msg,
                 case MPTCP_ATTR_TOKEN:
                         MPTCP_GET_NL_ATTR(data, len, attrs->token);
                         break;
+                case MPTCP_ATTR_LOC_ID:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->laddr_id);
+                        break;
+                case MPTCP_ATTR_REM_ID:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->raddr_id);
+                        break;
                 case MPTCP_ATTR_SADDR4:
                         MPTCP_GET_NL_ATTR(data, len, attrs->laddr4);
                         break;
@@ -181,15 +187,13 @@ static void parse_netlink_attributes(struct l_genl_msg *msg,
                 case MPTCP_ATTR_BACKUP:
                         MPTCP_GET_NL_ATTR(data, len, attrs->backup);
                         break;
-                case MPTCP_ATTR_IF_IDX:
-                        MPTCP_GET_NL_ATTR(data, len, attrs->index);
-                        break;
                 case MPTCP_ATTR_ERROR:
                         MPTCP_GET_NL_ATTR(data, len, attrs->error);
                         break;
+                case MPTCP_ATTR_IF_IDX:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->index);
+                        break;
                 case MPTCP_ATTR_FAMILY:
-                case MPTCP_ATTR_LOC_ID:
-                case MPTCP_ATTR_REM_ID:
                 case MPTCP_ATTR_FLAGS:
                 case MPTCP_ATTR_TIMEOUT:
                 case MPTCP_ATTR_RESET_REASON:
