@@ -121,10 +121,10 @@ struct pm_event_attrs
         in_port_t const *remote_port;
 
         /// Network interface index.
-        int32_t *index;
+        int32_t const *index;
 
         /// MPTCP subflow backup priority status.
-        uint8_t *backup;
+        uint8_t const *backup;
 
         /**
          * @brief MPTCP subflow related event error.
@@ -132,7 +132,7 @@ struct pm_event_attrs
          * @note This is value is equal to the @c sk_err member of
          *       @c struct @c sock in the Linux kernel.
          */
-        uint8_t *error;
+        uint8_t const *error;
 };
 
 /**
@@ -178,14 +178,20 @@ static void parse_netlink_attributes(struct l_genl_msg *msg,
                 case MPTCP_ATTR_DPORT:
                         MPTCP_GET_NL_ATTR(data, len, attrs->remote_port);
                         break;
+                case MPTCP_ATTR_BACKUP:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->backup);
+                        break;
+                case MPTCP_ATTR_IF_IDX:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->index);
+                        break;
+                case MPTCP_ATTR_ERROR:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->error);
+                        break;
                 case MPTCP_ATTR_FAMILY:
                 case MPTCP_ATTR_LOC_ID:
                 case MPTCP_ATTR_REM_ID:
-                case MPTCP_ATTR_BACKUP:
-                case MPTCP_ATTR_ERROR:
                 case MPTCP_ATTR_FLAGS:
                 case MPTCP_ATTR_TIMEOUT:
-                case MPTCP_ATTR_IF_IDX:
                 case MPTCP_ATTR_RESET_REASON:
                 case MPTCP_ATTR_RESET_FLAGS:
                         // Unused and ignored, at least for now.
