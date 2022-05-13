@@ -340,7 +340,15 @@ static void set_plugins_to_load(struct mptcpd_config *config,
 // ---------------------------------------------------------------
 // Command line options
 // ---------------------------------------------------------------
-static char const doc[] = "Start the Multipath TCP daemon.";
+#ifdef HAVE_UPSTREAM_KERNEL
+#  define MPTCPD_KERNEL "upstream"
+#else
+#  define MPTCPD_KERNEL "multipath-tcp.org"
+#endif
+static char const doc[] =
+        "Start the Multipath TCP daemon."
+        "\v"
+        "Supported Linux kernel: " MPTCPD_KERNEL;
 
 /**
  * @name Command Line Option Key Values
