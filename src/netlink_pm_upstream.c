@@ -22,13 +22,13 @@
 #include <ell/log.h>
 #pragma GCC diagnostic pop
 
-#include <mptcpd/private/mptcp_upstream.h>
+#include <mptcpd/types.h>
+#include <mptcpd/path_manager.h>
 #include <mptcpd/private/netlink_pm.h>
 #include <mptcpd/private/path_manager.h>
-#include <mptcpd/path_manager.h>
-#include <mptcpd/types.h>
 #include <mptcpd/private/addr_info.h>
 #include <mptcpd/private/sockaddr.h>
+#include <mptcpd/private/mptcp_upstream.h>
 
 #include "commands.h"
 #include "netlink_pm.h"
