@@ -14,6 +14,8 @@
 #include <arpa/inet.h>
 #include <net/if.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/main.h>
 #include <ell/idle.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
@@ -21,6 +23,7 @@
 #include <ell/netlink.h>
 #include <ell/rtnl.h>
 #include <ell/test.h>
+#pragma GCC diagnostic pop
 
 // Internal Headers
 // -----------------
