@@ -201,7 +201,7 @@ static void parse_netlink_attributes(struct l_genl_msg *msg,
                         // Unused and ignored, at least for now.
                         break;
                 default:
-                        l_warn("Unknown MPTCP genl attribute: %d", type);
+                        l_info("Unknown MPTCP genl attribute: %d", type);
                         break;
                 }
         }
