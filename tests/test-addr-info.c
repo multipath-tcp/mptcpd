@@ -43,10 +43,7 @@ static void test_addr_info(void const *test_data)
 {
         (void) test_data;
 
-        static struct in_addr const addr = {
-                .s_addr = 0x010200C0  // 192.0.2.1
-        };
-
+        static in_addr_t const addr = 0x010200C0;  // 192.0.2.1
         static in_port_t const port = 12;
         
         struct mptcpd_addr_info info = {
@@ -66,7 +63,7 @@ static void test_addr_info(void const *test_data)
         assert(sa != NULL && sa->sa_family == AF_INET);
 
         struct sockaddr_in const *sai = (struct sockaddr_in const *) sa;
-        assert(sai->sin_addr.s_addr == addr.s_addr);
+        assert(sai->sin_addr.s_addr == addr);
         assert(sai->sin_port == port);
 
         // Check MPTCP address ID.

@@ -22,12 +22,12 @@ static void test_bad_sockaddr_init(void const *test_data)
 {
         (void) test_data;
 
-        static struct in_addr  const *const bad_addr4 = NULL;
+        static in_addr_t const *const bad_addr4 = NULL;
         static struct in6_addr const *const bad_addr6 = NULL;
-        static struct sockaddr_storage *const bad_addr  = NULL;
+        static struct sockaddr_storage *const bad_addr = NULL;
 
-        static struct in_addr  const *const good_addr4 =
-                &test_laddr_1.sin_addr;
+        static in_addr_t const *const good_addr4 =
+                &test_laddr_1.sin_addr.s_addr;
         static unsigned short const port = 0;
 
         struct sockaddr_storage good_addr = { .ss_family = AF_UNSPEC };
@@ -50,8 +50,8 @@ static void test_sockaddr_in_init(void const *test_data)
 {
         (void) test_data;
 
-        static struct in_addr  const *const addr4 =
-                &test_laddr_1.sin_addr;
+        static in_addr_t const *const addr4 =
+                &test_laddr_1.sin_addr.s_addr;
         static struct in6_addr const *const addr6 = NULL;
         static unsigned short const port = test_laddr_1.sin_port;
 
@@ -69,7 +69,7 @@ static void test_sockaddr_in6_init(void const *test_data)
 {
         (void) test_data;
 
-        static struct in_addr  const *const addr4 = NULL;
+        static in_addr_t const *const addr4 = NULL;
         static struct in6_addr const *const addr6 =
                 &test_laddr_2.sin6_addr;
         static unsigned short const port = test_laddr_2.sin6_port;
