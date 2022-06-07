@@ -9,11 +9,14 @@
 
 #include <unistd.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/main.h>
 #include <ell/genl.h>
 #include <ell/timeout.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
 #include <ell/log.h>
+#pragma GCC diagnostic pop
 
 #include "test-util.h"
 

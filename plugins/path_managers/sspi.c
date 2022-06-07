@@ -17,9 +17,12 @@
 
 #include <netinet/in.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
 #include <ell/queue.h>
+#pragma GCC diagnostic pop
 
 #include <mptcpd/network_monitor.h>
 #include <mptcpd/path_manager.h>

@@ -16,9 +16,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/hashmap.h>
 #include <ell/uintset.h>
 #include <ell/util.h>
+#pragma GCC diagnostic pop
 
 #include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>

@@ -23,12 +23,15 @@
 #include <net/if.h>  // For standard network interface flags.
 #include <netinet/in.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/netlink.h>
 #include <ell/log.h>
 #include <ell/util.h>
 #include <ell/queue.h>
 #include <ell/timeout.h>
 #include <ell/rtnl.h>
+#pragma GCC diagnostic pop
 
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/network_monitor.h>

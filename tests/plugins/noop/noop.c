@@ -7,8 +7,11 @@
  * Copyright (c) 2019-2021, Intel Corporation
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
+#pragma GCC diagnostic pop
 
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>

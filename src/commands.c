@@ -15,9 +15,12 @@
 
 #include <string.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/genl.h>
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error(), etc.
 #include <ell/log.h>
+#pragma GCC diagnostic pop
 
 #include "commands.h"
 
