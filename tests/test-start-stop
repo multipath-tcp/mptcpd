@@ -3,7 +3,12 @@
 
 # Minimal mptcpd start/stop test.
 #
-# Copyright (c) 2018, 2019, 2021, Intel Corporation
+# Copyright (c) 2018, 2019, 2021, 2022, Intel Corporation
+
+if [ -z "$TEST_PLUGIN_DIR" ]; then
+    echo TEST_PLUGIN_DIR environment variable is not set.
+    exit 1   # failure
+fi
 
 # An exit status of 77 causes the Automake test driver to consider the
 # test as skipped.
