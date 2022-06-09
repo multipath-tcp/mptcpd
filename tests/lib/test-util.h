@@ -7,8 +7,8 @@
  * Copyright (c) 2020, 2022, Intel Corporation
  */
 
-#ifndef MPTCP_TEST_UTIL_H
-#define MPTCP_TEST_UTIL_H
+#ifndef MPTCPD_TEST_UTIL_H
+#define MPTCPD_TEST_UTIL_H
 
 
 /// Get MPTCP path management generic netlink API family name.
@@ -26,4 +26,4 @@ char const *tests_get_pm_family_name(void);
 void tests_skip_if_no_mptcp(void);
 
 
-#endif  // MPTCP_TEST_UTIL_H
+#endif  // MPTCPD_TEST_UTIL_H
