@@ -32,6 +32,7 @@
 #include <mptcpd/path_manager.h>
 #include <mptcpd/plugin.h>
 #include <mptcpd/private/sockaddr.h>
+#include <mptcpd/id_manager.h>
 
 /**
  * @brief Local address to interface mapping failure value.
@@ -52,7 +53,7 @@ static struct l_queue *sspi_interfaces;
 /**
  * @brief sspi plugin local address ID manager.
  *
- * Local address IDs are generated and managed through this
+ * Local MPTCP address IDs are generated and managed through this
  * @c mptcpd_idm instance.
  */
 static struct mptcpd_idm *sspi_idm;
@@ -104,6 +105,26 @@ struct sspi_new_connection_info
 
         /// Pointer to path manager.
         struct mptcpd_pm *const pm;
+};
+
+/**
+ * @struct sspi_local_addr_info
+ *
+ * @brief Data to be used when a new local address becomes available.
+ *
+ * This is a convenience structure for the purpose of making it easy
+ * to pass data needed for new address advertisement when iterating
+ * over all existing MPTCP connection tokens.
+ */
+struct sspi_local_addr_info
+{
+        /// Pointer to path manager.
+        struct mptcpd_pm *const pm;
+
+        struct sockaddr const *const addr;
+
+        /// MPTCP address ID.
+        mptcpd_aid_t const id;
 };
 
 // ----------------------------------------------------------------
@@ -487,7 +508,15 @@ static void sspi_send_addr(void *data, void *user_data)
          *      subflows exist for the addr in question, meaning there
          *      is no port associated with it.
          */
-        mptcpd_aid_t address_id = 0;
+        mptcpd_aid_t const address_id = mptcpd_idm_get_id(sspi_idm, addr);
+
+        if (address_id == 0) {
+                // Ran out of address IDs.  Unlikely to occur.
+                l_error("Unable to associate address ID "
+                        "with local address.");
+
+                return;
+        }
 
         /*
           mptcpd_pm_add_addr() will modify the sockaddr passed to it
@@ -550,6 +579,47 @@ static void sspi_send_addrs(struct mptcpd_interface const *i, void *data)
                                 sspi_send_addr,
                                 info);
         }
+}
+
+static void sspi_send_addr_via_token(void *data, void *user_data)
+{
+        mptcpd_token_t const token = L_PTR_TO_UINT(data);
+        struct sspi_local_addr_info const *const info = user_data;
+
+        if (mptcpd_pm_add_addr(info->pm,
+                               info->addr,
+                               info->id,
+                               token) != 0)
+                l_error("Unable to advertise IP address.");
+}
+
+static void sspi_send_addr_via_interface(void *data, void *user_data)
+{
+        struct sspi_interface_info const *const info = data;
+
+        l_queue_foreach(info->tokens,
+                        sspi_send_addr_via_token,
+                        user_data);
+}
+
+static void sspi_rm_addr_via_token(void *data, void *user_data)
+{
+        mptcpd_token_t const token = L_PTR_TO_UINT(data);
+        struct sspi_local_addr_info const *const info = user_data;
+
+        if (mptcpd_pm_remove_addr(info->pm,
+                                  info->id,
+                                  token) != 0)
+                l_error("Unable to stop advertising IP address.");
+}
+
+static void sspi_rm_addr_via_interface(void *data, void *user_data)
+{
+        struct sspi_interface_info const *const info = data;
+
+        l_queue_foreach(info->tokens,
+                        sspi_rm_addr_via_token,
+                        user_data);
 }
 
 // ----------------------------------------------------------------
@@ -793,6 +863,66 @@ static void sspi_subflow_priority(mptcpd_token_t token,
         */
 }
 
+static void sspi_new_local_address(struct mptcpd_interface const *i,
+                                   struct sockaddr const *sa,
+                                   struct mptcpd_pm *pm)
+{
+        (void) i;
+
+        mptcpd_aid_t const id = mptcpd_idm_get_id(sspi_idm, sa);
+
+        if (id == 0) {
+                l_error("Unable to map addr to ID.");
+                return;
+        }
+
+        struct sspi_local_addr_info info = {
+                .pm = pm,
+                .addr = sa,
+                .id = id
+        };
+
+        /*
+          A specific MPTCP connection token is not available since
+          this a network monitoring event not a MPTCP connection
+          event.  Advertise the address through existing MPTCP
+          connections by iterating over their corresponding tokens.
+          Subsequent MPTCP connections or joins may be rejected if a
+          subflow exists on the network interface through which
+          connection or join occurs.
+         */
+        l_queue_foreach(sspi_interfaces,
+                        sspi_send_addr_via_interface,
+                        &info);
+}
+
+static void sspi_delete_local_address(struct mptcpd_interface const *i,
+                                      struct sockaddr const *sa,
+                                      struct mptcpd_pm *pm)
+{
+        (void) i;
+
+        mptcpd_aid_t const id = mptcpd_idm_remove_id(sspi_idm, sa);
+
+        if (id == 0) {
+                // Not necessarily an error.
+                l_info("No address ID associated with addr.");
+                return;
+        }
+
+        struct sspi_local_addr_info info = { .pm = pm, .id = id };
+
+        /*
+          A specific MPTCP connection token is not available since
+          this a network monitoring event not a MPTCP connection
+          event.  Stop advertising the address through existing MPTCP
+          connections by iterating over their corresponding tokens.
+         */
+        l_queue_foreach(sspi_interfaces,
+                        sspi_rm_addr_via_interface,
+                        &info);
+}
+
 static struct mptcpd_plugin_ops const pm_ops = {
         .new_connection         = sspi_new_connection,
         .connection_established = sspi_connection_established,
@@ -801,7 +931,9 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .address_removed        = sspi_address_removed,
         .new_subflow            = sspi_new_subflow,
         .subflow_closed         = sspi_subflow_closed,
-        .subflow_priority       = sspi_subflow_priority
+        .subflow_priority       = sspi_subflow_priority,
+        .new_local_address      = sspi_new_local_address,
+        .delete_local_address   = sspi_delete_local_address
 };
 
 static int sspi_init(struct mptcpd_pm *pm)
