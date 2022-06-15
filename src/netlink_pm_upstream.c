@@ -65,7 +65,7 @@
  *
  * @return @c true on success.  @c false otherwise.
  */
-static bool mptcpd_addr_info_init(struct in_addr  const *addr4,
+static bool mptcpd_addr_info_init(in_addr_t       const *addr4,
                                   struct in6_addr const *addr6,
                                   in_port_t       const *port,
                                   uint8_t         const *id,
