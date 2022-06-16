@@ -44,6 +44,7 @@
 #include <mptcpd/private/mptcp_upstream.h>
 
 #include "path_manager.h"
+#include "listener_manager.h"
 #include "netlink_pm.h"
 
 
@@ -888,6 +889,15 @@ struct mptcpd_pm *mptcpd_pm_create(struct mptcpd_config const *config)
                 return NULL;
         }
 
+        // Create mptcpd listener manager.
+        pm->lm = mptcpd_lm_create();
+
+        if (pm->lm == NULL) {
+                mptcpd_pm_destroy(pm);
+                l_error("Unable to create listener manager.");
+                return NULL;
+        }
+
         pm->event_ops = l_queue_new();
 
         return pm;
@@ -906,6 +916,7 @@ void mptcpd_pm_destroy(struct mptcpd_pm *pm)
         mptcpd_plugin_unload(pm);
 
         l_queue_destroy(pm->event_ops, l_free);
+        mptcpd_lm_destroy(pm->lm);
         mptcpd_idm_destroy(pm->idm);
         mptcpd_nm_destroy(pm->nm);
         l_timeout_remove(pm->timeout);

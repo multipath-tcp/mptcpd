@@ -4,7 +4,7 @@
  *
  * @brief mptcpd path manager private interface.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifndef MPTCPD_PRIVATE_PATH_MANAGER_H
@@ -23,6 +23,7 @@ struct l_genl;
 struct l_genl_family;
 struct l_queue;
 struct l_timeout;
+struct l_hashmap;
 
 struct mptcpd_netlink_pm;
 struct mptcpd_addr_info;
@@ -86,9 +87,25 @@ struct mptcpd_pm
          * @brief MPTCP address ID manager.
          *
          * Manager that maps IP addresses to MPTCP address IDs, and
-         * generated IDs as needed..
+         * generated IDs as needed.
          */
         struct mptcpd_idm *idm;
+
+        /**
+         * @brief MPTCP listener manager map.
+         *
+         * The underlying hash map used by the MPTCP listener manager
+         * to map a MPTCP local address ID to a MPTCP socket file
+         * descriptor.
+         *
+         * @todo A mptcpd path manager-wide MPTCP listener manager like
+         *       this could be problematic if multiple client-oriented
+         *       plugins attempt to advertise or stop advertising a
+         *       different local addresses with the same MPTCP address ID
+         *       through the mptcpd_pm_add_addr() and
+         *       mptcpd_pm_remove_addr() functions.
+         */
+        struct l_hashmap *lm;
 
         /// List of @c pm_ops_info objects.
         struct l_queue *event_ops;
