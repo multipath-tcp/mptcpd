@@ -32,6 +32,7 @@
 
 #include "commands.h"
 #include "netlink_pm.h"
+#include "listener_manager.h"
 #include "path_manager.h"
 
 // Sanity check
@@ -271,11 +272,49 @@ static int upstream_announce(struct mptcpd_pm *pm,
                 // .ifindex  = ...
         };
 
+        /**
+         * Set up MPTCP listening socket.
+         *
+         * @todo This should be optional.
+         */
+        if (!mptcpd_lm_listen(pm->lm, id, addr))
+                return -1;
+
         return send_add_addr(pm,
                              MPTCP_PM_CMD_ANNOUNCE,
                              "announce",
                              &info,
                              token);
+}
+
+struct remove_info
+{
+        struct l_hashmap *const lm;
+        mptcpd_aid_t const id;
+};
+
+static void upstream_remove_callback(struct l_genl_msg *msg, void *user_data)
+{
+        static char const op[] = "remove_addr";
+
+        mptcpd_family_send_callback(msg, (void *) op);
+
+        /**
+         * @todo The above @c mptcpd_family_send_callback() function
+         *       also calls @c l_genl_msg_get_error().  We could
+         *       refactor but that may not be worth the trouble since
+         *       @c l_genl_msg_get_error() is not an expensive call.
+         */
+        if (l_genl_msg_get_error(msg) == 0) {
+                struct remove_info *info = user_data;
+
+                /**
+                 * Stop listening on MPTCP socket.
+                 *
+                 * @todo This should be optional.
+                 */
+                (void) mptcpd_lm_close(info->lm, info->id);
+        }
 }
 
 static int upstream_remove(struct mptcpd_pm *pm,
@@ -318,12 +357,16 @@ static int upstream_remove(struct mptcpd_pm *pm,
                 return ENOMEM;
         }
 
-        return l_genl_family_send(pm->family,
-                                  msg,
-                                  mptcpd_family_send_callback,
-                                  "remove_addr", /* user data */
-                                  NULL  /* destroy */)
-                == 0;
+        struct remove_info info = { .lm = pm->lm, .id = id };
+
+        bool const result =
+                l_genl_family_send(pm->family,
+                                   msg,
+                                   upstream_remove_callback,
+                                   &info, /* user data */
+                                   NULL  /* destroy */);
+
+        return result == 0;
 }
 
 static int upstream_add_subflow(struct mptcpd_pm *pm,
