@@ -28,6 +28,7 @@ check_PROGRAMS =		\
 	test-commands		\
 	test-configuration	\
 	test-id-manager		\
+	test-listener-manager	\
 	test-sockaddr		\
 	test-addr-info		\
 	test-murmur-hash
@@ -99,6 +100,12 @@ test_configuration_LDADD =			\
 test_id_manager_SOURCES = test-id-manager.c
 test_id_manager_LDADD =				\
 	$(top_builddir)/lib/libmptcpd.la	\
+	$(ELL_LIBS)				\
+	$(CODE_COVERAGE_LIBS)
+
+test_listener_manager_SOURCES = test-listener-manager.c
+test_listener_manager_LDADD =			\
+	$(top_builddir)/src/libpath_manager.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
 
