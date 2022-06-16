@@ -502,12 +502,6 @@ static void sspi_send_addr(void *data, void *user_data)
         struct sockaddr                 const *const addr = data;
         struct sspi_new_connection_info const *const info = user_data;
 
-        /**
-         * @bug Use real values instead of these placeholders!  The
-         *      @c port, in particular, is problematic because no
-         *      subflows exist for the addr in question, meaning there
-         *      is no port associated with it.
-         */
         mptcpd_aid_t const address_id = mptcpd_idm_get_id(sspi_idm, addr);
 
         if (address_id == 0) {
