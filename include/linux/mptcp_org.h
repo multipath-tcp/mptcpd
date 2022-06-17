@@ -66,18 +66,20 @@ enum {
  *   - MPTCP_EVENT_REMOVED: token, rem_id
  *       An address has been lost by the peer.
  *
- *   - MPTCP_EVENT_SUB_ESTABLISHED: token, family, saddr4 | saddr6,
- *                                  daddr4 | daddr6, sport, dport, backup,
- *                                  if_idx [, error]
+ *   - MPTCP_EVENT_SUB_ESTABLISHED: token, family, loc_id, rem_id,
+ *                                  saddr4 | saddr6, daddr4 | daddr6, sport,
+ *                                  dport, backup, if_idx [, error]
  *       A new subflow has been established. 'error' should not be set.
  *
- *   - MPTCP_EVENT_SUB_CLOSED: token, family, saddr4 | saddr6, daddr4 | daddr6,
- *                             sport, dport, backup, if_idx [, error]
+ *   - MPTCP_EVENT_SUB_CLOSED: token, family, loc_id, rem_id, saddr4 | saddr6,
+ *                             daddr4 | daddr6, sport, dport, backup, if_idx
+ *                             [, error]
  *       A subflow has been closed. An error (copy of sk_err) could be set if an
  *       error has been detected for this subflow.
  *
- *   - MPTCP_EVENT_SUB_PRIORITY: token, family, saddr4 | saddr6, daddr4 | daddr6,
- *                               sport, dport, backup, if_idx [, error]
+ *   - MPTCP_EVENT_SUB_PRIORITY: token, family, loc_id, rem_id, saddr4 | saddr6,
+ *                               daddr4 | daddr6, sport, dport, backup, if_idx
+ *                               [, error]
  *       The priority of a subflow has changed. 'error' should not be set.
  *
  * Commands for MPTCP:
@@ -88,7 +90,7 @@ enum {
  *       Announce that an address has been lost to the peer.
  *
  *   - MPTCP_CMD_SUB_CREATE: token, family, loc_id, rem_id, daddr4 | daddr6,
- *                           dport [,saddr4 | saddr6, sport, backup, if_idx]
+ *                           dport [, saddr4 | saddr6, sport, backup, if_idx]
  *       Create a new subflow.
  *
  *   - MPTCP_CMD_SUB_DESTROY: token, family, saddr4 | saddr6, daddr4 | daddr6,
