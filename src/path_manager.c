@@ -105,10 +105,10 @@ struct pm_event_attrs
         /// Remote MPTCP address ID.
         mptcpd_aid_t const *raddr_id;
 
-        /// Local IPv4 address.
+        /// Local IPv4 address (network byte order).
         in_addr_t const *laddr4;
 
-        /// Remote IPv4 address.
+        /// Remote IPv4 address (network byte order).
         in_addr_t const *raddr4;
 
         /// Local IPv6 address.
@@ -117,10 +117,10 @@ struct pm_event_attrs
         /// Remote IPv6 address.
         struct in6_addr const *raddr6;
 
-        /// Local IP port.
+        /// Local IP port  (network byte order).
         in_port_t const *local_port;
 
-        /// Remote IP port.
+        /// Remote IP port  (network byte order).
         in_port_t const *remote_port;
 
         /// Network interface index.

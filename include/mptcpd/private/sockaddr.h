@@ -30,9 +30,9 @@ struct sockaddr_storage;
  * IPv6 address.  Only one is required and used. The @a port may be
  * zero in cases where it is optional.
  *
- * @param[in]     addr4 IPv4 internet address.
+ * @param[in]     addr4 IPv4 internet address (network byte order).
  * @param[in]     addr6 IPv6 internet address.
- * @param[in]     port  IP port.
+ * @param[in]     port  IP port (network byte order).
  * @param[in,out] addr  mptcpd network address information.
  *
  * @return @c true on success.  @c false otherwise.
