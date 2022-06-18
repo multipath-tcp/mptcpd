@@ -166,9 +166,9 @@ struct get_limits_user_callback
  * @a flags, and @a index are optional and may be set to @c NULL if
  * not used.
  *
- * @param[in]     addr4 IPv4 internet address.
+ * @param[in]     addr4 IPv4 internet address (network byte order).
  * @param[in]     addr6 IPv6 internet address.
- * @param[in]     port  IP port.
+ * @param[in]     port  IP port (host byte order).
  * @param[in]     id    Address ID.
  * @param[in]     flags MPTCP flags.
  * @param[in]     index Network interface index.
@@ -189,7 +189,7 @@ static bool mptcpd_addr_info_init(in_addr_t       const *addr4,
         if (info == NULL
             || !mptcpd_sockaddr_storage_init(addr4,
                                              addr6,
-                                             port ? *port : 0,
+                                             port ? htons(*port) : 0,
                                              &info->addr))
                 return false;
 
@@ -232,12 +232,14 @@ static bool get_addr_callback_recurse(struct l_genl_attr *attr,
                         id = data;
                         break;
                 case MPTCP_PM_ADDR_ATTR_ADDR4:
+                        // Sent from kernel in network byte order.
                         addr4 = data;
                         break;
                 case MPTCP_PM_ADDR_ATTR_ADDR6:
                         addr6 = data;
                         break;
                 case MPTCP_PM_ADDR_ATTR_PORT:
+                        // Sent from kernel in host byte order.
                         port = data;
                         break;
                 case MPTCP_PM_ADDR_ATTR_FLAGS:
