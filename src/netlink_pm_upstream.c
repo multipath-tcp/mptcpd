@@ -458,8 +458,8 @@ static int upstream_add_addr(struct mptcpd_pm *pm,
         /*
           Payload (nested):
               Local address family
-              Local address
-              Local port (optional)
+              Local address (network byte order if IPv4 address)
+              Local port (host byte order) (optional)
               Local address ID (optional)
               Flags (optional)
               Network inteface index (optional)
