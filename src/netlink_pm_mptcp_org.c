@@ -116,8 +116,8 @@ static bool append_addr_attr(struct l_genl_msg *msg,
                         (struct sockaddr_in *) addr;
 
                 // IPv4 address in network byte order.
-                data = &addr4->sin_addr;
-                len  = sizeof(addr4->sin_addr);
+                data = &addr4->sin_addr.s_addr;
+                len  = sizeof(addr4->sin_addr.s_addr);
         } else {
                 if (local)
                         type = MPTCP_ATTR_SADDR6;

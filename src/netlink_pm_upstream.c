@@ -345,8 +345,8 @@ static bool append_addr_attr(struct l_genl_msg *msg,
                 struct sockaddr_in const *const addr4 =
                         (struct sockaddr_in *) addr;
 
-                data = &addr4->sin_addr;
-                len  = sizeof(addr4->sin_addr);
+                data = &addr4->sin_addr.s_addr;
+                len  = sizeof(addr4->sin_addr.s_addr);
         } else {
                 type = MPTCP_PM_ADDR_ATTR_ADDR6;
 
