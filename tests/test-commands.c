@@ -199,6 +199,31 @@ static void get_limits_callback(struct mptcpd_limit const *limits,
 
 // -------------------------------------------------------------------
 
+static void test_get_port(void const *test_data)
+{
+        (void) test_data;
+
+        struct sockaddr_in const *const addr = &test_laddr_1;
+
+        // Network byte order port.
+        in_port_t const nport = addr->sin_port;
+
+        // Host byte order port.
+        struct sockaddr const *const sa = (struct sockaddr const *) addr;
+        in_port_t const hport = mptcpd_get_port_number(sa);
+
+        /*
+           Verify that mptcpd_get_port_number() returns a host byte
+           order port.
+
+           The mptcpd_get_port_number() function is used internally by
+           the kernel-specific generic netlink MPTCP path management
+           API implementations in mptcpd.  That API expects ports to
+           be in host byte order.
+        */
+        assert(hport == ntohs(nport));
+}
+
 static void test_add_addr(void const *test_data)
 {
         struct test_info  *const info = (struct test_info *) test_data;
@@ -482,6 +507,7 @@ static void setup_tests (void *user_data)
 
         l_test_init(&argc, &args);
 
+        l_test_add("get_port",       test_get_port,       NULL);
         l_test_add("add_addr",       test_add_addr,       info);
         l_test_add("get_addr",       test_get_addr,       info);
         l_test_add("dump_addrs",     test_dump_addrs,     info);
