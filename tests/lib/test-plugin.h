@@ -169,8 +169,7 @@ static struct sockaddr_in const test_laddr_1 = {
         .sin_family = AF_INET,
         .sin_port   = MPTCPD_CONSTANT_HTONS(0x1234),
         .sin_addr   = {
-                // 192.0.2.1
-                .s_addr = MPTCPD_CONSTANT_HTONL(0xC0000201)
+                .s_addr = MPTCPD_CONSTANT_HTONL(0xC0000201) // 192.0.2.1
         }
 };
 
