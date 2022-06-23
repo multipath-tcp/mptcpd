@@ -4,7 +4,7 @@
  *
  * @brief mptcpd generic netlink command utilities.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2020, 2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -14,6 +14,7 @@
 #define _POSIX_C_SOURCE 200112L  ///< For XSI-compliant strerror_r().
 
 #include <string.h>
+#include <arpa/inet.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -45,7 +46,7 @@ uint16_t mptcpd_get_port_number(struct sockaddr const *addr)
                 port = addr6->sin6_port;
         }
 
-        return port;
+        return ntohs(port);
 }
 
 bool mptcpd_check_genl_error(struct l_genl_msg *msg, char const *fname)

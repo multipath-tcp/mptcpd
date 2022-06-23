@@ -11,10 +11,31 @@
 #define MPTCPD_PRIVATE_SOCKADDR_H
 
 #include <stdbool.h>
+#include <endian.h>
+#include <byteswap.h>
+
+#include <netinet/in.h>   // For in_addr_t.
 
 #include <mptcpd/export.h>
 
-#include <netinet/in.h>   // For in_addr_t.
+/**
+ * @name Swap host ordered bytes in an integer to network byte order.
+ *
+ * These macros may be used in place of @c htons() or @c htonl() when
+ * initializing an IPv4 address or IP port constant at compile-time.
+ */
+///@{
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+# define MPTCPD_CONSTANT_HTONS(hs) __bswap_constant_16(hs)
+# define MPTCPD_CONSTANT_HTONL(hl) __bswap_constant_32(hl)
+#else
+// No need to swap bytes on big endian platforms.
+// host byte order == network byte order
+# define MPTCPD_CONSTANT_HTONS(hs) hs
+# define MPTCPD_CONSTANT_HTONL(hl) hl
+#endif  // __BYTE_ORDER == __LITTLE_ENDIAN
+///@}
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,9 +51,9 @@ struct sockaddr_storage;
  * IPv6 address.  Only one is required and used. The @a port may be
  * zero in cases where it is optional.
  *
- * @param[in]     addr4 IPv4 internet address.
+ * @param[in]     addr4 IPv4 internet address (network byte order).
  * @param[in]     addr6 IPv6 internet address.
- * @param[in]     port  IP port.
+ * @param[in]     port  IP port (network byte order).
  * @param[in,out] addr  mptcpd network address information.
  *
  * @return @c true on success.  @c false otherwise.

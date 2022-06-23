@@ -166,9 +166,9 @@ struct get_limits_user_callback
  * @a flags, and @a index are optional and may be set to @c NULL if
  * not used.
  *
- * @param[in]     addr4 IPv4 internet address.
+ * @param[in]     addr4 IPv4 internet address (network byte order).
  * @param[in]     addr6 IPv6 internet address.
- * @param[in]     port  IP port.
+ * @param[in]     port  IP port (host byte order).
  * @param[in]     id    Address ID.
  * @param[in]     flags MPTCP flags.
  * @param[in]     index Network interface index.
@@ -189,7 +189,7 @@ static bool mptcpd_addr_info_init(in_addr_t       const *addr4,
         if (info == NULL
             || !mptcpd_sockaddr_storage_init(addr4,
                                              addr6,
-                                             port ? *port : 0,
+                                             port ? htons(*port) : 0,
                                              &info->addr))
                 return false;
 
@@ -232,12 +232,14 @@ static bool get_addr_callback_recurse(struct l_genl_attr *attr,
                         id = data;
                         break;
                 case MPTCP_PM_ADDR_ATTR_ADDR4:
+                        // Sent from kernel in network byte order.
                         addr4 = data;
                         break;
                 case MPTCP_PM_ADDR_ATTR_ADDR6:
                         addr6 = data;
                         break;
                 case MPTCP_PM_ADDR_ATTR_PORT:
+                        // Sent from kernel in host byte order.
                         port = data;
                         break;
                 case MPTCP_PM_ADDR_ATTR_FLAGS:
@@ -343,8 +345,8 @@ static bool append_addr_attr(struct l_genl_msg *msg,
                 struct sockaddr_in const *const addr4 =
                         (struct sockaddr_in *) addr;
 
-                data = &addr4->sin_addr;
-                len  = sizeof(addr4->sin_addr);
+                data = &addr4->sin_addr.s_addr;
+                len  = sizeof(addr4->sin_addr.s_addr);
         } else {
                 type = MPTCP_PM_ADDR_ATTR_ADDR6;
 
@@ -456,8 +458,8 @@ static int upstream_add_addr(struct mptcpd_pm *pm,
         /*
           Payload (nested):
               Local address family
-              Local address
-              Local port (optional)
+              Local address (network byte order if IPv4 address)
+              Local port (host byte order) (optional)
               Local address ID (optional)
               Flags (optional)
               Network inteface index (optional)

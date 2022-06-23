@@ -4,7 +4,7 @@
  *
  * @brief mptcpd generic netlink command utilities.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifndef MPTCPD_COMMANDS_H
@@ -108,14 +108,15 @@ static inline uint16_t mptcpd_get_addr_family(struct sockaddr const *addr)
 }
 
 /**
- * @brief Get IP port number.
+ * @brief Get IP port number (host byte order).
  *
  * @param[in] addr Network address information.
  *
  * Get IP port suitably typed for use in MPTCP generic netlink API
  * calls, or zero if no address was provided.
  *
- * @return IP port number, or zero if no IP address was provided.
+ * @return IP port number in host byte order, or zero if no IP address
+ *         was provided.
  */
 uint16_t mptcpd_get_port_number(struct sockaddr const *addr);
 

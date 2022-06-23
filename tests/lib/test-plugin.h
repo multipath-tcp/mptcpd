@@ -15,6 +15,7 @@
 #include <netinet/in.h>
 
 #include <mptcpd/types.h>
+#include <mptcpd/private/sockaddr.h>  // For MPTCPD_CONSTANT_HTON{S,L}()
 
 
 #ifdef __cplusplus
@@ -166,8 +167,10 @@ static mptcpd_token_t const test_bad_token  = 0xFFFFFFFF;
  */
 static struct sockaddr_in const test_laddr_1 = {
         .sin_family = AF_INET,
-        .sin_port   = 0x1234,
-        .sin_addr   = { .s_addr = 0x010200C0 }  // 192.0.2.1
+        .sin_port   = MPTCPD_CONSTANT_HTONS(0x1234),
+        .sin_addr   = {
+                .s_addr = MPTCPD_CONSTANT_HTONL(0xC0000201) // 192.0.2.1
+        }
 };
 
 #ifdef __cplusplus
@@ -178,13 +181,15 @@ static struct sockaddr_in const test_laddr_1 = {
 */
 static struct sockaddr_in const test_laddr_2 = {
         .sin_family = AF_INET,
-        .sin_port   = 0x5678,
-        .sin_addr   = { .s_addr = 0x020200C0 }  // 192.0.2.2
+        .sin_port   = MPTCPD_CONSTANT_HTONS(0x5678),
+        .sin_addr   = {
+                .s_addr = MPTCPD_CONSTANT_HTONL(0xC0000202) // 192.0.2.2
+        }
 };
 #else
 static struct sockaddr_in6 const test_laddr_2 = {
         .sin6_family = AF_INET6,
-        .sin6_port   = 0x5678,
+        .sin6_port   = MPTCPD_CONSTANT_HTONS(0x5678),
         .sin6_addr   = { .s6_addr = { [0]  = 0x20,
                                       [1]  = 0x01,
                                       [2]  = 0X0D,
@@ -204,13 +209,15 @@ static struct sockaddr_in6 const test_laddr_2 = {
 */
 static struct sockaddr_in const test_raddr_1 = {
         .sin_family = AF_INET,
-        .sin_port   = 0x3456,
-        .sin_addr   = { .s_addr = 0x017100CB }  // 203.0.113.1
+        .sin_port   = MPTCPD_CONSTANT_HTONS(0x3456),
+        .sin_addr   = {
+                .s_addr = MPTCPD_CONSTANT_HTONL(0xCB007101) // 203.0.113.1
+        }
 };
 #else
 static struct sockaddr_in6 const test_raddr_1 = {
         .sin6_family = AF_INET6,
-        .sin6_port   = 0x3456,
+        .sin6_port   = MPTCPD_CONSTANT_HTONS(0x3456),
         .sin6_addr   = { .s6_addr = { [0]  = 0x20,
                                       [1]  = 0x01,
                                       [2]  = 0X0D,
@@ -223,20 +230,26 @@ static struct sockaddr_in6 const test_raddr_1 = {
 
 static struct sockaddr_in const test_raddr_2 = {
         .sin_family = AF_INET,
-        .sin_port   = 0x7890,
-        .sin_addr   = { .s_addr = 0x027100CB }  // 203.0.113.2
+        .sin_port   = MPTCPD_CONSTANT_HTONS(0x7890),
+        .sin_addr   = {
+                .s_addr = MPTCPD_CONSTANT_HTONL(0xCB007102) // 203.0.113.2
+        }
 };
 
 static struct sockaddr_in const test_laddr_4 = {
         .sin_family = AF_INET,
-        .sin_port   = 0x2345,
-        .sin_addr   = { .s_addr = 0x040200C0 }  // 192.0.2.4
+        .sin_port   = MPTCPD_CONSTANT_HTONS(0x2345),
+        .sin_addr   = {
+                .s_addr = MPTCPD_CONSTANT_HTONL(0xC0000204) // 192.0.2.4
+        }
 };
 
 static struct sockaddr_in const test_raddr_4 = {
         .sin_family = AF_INET,
-        .sin_port   = 0x3456,
-        .sin_addr   = { .s_addr = 0x047100CB }  // 203.0.113.4
+        .sin_port   = MPTCPD_CONSTANT_HTONS(0x3456),
+        .sin_addr   = {
+                .s_addr = MPTCPD_CONSTANT_HTONL(0xCB007104) // 203.0.113.4
+        }
 };
 
 ///@}

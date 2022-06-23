@@ -4,7 +4,7 @@
  *
  * @brief mptcpd sockaddr utilities test.
  *
- * Copyright (c) 2021, Intel Corporation
+ * Copyright (c) 2021, 2022, Intel Corporation
  */
 
 #include <ell/log.h>
@@ -17,6 +17,25 @@
 #undef NDEBUG
 #include <assert.h>
 
+
+static void test_network_byte_swap(void const *test_data)
+{
+        (void) test_data;
+
+        uint16_t const hs = 0x1234;
+        uint32_t const hl = 0x040200C0;
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+        uint16_t const ns = 0x3412;
+        uint32_t const nl = 0xC0000204;
+
+        assert(MPTCPD_CONSTANT_HTONS(hs) == ns);
+        assert(MPTCPD_CONSTANT_HTONL(hl) == nl);
+#else
+        assert(MPTCPD_CONSTANT_HTONS(hs) == hs);
+        assert(MPTCPD_CONSTANT_HTONL(hl) == hl);
+#endif  // __BYTE_ORDER == __LITTLE_ENDIAN
+}
 
 static void test_bad_sockaddr_init(void const *test_data)
 {
@@ -90,6 +109,7 @@ int main(int argc, char *argv[])
 
         l_test_init(&argc, &argv);
 
+        l_test_add("network byte swap", test_network_byte_swap, NULL);
         l_test_add("bad sockaddr init", test_bad_sockaddr_init, NULL);
         l_test_add("sockaddr_in init",  test_sockaddr_in_init,  NULL);
         l_test_add("sockaddr_in6 init", test_sockaddr_in6_init, NULL);
