@@ -11,10 +11,14 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        cc: [gcc, clang]
+
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
-      run: sudo apt-get -y install autoconf-archive git
+      run: sudo apt-get -y install autoconf-archive git clang
     - name: build and install ELL
       run: |
         git clone git://git.kernel.org/pub/scm/libs/ell/ell.git
@@ -25,7 +29,7 @@ jobs:
     - name: bootstrap
       run: ./bootstrap
     - name: configure
-      run: ./configure
+      run: ./configure CC=${{ matrix.cc }}
     - name: make
       run: make
     - name: make check
