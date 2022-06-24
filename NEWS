@@ -1,3 +1,33 @@
+24 June 2022 - mptcpd 0.10
+
+- Inconsistent byte order handling in mptcpd was corrected.  IP ports
+  sent in path management commands and events now have the correct
+  byte order.  Furthermore, the mptcpd unit test suite no longer
+  assumes that the tests will be run on a little endian host.  IPv4
+  addresses and IP ports used in the mptcpd unit test suite are now
+  byte swapped as needed according to the endianness of the platform.
+  As always, IPv4 addresses and IP ports passed through pointers to
+  struct sockaddr should be in network byte order by convention.
+
+- A potential memory violation caused when attempting to register NULL
+  networking monitoring operations with mptcpd was fixed.
+
+- Mptcpd now supports gcc 12.  Link-time errors found in gcc 12 mptcpd
+  builds were fixed.
+
+- ELL 0.45 or greater is supported.
+
+- Code coverage was further expanded.
+
+- The mptcpd network monitor supports loopback interface monitoring if
+  so desired.
+
+- Improved support for reproducible builds by disabling HTML
+  timestamps in Doxygen generated mptcpd documentation.
+
+- Some mptcpd unit tests will be skipped rather than allowed to fail
+  on hosts running a kernel without MPTCP support.
+
 28 January 2022 - mptcpd 0.9
 
 - mptcpd
