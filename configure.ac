@@ -6,7 +6,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([mptcpd],
-        [0.9],
+        [0.10],
         [mptcp@lists.linux.dev],
         [],
         [https://github.com/intel/mptcpd])
