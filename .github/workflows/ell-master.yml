@@ -24,7 +24,7 @@ jobs:
         git clone git://git.kernel.org/pub/scm/libs/ell/ell.git
         cd ell
         ./bootstrap
-        ./configure --prefix=/usr
+        ./configure CC=${{ matrix.cc }} --prefix=/usr
         sudo make install
     - name: bootstrap
       run: ./bootstrap
