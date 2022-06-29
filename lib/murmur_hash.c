@@ -15,6 +15,7 @@
  *     value instead of a function "out" parameter of type @c void*.
  * @li The only compiler-specific support left in place is for gcc and
  *     clang.
+ * @li Declare @c inline functions as @c static @c inline.
  * @li The coding style was modified to conform to the mptcpd style.
  * @li gcc "implicit fallthrough" warnings for switch statement were
  *     silenced.
@@ -48,17 +49,25 @@ static inline uint32_t rotl32(uint32_t x, int8_t r)
 }
 
 //------------------------------------------------------------------------
-// Block read - if your platform needs to do endian-swapping or can only
-// handle aligned reads, do the conversion here
 
+/**
+ * @brief Block read.
+ *
+ * If your platform needs to do endian-swapping or can only handle
+ * aligned reads, do the conversion here.
+ */
 static FORCE_INLINE uint32_t getblock32 (uint32_t const *p, int i)
 {
         return p[i];
 }
 
 //------------------------------------------------------------------------
-// Finalization mix - force all bits of a hash block to avalanche
 
+/**
+ * @brief Finalization mix.
+ *
+ * Force all bits of a hash block to avalanche.
+ */
 static FORCE_INLINE uint32_t fmix32(uint32_t h)
 {
         h ^= h >> 16;
