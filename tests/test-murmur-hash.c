@@ -63,9 +63,14 @@ static void test_hash_32(void const *test_data)
         assert(hash3 != hash2);
         assert(hash3 != hash1);
 
+        uint8_t a[31] = { 1, 2, 3 };
+        unsigned int const hash4 =
+            mptcpd_murmur_hash3(a, sizeof(a), seed);
+
         l_info("hash1: 0x%x", hash1);
         l_info("hash2: 0x%x", hash2);
         l_info("hash3: 0x%x", hash3);
+        l_info("hash4: 0x%x", hash4);
 }
 
 int main(int argc, char *argv[])
