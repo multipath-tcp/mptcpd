@@ -24,7 +24,7 @@
  * Copyright (c) 2022, Intel Corporation
  */
 
-#include "murmur_hash.h"
+#include <mptcpd/private/murmur_hash.h>
 
 #ifdef __GNUC__
 #  define FORCE_INLINE inline __attribute__((always_inline))
