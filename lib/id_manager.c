@@ -4,25 +4,36 @@
  *
  * @brief Map of network address to MPTCP address ID.
  *
- * Copyright (c) 2020, 2021, Intel Corporation
+ * Copyright (c) 2020-2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>
 #endif
 
+#define _POSIX_C_SOURCE 200112L  ///< For XSI-compliant strerror_r().
+
 #include <assert.h>
+#include <errno.h>
 #include <stdint.h>
+#include <string.h>
+#include <time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+
+#ifdef HAVE_GETRANDOM
+# include <sys/random.h>
+#endif // HAVE_GETRANDOM
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/hashmap.h>
 #include <ell/uintset.h>
 #include <ell/util.h>
+#include <ell/log.h>
 #pragma GCC diagnostic pop
 
+#include <mptcpd/private/murmur_hash.h>
 #include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>
 
@@ -35,6 +46,26 @@
 /// Maximum MPTCP address ID.
 #define MPTCPD_MAX_ID UINT8_MAX
 
+
+/**
+ * @brief MurmurHash3 seed value.
+ *
+ * @note This could be tied to each @c mptcpd_idm instance so that the
+ *       seed value wouldn't shared between multiple mptcpd_idm
+ *       instances but the only way to pass the seed value to the
+ *       mptcpd MurmurHash3 hash function through the ELL @c l_hashmap
+ *       interface would be to make it a part of the key, such as
+ *       through a convenience @c struct.  That would double the size
+ *       of the key on 64 bit platforms (sizeof(struct sockaddr*) +
+ *       sizeof(uint32_t) + padding).  That may not be a problem for
+ *       the common case since most platforms would not have many
+ *       local addresses, meaning the larger key size would not impact
+ *       the run-time memory footprint by much.  Furthermore, it is
+ *       unlikely that such a global seed value shared between
+ *       @c mptcpd_idm instances would be a problem since each
+ *       @c mptcpd_idm insance would have its own @c l_hashmap.
+ */
+static uint32_t _idm_hash_seed = 0;
 
 /**
  * @struct mptcpd_idm
@@ -63,29 +94,17 @@ struct mptcpd_idm
 static inline unsigned int
 mptcpd_hash_sockaddr_in(struct sockaddr_in const *sa)
 {
-        /**
-         * @todo This hash function is rather trivial.  If collisions
-         *       end up being a concern we may want to look into a
-         *       better hash algorithm, such as MurmurHash.
-         */
-        return sa->sin_addr.s_addr;
+        return mptcpd_murmur_hash3(&sa->sin_addr.s_addr,
+                                   sizeof(sa->sin_addr.s_addr),
+                                   _idm_hash_seed);
 }
 
 static inline unsigned int
 mptcpd_hash_sockaddr_in6(struct sockaddr_in6 const *sa)
 {
-        /**
-         * @todo This hash function is rather trivial.  If collisions
-         *       end up being a concern we may want to look into a
-         *       better hash algorithm, such as MurmurHash.
-         */
-        // Hash based on the last 4 bytes of the IPv6 address.
-        static size_t const offset =
-                sizeof(sa->sin6_addr.s6_addr) - sizeof(unsigned int) - 1;
-
-        uint8_t const *const addr6 = sa->sin6_addr.s6_addr;
-
-        return *((unsigned int *) (addr6 + offset));
+        return mptcpd_murmur_hash3(sa->sin6_addr.s6_addr,
+                                   sizeof(sa->sin6_addr.s6_addr),
+                                   _idm_hash_seed);
 }
 
 static unsigned int mptcpd_hash_sockaddr(void const *p)
@@ -201,6 +220,34 @@ struct mptcpd_idm *mptcpd_idm_create(void)
             || !l_hashmap_set_key_free_function(idm->map, l_free)) {
                 mptcpd_idm_destroy(idm);
                 idm = NULL;
+        }
+
+        if (_idm_hash_seed == 0) {
+#ifdef HAVE_GETRANDOM
+                /*
+                  Randomize the hash seed value with data from the
+                  kernel random number generator.
+                */
+                ssize_t const len =
+                        getrandom(&_idm_hash_seed,
+                                  sizeof(_idm_hash_seed),
+                                  GRND_NONBLOCK);
+
+                if (len == -1) {  // unlikely
+                        char errmsg[80];
+                        int const r =
+                                strerror_r(errno,
+                                           errmsg,
+                                           L_ARRAY_SIZE(errmsg));
+
+                        l_error("Unable to generate ID manager "
+                                "hash seed: %s",
+                                r == 0 ? errmsg : "<unknown error>");
+                }
+#else
+                // Fallback on current time as seed (not desirable).
+                _idm_hash_seed = (uint32_t) time(NULL);
+#endif  // HAVE_GETAUXVAL
         }
 
         return idm;
