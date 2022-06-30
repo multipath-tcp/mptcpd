@@ -29,7 +29,8 @@ check_PROGRAMS =		\
 	test-configuration	\
 	test-id-manager		\
 	test-sockaddr		\
-	test-addr-info
+	test-addr-info		\
+	test-murmur-hash
 
 noinst_PROGRAMS = mptcpwrap-tester
 
@@ -110,6 +111,12 @@ test_sockaddr_LDADD =				\
 
 test_addr_info_SOURCES = test-addr-info.c
 test_addr_info_LDADD =				\
+	$(top_builddir)/lib/libmptcpd.la	\
+	$(ELL_LIBS)				\
+	$(CODE_COVERAGE_LIBS)
+
+test_murmur_hash_SOURCES = test-murmur-hash.c
+test_murmur_hash_LDADD =			\
 	$(top_builddir)/lib/libmptcpd.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
