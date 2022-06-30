@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2018-2020, Intel Corporation
+## Copyright (c) 2018-2020, 2022, Intel Corporation
 
 include $(top_srcdir)/aminclude_static.am
 
@@ -24,7 +24,8 @@ libmptcpd_la_SOURCES =		\
 	network_monitor.c	\
 	path_manager.c		\
 	plugin.c		\
-	sockaddr.c
+	sockaddr.c		\
+	murmur_hash.c
 
 #if BUILDING_DLL
 #libmptcpd_la_SOURCES += debug.c

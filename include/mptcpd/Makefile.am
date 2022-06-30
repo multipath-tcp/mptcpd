@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2017-2021, Intel Corporation
+## Copyright (c) 2017-2022, Intel Corporation
 
 pkginclude_HEADERS =		\
 	addr_info.h		\
@@ -18,6 +18,7 @@ noinst_HEADERS =			\
 	private/id_manager.h		\
 	private/mptcp_org.h		\
 	private/mptcp_upstream.h	\
+	private/murmur_hash.h		\
 	private/netlink_pm.h		\
 	private/path_manager.h 		\
 	private/plugin.h		\
