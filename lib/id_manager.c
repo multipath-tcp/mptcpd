@@ -21,16 +21,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#ifdef HAVE_GETRANDOM
-# include <sys/random.h>
-#endif // HAVE_GETRANDOM
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/hashmap.h>
 #include <ell/uintset.h>
 #include <ell/util.h>
 #include <ell/log.h>
+#include <ell/random.h>
 #pragma GCC diagnostic pop
 
 #include <mptcpd/private/murmur_hash.h>
@@ -222,33 +219,8 @@ struct mptcpd_idm *mptcpd_idm_create(void)
                 idm = NULL;
         }
 
-        if (_idm_hash_seed == 0) {
-#ifdef HAVE_GETRANDOM
-                /*
-                  Randomize the hash seed value with data from the
-                  kernel random number generator.
-                */
-                ssize_t const len =
-                        getrandom(&_idm_hash_seed,
-                                  sizeof(_idm_hash_seed),
-                                  GRND_NONBLOCK);
-
-                if (len == -1) {  // unlikely
-                        char errmsg[80];
-                        int const r =
-                                strerror_r(errno,
-                                           errmsg,
-                                           L_ARRAY_SIZE(errmsg));
-
-                        l_error("Unable to generate ID manager "
-                                "hash seed: %s",
-                                r == 0 ? errmsg : "<unknown error>");
-                }
-#else
-                // Fallback on current time as seed (not desirable).
-                _idm_hash_seed = (uint32_t) time(NULL);
-#endif  // HAVE_GETAUXVAL
-        }
+        if (_idm_hash_seed == 0)
+                _idm_hash_seed = l_getrandom_uint32();
 
         return idm;
 }

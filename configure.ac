@@ -267,11 +267,6 @@ AC_CHECK_FUNC([l_hashmap_replace],
                          [ELL has l_hashmap_replace()])])
 LIBS=$mptcpd_save_libs
 
-AC_CHECK_FUNC([getrandom],
-              [AC_DEFINE([HAVE_GETRANDOM],
-                         [],
-                         [C library has getrandom()])])
-
 # ---------------------------------------------------------------
 # Enable additional C compiler warnings.  We do this after all
 # Autoconf tests have been run since not all autoconf macros are
