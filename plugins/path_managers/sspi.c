@@ -863,6 +863,21 @@ static void sspi_new_local_address(struct mptcpd_interface const *i,
 {
         (void) i;
 
+        struct mptcpd_nm const *const nm = mptcpd_pm_get_nm(pm);
+
+        /*
+          Track the network interface associated with the new local
+          address as needed.
+        */
+        struct sspi_interface_info *const interface_info =
+                sspi_interface_info_lookup(nm, sa);
+
+        if (interface_info == NULL) {
+                l_error("Unable to track new local address.");
+
+                return;
+        }
+
         mptcpd_aid_t const id = mptcpd_idm_get_id(sspi_idm, sa);
 
         if (id == 0) {
