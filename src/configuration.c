@@ -758,7 +758,7 @@ static bool merge_config(struct mptcpd_config       *dst,
                 while (entry) {
                         l_queue_push_tail(
                                 (struct l_queue *) dst->plugins_to_load,
-                                entry->data);
+                                l_strdup(entry->data));
 
                         entry = entry->next;
                 }
