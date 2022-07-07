@@ -37,6 +37,7 @@
 #include <mptcpd/private/sockaddr.h>
 #include <mptcpd/network_monitor.h>
 
+
 // See IETF RFC 3849: IPv6 Address Prefix Reserved for Documentation.
 // 2001:DB8::/32
 static struct in6_addr const test_net_v6 = {
@@ -1010,13 +1011,13 @@ static void check_default_route(struct nm_addr_info *ai)
         mptcpd_addr_get(ai);
 
         if (l_netlink_send(ai->nm->rtnl,
-            RTM_GETROUTE,
-            0,
-            &store,
-            buf - (char *)&store,
-            handle_rtm_getroute,
-            ai,
-            NULL) == 0) {
+                           RTM_GETROUTE,
+                           0,
+                           &store,
+                           buf - (char *) &store,
+                           handle_rtm_getroute,
+                           ai,
+                           NULL) == 0) {
                 l_debug("Route lookup failed");
                 mptcpd_addr_put(ai);
         }
