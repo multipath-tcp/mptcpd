@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2019-2020, Intel Corporation
+## Copyright (c) 2019-2020, 2022, Intel Corporation
 
 include $(top_srcdir)/aminclude_static.am
 
@@ -17,6 +17,8 @@ check_LTLIBRARIES = libmptcpd_test.la
 libmptcpd_test_la_SOURCES =	\
 	call_count.c		\
 	call_plugin.c		\
+	interface.c		\
+	interface.h		\
 	sockaddr.c		\
 	test-plugin.h		\
 	test-util.c		\
