@@ -4,7 +4,7 @@
  *
  * @brief mptcpd user space path manager plugin header file.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2020, 2022, Intel Corporation
  */
 
 #ifndef MPTCPD_PLUGIN_H
@@ -139,29 +139,33 @@ struct mptcpd_plugin_ops
          * A new MPTCP connection has been created, and pending
          * completion.
          *
-         * @param[in] token  MPTCP connection token.
-         * @param[in] laddr  Local address information.
-         * @param[in] raddr  Remote address information.
-         * @param[in] pm     Opaque pointer to mptcpd path manager
-         *                   object.
+         * @param[in] token       MPTCP connection token.
+         * @param[in] laddr       Local address information.
+         * @param[in] raddr       Remote address information.
+         * @param[in] server_side Server side connection flag.
+         * @param[in] pm          Opaque pointer to mptcpd path
+         *                        manager object.
          */
         void (*new_connection)(mptcpd_token_t token,
                                struct sockaddr const *laddr,
                                struct sockaddr const *raddr,
+                               bool server_side,
                                struct mptcpd_pm *pm);
 
         /**
          * @brief New MPTCP-capable connection has been established.
          *
-         * @param[in] token  MPTCP connection token.
-         * @param[in] laddr  Local address information.
-         * @param[in] raddr  Remote address information.
-         * @param[in] pm     Opaque pointer to mptcpd path manager
-         *                   object.
+         * @param[in] token       MPTCP connection token.
+         * @param[in] laddr       Local address information.
+         * @param[in] raddr       Remote address information.
+         * @param[in] server_side Server side connection flag.
+         * @param[in] pm          Opaque pointer to mptcpd path
+         *                        manager object.
          */
         void (*connection_established)(mptcpd_token_t token,
                                        struct sockaddr const *laddr,
                                        struct sockaddr const *raddr,
+                                       bool server_side,
                                        struct mptcpd_pm *pm);
 
         /**
