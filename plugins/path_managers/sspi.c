@@ -4,7 +4,7 @@
  *
  * @brief MPTCP single-subflow-per-interface path manager plugin.
  *
- * Copyright (c) 2018-2021, Intel Corporation
+ * Copyright (c) 2018-2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -543,9 +543,11 @@ static void sspi_send_addrs(struct mptcpd_interface const *i, void *data)
 static void sspi_new_connection(mptcpd_token_t token,
                                 struct sockaddr const *laddr,
                                 struct sockaddr const *raddr,
+                                bool server_side,
                                 struct mptcpd_pm *pm)
 {
         (void) raddr;
+        (void) server_side;
 
         /**
          * @note Because we directly store connection tokens in a
@@ -603,11 +605,13 @@ static void sspi_new_connection(mptcpd_token_t token,
 static void sspi_connection_established(mptcpd_token_t token,
                                         struct sockaddr const *laddr,
                                         struct sockaddr const *raddr,
+                                        bool server_side,
                                         struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
+        (void) server_side,
         (void) pm;
 
         /**
