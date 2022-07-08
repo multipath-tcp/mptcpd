@@ -125,7 +125,7 @@ bool mptcpd_lm_close(struct l_hashmap *lm, mptcpd_aid_t id)
         }
 
         // Value will never exceed INT_MAX.
-        int const fd = L_PTR_TO_UINT(fd);
+        int const fd = L_PTR_TO_UINT(value);
 
         return close(fd) == 0;
 }
