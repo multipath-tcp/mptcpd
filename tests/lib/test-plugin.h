@@ -138,20 +138,24 @@ static struct plugin_call_count const test_count_4 = {
  * types of values they correspond to.
  */
 ///@{
-static mptcpd_token_t const test_token_1    = 0x12345678;
-static mptcpd_aid_t   const test_laddr_id_1 = 0x34;
-static mptcpd_aid_t   const test_raddr_id_1 = 0x56;
-static bool           const test_backup_1   = true;
+static mptcpd_token_t const test_token_1       = 0x12345678;
+static mptcpd_aid_t   const test_laddr_id_1    = 0x34;
+static mptcpd_aid_t   const test_raddr_id_1    = 0x56;
+static bool           const test_backup_1      = true;
+static bool           const test_server_side_1 = true;
 
-static mptcpd_token_t const test_token_2    = 0x23456789;
-static mptcpd_aid_t   const test_laddr_id_2 = 0x23;
-static mptcpd_aid_t   const test_raddr_id_2 = 0x45;
-static bool           const test_backup_2   = false;
 
-static mptcpd_token_t const test_token_4    = 0x34567890;
-static mptcpd_aid_t   const test_laddr_id_4 = 0x90;
-static mptcpd_aid_t   const test_raddr_id_4 = 0x01;
-static bool           const test_backup_4   = true;
+static mptcpd_token_t const test_token_2       = 0x23456789;
+static mptcpd_aid_t   const test_laddr_id_2    = 0x23;
+static mptcpd_aid_t   const test_raddr_id_2    = 0x45;
+static bool           const test_backup_2      = false;
+static bool           const test_server_side_2 = true;
+
+static mptcpd_token_t const test_token_4       = 0x34567890;
+static mptcpd_aid_t   const test_laddr_id_4    = 0x90;
+static mptcpd_aid_t   const test_raddr_id_4    = 0x01;
+static bool           const test_backup_4      = true;
+static bool           const test_server_side_4 = false;
 
 // For verifying that a plugin will not be dispatched.
 static mptcpd_token_t const test_bad_token  = 0xFFFFFFFF;
@@ -290,6 +294,9 @@ struct plugin_call_args
 
         /// MPTCP backup priority.
         bool backup;
+
+        /// Server side connection flag.
+        bool server_side;
 
         /// Mptcpd path manager object.
         struct mptcpd_pm *const pm;
