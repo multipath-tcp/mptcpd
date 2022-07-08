@@ -221,12 +221,12 @@ static void test_plugin_dispatch(void const *test_data)
 
         // Plugin 1 as default (no plugin name specified)
         static struct plugin_call_args const args1_default = {
-                .token       = test_token_1,
-                .raddr_id    = test_raddr_id_1,
-                .laddr       = (struct sockaddr const *) &test_laddr_1,
-                .raddr       = (struct sockaddr const *) &test_raddr_1,
-                .backup      = test_backup_1,
-                .server_side = test_server_side_1
+                .token       = args1.token,
+                .raddr_id    = args1.raddr_id,
+                .laddr       = args1.laddr,
+                .raddr       = args1.raddr,
+                .backup      = args1.backup,
+                .server_side = args1.server_side
         };
 
         call_plugin_ops(&test_count_1, &args1_default);
