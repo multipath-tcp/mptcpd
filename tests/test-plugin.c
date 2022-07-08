@@ -207,7 +207,7 @@ static void test_plugin_dispatch(void const *test_data)
 
         // Notice that we call plugin 1 twice.
         // Plugin 1
-        static struct plugin_call_args const args1 = {
+        struct plugin_call_args const args1 = {
                 .name        = TEST_PLUGIN_ONE,
                 .token       = test_token_1,
                 .raddr_id    = test_raddr_id_1,
@@ -220,7 +220,7 @@ static void test_plugin_dispatch(void const *test_data)
         call_plugin_ops(&test_count_1, &args1);
 
         // Plugin 1 as default (no plugin name specified)
-        static struct plugin_call_args const args1_default = {
+        struct plugin_call_args const args1_default = {
                 .token       = args1.token,
                 .raddr_id    = args1.raddr_id,
                 .laddr       = args1.laddr,
@@ -232,7 +232,7 @@ static void test_plugin_dispatch(void const *test_data)
         call_plugin_ops(&test_count_1, &args1_default);
 
         // Plugin 2
-        static struct plugin_call_args const args2 = {
+        struct plugin_call_args const args2 = {
                 .name        = TEST_PLUGIN_TWO,
                 .token       = test_token_2,
                 .raddr_id    = test_raddr_id_2,
