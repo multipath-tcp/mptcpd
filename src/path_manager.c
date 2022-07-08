@@ -127,7 +127,7 @@ struct pm_event_attrs
         /// Network interface index.
         int32_t const *index;
 
-        /// MPTCP subflow backup priority status.
+        /// MPTCP subflow backup priority status (boolean).
         uint8_t const *backup;
 
         /**
@@ -137,6 +137,9 @@ struct pm_event_attrs
          *       @c struct @c sock in the Linux kernel.
          */
         uint8_t const *error;
+
+        /// Server side connection event (boolean)
+        uint8_t const *server_side;
 };
 
 /**
@@ -197,6 +200,9 @@ static void parse_netlink_attributes(struct l_genl_msg *msg,
                 case MPTCP_ATTR_IF_IDX:
                         MPTCP_GET_NL_ATTR(data, len, attrs->index);
                         break;
+                case MPTCP_ATTR_SERVER_SIDE:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->server_side);
+                        break;
                 case MPTCP_ATTR_FAMILY:
                 case MPTCP_ATTR_FLAGS:
                 case MPTCP_ATTR_TIMEOUT:
@@ -221,7 +227,9 @@ static void handle_connection_created(struct pm_event_attrs const *attrs,
               Local port
               Remote address
               Remote port
-              Path management strategy (optional)
+
+              Upsteam kernel event attributes:
+                  Server side status
         */
         if (!attrs->token
             || !(attrs->laddr4 || attrs->laddr6)
@@ -250,11 +258,14 @@ static void handle_connection_created(struct pm_event_attrs const *attrs,
         }
 
         static char const *const pm_name = NULL;
+        bool const server_side =
+                (attrs->server_side != NULL ? *attrs->server_side : false);
 
         mptcpd_plugin_new_connection(pm_name,
                                      *attrs->token,
                                      (struct sockaddr *) &laddr,
                                      (struct sockaddr *) &raddr,
+                                     server_side,
                                      pm);
 }
 
@@ -268,6 +279,9 @@ static void handle_connection_established(struct pm_event_attrs const *attrs,
               Local port
               Remote address
               Remote port
+
+              Upsteam kernel event attributes:
+                  Server side status
         */
         if (!attrs->token
             || !(attrs->laddr4 || attrs->laddr6)
@@ -295,9 +309,14 @@ static void handle_connection_established(struct pm_event_attrs const *attrs,
                 return;
         }
 
+        // Assume server_side is false if event attribute is unavailable.
+        bool const server_side =
+                (attrs->server_side != NULL ? *attrs->server_side : false);
+
         mptcpd_plugin_connection_established(*attrs->token,
                                              (struct sockaddr *) &laddr,
                                              (struct sockaddr *) &raddr,
+                                             server_side,
                                              pm);
 }
 
