@@ -25,7 +25,9 @@ libmptcpd_la_SOURCES =		\
 	path_manager.c		\
 	plugin.c		\
 	sockaddr.c		\
-	murmur_hash.c
+	murmur_hash.c		\
+	hash_sockaddr.c		\
+	hash_sockaddr.h
 
 #if BUILDING_DLL
 #libmptcpd_la_SOURCES += debug.c
