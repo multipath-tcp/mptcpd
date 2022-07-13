@@ -53,6 +53,12 @@ static void test_map_id(void const *test_data)
         assert(mptcpd_idm_map_id(_idm,
                                  (struct sockaddr *) &test_laddr_4,
                                  _updated_id));
+
+        // Attempt to map invalid (0) ID.
+        mptcpd_aid_t const invalid_id = 0;
+        assert(!mptcpd_idm_map_id(_idm,
+                                  (struct sockaddr *) &test_laddr_4,
+                                  invalid_id));
 }
 
 static void test_get_id(void const *test_data)
