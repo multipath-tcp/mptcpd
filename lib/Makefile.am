@@ -21,6 +21,7 @@ libmptcpd_la_LDFLAGS = 	\
 libmptcpd_la_SOURCES =		\
 	addr_info.c		\
 	id_manager.c		\
+	listener_manager.c	\
 	network_monitor.c	\
 	path_manager.c		\
 	plugin.c		\
@@ -29,7 +30,7 @@ libmptcpd_la_SOURCES =		\
 	hash_sockaddr.c		\
 	hash_sockaddr.h
 
-#if BUILDING_DLL
+#IF BUILDING_DLL
 #libmptcpd_la_SOURCES += debug.c
 #endif
 

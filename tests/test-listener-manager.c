@@ -14,7 +14,7 @@
 #include <ell/test.h>
 #include <ell/hashmap.h>
 
-#include "../src/listener_manager.h"
+#include <mptcpd/listener_manager.h>
 
 #include "test-plugin.h"  // For test sockaddrs
 

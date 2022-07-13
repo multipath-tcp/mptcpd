@@ -23,6 +23,7 @@
 #pragma GCC diagnostic pop
 
 #include <mptcpd/types.h>
+#include <mptcpd/listener_manager.h>
 #include <mptcpd/path_manager.h>
 #include <mptcpd/private/netlink_pm.h>
 #include <mptcpd/private/path_manager.h>
@@ -32,7 +33,6 @@
 
 #include "commands.h"
 #include "netlink_pm.h"
-#include "listener_manager.h"
 #include "path_manager.h"
 
 // Sanity check

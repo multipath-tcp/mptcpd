@@ -20,9 +20,7 @@ libpath_manager_la_SOURCES =	\
 	netlink_pm.c		\
 	netlink_pm.h		\
 	path_manager.c		\
-	path_manager.h		\
-	listener_manager.c	\
-	listener_manager.h
+	path_manager.h
 
 if HAVE_UPSTREAM_KERNEL
 libpath_manager_la_SOURCES += netlink_pm_upstream.c
