@@ -259,6 +259,7 @@ static void test_remove_addr(void const *test_data)
 
         // Client-oriented path manager.
         int result = mptcpd_pm_remove_addr(pm,
+                                           laddr1,
                                            test_laddr_id_1,
                                            test_token_1);
 

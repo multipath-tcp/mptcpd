@@ -277,7 +277,7 @@ static int upstream_announce(struct mptcpd_pm *pm,
          *
          * @todo This should be optional.
          */
-        if (!mptcpd_lm_listen(pm->lm, id, addr))
+        if (!mptcpd_lm_listen(pm->lm, addr))
                 return -1;
 
         return send_add_addr(pm,
@@ -289,8 +289,8 @@ static int upstream_announce(struct mptcpd_pm *pm,
 
 struct remove_info
 {
-        struct l_hashmap *const lm;
-        mptcpd_aid_t const id;
+        struct mptcpd_lm *const lm;
+        struct sockaddr const *const sa;
 };
 
 static void upstream_remove_callback(struct l_genl_msg *msg, void *user_data)
@@ -313,11 +313,12 @@ static void upstream_remove_callback(struct l_genl_msg *msg, void *user_data)
                  *
                  * @todo This should be optional.
                  */
-                (void) mptcpd_lm_close(info->lm, info->id);
+                (void) mptcpd_lm_close(info->lm, info->sa);
         }
 }
 
 static int upstream_remove(struct mptcpd_pm *pm,
+                           struct sockaddr const *addr,
                            mptcpd_aid_t id,
                            mptcpd_token_t token)
 {
@@ -357,7 +358,7 @@ static int upstream_remove(struct mptcpd_pm *pm,
                 return ENOMEM;
         }
 
-        struct remove_info info = { .lm = pm->lm, .id = id };
+        struct remove_info info = { .lm = pm->lm, .sa = addr };
 
         bool const result =
                 l_genl_family_send(pm->family,

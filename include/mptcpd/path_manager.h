@@ -4,7 +4,7 @@
  *
  * @brief mptcpd generic netlink commands.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifndef MPTCPD_LIB_PATH_MANAGER_H
@@ -126,6 +126,9 @@ MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
  * @brief Stop advertising network address to peers.
  *
  * @param[in] pm         The mptcpd path manager object.
+ * @param[in] addr       Local IP address and port (zero if unused)
+ *                       that should no longer be advertised through
+ *                       MPTCP.
  * @param[in] address_id MPTCP local address ID to be sent in the
  *                       MPTCP protocol @c REMOVE_ADDR option
  *                       corresponding to the local address that will
@@ -135,6 +138,7 @@ MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
+                                     struct sockaddr const *addr,
                                      mptcpd_aid_t address_id,
                                      mptcpd_token_t token);
 

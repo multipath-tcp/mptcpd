@@ -4,7 +4,7 @@
  *
  * @brief mptcpd generic netlink commands.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -262,6 +262,7 @@ int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
 }
 
 int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
+                          struct sockaddr const *addr,
                           mptcpd_aid_t address_id,
                           mptcpd_token_t token)
 {
@@ -277,7 +278,7 @@ int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
         if (ops == NULL || ops->remove_addr == NULL)
                 return ENOTSUP;
 
-        return ops->remove_addr(pm, address_id, token);
+        return ops->remove_addr(pm, addr, address_id, token);
 }
 
 int mptcpd_pm_add_subflow(struct mptcpd_pm *pm,
