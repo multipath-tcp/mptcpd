@@ -13,15 +13,14 @@
 #include <stdbool.h>
 
 #include <mptcpd/export.h>
-#include <mptcpd/types.h>
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct l_hashmap;
 struct sockaddr;
+struct mptcpd_lm;
 
 /**
  * @brief Create a MPTCP listener manager.
@@ -29,37 +28,36 @@ struct sockaddr;
  * @return Pointer to a MPTCP listener manager on success.  @c NULL on
  *         failure.
  */
-MPTCPD_API struct l_hashmap *mptcpd_lm_create(void);
+MPTCPD_API struct mptcpd_lm *mptcpd_lm_create(void);
 
 /**
  * @brief Destroy MPTCP listener manager.
  *
  * @param[in,out] lm The mptcpd address listener manager object.
  */
-MPTCPD_API void mptcpd_lm_destroy(struct l_hashmap *lm);
+MPTCPD_API void mptcpd_lm_destroy(struct mptcpd_lm *lm);
 
 /**
  * @brief Listen on the given MPTCP local address.
  *
  * @param[in] lm The mptcpd address listener manager object.
- * @param[in] id The MPTCP local address ID.
  * @param[in] sa The MPTCP local address.
  *
  * @return @c true on success, and @c false on failure.
  */
-MPTCPD_API bool mptcpd_lm_listen(struct l_hashmap *lm,
-                                 mptcpd_aid_t id,
+MPTCPD_API bool mptcpd_lm_listen(struct mptcpd_lm *lm,
                                  struct sockaddr const *sa);
 
 /**
  * @brief Stop listening on a MPTCP local address.
  *
  * @param[in] lm The mptcpd address listener manager object.
- * @param[in] id The MPTCP local address ID.
+ * @param[in] sa The MPTCP local IP address.
  *
  * @return @c true on success, and @c false on failure.
  */
-MPTCPD_API bool mptcpd_lm_close(struct l_hashmap *lm, mptcpd_aid_t id);
+MPTCPD_API bool mptcpd_lm_close(struct mptcpd_lm *lm,
+                                struct sockaddr const *sa);
 
 #ifdef __cplusplus
 }

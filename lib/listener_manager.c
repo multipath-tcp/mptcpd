@@ -24,62 +24,65 @@
 #include <ell/hashmap.h>
 #include <ell/util.h>
 #include <ell/log.h>
+#include <ell/random.h>
 #pragma GCC diagnostic pop
 
 #include <mptcpd/listener_manager.h>
 
+#include "hash_sockaddr.h"
+
 
 // ----------------------------------------------------------------------
 
-struct l_hashmap *mptcpd_lm_create(void)
+/**
+ * @struct mptcpd_lm
+ *
+ * @brief Internal mptcpd listern manager data.
+ */
+struct mptcpd_lm
 {
-        // Map of MPTCP local address ID to MPTCP listener file
-        // descriptor.
-        return l_hashmap_new();
-}
+        /// Map of @c struct @c sockaddr to listener file descriptor.
+        struct l_hashmap *map;
 
-static void close_listener(void *value)
+        /// MurmurHash3 seed value.
+        uint32_t seed;
+};
+
+// ----------------------------------------------------------------------
+
+/**
+ * @struct lm_value
+ *
+ * @brief mptcpd listener map entry value.
+ */
+struct lm_value
 {
-        /*
-          We don't need to worry about overflow due to casting from
-          unsigned int since the file descriptor value stored in the
-          map will never be larger than INT_MAX by design.
-        */
-        int const fd = L_PTR_TO_UINT(value);
+        /// Listener file descriptor.
+        int fd;
 
-        (void) close(fd);
-}
-
-
-void mptcpd_lm_destroy(struct l_hashmap *lm)
-{
-        if (lm == NULL)
-                return;
-
-        l_hashmap_destroy(lm, close_listener);
-}
-
-bool mptcpd_lm_listen(struct l_hashmap *lm,
-                      mptcpd_aid_t id,
-                      struct sockaddr const *sa)
-{
         /**
-         * @todo Allow id == 0?
+         * @brief Listener reference count.
+         *
+         * Mptcpd listeners are reference counted to allow sharing.
          */
-        if (lm == NULL || id == 0 || sa == NULL)
-                return false;
+        int refcnt;
+};
 
-        if (sa->sa_family != AF_INET && sa->sa_family != AF_INET6)
-                return false;
+// ----------------------------------------------------------------------
 
+static int open_listener(struct sockaddr const *sa)
+{
 #ifndef IPPROTO_MPTCP
 #define IPPROTO_MPTCP IPPROTO_TCP + 256
 #endif
 
         int const fd = socket(sa->sa_family, SOCK_STREAM, IPPROTO_MPTCP);
-        if (fd == -1)
+        if (fd == -1) {
                 l_error("Unable to open MPTCP listener: %s",
                         strerror(errno));
+
+                return -1;
+        }
 
         socklen_t const addr_size =
                 (sa->sa_family == AF_INET
@@ -90,44 +93,137 @@ bool mptcpd_lm_listen(struct l_hashmap *lm,
                 l_error("Unable to bind MPTCP listener: %s",
                         strerror(errno));
                 (void) close(fd);
-                return false;
+                return -1;
         }
 
         if (listen(fd, 0) == -1) {
                 l_error("Unable to listen on MPTCP socket: %s",
                         strerror(errno));
                 (void) close(fd);
+                return -1;
+        }
+
+        return fd;
+}
+
+static void close_listener(void *value)
+{
+        struct lm_value *const data = value;
+
+        /**
+         * @todo Should care if the @c close() call fails?  It
+         *       shouldn't fail since we only get here if the listener
+         *       socket was successfully opened earlier.
+         */
+        (void) close(data->fd);
+        l_free(data);
+}
+
+// ----------------------------------------------------------------------
+
+struct mptcpd_lm *mptcpd_lm_create(void)
+{
+        struct mptcpd_lm *lm = l_new(struct mptcpd_lm, 1);
+
+        // Map of IP address to MPTCP listener file descriptor.
+        lm->map  = l_hashmap_new();
+        lm->seed = l_getrandom_uint32();
+
+        if (!l_hashmap_set_hash_function(lm->map, mptcpd_hash_sockaddr)
+            || !l_hashmap_set_compare_function(lm->map,
+                                               mptcpd_hash_sockaddr_compare)
+            || !l_hashmap_set_key_copy_function(lm->map,
+						mptcpd_hash_sockaddr_key_copy)
+            || !l_hashmap_set_key_free_function(lm->map,
+                                                mptcpd_hash_sockaddr_key_free)) {
+                mptcpd_lm_destroy(lm);
+                lm = NULL;
+        }
+
+        return lm;
+}
+
+void mptcpd_lm_destroy(struct mptcpd_lm *lm)
+{
+        if (lm == NULL)
+                return;
+
+        l_hashmap_destroy(lm->map, close_listener);
+        l_free(lm);
+}
+
+bool mptcpd_lm_listen(struct mptcpd_lm *lm, struct sockaddr const *sa)
+{
+        if (lm == NULL || sa == NULL)
+                return false;
+
+        if (sa->sa_family != AF_INET && sa->sa_family != AF_INET6)
+                return false;
+
+        struct mptcpd_hash_sockaddr_key const key = {
+                .sa = sa, .seed = lm->seed
+        };
+
+        struct lm_value *data = l_hashmap_lookup(lm->map, &key);
+
+        /*
+          A listener already exists for the given IP address.
+          Increment the reference count.
+        */
+        if (data != NULL) {
+                data->refcnt++;
+
+                return true;
+        }
+
+        data = l_new(struct lm_value, 1);
+
+        data->fd = open_listener(sa);
+        if (data->fd == -1) {
+                l_free(data);
+
                 return false;
         }
 
-        if (!l_hashmap_insert(lm, L_UINT_TO_PTR(id), L_UINT_TO_PTR(fd))) {
-                l_error("Unable to map MPTCP address ID %u listener", id);
-                (void) close(fd);
+        if (!l_hashmap_insert(lm->map, &key, data)) {
+                l_error("Unable to map MPTCP address to listener.");
+
+                (void) close(data->fd);
+                l_free(data);
+
                 return false;
         }
+
+        data->refcnt = 1;
 
         return true;
 }
 
-bool mptcpd_lm_close(struct l_hashmap *lm, mptcpd_aid_t id)
+bool mptcpd_lm_close(struct mptcpd_lm *lm, struct sockaddr const *sa)
 {
-        /**
-         * @todo Allow id == 0?
-         */
-        if (lm == NULL || id == 0)
+        if (lm == NULL || sa == NULL)
                 return false;
 
-        void const *const value = l_hashmap_remove(lm, L_UINT_TO_PTR(id));
+        struct mptcpd_hash_sockaddr_key const key = {
+                .sa = sa, .seed = lm->seed
+        };
 
-        if (value == NULL) {
-                l_error("No listener for MPTCP address id %u.", id);
+        struct lm_value *const data = l_hashmap_lookup(lm->map, &key);
+
+        /*
+          A listener already exists for the given IP address.
+          Decrement the reference count.
+        */
+        if (data == NULL)
                 return false;
+
+        if (--data->refcnt == 0) {
+                // No more listeners sharing the same address.
+                close_listener(data);
+                (void) l_hashmap_remove(lm->map, &key);
         }
 
-        // Value will never exceed INT_MAX.
-        int const fd = L_PTR_TO_UINT(value);
-
-        return close(fd) == 0;
+        return true;
 }
 
 
