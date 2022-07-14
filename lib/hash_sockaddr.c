@@ -24,6 +24,9 @@ static inline unsigned int
 mptcpd_hash_sockaddr_in(struct sockaddr_in const *sa,
                         uint32_t seed)
 {
+        /**
+         * @todo The port should also be included in the hash.
+         */
         return mptcpd_murmur_hash3(&sa->sin_addr.s_addr,
                                    sizeof(sa->sin_addr.s_addr),
                                    seed);
@@ -33,6 +36,9 @@ static inline unsigned int
 mptcpd_hash_sockaddr_in6(struct sockaddr_in6 const *sa,
                          uint32_t seed)
 {
+        /**
+         * @todo The port should also be included in the hash.
+         */
         return mptcpd_murmur_hash3(sa->sin6_addr.s6_addr,
                                    sizeof(sa->sin6_addr.s6_addr),
                                    seed);
