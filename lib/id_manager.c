@@ -97,8 +97,8 @@ struct mptcpd_idm *mptcpd_idm_create(void)
         assert(MPTCPD_MIN_ID != MPTCPD_INVALID_ID);
 
         idm->ids = l_uintset_new_from_range(MPTCPD_MIN_ID, MPTCPD_MAX_ID);
-
         idm->map = l_hashmap_new();
+        idm->seed = l_getrandom_uint32();
 
         if (!l_hashmap_set_hash_function(idm->map, mptcpd_hash_sockaddr)
             || !l_hashmap_set_compare_function(idm->map,
@@ -110,8 +110,6 @@ struct mptcpd_idm *mptcpd_idm_create(void)
                 mptcpd_idm_destroy(idm);
                 idm = NULL;
         }
-
-        idm->seed = l_getrandom_uint32();
 
         return idm;
 }
