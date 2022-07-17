@@ -7,6 +7,7 @@
  * Copyright (c) 2022, Intel Corporation
  */
 
+#include <string.h>
 #include <netinet/in.h>
 
 #pragma GCC diagnostic push
@@ -20,28 +21,129 @@
 #include "hash_sockaddr.h"
 
 
-static inline unsigned int
-mptcpd_hash_sockaddr_in(struct sockaddr_in const *sa,
+/**
+ * @brief Bundle IPv4 address and port as a hash key.
+ */
+struct endpoint_in
+{
+        in_addr_t addr;
+        in_port_t port;
+};
+
+/**
+ * @brief Bundle IPv6 address and port as a hash key.
+ */
+struct endpoint_in6
+{
+        struct in6_addr addr;
+        in_port_t port;
+};
+
+/**
+ * @brief IPv4 address/port hash key buffer.
+ *
+ * This union ensures that padding bytes are initialized to zero in
+ * the @c endpoint member.  For this to work the @c buffer member must
+ * initialized prior to the @c endpoint member, e.g.
+ * @code
+ * union key_in key = { .buffer = { 0 } };
+ *
+ * key.endpoint.addr = sa->sin_addr.s_addr;
+ * key.endpoint.port = sa->sin_port;
+ * @endcode
+ * The goal is to avoid hashing uninitialized bytes in the hash key.
+ */
+union key_in
+{
+        struct endpoint_in endpoint;
+        uint8_t buffer[sizeof(struct endpoint_in)];
+};
+
+/**
+ * @brief IPv6 address/port hash key buffer.
+ *
+ * This union ensures that padding bytes are initialized to zero in
+ * the @c endpoint member.  For this to work the @c buffer member must
+ * initialized prior to the @c endpoint member, e.g.
+ * @code
+ * union key_in6 key = { .buffer = { 0 } };
+ *
+ * memcpy(key.endpoint.addr.s6_addr,
+ *        sa->sin6_addr.s6_addr,
+ *        sizeof(key.endpoint.addr.s6_addr));
+ *
+ * key.endpoint.port = sa->sin6_port;
+ * @endcode
+ * The goal is to avoid hashing uninitialized bytes in the hash key.
+ */
+union key_in6
+{
+        struct endpoint_in6 endpoint;
+        uint8_t buffer[sizeof(struct endpoint_in6)];
+};
+
+
+static unsigned int mptcpd_hash_sockaddr_in(struct sockaddr_in const *sa,
                         uint32_t seed)
 {
-        /**
-         * @todo The port should also be included in the hash.
-         */
-        return mptcpd_murmur_hash3(&sa->sin_addr.s_addr,
-                                   sizeof(sa->sin_addr.s_addr),
-                                   seed);
+        // No port set.  Don't bother including it in the hash.
+        if (sa->sin_port == 0)
+                return mptcpd_murmur_hash3(&sa->sin_addr.s_addr,
+                                           sizeof(sa->sin_addr.s_addr),
+                                           seed);
+
+        // ---------------------------------------
+
+        // Non-zero port.  Include it in the hash.
+
+        /*
+          Initialize the key buffer first to ensure padding bytes in
+          the endpoint union member are zero.  This works since the
+          buffer union member also includes padding bytes found in the
+          endpoint member.
+        */
+        union key_in key = { .buffer = { 0 } };
+
+        key.endpoint.addr = sa->sin_addr.s_addr;
+        key.endpoint.port = sa->sin_port;
+
+        return mptcpd_murmur_hash3(key.buffer, sizeof(key.buffer), seed);
 }
 
-static inline unsigned int
+static unsigned int
 mptcpd_hash_sockaddr_in6(struct sockaddr_in6 const *sa,
                          uint32_t seed)
 {
         /**
-         * @todo The port should also be included in the hash.
+         * @todo Should we include other sockaddr_in6 members, e.g.
+         *       sin6_flowinfo and sin6_scope_id, as part of the key?
          */
-        return mptcpd_murmur_hash3(sa->sin6_addr.s6_addr,
-                                   sizeof(sa->sin6_addr.s6_addr),
-                                   seed);
+
+        // No port set.  Don't bother including it in the hash.
+        if (sa->sin6_port == 0)
+                return mptcpd_murmur_hash3(sa->sin6_addr.s6_addr,
+                                           sizeof(sa->sin6_addr.s6_addr),
+                                           seed);
+
+        // ---------------------------------------
+
+        // Non-zero port.  Include it in the hash.
+
+        /*
+          Initialize the key buffer first to ensure padding bytes in
+          the endpoint union member are zero.  This works since the
+          buffer union member also includes padding bytes found in the
+          endpoint member.
+        */
+        union key_in6 key = { .buffer = { 0 } };
+
+        memcpy(key.endpoint.addr.s6_addr,
+               sa->sin6_addr.s6_addr,
+               sizeof(key.endpoint.addr.s6_addr));
+
+        key.endpoint.port = sa->sin6_port;
+
+        return mptcpd_murmur_hash3(key.buffer, sizeof(key.buffer), seed);
 }
 
 unsigned int mptcpd_hash_sockaddr(void const *p)
