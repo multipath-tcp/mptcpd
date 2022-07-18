@@ -37,7 +37,7 @@ struct ipv6_listen_case
 };
 
 /**
- * @brief Initialize test case to listed on IPv4 loopback address.
+ * @brief Initialize test case to listen on IPv4 loopback address.
  *
  * @param[in] port IP port to listen on.
  */
@@ -54,7 +54,7 @@ struct ipv6_listen_case
         }
 
 /**
- * @brief Initialize test case to listed on IPv6 loopback address.
+ * @brief Initialize test case to listen on IPv6 loopback address.
  *
  * @param[in] port IP port to listen on.
  */
