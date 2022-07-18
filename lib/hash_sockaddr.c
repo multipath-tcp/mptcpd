@@ -7,6 +7,11 @@
  * Copyright (c) 2022, Intel Corporation
  */
 
+#ifdef HAVE_CONFIG_H
+# include <mptcpd/private/config.h>
+#endif
+
+#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 #include <netinet/in.h>
@@ -26,7 +31,7 @@
  * @brief Bundle IPv4 address and port as a hash key.
  *
  * A @c padding member is added to allow the padding bytes to be
- * implicitly initialized to zero in a designated initializer, e.g.:
+ * initialized to zero in a designated initializer, e.g.:
  * @code
  * struct endpoint_in endpoint = {
  *     .addr = 0xC0000202,
@@ -37,16 +42,16 @@
  */
 struct key_in
 {
-        in_addr_t addr;
-        in_port_t port;
-        uint16_t padding;  // To be implicitly initialized.
+        in_addr_t const addr;
+        in_port_t const port;
+        uint16_t  const padding;    // Initialize to zero.
 };
 
 /**
  * @brief Bundle IPv6 address and port as a hash key.
  *
  * A @c padding member is added to allow the padding bytes to be
- * implicitly initialized to zero in a designated initializer, e.g.:
+ * initialized to zero in a designated initializer, e.g.:
  * @code
  * struct endpoint_in6 endpoint = {
  *     .addr = { .s6_addr = { [0]  = 0x20,
@@ -63,8 +68,8 @@ struct key_in
 struct key_in6
 {
         struct in6_addr addr;
-        in_port_t port;
-        uint16_t padding;  // To be implicitly initialized.
+        in_port_t const port;
+        uint16_t  const padding;  // Initialize to zero.
 };
 
 static unsigned int
@@ -120,6 +125,8 @@ unsigned int mptcpd_hash_sockaddr(void const *p)
         struct mptcpd_hash_sockaddr_key const *const key = p;
         struct sockaddr const *const sa = key->sa;
 
+        assert(sa->sa_family == AF_INET || sa->sa_family == AF_INET6);
+
         if (sa->sa_family == AF_INET) {
                 struct sockaddr_in const *sa4 =
                         (struct sockaddr_in const *) sa;
@@ -133,6 +140,54 @@ unsigned int mptcpd_hash_sockaddr(void const *p)
         }
 }
 
+static inline int compare_port(in_port_t lhs, in_port_t rhs)
+{
+        return lhs < rhs ? -1 : (lhs > rhs ? 1 : 0);
+}
+
+static int compare_sockaddr_in(struct sockaddr const *lsa,
+                        struct sockaddr const *rsa)
+{
+        struct sockaddr_in const *const lin =
+                (struct sockaddr_in const *) lsa;
+
+        struct sockaddr_in const *const rin =
+                (struct sockaddr_in const *) rsa;
+
+        in_addr_t const lhs = lin->sin_addr.s_addr;
+        in_addr_t const rhs = rin->sin_addr.s_addr;
+
+        if (lhs == rhs)
+                return compare_port(lin->sin_port, rin->sin_port);
+
+        return lhs < rhs ? -1 : 1;
+}
+
+static int compare_sockaddr_in6(struct sockaddr const *lsa,
+                                struct sockaddr const *rsa)
+{
+        /**
+         * @todo Should we compare the other @c struct @c sockaddr_in6
+         *       fields as well?
+         */
+
+        struct sockaddr_in6 const *const lin =
+                (struct sockaddr_in6 const *) lsa;
+
+        struct sockaddr_in6 const *const rin =
+                (struct sockaddr_in6 const *) rsa;
+
+        uint8_t const *const lhs = lin->sin6_addr.s6_addr;
+        uint8_t const *const rhs = rin->sin6_addr.s6_addr;
+
+        int const cmp = memcmp(lhs, rhs, sizeof(lin->sin6_addr.s6_addr));
+
+        if (cmp == 0)
+                return compare_port(lin->sin6_port, rin->sin6_port);
+
+        return cmp;
+}
+
 int mptcpd_hash_sockaddr_compare(void const *a, void const *b)
 {
         struct mptcpd_hash_sockaddr_key const *const lkey = a;
@@ -141,38 +196,13 @@ int mptcpd_hash_sockaddr_compare(void const *a, void const *b)
         struct sockaddr const *const lsa = lkey->sa;
         struct sockaddr const *const rsa = rkey->sa;
 
-        /**
-         * @todo Should we compare the other @c struct @c sockaddr_in
-         *       and @c struct @c sockaddr_in6 fields as well?
-         */
-
         if (lsa->sa_family == rsa->sa_family) {
                 if (lsa->sa_family == AF_INET) {
                         // IPv4
-                        struct sockaddr_in const *const lin =
-                                (struct sockaddr_in const *) lsa;
-
-                        struct sockaddr_in const *const rin =
-                                (struct sockaddr_in const *) rsa;
-
-                        uint32_t const lhs = lin->sin_addr.s_addr;
-                        uint32_t const rhs = rin->sin_addr.s_addr;
-
-                        return lhs < rhs ? -1 : (lhs > rhs ? 1 : 0);
+                        return compare_sockaddr_in(lsa, rsa);
                 } else {
                         // IPv6
-                        struct sockaddr_in6 const *const lin =
-                                (struct sockaddr_in6 const *) lsa;
-
-                        struct sockaddr_in6 const *const rin =
-                                (struct sockaddr_in6 const *) rsa;
-
-                        uint8_t const *const lhs = lin->sin6_addr.s6_addr;
-                        uint8_t const *const rhs = rin->sin6_addr.s6_addr;
-
-                        return memcmp(lhs,
-                                      rhs,
-                                      sizeof(lin->sin6_addr.s6_addr));
+                        return compare_sockaddr_in6(lsa, rsa);
                 }
         } else if (lsa->sa_family == AF_INET) {
                 return 1;   // IPv4 > IPv6
