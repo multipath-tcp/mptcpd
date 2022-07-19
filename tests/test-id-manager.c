@@ -69,6 +69,12 @@ static void test_get_id(void const *test_data)
                                    (struct sockaddr *) &test_laddr_1);
         assert(_id[0] != 0);
 
+        struct sockaddr_in laddr_1_diff_port = test_laddr_1;
+        laddr_1_diff_port.sin_port = test_laddr_1.sin_port + 1;
+        assert(mptcpd_idm_get_id(_idm,
+                                 (struct sockaddr *) &laddr_1_diff_port)
+               == _id[0]);
+
         _id[1] = mptcpd_idm_get_id(_idm,
                                    (struct sockaddr *) &test_laddr_2);
         assert(_id[1] != 0 && _id[1] != _id[0]);
