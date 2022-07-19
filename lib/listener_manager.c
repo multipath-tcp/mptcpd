@@ -27,6 +27,7 @@
 #include <ell/random.h>
 #pragma GCC diagnostic pop
 
+#include <mptcpd/private/murmur_hash.h>
 #include <mptcpd/listener_manager.h>
 
 #include "hash_sockaddr.h"
@@ -67,6 +68,159 @@ struct lm_value
          */
         int refcnt;
 };
+
+// ----------------------------------------------------------------------
+
+/**
+ * @brief Bundle IPv4 address and port as a hash key.
+ *
+ * A @c padding member is added to allow the padding bytes to be
+ * initialized to zero in a designated initializer, e.g.:
+ * @code
+ * struct endpoint_in endpoint = {
+ *     .addr = 0xC0000202,
+ *     .port = 0x4321
+ * };
+ * The goal is to avoid hashing uninitialized bytes in the hash key.
+ * @endcode
+ */
+struct key_in
+{
+        in_addr_t const addr;
+        in_port_t const port;
+        uint16_t  const padding;    // Initialize to zero.
+};
+
+/**
+ * @brief Bundle IPv6 address and port as a hash key.
+ *
+ * A @c padding member is added to allow the padding bytes to be
+ * initialized to zero in a designated initializer, e.g.:
+ * @code
+ * struct endpoint_in6 endpoint = {
+ *     .addr = { .s6_addr = { [0]  = 0x20,
+ *                            [1]  = 0x01,
+ *                            [2]  = 0X0D,
+ *                            [3]  = 0xB8,
+ *                            [14] = 0x01,
+ *                            [15] = 0x02 } },
+ *     .port = 0x4321
+ * };
+ * The goal is to avoid hashing uninitialized bytes in the hash key.
+ * @endcode
+ */
+struct key_in6
+{
+        struct in6_addr addr;
+        in_port_t const port;
+        uint16_t  const padding;  // Initialize to zero.
+};
+
+static unsigned int hash_sockaddr_in(struct sockaddr_in const *sa,
+                                     uint32_t seed)
+{
+        struct key_in const key = {
+                .addr = sa->sin_addr.s_addr,
+                .port = sa->sin_port
+        };
+
+        return mptcpd_murmur_hash3(&key, sizeof(key), seed);
+}
+
+static unsigned int hash_sockaddr_in6(struct sockaddr_in6 const *sa,
+                                      uint32_t seed)
+{
+        /**
+         * @todo Should we include other sockaddr_in6 members, e.g.
+         *       sin6_flowinfo and sin6_scope_id, as part of the key?
+         */
+        struct key_in6 key = { .port = sa->sin6_port };
+
+        memcpy(key.addr.s6_addr,
+               sa->sin6_addr.s6_addr,
+               sizeof(key.addr.s6_addr));
+
+        return mptcpd_murmur_hash3(&key, sizeof(key), seed);
+}
+
+/**
+ * @brief Generate a hash value based on IP address and port.
+ *
+ * @param[in] p @c struct @c mptcpd_hash_sockaddr_key instance
+ *              containing the IP address and port to be hashed.
+ *
+ * @return The hash value.
+ */
+static unsigned int hash_sockaddr(void const *p)
+{
+        struct mptcpd_hash_sockaddr_key const *const key = p;
+        struct sockaddr const *const sa = key->sa;
+
+        assert(sa->sa_family == AF_INET || sa->sa_family == AF_INET6);
+
+        if (sa->sa_family == AF_INET) {
+                struct sockaddr_in const *sa4 =
+                        (struct sockaddr_in const *) sa;
+
+                return hash_sockaddr_in(sa4, key->seed);
+        } else {
+                struct sockaddr_in6 const *sa6 =
+                        (struct sockaddr_in6 const *) sa;
+
+                return hash_sockaddr_in6(sa6, key->seed);
+        }
+}
+
+static inline int compare_port(in_port_t lhs, in_port_t rhs)
+{
+        return lhs < rhs ? -1 : (lhs > rhs ? 1 : 0);
+}
+
+/**
+ * @brief Compare hash map keys based on IP address and port.
+ *
+ * @param[in] a Pointer @c struct @c sockaddr (left hand side).
+ * @param[in] b Pointer @c struct @c sockaddr (right hand side).
+ *
+ * @return 0 if the IP addresses and ports are equal, and -1 or 1
+ *         otherwise, depending on IP address family and comparisons
+ *         of IP addresses and ports of the same type.
+ */
+static int hash_sockaddr_compare(void const *a, void const *b)
+{
+        int const cmp = mptcpd_hash_sockaddr_compare(a, b);
+
+        if (cmp != 0)
+                return cmp;
+
+        struct mptcpd_hash_sockaddr_key const *const lkey = a;
+        struct mptcpd_hash_sockaddr_key const *const rkey = b;
+
+        struct sockaddr const *const lsa = lkey->sa;
+        struct sockaddr const *const rsa = rkey->sa;
+
+        in_port_t lport, rport;
+
+        if (lsa->sa_family == AF_INET) {
+                struct sockaddr_in const *const lin =
+                        (struct sockaddr_in const *) lsa;
+                struct sockaddr_in const *const rin =
+                        (struct sockaddr_in const *) rsa;
+
+                lport = lin->sin_port;
+                rport = rin->sin_port;
+        } else {
+                struct sockaddr_in6 const *const lin =
+                        (struct sockaddr_in6 const *) lsa;
+                struct sockaddr_in6 const *const rin =
+                        (struct sockaddr_in6 const *) rsa;
+
+                lport = lin->sin6_port;
+                rport = rin->sin6_port;
+        }
+
+        return compare_port(lport, rport);
+}
 
 // ----------------------------------------------------------------------
 
@@ -129,9 +283,9 @@ struct mptcpd_lm *mptcpd_lm_create(void)
         lm->map  = l_hashmap_new();
         lm->seed = l_getrandom_uint32();
 
-        if (!l_hashmap_set_hash_function(lm->map, mptcpd_hash_sockaddr)
+        if (!l_hashmap_set_hash_function(lm->map, hash_sockaddr)
             || !l_hashmap_set_compare_function(lm->map,
-                                               mptcpd_hash_sockaddr_compare)
+                                               hash_sockaddr_compare)
             || !l_hashmap_set_key_copy_function(lm->map,
 						mptcpd_hash_sockaddr_key_copy)
             || !l_hashmap_set_key_free_function(lm->map,

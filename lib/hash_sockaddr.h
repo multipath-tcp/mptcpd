@@ -47,18 +47,7 @@ struct mptcpd_hash_sockaddr_key
 };
 
 /**
- * @brief Generate a hash value based on a @c struct @c sockaddr.
- *
- * @param[in] p @c struct @c mptcpd_hash_sockaddr_key instance containing
- *              the IP address to be hashed.
- *
- * @return The hash value.
- */
-unsigned int mptcpd_hash_sockaddr(void const *p);
-
-
-/**
- * @brief Compare hash map keys based on IP address.
+ * @brief Compare hash map keys based on IP address alone.
  *
  * @param[in] a Pointer @c struct @c sockaddr (left hand side).
  * @param[in] b Pointer @c struct @c sockaddr (right hand side).
@@ -66,6 +55,8 @@ unsigned int mptcpd_hash_sockaddr(void const *p);
  * @return 0 if the IP addresses are equal, and -1 or 1 otherwise,
  *         depending on IP address family and comparisons of IP
  *         addresses of the same type.
+ *
+ * @note Ports are not compared.
  */
 int mptcpd_hash_sockaddr_compare(void const *a, void const *b);
 

@@ -90,6 +90,59 @@ static bool mptcpd_hashmap_replace(struct l_hashmap *map,
 
 // ----------------------------------------------------------------------
 
+static inline
+unsigned int hash_sockaddr_in(struct sockaddr_in const *sa,
+                                      uint32_t seed)
+{
+        return mptcpd_murmur_hash3(&sa->sin_addr.s_addr,
+                                   sizeof(sa->sin_addr.s_addr),
+                                   seed);
+}
+
+static inline
+unsigned int hash_sockaddr_in6(struct sockaddr_in6 const *sa,
+                               uint32_t seed)
+{
+        /**
+         * @todo Should we include other sockaddr_in6 members, e.g.
+         *       sin6_flowinfo and sin6_scope_id, as part of the key?
+         */
+
+        return mptcpd_murmur_hash3(sa->sin6_addr.s6_addr,
+                                   sizeof(sa->sin6_addr.s6_addr),
+                                   seed);
+}
+
+/**
+ * @brief Generate a hash value based on IP address alone.
+ *
+ * @param[in] p @c struct @c mptcpd_hash_sockaddr_key instance
+ *              containing the IP address to be hashed.
+ *
+ * @return The hash value.
+ */
+static unsigned int hash_sockaddr(void const *p)
+{
+        struct mptcpd_hash_sockaddr_key const *const key = p;
+        struct sockaddr const *const sa = key->sa;
+
+        assert(sa->sa_family == AF_INET || sa->sa_family == AF_INET6);
+
+        if (sa->sa_family == AF_INET) {
+                struct sockaddr_in const *sa4 =
+                        (struct sockaddr_in const *) sa;
+
+                return hash_sockaddr_in(sa4, key->seed);
+        } else {
+                struct sockaddr_in6 const *sa6 =
+                        (struct sockaddr_in6 const *) sa;
+
+                return hash_sockaddr_in6(sa6, key->seed);
+        }
+}
+
+// ----------------------------------------------------------------------
+
 struct mptcpd_idm *mptcpd_idm_create(void)
 {
         struct mptcpd_idm *idm = l_new(struct mptcpd_idm, 1);
@@ -100,7 +153,7 @@ struct mptcpd_idm *mptcpd_idm_create(void)
         idm->map = l_hashmap_new();
         idm->seed = l_getrandom_uint32();
 
-        if (!l_hashmap_set_hash_function(idm->map, mptcpd_hash_sockaddr)
+        if (!l_hashmap_set_hash_function(idm->map, hash_sockaddr)
             || !l_hashmap_set_compare_function(idm->map,
                                                mptcpd_hash_sockaddr_compare)
             || !l_hashmap_set_key_copy_function(idm->map,
