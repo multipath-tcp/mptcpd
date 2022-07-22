@@ -372,6 +372,19 @@ mptcpd_pm_get_nm(struct mptcpd_pm const *pm);
 MPTCPD_API struct mptcpd_idm *
 mptcpd_pm_get_idm(struct mptcpd_pm const *pm);
 
+/**
+ * @brief Get pointer to the global MPTCP listener manager.
+ *
+ * @param[in] pm Mptcpd path manager data.
+ *
+ * @note The global MPTCP listener manager tracks MPTCP listening
+ *       sockets associated with a local address.
+ *
+ * @return Global mptcpd MPTCP listener manager.
+ */
+MPTCPD_API struct mptcpd_lm *
+mptcpd_pm_get_lm(struct mptcpd_pm const *pm);
+
 #ifdef __cplusplus
 }
 #endif

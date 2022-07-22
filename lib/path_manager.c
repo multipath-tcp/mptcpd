@@ -370,6 +370,11 @@ struct mptcpd_idm * mptcpd_pm_get_idm(struct mptcpd_pm const *pm)
         return pm->idm;
 }
 
+struct mptcpd_lm * mptcpd_pm_get_lm(struct mptcpd_pm const *pm)
+{
+        return pm->lm;
+}
+
 
 /*
   Local Variables:
