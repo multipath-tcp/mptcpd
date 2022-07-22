@@ -142,7 +142,9 @@ struct mptcpd_plugin_ops
          * @param[in] token       MPTCP connection token.
          * @param[in] laddr       Local address information.
          * @param[in] raddr       Remote address information.
-         * @param[in] server_side Server side connection flag.
+         * @param[in] server_side @c true if this peer was the
+         *                        listener (server), @c false if this
+         *                        peer initiated the connection.
          * @param[in] pm          Opaque pointer to mptcpd path
          *                        manager object.
          */
@@ -158,7 +160,9 @@ struct mptcpd_plugin_ops
          * @param[in] token       MPTCP connection token.
          * @param[in] laddr       Local address information.
          * @param[in] raddr       Remote address information.
-         * @param[in] server_side Server side connection flag.
+         * @param[in] server_side @c true if this peer was the
+         *                        listener (server), @c false if this
+         *                        peer initiated the connection.
          * @param[in] pm          Opaque pointer to mptcpd path
          *                        manager object.
          */
