@@ -95,7 +95,9 @@ struct mptcpd_pm
          * @brief MPTCP listener manager.
          *
          * The MPTCP listener manager maps MPTCP local addresses to a
-         * listening socket file descriptors bound to those addresses.
+         * listening socket file descriptors bound to those addresses
+         * to allow passive subflow connections (joins) to be
+         * accepted.
          */
         struct mptcpd_lm *lm;
 
