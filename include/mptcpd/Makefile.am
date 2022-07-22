@@ -17,6 +17,7 @@ noinst_HEADERS =			\
 	private/config.h		\
 	private/configuration.h		\
 	private/id_manager.h		\
+	private/listener_manager.h	\
 	private/mptcp_org.h		\
 	private/mptcp_upstream.h	\
 	private/murmur_hash.h		\

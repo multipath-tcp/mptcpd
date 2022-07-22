@@ -39,7 +39,7 @@
 #include <mptcpd/private/sockaddr.h>
 #include <mptcpd/private/configuration.h>
 #include <mptcpd/private/addr_info.h>
-#include <mptcpd/listener_manager.h>
+#include <mptcpd/private/listener_manager.h>
 
 // For netlink events.  Same API applies to multipath-tcp.org kernel.
 #include <mptcpd/private/mptcp_upstream.h>

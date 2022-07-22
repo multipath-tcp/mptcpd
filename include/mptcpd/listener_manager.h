@@ -2,7 +2,7 @@
 /**
  * @file listener_manager.h
  *
- * @brief Map of MPTCP local address ID to listener.
+ * @brief Map of MPTCP local address to listener.
  *
  * Copyright (c) 2022, Intel Corporation
  */
@@ -23,22 +23,10 @@ struct sockaddr;
 struct mptcpd_lm;
 
 /**
- * @brief Create a MPTCP listener manager.
- *
- * @return Pointer to a MPTCP listener manager on success.  @c NULL on
- *         failure.
- */
-MPTCPD_API struct mptcpd_lm *mptcpd_lm_create(void);
-
-/**
- * @brief Destroy MPTCP listener manager.
- *
- * @param[in,out] lm The mptcpd address listener manager object.
- */
-MPTCPD_API void mptcpd_lm_destroy(struct mptcpd_lm *lm);
-
-/**
  * @brief Listen on the given MPTCP local address.
+ *
+ * Create a MPTCP listening socket for the given local address.  This
+ * is needed to accept subflows, e.g. during a @c MP_JOIN operation.
  *
  * @param[in] lm The mptcpd address listener manager object.
  * @param[in] sa The MPTCP local address.

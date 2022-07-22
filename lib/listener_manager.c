@@ -28,6 +28,7 @@
 #pragma GCC diagnostic pop
 
 #include <mptcpd/private/murmur_hash.h>
+#include <mptcpd/private/listener_manager.h>
 #include <mptcpd/listener_manager.h>
 
 #include "hash_sockaddr.h"
