@@ -90,17 +90,28 @@ static void test_pm_create(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
 
-        info->pm = mptcpd_pm_create(info->config);
+        struct mptcpd_pm *const pm = mptcpd_pm_create(info->config);
 
-        assert(info->pm       != NULL);
-        assert(info->pm->genl != NULL);
-        assert(info->pm->nm   != NULL);
+        assert(pm            != NULL);
+        assert(pm->config    != NULL);
+        assert(pm->genl      != NULL);
+        assert(pm->timeout   != NULL);
+        assert(pm->nm        != NULL);
+        assert(pm->idm       != NULL);
+        assert(pm->lm        != NULL);
+        assert(pm->event_ops != NULL);
+
+        assert(mptcpd_pm_get_nm(pm)  == pm->nm);
+        assert(mptcpd_pm_get_idm(pm) == pm->idm);
+        assert(mptcpd_pm_get_lm(pm)  == pm->lm);
 
         /*
           Other struct mptcpd_pm fields may not have been initialized
           yet since they depend on the existence of the "mptcp"
           generic netlink family.
         */
+
+        info->pm = pm;
 }
 
 static void test_pm_register_ops(void const *test_data)
