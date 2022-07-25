@@ -1,12 +1,12 @@
 24 June 2022 - mptcpd 0.10
 
-- Inconsistent byte order handling in mptcpd was corrected.  IP ports
+- Inconsistent byte order handling in mptcpd was corrected.  TCP ports
   sent in path management commands and events now have the correct
   byte order.  Furthermore, the mptcpd unit test suite no longer
   assumes that the tests will be run on a little endian host.  IPv4
-  addresses and IP ports used in the mptcpd unit test suite are now
+  addresses and TCP ports used in the mptcpd unit test suite are now
   byte swapped as needed according to the endianness of the platform.
-  As always, IPv4 addresses and IP ports passed through pointers to
+  As always, IPv4 addresses and TCP ports passed through pointers to
   struct sockaddr should be in network byte order by convention.
 
 - A potential memory violation caused when attempting to register NULL

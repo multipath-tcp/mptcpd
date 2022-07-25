@@ -22,7 +22,7 @@
  * @name Swap host ordered bytes in an integer to network byte order.
  *
  * These macros may be used in place of @c htons() or @c htonl() when
- * initializing an IPv4 address or IP port constant at compile-time.
+ * initializing an IPv4 address or TCP port constant at compile-time.
  */
 ///@{
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -53,7 +53,7 @@ struct sockaddr_storage;
  *
  * @param[in]     addr4 IPv4 internet address (network byte order).
  * @param[in]     addr6 IPv6 internet address.
- * @param[in]     port  IP port (network byte order).
+ * @param[in]     port  TCP port (network byte order).
  * @param[in,out] addr  mptcpd network address information.
  *
  * @return @c true on success.  @c false otherwise.
