@@ -117,10 +117,10 @@ struct pm_event_attrs
         /// Remote IPv6 address.
         struct in6_addr const *raddr6;
 
-        /// Local IP port  (network byte order).
+        /// Local TCP port  (network byte order).
         in_port_t const *local_port;
 
-        /// Remote IP port  (network byte order).
+        /// Remote TCP port  (network byte order).
         in_port_t const *remote_port;
 
         /// Network interface index.

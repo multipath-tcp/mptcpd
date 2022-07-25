@@ -168,7 +168,7 @@ struct get_limits_user_callback
  *
  * @param[in]     addr4 IPv4 internet address (network byte order).
  * @param[in]     addr6 IPv6 internet address.
- * @param[in]     port  IP port (host byte order).
+ * @param[in]     port  TCP port (host byte order).
  * @param[in]     id    Address ID.
  * @param[in]     flags MPTCP flags.
  * @param[in]     index Network interface index.
