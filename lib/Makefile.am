@@ -30,10 +30,6 @@ libmptcpd_la_SOURCES =		\
 	hash_sockaddr.c		\
 	hash_sockaddr.h
 
-#IF BUILDING_DLL
-#libmptcpd_la_SOURCES += debug.c
-#endif
-
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = mptcpd.pc
 
