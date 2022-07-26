@@ -225,6 +225,13 @@ static int hash_sockaddr_compare(void const *a, void const *b)
 
 // ----------------------------------------------------------------------
 
+static in_port_t get_port(struct sockaddr const *sa)
+{
+        return sa->sa_family == AF_INET
+                ? ((struct sockaddr_in const *) sa)->sin_port
+                : ((struct sockaddr_in6 const *) sa)->sin6_port;
+}
+
 static int open_listener(struct sockaddr const *sa)
 {
 #ifndef IPPROTO_MPTCP
@@ -263,15 +270,63 @@ static int open_listener(struct sockaddr const *sa)
 
 static void close_listener(void *value)
 {
+        if (value == NULL)
+                return;
+
         struct lm_value *const data = value;
 
-        /**
-         * @todo Should care if the @c close() call fails?  It
-         *       shouldn't fail since we only get here if the listener
-         *       socket was successfully opened earlier.
-         */
+        // This close() should not fail since the fd is valid.
         (void) close(data->fd);
+
         l_free(data);
+}
+
+static in_port_t make_listener(struct mptcpd_lm* lm,
+                               struct sockaddr const *sa)
+{
+        int const fd = open_listener(sa);
+        if (fd == -1)
+                return 0;
+
+        /*
+          The port in a sockaddr used for the key should be non-zero.
+          Retrieve the socket address to which the socket file
+          descriptor is bound in case an ephemeral port was chosen by
+          the kernel, as is the case when the port in the user
+          provided sockaddr passed to bind() is zero.
+        */
+        struct sockaddr_storage ss;
+        socklen_t addrlen = sizeof(ss);
+
+        struct sockaddr *const addr = (struct sockaddr *) &ss;
+
+        int const r = getsockname(fd, addr, &addrlen);
+
+        if (r == -1) {
+                l_error("Unable to retrieve listening socket name: %s",
+                        strerror(errno));
+                (void) close(fd);
+                return 0;
+        }
+
+        struct mptcpd_hash_sockaddr_key const key = {
+                .sa = addr, .seed = lm->seed
+        };
+
+        struct lm_value *const data = l_new(struct lm_value, 1);
+
+        if (!l_hashmap_insert(lm->map, &key, data)) {
+                l_error("Unable to map MPTCP address to listener.");
+
+                close_listener(data);
+
+                return 0;
+        }
+
+        data->fd     = fd;
+        data->refcnt = 1;
+
+        return get_port(key.sa);
 }
 
 // ----------------------------------------------------------------------
@@ -307,51 +362,35 @@ void mptcpd_lm_destroy(struct mptcpd_lm *lm)
         l_free(lm);
 }
 
-bool mptcpd_lm_listen(struct mptcpd_lm *lm, struct sockaddr const *sa)
+in_port_t mptcpd_lm_listen(struct mptcpd_lm *lm,
+                           struct sockaddr const *sa)
 {
         if (lm == NULL || sa == NULL)
-                return false;
+                return 0;
 
         if (sa->sa_family != AF_INET && sa->sa_family != AF_INET6)
-                return false;
+                return 0;
 
         struct mptcpd_hash_sockaddr_key const key = {
                 .sa = sa, .seed = lm->seed
         };
 
-        struct lm_value *data = l_hashmap_lookup(lm->map, &key);
+        struct lm_value *const data = l_hashmap_lookup(lm->map, &key);
 
         /*
-          A listener already exists for the given IP address.
+          A listener already exists for the given address.
           Increment the reference count.
         */
         if (data != NULL) {
                 data->refcnt++;
-
-                return true;
+                return get_port(sa);
         }
 
-        data = l_new(struct lm_value, 1);
-
-        data->fd = open_listener(sa);
-        if (data->fd == -1) {
-                l_free(data);
-
-                return false;
-        }
-
-        if (!l_hashmap_insert(lm->map, &key, data)) {
-                l_error("Unable to map MPTCP address to listener.");
-
-                (void) close(data->fd);
-                l_free(data);
-
-                return false;
-        }
-
-        data->refcnt = 1;
-
-        return true;
+        /*
+          The sockaddr doesn't exist in the map.  Make a new
+          listener.
+        */
+        return make_listener(lm, sa);
 }
 
 bool mptcpd_lm_close(struct mptcpd_lm *lm, struct sockaddr const *sa)

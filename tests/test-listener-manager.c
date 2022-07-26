@@ -40,7 +40,7 @@ struct ipv6_listen_case
 /**
  * @brief Initialize test case to listen on IPv4 loopback address.
  *
- * @param[in] port IP port to listen on.
+ * @param[in] port TCP port to listen on - host byte order.
  */
 #define INIT_IPV4_TEST_CASE(port)                                       \
         {                                                               \
@@ -57,7 +57,7 @@ struct ipv6_listen_case
 /**
  * @brief Initialize test case to listen on IPv6 loopback address.
  *
- * @param[in] port IP port to listen on.
+ * @param[in] port TCP port to listen on - host byte order.
  */
 #define INIT_IPV6_TEST_CASE(port)                                       \
         {                                                               \
@@ -73,6 +73,14 @@ struct ipv6_listen_case
 
 static struct mptcpd_lm *_lm;
 
+static in_port_t get_port(struct sockaddr const *sa)
+{
+        return sa->sa_family == AF_INET
+                ? ((struct sockaddr_in const *) sa)->sin_port
+                : ((struct sockaddr_in6 const *) sa)->sin6_port;
+}
+
+
 static void test_create(void const *test_data)
 {
         (void) test_data;
@@ -86,14 +94,29 @@ static void test_listen(void const *test_data)
 {
         struct sockaddr const *const sa = test_data;
 
-        assert(mptcpd_lm_listen(_lm, sa));
+        in_port_t const original_port = get_port(sa);
+        in_port_t port = mptcpd_lm_listen(_lm, sa);
+
+        assert(port != 0);
+
+        if (original_port != 0)
+                assert(original_port == port);
+
+        port = ntohs(port);
+
+        l_info("Listening on port 0x%x (%u)", port, port);
 }
 
 static void test_close(void const *test_data)
 {
         struct sockaddr const *const sa = test_data;
 
-        assert(mptcpd_lm_close(_lm, sa));
+        in_port_t const port = get_port(sa);
+
+        if (port == 0)
+                assert(!mptcpd_lm_close(_lm, sa));
+        else
+                assert(mptcpd_lm_close(_lm, sa));
 }
 
 static void test_destroy(void const *test_data)
@@ -154,6 +177,15 @@ int main(int argc, char *argv[])
         l_test_add("close  - IPv6",
                    test_close,
                    (struct sockaddr const *) &ipv6_cases[0]);
+
+        struct sockaddr_in const zero_port_case = {
+                .sin_family = AF_INET,
+                .sin_addr   = { .s_addr = htonl(INADDR_LOOPBACK) }
+        };
+
+        l_test_add("close  - IPv4 - zero port",
+                   test_close,
+                   (struct sockaddr const *) &zero_port_case);
 
         l_test_add("destroy lm",    test_destroy, NULL);
 

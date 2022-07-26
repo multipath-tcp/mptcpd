@@ -277,7 +277,7 @@ static int upstream_announce(struct mptcpd_pm *pm,
          *
          * @todo This should be optional.
          */
-        if (!mptcpd_lm_listen(pm->lm, addr))
+        if (mptcpd_lm_listen(pm->lm, addr) == 0)
                 return -1;
 
         return send_add_addr(pm,

@@ -10,7 +10,7 @@
 #ifndef MPTCPD_LISTENER_MANAGER_H
 #define MPTCPD_LISTENER_MANAGER_H
 
-#include <stdbool.h>
+#include <netinet/in.h>
 
 #include <mptcpd/export.h>
 
@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-struct sockaddr;
+
 struct mptcpd_lm;
 
 /**
@@ -31,16 +31,26 @@ struct mptcpd_lm;
  * @param[in] lm The mptcpd address listener manager object.
  * @param[in] sa The MPTCP local address.
  *
- * @return @c true on success, and @c false on failure.
+ * @return Non-zero port in network byte order to which the listener
+ *         was bound, and zero on failure.  An ephemeral port will be
+ *         returned if the port in the local address @a sa is zero.
+ *         The @c sockaddr passed to subsequent calls to
+ *         @c mptcpd_lm_close() should take this into account since
+ *         the mptcpd listener manager will only keep track of
+ *         addresses with non-zero ports, including addresses with
+ *         ephemeral ports.
  */
-MPTCPD_API bool mptcpd_lm_listen(struct mptcpd_lm *lm,
-                                 struct sockaddr const *sa);
+MPTCPD_API in_port_t mptcpd_lm_listen(struct mptcpd_lm *lm,
+                                      struct sockaddr const *sa);
 
 /**
  * @brief Stop listening on a MPTCP local address.
  *
  * @param[in] lm The mptcpd address listener manager object.
- * @param[in] sa The MPTCP local IP address.
+ * @param[in] sa The MPTCP local address with the non-zero port
+ *               returned from @c mptcpd_lm_listen(), i.e. the
+ *               non-zero port provided by the user or the ephemeral
+ *               port chosen by the kernel.
  *
  * @return @c true on success, and @c false on failure.
  */
