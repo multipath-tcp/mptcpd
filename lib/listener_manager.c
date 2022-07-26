@@ -33,6 +33,10 @@
 
 #include "hash_sockaddr.h"
 
+#ifndef IPPROTO_MPTCP
+#define IPPROTO_MPTCP IPPROTO_TCP + 256
+#endif
+
 
 // ----------------------------------------------------------------------
 
@@ -261,10 +265,6 @@ static bool is_unbound_address(struct sockaddr const *sa)
 
 static int open_listener(struct sockaddr const *sa)
 {
-#ifndef IPPROTO_MPTCP
-#define IPPROTO_MPTCP IPPROTO_TCP + 256
-#endif
-
         int const fd = socket(sa->sa_family, SOCK_STREAM, IPPROTO_MPTCP);
         if (fd == -1) {
                 l_error("Unable to open MPTCP listener: %s",
