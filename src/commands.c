@@ -54,8 +54,7 @@ bool mptcpd_check_genl_error(struct l_genl_msg *msg, char const *fname)
         int const error = l_genl_msg_get_error(msg);
 
         if (error < 0) {
-                // Error during send.  Likely insufficient perms.
-
+                // Error during send.
                 char const *const genl_errmsg =
 #ifdef HAVE_L_GENL_MSG_GET_EXTENDED_ERROR
                         l_genl_msg_get_extended_error(msg);
@@ -63,18 +62,13 @@ bool mptcpd_check_genl_error(struct l_genl_msg *msg, char const *fname)
                         NULL;
 #endif
 
-                if (genl_errmsg != NULL) {
-                        l_error("%s: %s", fname, genl_errmsg);
-                } else {
-                        char errmsg[80];
-                        int const r = strerror_r(-error,
-                                                 errmsg,
-                                                 L_ARRAY_SIZE(errmsg));
+                char errmsg[80] = { 0 };
+                (void) strerror_r(-error, errmsg, L_ARRAY_SIZE(errmsg));
 
-                        l_error("%s error: %s",
-                                fname,
-                                r == 0 ? errmsg : "<unknown error>");
-                }
+                if (genl_errmsg != NULL)
+                        l_error("%s: %s: %s", fname, genl_errmsg, errmsg);
+                else
+                        l_error("%s: %s", fname, errmsg);
 
                 return false;
         }
