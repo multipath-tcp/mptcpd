@@ -30,7 +30,6 @@ struct sockaddr;
  *       exported from libmptcpd.
  */
 ///@{
-
 /**
  * @brief Hash key information.
  *
