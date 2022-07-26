@@ -107,6 +107,15 @@ static void test_listen(void const *test_data)
         l_info("Listening on port 0x%x (%u)", port, port);
 }
 
+static void test_listen_bad_address(void const *test_data)
+{
+        struct sockaddr const *const sa = test_data;
+
+        in_port_t const port = mptcpd_lm_listen(_lm, sa);
+
+        assert(port == 0);
+}
+
 static void test_close(void const *test_data)
 {
         struct sockaddr const *const sa = test_data;
@@ -133,6 +142,8 @@ int main(int argc, char *argv[])
 
         l_test_init(&argc, &argv);
 
+        l_test_add("create lm", test_create, NULL);
+
         /*
           Listen on the IPv4 and IPv6 loopback addresses since we need
           an address backed by a network interface so that the
@@ -152,31 +163,48 @@ int main(int argc, char *argv[])
                 INIT_IPV6_TEST_CASE(0)
         };
 
-
-        l_test_add("create lm", test_create, NULL);
-
         for (size_t i = 0; i < L_ARRAY_SIZE(ipv4_cases); ++i) {
                 char const *const desc = ipv4_cases[i].desc;
-                struct sockaddr const *const sa =
-                        (struct sockaddr const *) &ipv4_cases[i].addr;
 
-                l_test_add(desc, test_listen, sa);
+                l_test_add(desc, test_listen, &ipv4_cases[i].addr);
         }
 
         for (size_t i = 0; i < L_ARRAY_SIZE(ipv6_cases); ++i) {
                 char const *const desc = ipv6_cases[i].desc;
-                struct sockaddr const *const sa =
-                        (struct sockaddr const *) &ipv6_cases[i].addr;
 
-                l_test_add(desc, test_listen, sa);
+                l_test_add(desc, test_listen, &ipv6_cases[i].addr);
         }
 
-        l_test_add("close  - IPv4",
-                   test_close,
-                   (struct sockaddr const *) &ipv4_cases[0]);
-        l_test_add("close  - IPv6",
-                   test_close,
-                   (struct sockaddr const *) &ipv6_cases[0]);
+        // Test listen failure with "bad" (unbound) addresses.
+        struct sockaddr_in const ipv4_bad_cases[] = {
+                {
+                        .sin_family = AF_INET,
+                        .sin_addr = { .s_addr = INADDR_ANY }
+                },
+                {
+                        .sin_family = AF_INET,
+                        .sin_addr = { .s_addr = INADDR_BROADCAST }
+                }
+        };
+
+        for (size_t i = 0; i < L_ARRAY_SIZE(ipv4_bad_cases); ++i) {
+                l_test_add("listen - bad IPv4 address",
+                           test_listen_bad_address,
+                           &ipv4_bad_cases[i]);
+        }
+
+        struct sockaddr_in6 const ipv6_bad_case = {
+                .sin6_family = AF_INET6,
+                .sin6_addr = IN6ADDR_ANY_INIT
+        };
+
+        l_test_add("listen - bad IPv6 address",
+                   test_listen_bad_address,
+                   &ipv6_bad_case);
+
+        // Listener close test cases.
+        l_test_add("close  - IPv4", test_close, &ipv4_cases[0]);
+        l_test_add("close  - IPv6", test_close, &ipv6_cases[0]);
 
         struct sockaddr_in const zero_port_case = {
                 .sin_family = AF_INET,
@@ -185,7 +213,7 @@ int main(int argc, char *argv[])
 
         l_test_add("close  - IPv4 - zero port",
                    test_close,
-                   (struct sockaddr const *) &zero_port_case);
+                   &zero_port_case);
 
         l_test_add("destroy lm",    test_destroy, NULL);
 
