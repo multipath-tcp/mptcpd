@@ -232,6 +232,33 @@ static in_port_t get_port(struct sockaddr const *sa)
                 : ((struct sockaddr_in6 const *) sa)->sin6_port;
 }
 
+/**
+ * @brief Is IP address not bound to a specific network interface?
+ *
+ * @param[in] sa IP address.
+ *
+ * @return @c true if @a sa corresponds to an IP address that isn't
+ *         bound to a network interface, and @c false otherwise.
+ */
+static bool is_unbound_address(struct sockaddr const *sa)
+{
+        if (sa->sa_family == AF_INET) {
+                struct sockaddr_in const *const a =
+                        (struct sockaddr_in const *) sa;
+
+                in_addr_t const s_addr = a->sin_addr.s_addr;
+
+                return s_addr == INADDR_ANY || s_addr == INADDR_BROADCAST;
+        } else {
+                struct sockaddr_in6 const *const a =
+                        (struct sockaddr_in6 const *) sa;
+
+                struct in6_addr const *const addr = &a->sin6_addr;
+
+                return memcmp(addr, &in6addr_any, sizeof(*addr)) == 0;
+        }
+}
+
 static int open_listener(struct sockaddr const *sa)
 {
 #ifndef IPPROTO_MPTCP
@@ -369,6 +396,9 @@ in_port_t mptcpd_lm_listen(struct mptcpd_lm *lm,
                 return 0;
 
         if (sa->sa_family != AF_INET && sa->sa_family != AF_INET6)
+                return 0;
+
+        if (is_unbound_address(sa))
                 return 0;
 
         struct mptcpd_hash_sockaddr_key const key = {
