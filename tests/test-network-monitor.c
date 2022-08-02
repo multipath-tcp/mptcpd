@@ -112,10 +112,11 @@ static void check_interface(struct mptcpd_interface const *i, void *data)
                 i->flags,
                 i->name);
 
-        assert(l_queue_length(i->addrs) > 0);
-
-        l_debug("  addrs:");
-        l_queue_foreach(i->addrs, dump_addr, NULL);
+        /* Ifaces can have no addresses, e.g. if attached to a bridge. */
+        if (l_queue_length(i->addrs) > 0) {
+                l_debug("  addrs:");
+                l_queue_foreach(i->addrs, dump_addr, NULL);
+        }
 
         /*
           Only network interfaces that are up and running should be
