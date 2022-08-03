@@ -239,7 +239,7 @@ int mptcpd_kpm_set_flags(struct mptcpd_pm *pm,
 // -------------------------------------------------------------------
 
 int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
-                       struct sockaddr const *addr,
+                       struct sockaddr *addr,
                        mptcpd_aid_t address_id,
                        mptcpd_token_t token)
 {

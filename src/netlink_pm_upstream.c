@@ -257,10 +257,21 @@ static int send_add_addr(struct mptcpd_pm *pm,
 //          User Space Path Manager Related Functions
 // --------------------------------------------------------------
 static int upstream_announce(struct mptcpd_pm *pm,
-                             struct sockaddr const *addr,
+                             struct sockaddr *addr,
                              mptcpd_aid_t id,
                              mptcpd_token_t token)
 {
+        /**
+         * Set up MPTCP listening socket.
+         *
+         * @note An ephemeral port will be assigned to the port in
+         *       @a addr if it is zero.
+         *
+         * @todo This should be optional.
+         */
+        if (!mptcpd_lm_listen(pm->lm, addr))
+                return -1;
+
         /**
          * @todo Add support for the optional network interface index
          *       attribute.
@@ -271,14 +282,6 @@ static int upstream_announce(struct mptcpd_pm *pm,
                 .flags    = MPTCP_PM_ADDR_FLAG_SIGNAL,
                 // .ifindex  = ...
         };
-
-        /**
-         * Set up MPTCP listening socket.
-         *
-         * @todo This should be optional.
-         */
-        if (mptcpd_lm_listen(pm->lm, addr) == 0)
-                return -1;
 
         return send_add_addr(pm,
                              MPTCP_PM_CMD_ANNOUNCE,
