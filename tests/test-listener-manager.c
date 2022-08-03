@@ -27,13 +27,13 @@
 
 struct ipv4_listen_case
 {
-        struct sockaddr_in const addr;
+        struct sockaddr_in addr;
         char const *const desc;
 };
 
 struct ipv6_listen_case
 {
-        struct sockaddr_in6 const addr;
+        struct sockaddr_in6 addr;
         char const *const desc;
 };
 
@@ -92,10 +92,13 @@ static void test_create(void const *test_data)
 
 static void test_listen(void const *test_data)
 {
-        struct sockaddr const *const sa = test_data;
+        struct sockaddr *const sa = (struct sockaddr *) test_data;
 
         in_port_t const original_port = get_port(sa);
-        in_port_t port = mptcpd_lm_listen(_lm, sa);
+
+        assert(mptcpd_lm_listen(_lm, sa));
+
+        in_port_t port = get_port(sa);
 
         assert(port != 0);
 
@@ -109,11 +112,9 @@ static void test_listen(void const *test_data)
 
 static void test_listen_bad_address(void const *test_data)
 {
-        struct sockaddr const *const sa = test_data;
+        struct sockaddr *const sa = (struct sockaddr *) test_data;
 
-        in_port_t const port = mptcpd_lm_listen(_lm, sa);
-
-        assert(port == 0);
+        assert(!mptcpd_lm_listen(_lm, sa));
 }
 
 static void test_close(void const *test_data)
@@ -149,14 +150,14 @@ int main(int argc, char *argv[])
           an address backed by a network interface so that the
           underlying bind() call can succeed.
         */
-        struct ipv4_listen_case const ipv4_cases[] = {
+        struct ipv4_listen_case ipv4_cases[] = {
                 INIT_IPV4_TEST_CASE(0x3456),
                 INIT_IPV4_TEST_CASE(0x3457),
                 INIT_IPV4_TEST_CASE(0x3456),  // Same port as above.
                 INIT_IPV4_TEST_CASE(0)
         };
 
-        struct ipv6_listen_case const ipv6_cases[] = {
+        struct ipv6_listen_case ipv6_cases[] = {
                 INIT_IPV6_TEST_CASE(0x4567),
                 INIT_IPV6_TEST_CASE(0x4578),
                 INIT_IPV6_TEST_CASE(0x4567),  // Same port as above.
@@ -176,7 +177,7 @@ int main(int argc, char *argv[])
         }
 
         // Test listen failure with "bad" (unbound) addresses.
-        struct sockaddr_in const ipv4_bad_cases[] = {
+        struct sockaddr_in ipv4_bad_cases[] = {
                 {
                         .sin_family = AF_INET,
                         .sin_addr = { .s_addr = INADDR_ANY }

@@ -19,7 +19,6 @@
 extern "C" {
 #endif
 
-
 struct mptcpd_lm;
 
 /**
@@ -28,27 +27,25 @@ struct mptcpd_lm;
  * Create a MPTCP listening socket for the given local address.  This
  * is needed to accept subflows, e.g. during a @c MP_JOIN operation.
  *
- * @param[in] lm The mptcpd address listener manager object.
- * @param[in] sa The MPTCP local address.
+ * @param[in]     lm The mptcpd address listener manager object.
+ * @param[in,out] sa The MPTCP local address.  If the port is zero an
+ *                   ephemeral port will be chosen, and assigned to
+ *                   the appropriate underlying address
+ *                   family-specific port member, e.g. @c sin_port or
+ *                   @c sin6_port.  The port will be in network byte
+ *                   order.
  *
- * @return Non-zero port in network byte order to which the listener
- *         was bound, and zero on failure.  An ephemeral port will be
- *         returned if the port in the local address @a sa is zero.
- *         The @c sockaddr passed to subsequent calls to
- *         @c mptcpd_lm_close() should take this into account since
- *         the mptcpd listener manager will only keep track of
- *         addresses with non-zero ports, including addresses with
- *         ephemeral ports.
+ * @return @c true on success, and @c false on failure.
  */
-MPTCPD_API in_port_t mptcpd_lm_listen(struct mptcpd_lm *lm,
-                                      struct sockaddr const *sa);
+MPTCPD_API bool mptcpd_lm_listen(struct mptcpd_lm *lm,
+                                 struct sockaddr *sa);
 
 /**
  * @brief Stop listening on a MPTCP local address.
  *
  * @param[in] lm The mptcpd address listener manager object.
- * @param[in] sa The MPTCP local address with the non-zero port
- *               returned from @c mptcpd_lm_listen(), i.e. the
+ * @param[in] sa The MPTCP local address with a non-zero port, such as
+ *               the one assigned by @c mptcpd_lm_listen(), i.e. the
  *               non-zero port provided by the user or the ephemeral
  *               port chosen by the kernel.
  *

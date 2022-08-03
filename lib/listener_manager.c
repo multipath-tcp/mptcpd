@@ -229,11 +229,11 @@ static int hash_sockaddr_compare(void const *a, void const *b)
 
 // ----------------------------------------------------------------------
 
-static in_port_t get_port(struct sockaddr const *sa)
+static socklen_t get_addr_size(struct sockaddr const *sa)
 {
         return sa->sa_family == AF_INET
-                ? ((struct sockaddr_in const *) sa)->sin_port
-                : ((struct sockaddr_in6 const *) sa)->sin6_port;
+                ? sizeof(struct sockaddr_in)
+                : sizeof(struct sockaddr_in6);
 }
 
 /**
@@ -273,10 +273,7 @@ static int open_listener(struct sockaddr const *sa)
                 return -1;
         }
 
-        socklen_t const addr_size =
-                (sa->sa_family == AF_INET
-                 ? sizeof(struct sockaddr_in)
-                 : sizeof(struct sockaddr_in6));
+        socklen_t const addr_size = get_addr_size(sa);
 
         if (bind(fd, sa, addr_size) == -1) {
                 l_error("Unable to bind MPTCP listener: %s",
@@ -308,12 +305,11 @@ static void close_listener(void *value)
         l_free(data);
 }
 
-static in_port_t make_listener(struct mptcpd_lm* lm,
-                               struct sockaddr const *sa)
+static int make_listener(struct mptcpd_lm* lm, struct sockaddr *sa)
 {
         int const fd = open_listener(sa);
         if (fd == -1)
-                return 0;
+                return -1;
 
         /*
           The port in a sockaddr used for the key should be non-zero.
@@ -322,22 +318,19 @@ static in_port_t make_listener(struct mptcpd_lm* lm,
           the kernel, as is the case when the port in the user
           provided sockaddr passed to bind() is zero.
         */
-        struct sockaddr_storage ss;
-        socklen_t addrlen = sizeof(ss);
+        socklen_t addrlen = get_addr_size(sa);
 
-        struct sockaddr *const addr = (struct sockaddr *) &ss;
-
-        int const r = getsockname(fd, addr, &addrlen);
+        int const r = getsockname(fd, sa, &addrlen);
 
         if (r == -1) {
                 l_error("Unable to retrieve listening socket name: %s",
                         strerror(errno));
                 (void) close(fd);
-                return 0;
+                return -1;
         }
 
         struct mptcpd_hash_sockaddr_key const key = {
-                .sa = addr, .seed = lm->seed
+                .sa = sa, .seed = lm->seed
         };
 
         struct lm_value *const data = l_new(struct lm_value, 1);
@@ -347,13 +340,13 @@ static in_port_t make_listener(struct mptcpd_lm* lm,
 
                 close_listener(data);
 
-                return 0;
+                return -1;
         }
 
         data->fd     = fd;
         data->refcnt = 1;
 
-        return get_port(key.sa);
+        return 0;
 }
 
 // ----------------------------------------------------------------------
@@ -389,17 +382,16 @@ void mptcpd_lm_destroy(struct mptcpd_lm *lm)
         l_free(lm);
 }
 
-in_port_t mptcpd_lm_listen(struct mptcpd_lm *lm,
-                           struct sockaddr const *sa)
+bool mptcpd_lm_listen(struct mptcpd_lm *lm, struct sockaddr *sa)
 {
         if (lm == NULL || sa == NULL)
-                return 0;
+                return false;
 
         if (sa->sa_family != AF_INET && sa->sa_family != AF_INET6)
-                return 0;
+                return false;
 
         if (is_unbound_address(sa))
-                return 0;
+                return false;
 
         struct mptcpd_hash_sockaddr_key const key = {
                 .sa = sa, .seed = lm->seed
@@ -413,14 +405,14 @@ in_port_t mptcpd_lm_listen(struct mptcpd_lm *lm,
         */
         if (data != NULL) {
                 data->refcnt++;
-                return get_port(sa);
+                return true;
         }
 
         /*
           The sockaddr doesn't exist in the map.  Make a new
           listener.
         */
-        return make_listener(lm, sa);
+        return make_listener(lm, sa) == 0;
 }
 
 bool mptcpd_lm_close(struct mptcpd_lm *lm, struct sockaddr const *sa)
