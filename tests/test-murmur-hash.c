@@ -40,7 +40,7 @@ static void test_hash_32(void const *test_data)
         uint8_t  const k3[16] = {
             [0]  = 0x20,
             [1]  = 0x01,
-            [2]  = 0X0D,
+            [2]  = 0x0D,
             [3]  = 0xB8,
             [14] = 0x01,
             [15] = 0x02

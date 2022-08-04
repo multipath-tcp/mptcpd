@@ -149,7 +149,7 @@ static void test_copy_af_inet6(void const *test_data)
                 .sin6_addr   = {
                         .s6_addr = { [0]  = 0x20,
                                      [1]  = 0x01,
-                                     [2]  = 0X0D,
+                                     [2]  = 0x0D,
                                      [3]  = 0xB8,
                                      [14] = 0x01,
                                      [15] = 0x02 }  // 2001:DB8::102

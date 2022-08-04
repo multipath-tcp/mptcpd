@@ -196,7 +196,7 @@ static struct sockaddr_in6 const test_laddr_2 = {
         .sin6_port   = MPTCPD_CONSTANT_HTONS(0x5678),
         .sin6_addr   = { .s6_addr = { [0]  = 0x20,
                                       [1]  = 0x01,
-                                      [2]  = 0X0D,
+                                      [2]  = 0x0D,
                                       [3]  = 0xB8,
                                       [14] = 0x01,
                                       [15] = 0x02 }  // 2001:DB8::102
@@ -224,7 +224,7 @@ static struct sockaddr_in6 const test_raddr_1 = {
         .sin6_port   = MPTCPD_CONSTANT_HTONS(0x3456),
         .sin6_addr   = { .s6_addr = { [0]  = 0x20,
                                       [1]  = 0x01,
-                                      [2]  = 0X0D,
+                                      [2]  = 0x0D,
                                       [3]  = 0xB8,
                                       [14] = 0x02,
                                       [15] = 0x01 }  // 2001:DB8::201
