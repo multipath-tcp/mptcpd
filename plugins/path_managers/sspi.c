@@ -27,6 +27,7 @@
 #include <mptcpd/network_monitor.h>
 #include <mptcpd/path_manager.h>
 #include <mptcpd/plugin.h>
+#include <mptcpd/private/sockaddr.h>
 
 /**
  * @brief Local address to interface mapping failure value.
@@ -459,8 +460,9 @@ static bool sspi_remove_token(void *data, void *user_data)
 /**
  * @brief Inform kernel of local address available for subflows.
  *
- * @param[in] i    Network interface information.
- * @param[in] data User supplied data, the path manager in this case.
+ * @param[in] data      @c struct @c sockaddr containing address to
+ *                      advertise.
+ * @param[in] user_data New connection information.
  */
 static void sspi_send_addr(void *data, void *user_data)
 {
@@ -475,24 +477,25 @@ static void sspi_send_addr(void *data, void *user_data)
          */
         mptcpd_aid_t address_id = 0;
 
-        /**
-         * @note The port is an optional field of the MPTCP
-         *       @c ADD_ADDR option.  Setting it to zero causes it to
-         *       be ignored when sending the address information to
-         *       the kernel.
-         */
         /*
-        in_port_t const port = 0;
-        if (addr->sa_family == AF_INET)
-                ((struct sockaddr_in const *) addr)->sin_port = port;
-        else
-                ((struct sockaddr_in6 const *) addr)->sin6_port = port;
-        */
+          mptcpd_pm_add_addr() will modify the sockaddr passed to it
+          if the port is zero.  Make a copy to avoid modifying the
+          original.
+         */
+        struct sockaddr *const sa = mptcpd_sockaddr_copy(addr);
 
         mptcpd_pm_add_addr(info->pm,
-                           addr,
+                           sa,
                            address_id,
                            info->token);
+
+        /**
+         * @todo The sspi plugin currently doesn't stop advertising IP
+         *       addresses.  The address will need to be stored for later
+         *       use in mptcpd_pm_remove_addr() once the need for that
+         *       occurs.
+         */
+        l_free(sa);
 }
 
 /**
