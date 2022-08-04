@@ -10,8 +10,6 @@
 #ifndef MPTCPD_LISTENER_MANAGER_H
 #define MPTCPD_LISTENER_MANAGER_H
 
-#include <netinet/in.h>
-
 #include <mptcpd/export.h>
 
 
@@ -20,6 +18,7 @@ extern "C" {
 #endif
 
 struct mptcpd_lm;
+struct sockaddr;
 
 /**
  * @brief Listen on the given MPTCP local address.
