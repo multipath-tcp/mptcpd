@@ -11,6 +11,11 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include <ell/util.h>
+#pragma GCC diagnostic pop
+
 #include <mptcpd/private/sockaddr.h>
 
 
@@ -39,6 +44,21 @@ bool mptcpd_sockaddr_storage_init(in_addr_t const *addr4,
         }
 
         return true;
+}
+
+struct sockaddr *
+mptcpd_sockaddr_copy(struct sockaddr const *sa)
+{
+        if (sa == NULL)
+                return NULL;
+
+        if (sa->sa_family == AF_INET)
+                return l_memdup(sa, sizeof(struct sockaddr_in));
+        else if (sa->sa_family == AF_INET6)
+                return l_memdup(sa, sizeof(struct sockaddr_in6));
+
+        // Not an IPv4 or IPv6 address.
+        return NULL;
 }
 
 

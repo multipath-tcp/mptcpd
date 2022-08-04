@@ -64,6 +64,22 @@ mptcpd_sockaddr_storage_init(in_addr_t const *addr4,
                              in_port_t port,
                              struct sockaddr_storage *addr);
 
+/**
+ * @brief Deep copy a @c sockaddr.
+ *
+ * Copy the address family-specific contents of a @c sockaddr.  For an
+ * @c AF_INET address family, a @c struct @c sockaddr_in will be
+ * dynamically allocated and copied from @a sa.  Similarly, @c struct
+ * @c sockaddr_in6 will be allocated and copied from @a sa for the
+ * @c AF_INET6 address family case.
+ *
+ * @return Dynamically allocated copy of @a sa if the @c sa_family
+ *         member is @c AF_INET or @c AF_INET6, and @c NULL otherwise.
+ *         Deallocate with @c l_free().
+ */
+MPTCPD_API struct sockaddr *
+mptcpd_sockaddr_copy(struct sockaddr const *sa);
+
 #ifdef __cplusplus
 }
 #endif
