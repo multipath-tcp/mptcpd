@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file listener_manager.h
+ * @file private/listener_manager.h
  *
  * @brief Map of MPTCP local address to listener - private API.
  *
@@ -33,7 +33,6 @@ MPTCPD_API struct mptcpd_lm *mptcpd_lm_create(void);
  * @param[in,out] lm The mptcpd address listener manager object.
  */
 MPTCPD_API void mptcpd_lm_destroy(struct mptcpd_lm *lm);
-
 
 #ifdef __cplusplus
 }
