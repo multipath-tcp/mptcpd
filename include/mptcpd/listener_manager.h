@@ -10,6 +10,8 @@
 #ifndef MPTCPD_LISTENER_MANAGER_H
 #define MPTCPD_LISTENER_MANAGER_H
 
+#include <stdbool.h>
+
 #include <mptcpd/export.h>
 
 
