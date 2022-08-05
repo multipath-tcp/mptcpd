@@ -36,10 +36,10 @@ struct sockaddr;
  *                   @c sin6_port.  The port will be in network byte
  *                   order.
  *
- * @return @c true on success, and @c false on failure.
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
-MPTCPD_API bool mptcpd_lm_listen(struct mptcpd_lm *lm,
-                                 struct sockaddr *sa);
+MPTCPD_API int mptcpd_lm_listen(struct mptcpd_lm *lm,
+                                struct sockaddr *sa);
 
 /**
  * @brief Stop listening on a MPTCP local address.
@@ -50,10 +50,10 @@ MPTCPD_API bool mptcpd_lm_listen(struct mptcpd_lm *lm,
  *               non-zero port provided by the user or the ephemeral
  *               port chosen by the kernel.
  *
- * @return @c true on success, and @c false on failure.
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
-MPTCPD_API bool mptcpd_lm_close(struct mptcpd_lm *lm,
-                                struct sockaddr const *sa);
+MPTCPD_API int mptcpd_lm_close(struct mptcpd_lm *lm,
+                               struct sockaddr const *sa);
 
 #ifdef __cplusplus
 }

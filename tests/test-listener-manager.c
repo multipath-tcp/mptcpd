@@ -7,14 +7,16 @@
  * Copyright (c) 2022, Intel Corporation
  */
 
-
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/util.h>
 #include <ell/log.h>
 #include <ell/test.h>
 #include <ell/hashmap.h>
+#pragma GCC diagnostic pop
 
 #include <mptcpd/private/listener_manager.h>
 #include <mptcpd/listener_manager.h>
@@ -96,7 +98,7 @@ static void test_listen(void const *test_data)
 
         in_port_t const original_port = get_port(sa);
 
-        assert(mptcpd_lm_listen(_lm, sa));
+        assert(mptcpd_lm_listen(_lm, sa) == 0);
 
         in_port_t port = get_port(sa);
 
@@ -114,7 +116,7 @@ static void test_listen_bad_address(void const *test_data)
 {
         struct sockaddr *const sa = (struct sockaddr *) test_data;
 
-        assert(!mptcpd_lm_listen(_lm, sa));
+        assert(mptcpd_lm_listen(_lm, sa) != 0);
 }
 
 static void test_close(void const *test_data)
@@ -124,9 +126,9 @@ static void test_close(void const *test_data)
         in_port_t const port = get_port(sa);
 
         if (port == 0)
-                assert(!mptcpd_lm_close(_lm, sa));
+                assert(mptcpd_lm_close(_lm, sa) != 0);
         else
-                assert(mptcpd_lm_close(_lm, sa));
+                assert(mptcpd_lm_close(_lm, sa) == 0);
 }
 
 static void test_destroy(void const *test_data)
