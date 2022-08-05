@@ -4,7 +4,7 @@
  *
  * @brief Mptcpd configuration parser implementation.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -582,8 +582,11 @@ static void parse_config_addr_flags(struct mptcpd_config *config,
                                       group,
                                       "addr-flags");
 
-        if (addr_flags != NULL)
+        if (addr_flags != NULL) {
                 config->addr_flags = addr_flags_from_string(addr_flags);
+
+                l_free(addr_flags);
+        }
 }
 
 static void parse_config_notify_flags(struct mptcpd_config *config,
@@ -598,8 +601,11 @@ static void parse_config_notify_flags(struct mptcpd_config *config,
                                       group,
                                       "notify-flags");
 
-        if (notify_flags != NULL)
+        if (notify_flags != NULL) {
                 config->notify_flags = notify_flags_from_string(notify_flags);
+
+                l_free(notify_flags);
+        }
 }
 
 static void parse_config_default_plugin(struct mptcpd_config *config,
