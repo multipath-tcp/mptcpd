@@ -44,30 +44,52 @@
 
 // -------------------------------------------------------------------
 
-struct test_info
+struct test_addr_info
 {
-        struct l_netlink *const rtnl;
-
-        // Address used for kernel add_addr and dump_addr calls.
-        struct sockaddr const *const addr;
+        // Test address.
+        struct sockaddr *const addr;
 
         // Network interface on which to bind the test address.
         int const ifindex;
 
-        // CIDR prefix
-        uint8_t const prefix;
+        // CIDR prefix length.
+        uint8_t const prefix_len;
 
-        // String form of the addr.
-        char const *const ip;
+        /**
+         * @brief String form of the addr.
+         *
+         * @note Long enough for both IPv4 and IPv6 addresses.
+         */
+        char ip[INET6_ADDRSTRLEN];
+
+        /// MPTCP connection used in user space PM calls.
+        mptcpd_token_t token;
+
+        // MPTCP address ID used for add_addr and dump_addr calls.
+        mptcpd_aid_t id;
+};
+
+struct test_info
+{
+        struct l_netlink *const rtnl;
+
+        /*
+          Address information for user space add_addr and remove_addr
+          calls.
+        */
+        struct test_addr_info u_addr;
+
+        /*
+          Address information for kernel add_addr and dump_addr
+          calls.
+        */
+        struct test_addr_info k_addr;
 
         // Mptcpd configuration.
         struct mptcpd_config *config;
 
         // Mptcpd path manager object.
         struct mptcpd_pm *pm;
-
-        // ID used for kernel add_addr and dump_addr calls.
-        mptcpd_aid_t id;
 
         // Number of times dump_addrs call was completed.
         int dump_addrs_complete_count;
@@ -77,15 +99,21 @@ struct test_info
 };
 
 // -------------------------------------------------------------------
+/*
+  Number of addresses to set up for test purposes (2, user space and
+  kernel space).
+*/
+static int const addrs_to_setup_count = 2;
 
-static struct sockaddr const *const laddr1 =
-        (struct sockaddr const *) &test_laddr_1;
+// Number of addresses set up for test purposes.
+static int addr_setup_count;
+
+// -------------------------------------------------------------------
+// Addresses used for user space PM subflow command tests.
+// -------------------------------------------------------------------
 
 static struct sockaddr const *const laddr2 =
         (struct sockaddr const *) &test_laddr_2;
-
-static struct sockaddr const *const raddr1 =
-        (struct sockaddr const *) &test_raddr_1;
 
 static struct sockaddr const *const raddr2 =
         (struct sockaddr const *) &test_raddr_2;
@@ -108,10 +136,48 @@ static struct mptcpd_limit const _limits[] = {
 
 // -------------------------------------------------------------------
 
+static void const *get_in_addr(struct sockaddr const *sa)
+{
+        if (sa->sa_family == AF_INET) {
+                struct sockaddr_in const *const addr =
+                        (struct sockaddr_in const *) sa;
+
+                return &addr->sin_addr;
+        } else if (sa->sa_family == AF_INET6) {
+                struct sockaddr_in6 const *const addr =
+                        (struct sockaddr_in6 const *) sa;
+
+                return &addr->sin6_addr;
+        }
+
+        return NULL;  // Not an internet address. Unlikely.
+}
+
+static void dump_addr(char const *description, struct sockaddr const *a)
+{
+        assert(a != NULL);
+
+        void const *src = get_in_addr(a);
+
+        char addrstr[INET6_ADDRSTRLEN];  // Long enough for both IPv4
+                                         // and IPv6 addresses.
+
+        assert(inet_ntop(a->sa_family, src, addrstr, sizeof(addrstr)));
+
+        in_port_t const port = mptcpd_get_port_number(a);
+
+        l_info("%s: %s:<0x%x (%u)>",
+               description,
+               addrstr,
+               port,
+               port);
+}
+
 static void get_addr_callback(struct mptcpd_addr_info const *info,
                               void *user_data)
 {
-        struct test_info *const tinfo = (struct test_info *) user_data;
+        struct test_info const *const tinfo = user_data;
+        struct test_addr_info const *const k_addr = &tinfo->k_addr;
 
         /**
          * @bug We could have a resource leak in the kernel here if
@@ -121,16 +187,23 @@ static void get_addr_callback(struct mptcpd_addr_info const *info,
          */
         assert(info != NULL);
 
-        assert(mptcpd_addr_info_get_id(info) == tinfo->id);
-        assert(mptcpd_addr_info_get_index(info) == tinfo->ifindex);
-        assert(sockaddr_is_equal(tinfo->addr,
+        l_info("=======================");
+        dump_addr("Address   to mptcpd_kpm_add_addr()",
+                  k_addr->addr);
+        dump_addr("Address from mptcpd_kpm_get_addr()",
+                  mptcpd_addr_info_get_addr(info));
+        l_info("=======================");
+
+        assert(mptcpd_addr_info_get_id(info) == k_addr->id);
+        assert(mptcpd_addr_info_get_index(info) == k_addr->ifindex);
+        assert(sockaddr_is_equal(k_addr->addr,
                                  mptcpd_addr_info_get_addr(info)));
 }
 
 static void dump_addrs_callback(struct mptcpd_addr_info const *info,
                                 void *user_data)
 {
-        struct test_info *const tinfo = (struct test_info *) user_data;
+        struct test_info const *const tinfo = user_data;
 
         /**
          * @bug We could have a resource leak in the kernel here if
@@ -140,18 +213,20 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
          */
         assert(info != NULL);
 
+        struct test_addr_info const *const k_addr = &tinfo->k_addr;
+
         // Other IDs unrelated to this test could already exist.
-        if (mptcpd_addr_info_get_id(info) != tinfo->id)
+        if (mptcpd_addr_info_get_id(info) != k_addr->id)
                 return;
 
-        assert(mptcpd_addr_info_get_index(info) == tinfo->ifindex);
-        assert(sockaddr_is_equal(tinfo->addr,
+        assert(mptcpd_addr_info_get_index(info) == k_addr->ifindex);
+        assert(sockaddr_is_equal(k_addr->addr,
                                  mptcpd_addr_info_get_addr(info)));
 }
 
 static void dump_addrs_complete(void *user_data)
 {
-        struct test_info *const info = (struct test_info *) user_data;
+        struct test_info *const info = user_data;
 
         info->dump_addrs_complete_count++;
 }
@@ -231,23 +306,27 @@ static void test_add_addr(void const *test_data)
         struct mptcpd_idm *const idm  = mptcpd_pm_get_idm(pm);
 
         // Client-oriented path manager.
+        struct test_addr_info const *const u_addr = &info->u_addr;
+
         int result = mptcpd_pm_add_addr(pm,
-                                        laddr1,
-                                        test_laddr_id_1,
-                                        test_token_1);
+                                        u_addr->addr,
+                                        u_addr->id,
+                                        u_addr->token);
 
         assert(result == 0 || result == ENOTSUP);
 
         // In-kernel (server-oriented) path manager.
-        info->id = mptcpd_idm_get_id(idm, info->addr);
+        struct test_addr_info *const k_addr = &info->k_addr;
+
+        k_addr->id = mptcpd_idm_get_id(idm, k_addr->addr);
 
         uint32_t flags = 0;
 
         result = mptcpd_kpm_add_addr(pm,
-                                     info->addr,
-                                     info->id,
+                                     k_addr->addr,
+                                     k_addr->id,
                                      flags,
-                                     info->ifindex);
+                                     k_addr->ifindex);
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -258,15 +337,19 @@ static void test_remove_addr(void const *test_data)
         struct mptcpd_pm *const pm   = info->pm;
 
         // Client-oriented path manager.
+        struct test_addr_info const *const u_addr = &info->u_addr;
+
         int result = mptcpd_pm_remove_addr(pm,
-                                           laddr1,
-                                           test_laddr_id_1,
-                                           test_token_1);
+                                           u_addr->addr,
+                                           u_addr->id,
+                                           u_addr->token);
 
         assert(result == 0 || result == ENOTSUP);
 
         // In-kernel (server-oriented) path manager.
-        result = mptcpd_kpm_remove_addr(pm, info->id);
+        struct test_addr_info const *const k_addr = &info->k_addr;
+
+        result = mptcpd_kpm_remove_addr(pm, k_addr->id);
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -278,7 +361,7 @@ static void test_get_addr(void const *test_data)
 
         int const result =
                 mptcpd_kpm_get_addr(pm,
-                                    info->id,
+                                    info->k_addr.id,
                                     get_addr_callback,
                                     info,
                                     NULL);
@@ -353,7 +436,8 @@ static void test_set_flags(void const *test_data)
 
         static mptcpd_flags_t const flags = MPTCPD_ADDR_FLAG_BACKUP;
 
-        int const result = mptcpd_kpm_set_flags(pm, info->addr, flags);
+        int const result =
+                mptcpd_kpm_set_flags(pm, info->k_addr.addr, flags);
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -380,10 +464,10 @@ void test_set_backup(void const *test_data)
         struct mptcpd_pm *const pm   = info->pm;
 
         int const result = mptcpd_pm_set_backup(pm,
-                                                test_token_1,
-                                                laddr1,
-                                                raddr1,
-                                                test_backup_1);
+                                                test_token_2,
+                                                laddr2,
+                                                raddr2,
+                                                !test_backup_2);
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -394,9 +478,9 @@ void test_remove_subflow(void const *test_data)
         struct mptcpd_pm *const pm   = info->pm;
 
         int const result = mptcpd_pm_remove_subflow(pm,
-                                                    test_token_1,
-                                                    laddr1,
-                                                    raddr1);
+                                                    test_token_2,
+                                                    laddr2,
+                                                    raddr2);
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -425,17 +509,15 @@ static void handle_rtm_newaddr(int errnum,
         assert(data == NULL);
         assert(len == 0);
 
+        (void) user_data;  // Pointer to struct test_info.
+
         if (errnum != 0) {
 
                 static int const status = 0;  // Do not exit on error.
 
-                struct test_info *const info = user_data;
-
                 error(status,
                       errnum,
-                      "bind of test address %s to interface %d failed",
-                      info->ip,
-                      info->ifindex);
+                      "bind of test address to interface failed");
         }
 }
 
@@ -456,7 +538,7 @@ static void handle_rtm_deladdr(int errnum,
         if (errnum != 0) {
                 static int const status = 0;  // Do not exit on error.
 
-                struct test_info *const info = user_data;
+                struct test_addr_info *const info = user_data;
 
                 error(status,
                       errnum,
@@ -525,44 +607,97 @@ static void setup_tests (void *user_data)
 
 static void complete_address_setup(void *user_data)
 {
-        // Run tests after address setup is complete.
-        bool const result = l_idle_oneshot(setup_tests, user_data, NULL);
-        assert(result);
+        if (++addr_setup_count == addrs_to_setup_count) {
+                // Run tests after address setup is complete.
+                bool const result =
+                        l_idle_oneshot(setup_tests, user_data, NULL);
+
+                assert(result);
+        }
 }
 
 static void complete_address_teardown(void *user_data)
 {
         (void) user_data;
 
-        l_main_quit();
+        if (--addr_setup_count == 0)
+                l_main_quit();
+}
+
+static void setup_test_address(struct test_info *data,
+                               struct test_addr_info *info)
+{
+        sa_family_t const sa_family = info->addr->sa_family;
+
+        int id = 0;
+
+        if (sa_family == AF_INET) {
+                id = l_rtnl_ifaddr4_add(data->rtnl,
+                                        info->ifindex,
+                                        info->prefix_len,
+                                        info->ip,
+                                        NULL, // broadcast
+                                        handle_rtm_newaddr,
+                                        data,
+                                        complete_address_setup);
+        } else if (sa_family == AF_INET6) {
+                id = l_rtnl_ifaddr6_add(data->rtnl,
+                                        info->ifindex,
+                                        info->prefix_len,
+                                        info->ip,
+                                        handle_rtm_newaddr,
+                                        data,
+                                        complete_address_setup);
+        }
+
+        assert(id != 0);
 }
 
 static void setup_test_addresses(struct test_info *info)
 {
-        int const id = l_rtnl_ifaddr4_add(info->rtnl,
-                                          info->ifindex,
-                                          info->prefix,
-                                          info->ip,
-                                          NULL, // broadcast
-                                          handle_rtm_newaddr,
-                                          info,
-                                          complete_address_setup);
+        // Address used for user space PM advertising tests.
+        setup_test_address(info, &info->u_addr);
+
+        // Address used for kernel space PM tests.
+        setup_test_address(info, &info->k_addr);
+}
+
+static void teardown_test_address(struct l_netlink *rtnl,
+                                  struct test_addr_info *info)
+{
+        sa_family_t const sa_family = info->addr->sa_family;
+
+        int id = 0;
+
+        if (sa_family == AF_INET) {
+                id = l_rtnl_ifaddr4_delete(rtnl,
+                                           info->ifindex,
+                                           info->prefix_len,
+                                           info->ip,
+                                           NULL, // broadcast
+                                           handle_rtm_deladdr,
+                                           info,
+                                           complete_address_teardown);
+        } else if (sa_family == AF_INET6) {
+                id = l_rtnl_ifaddr6_delete(rtnl,
+                                           info->ifindex,
+                                           info->prefix_len,
+                                           info->ip,
+                                           handle_rtm_deladdr,
+                                           info,
+                                           complete_address_teardown);
+        }
 
         assert(id != 0);
 }
 
 static void teardown_test_addresses(struct test_info *info)
 {
-        int const id = l_rtnl_ifaddr4_delete(info->rtnl,
-                                             info->ifindex,
-                                             info->prefix,
-                                             info->ip,
-                                             NULL, // broadcast
-                                             handle_rtm_deladdr,
-                                             info,
-                                             complete_address_teardown);
+        // Address used for user space PM advertising tests.
+        teardown_test_address(info->rtnl, &info->u_addr);
 
-        assert(id != 0);
+        // Address used for kernel space PM tests.
+        teardown_test_address(info->rtnl, &info->k_addr);
 }
 
 // -------------------------------------------------------------------
@@ -596,6 +731,12 @@ static void idle_callback(struct l_idle *idle, void *user_data)
                 teardown_test_addresses(user_data); // Done running tests.
 }
 
+static uint8_t get_prefix_len(struct sockaddr const *sa)
+{
+        // One IP address
+        return sa->sa_family == AF_INET ? 32 : 128;
+}
+
 // -------------------------------------------------------------------
 
 int main(void)
@@ -612,34 +753,38 @@ int main(void)
         struct l_netlink *const rtnl = l_netlink_new(NETLINK_ROUTE);
         assert(rtnl != NULL);
 
-        static struct sockaddr const *const sa = laddr1;
-
-        // Bind test IP address to loopback interface.
+        // Bind test IP addresses to loopback interface.
         static char const loopback[] = "lo";
 
-        char ip[INET6_ADDRSTRLEN] = { 0 };
-
-        uint8_t prefix = 0;
-        void const *src = NULL;
-
-        if (sa->sa_family == AF_INET) {
-                prefix = 32;   // One IPv4 address
-                src = &((struct sockaddr_in  const *) sa)->sin_addr;
-        } else {
-                prefix = 128;  // One IPv6 address
-                src = &((struct sockaddr_in6 const *) sa)->sin6_addr;
-        }
+        // Mutable sockaddr copies.
+        struct sockaddr_in laddr1 = test_laddr_1;
+        struct sockaddr_in laddr4 = test_laddr_4;
 
         struct test_info info = {
                 .rtnl    = rtnl,
-                .addr    = sa,
-                .ifindex = if_nametoindex(loopback),
-                .prefix  = prefix,
-                .ip      = inet_ntop(sa->sa_family,
-                                     src,
-                                     ip,
-                                     sizeof(ip))
+                .u_addr = {
+                        .addr        = (struct sockaddr *) &laddr4,
+                        .ifindex     = if_nametoindex(loopback),
+                        .prefix_len  = get_prefix_len(info.u_addr.addr),
+                        .token       = test_token_4,
+                        .id          = test_laddr_id_4
+                },
+                .k_addr = {
+                        .addr        = (struct sockaddr *) &laddr1,
+                        .ifindex     = if_nametoindex(loopback),
+                        .prefix_len  = get_prefix_len(info.k_addr.addr)
+                }
         };
+
+        inet_ntop(info.u_addr.addr->sa_family,
+                  get_in_addr(info.u_addr.addr),
+                  info.u_addr.ip,
+                  sizeof(info.u_addr.ip));
+
+        inet_ntop(info.k_addr.addr->sa_family,
+                  get_in_addr(info.k_addr.addr),
+                  info.k_addr.ip,
+                  sizeof(info.k_addr.ip));
 
         setup_test_addresses(&info);
 
