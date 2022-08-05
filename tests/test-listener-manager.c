@@ -16,7 +16,6 @@
 #include <ell/util.h>
 #include <ell/log.h>
 #include <ell/test.h>
-#include <ell/hashmap.h>
 #pragma GCC diagnostic pop
 
 #include <mptcpd/private/listener_manager.h>
