@@ -9,6 +9,7 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/un.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -96,6 +97,11 @@ static void test_listen(void const *test_data)
 {
         struct sockaddr *const sa = (struct sockaddr *) test_data;
 
+        if (sa == NULL) {
+                assert(mptcpd_lm_listen(_lm, sa) != 0);
+                return;
+        }
+
         in_port_t const original_port = get_port(sa);
 
         assert(mptcpd_lm_listen(_lm, sa) == 0);
@@ -123,6 +129,11 @@ static void test_close(void const *test_data)
 {
         struct sockaddr const *const sa = test_data;
 
+        if (sa == NULL) {
+                assert(mptcpd_lm_close(_lm, sa) != 0);
+                return;
+        }
+
         in_port_t const port = get_port(sa);
 
         if (port == 0)
@@ -136,6 +147,7 @@ static void test_destroy(void const *test_data)
         (void) test_data;
 
         mptcpd_lm_destroy(_lm);
+        mptcpd_lm_destroy(NULL);
 }
 
 int main(int argc, char *argv[])
@@ -205,6 +217,15 @@ int main(int argc, char *argv[])
                    test_listen_bad_address,
                    &ipv6_bad_case);
 
+        struct sockaddr const unix_sa = { .sa_family = AF_UNIX };
+        l_test_add("listen - bad non-INET address",
+                   test_listen_bad_address,
+                   &unix_sa);
+
+        l_test_add("listen - bad NULL address",
+                   test_listen_bad_address,
+                   NULL);
+
         // Listener close test cases.
         l_test_add("close  - IPv4", test_close, &ipv4_cases[0]);
         l_test_add("close  - IPv6", test_close, &ipv6_cases[0]);
@@ -217,6 +238,8 @@ int main(int argc, char *argv[])
         l_test_add("close  - IPv4 - zero port",
                    test_close,
                    &zero_port_case);
+
+        l_test_add("close  - NULL", test_close, NULL);
 
         l_test_add("destroy lm",    test_destroy, NULL);
 
