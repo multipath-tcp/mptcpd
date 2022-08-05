@@ -299,57 +299,38 @@ static void test_get_port(void const *test_data)
         assert(hport == ntohs(nport));
 }
 
-static void test_add_addr(void const *test_data)
+// -------------------------------------------------------------------
+// In-kernel (server-oriented) path manager commands.
+// -------------------------------------------------------------------
+static void test_add_addr_kernel(void const *test_data)
 {
         struct test_info  *const info = (struct test_info *) test_data;
         struct mptcpd_pm  *const pm   = info->pm;
         struct mptcpd_idm *const idm  = mptcpd_pm_get_idm(pm);
 
-        // Client-oriented path manager.
-        struct test_addr_info const *const u_addr = &info->u_addr;
-
-        int result = mptcpd_pm_add_addr(pm,
-                                        u_addr->addr,
-                                        u_addr->id,
-                                        u_addr->token);
-
-        assert(result == 0 || result == ENOTSUP);
-
-        // In-kernel (server-oriented) path manager.
         struct test_addr_info *const k_addr = &info->k_addr;
 
         k_addr->id = mptcpd_idm_get_id(idm, k_addr->addr);
 
         uint32_t flags = 0;
 
-        result = mptcpd_kpm_add_addr(pm,
-                                     k_addr->addr,
-                                     k_addr->id,
-                                     flags,
-                                     k_addr->ifindex);
+        int const result = mptcpd_kpm_add_addr(pm,
+                                               k_addr->addr,
+                                               k_addr->id,
+                                               flags,
+                                               k_addr->ifindex);
 
         assert(result == 0 || result == ENOTSUP);
 }
 
-static void test_remove_addr(void const *test_data)
+static void test_remove_addr_kernel(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
-        // Client-oriented path manager.
-        struct test_addr_info const *const u_addr = &info->u_addr;
-
-        int result = mptcpd_pm_remove_addr(pm,
-                                           u_addr->addr,
-                                           u_addr->id,
-                                           u_addr->token);
-
-        assert(result == 0 || result == ENOTSUP);
-
-        // In-kernel (server-oriented) path manager.
         struct test_addr_info const *const k_addr = &info->k_addr;
 
-        result = mptcpd_kpm_remove_addr(pm, k_addr->id);
+        int const result = mptcpd_kpm_remove_addr(pm, k_addr->id);
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -442,13 +423,48 @@ static void test_set_flags(void const *test_data)
         assert(result == 0 || result == ENOTSUP);
 }
 
+// -------------------------------------------------------------------
+// User space (client-oriented) path manager commands.
+// -------------------------------------------------------------------
+static void test_add_addr_user(void const *test_data)
+{
+        struct test_info  *const info = (struct test_info *) test_data;
+        struct mptcpd_pm  *const pm   = info->pm;
+
+        struct test_addr_info const *const u_addr = &info->u_addr;
+
+        int const result = mptcpd_pm_add_addr(pm,
+                                              u_addr->addr,
+                                              u_addr->id,
+                                              u_addr->token);
+
+        assert(result == 0 || result == ENOTSUP);
+}
+
+static void test_remove_addr_user(void const *test_data)
+{
+        struct test_info *const info = (struct test_info *) test_data;
+        struct mptcpd_pm *const pm   = info->pm;
+
+        struct test_addr_info const *const u_addr = &info->u_addr;
+
+        int const result = mptcpd_pm_remove_addr(pm,
+                                                 u_addr->addr,
+                                                 u_addr->id,
+                                                 u_addr->token);
+
+        assert(result == 0 || result == ENOTSUP);
+}
+
 static void test_add_subflow(void const *test_data)
 {
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
+        struct test_addr_info const *const u_addr = &info->u_addr;
+
         int const result = mptcpd_pm_add_subflow(pm,
-                                                 test_token_2,
+                                                 u_addr->token,
                                                  test_laddr_id_2,
                                                  test_raddr_id_2,
                                                  laddr2,
@@ -463,8 +479,10 @@ void test_set_backup(void const *test_data)
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
+        struct test_addr_info const *const u_addr = &info->u_addr;
+
         int const result = mptcpd_pm_set_backup(pm,
-                                                test_token_2,
+                                                u_addr->token,
                                                 laddr2,
                                                 raddr2,
                                                 !test_backup_2);
@@ -477,13 +495,18 @@ void test_remove_subflow(void const *test_data)
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
+        struct test_addr_info const *const u_addr = &info->u_addr;
+
         int const result = mptcpd_pm_remove_subflow(pm,
-                                                    test_token_2,
+                                                    u_addr->token,
                                                     laddr2,
                                                     raddr2);
 
         assert(result == 0 || result == ENOTSUP);
 }
+
+// -------------------------------------------------------------------
+
 
 void test_get_nm(void const *test_data)
 {
@@ -590,19 +613,26 @@ static void setup_tests (void *user_data)
 
         l_test_init(&argc, &args);
 
-        l_test_add("get_port",       test_get_port,       NULL);
-        l_test_add("add_addr",       test_add_addr,       info);
-        l_test_add("get_addr",       test_get_addr,       info);
-        l_test_add("dump_addrs",     test_dump_addrs,     info);
-        l_test_add("remove_addr",    test_remove_addr,    info);
-        l_test_add("set_limits",     test_set_limits,     info);
-        l_test_add("get_limits",     test_get_limits,     info);
-        l_test_add("set_flags",      test_set_flags,      info);
-        l_test_add("flush_addrs",    test_flush_addrs,    info);
-        l_test_add("add_subflow",    test_add_subflow,    info);
-        l_test_add("set_backup",     test_set_backup,     info);
-        l_test_add("remove_subflow", test_remove_subflow, info);
-        l_test_add("get_nm",         test_get_nm,         info);
+        // Non-command tests.
+        l_test_add("get_port", test_get_port, NULL);
+        l_test_add("get_nm",   test_get_nm,   info);
+
+        // In-kernel path manager tests.
+        l_test_add("add_addr - kernel",    test_add_addr_kernel,    info);
+        l_test_add("get_addr",             test_get_addr,           info);
+        l_test_add("dump_addrs",           test_dump_addrs,         info);
+        l_test_add("remove_addr - kernel", test_remove_addr_kernel, info);
+        l_test_add("set_limits",           test_set_limits,         info);
+        l_test_add("get_limits",           test_get_limits,         info);
+        l_test_add("set_flags",            test_set_flags,          info);
+        l_test_add("flush_addrs",          test_flush_addrs,        info);
+
+        // User space path manager tests.
+        l_test_add("add_addr - user",    test_add_addr_user,    info);
+        l_test_add("add_subflow",        test_add_subflow,      info);
+        l_test_add("set_backup",         test_set_backup,       info);
+        l_test_add("remove_subflow",     test_remove_subflow,   info);
+        l_test_add("remove_addr - user", test_remove_addr_user, info);
 }
 
 static void complete_address_setup(void *user_data)
@@ -757,20 +787,27 @@ int main(void)
         static char const loopback[] = "lo";
 
         // Mutable sockaddr copies.
-        struct sockaddr_in laddr1 = test_laddr_1;
-        struct sockaddr_in laddr4 = test_laddr_4;
+        struct sockaddr_in user_addr   = test_laddr_4;
+        struct sockaddr_in kernel_addr = test_laddr_1;
+
+        /*
+          Set the test port to zero make the kernel choose a random
+          (ephemeral) unused port to prevent potential reuse of an
+          existing address.
+        */
+        user_addr.sin_port = 0;
 
         struct test_info info = {
                 .rtnl    = rtnl,
                 .u_addr = {
-                        .addr        = (struct sockaddr *) &laddr4,
+                        .addr        = (struct sockaddr *) &user_addr,
                         .ifindex     = if_nametoindex(loopback),
                         .prefix_len  = get_prefix_len(info.u_addr.addr),
                         .token       = test_token_4,
                         .id          = test_laddr_id_4
                 },
                 .k_addr = {
-                        .addr        = (struct sockaddr *) &laddr1,
+                        .addr        = (struct sockaddr *) &kernel_addr,
                         .ifindex     = if_nametoindex(loopback),
                         .prefix_len  = get_prefix_len(info.k_addr.addr)
                 }
