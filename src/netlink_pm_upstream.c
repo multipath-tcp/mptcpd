@@ -286,7 +286,8 @@ static int upstream_remove(struct mptcpd_pm *pm,
         /**
          * @todo Refactor upstream_remove() and
          *       mptcp_org_remove_addr() functions. They only differ
-         *       by command and attribute types.
+         *       by command and attribute types, and callback
+         *       function.
          */
 
         /*
