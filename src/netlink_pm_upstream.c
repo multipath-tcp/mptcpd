@@ -227,8 +227,10 @@ static int upstream_announce(struct mptcpd_pm *pm,
          *
          * @todo This should be optional.
          */
-        if (!mptcpd_lm_listen(pm->lm, addr))
-                return -1;
+        int const r = mptcpd_lm_listen(pm->lm, addr);
+
+        if (r != 0)
+                return r;
 
         /**
          * @todo Add support for the optional network interface index
