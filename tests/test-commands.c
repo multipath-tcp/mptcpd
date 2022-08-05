@@ -438,7 +438,15 @@ static void test_add_addr_user(void const *test_data)
                                               u_addr->id,
                                               u_addr->token);
 
-        assert(result == 0 || result == ENOTSUP);
+        /*
+          EADDRNOTAVAIL error will generally occur if the test is run
+          without sufficient permissions to set up the test addresses
+          by associating them with a network interface.
+
+         */
+        assert(result == 0
+               || result == ENOTSUP
+               || result == EADDRNOTAVAIL);
 }
 
 static void test_remove_addr_user(void const *test_data)
