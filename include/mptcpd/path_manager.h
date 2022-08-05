@@ -119,7 +119,7 @@ MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
  * @param[in]     id    MPTCP local address ID.
  * @param[in]     token MPTCP connection token.
  *
- * @return @c 0 if operation was successful. @c errno otherwise.
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
                                   struct sockaddr *addr,
