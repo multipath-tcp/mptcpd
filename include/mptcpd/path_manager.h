@@ -4,7 +4,7 @@
  *
  * @brief mptcpd generic netlink commands.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifndef MPTCPD_LIB_PATH_MANAGER_H
@@ -107,18 +107,22 @@ MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
 /**
  * @brief Advertise new network address to peers.
  *
- * @param[in] pm    The mptcpd path manager object.
- * @param[in] addr  Local IP address and port to be advertised
- *                  through the MPTCP protocol @c ADD_ADDR
- *                  option.  The port is optional, and is
- *                  ignored if it is zero.
- * @param[in] id    MPTCP local address ID.
- * @param[in] token MPTCP connection token.
+ * @param[in]     pm    The mptcpd path manager object.
+ * @param[in,out] addr  Local IP address and port to be advertised
+ *                      through the MPTCP protocol @c ADD_ADDR
+ *                      option.  If the port is zero an ephemeral port
+ *                      will be chosen, and assigned to the
+ *                      appropriate underlying address family-specific
+ *                      port member, e.g. @c sin_port or
+ *                      @c sin6_port.  The port will be in network
+ *                      byte order.
+ * @param[in]     id    MPTCP local address ID.
+ * @param[in]     token MPTCP connection token.
  *
- * @return @c 0 if operation was successful. @c errno otherwise.
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
-                                  struct sockaddr const *addr,
+                                  struct sockaddr *addr,
                                   mptcpd_aid_t id,
                                   mptcpd_token_t token);
 
@@ -126,6 +130,8 @@ MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
  * @brief Stop advertising network address to peers.
  *
  * @param[in] pm         The mptcpd path manager object.
+ * @param[in] addr       Local IP address and port that should no longer
+ *                       be advertised through MPTCP.
  * @param[in] address_id MPTCP local address ID to be sent in the
  *                       MPTCP protocol @c REMOVE_ADDR option
  *                       corresponding to the local address that will
@@ -135,6 +141,7 @@ MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
+                                     struct sockaddr const *addr,
                                      mptcpd_aid_t address_id,
                                      mptcpd_token_t token);
 
@@ -367,6 +374,19 @@ mptcpd_pm_get_nm(struct mptcpd_pm const *pm);
  */
 MPTCPD_API struct mptcpd_idm *
 mptcpd_pm_get_idm(struct mptcpd_pm const *pm);
+
+/**
+ * @brief Get pointer to the global MPTCP listener manager.
+ *
+ * @param[in] pm Mptcpd path manager data.
+ *
+ * @note The global MPTCP listener manager tracks MPTCP listening
+ *       sockets associated with a local address.
+ *
+ * @return Global mptcpd MPTCP listener manager.
+ */
+MPTCPD_API struct mptcpd_lm *
+mptcpd_pm_get_lm(struct mptcpd_pm const *pm);
 
 #ifdef __cplusplus
 }

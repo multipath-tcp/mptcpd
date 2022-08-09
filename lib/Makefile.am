@@ -21,15 +21,14 @@ libmptcpd_la_LDFLAGS = 	\
 libmptcpd_la_SOURCES =		\
 	addr_info.c		\
 	id_manager.c		\
+	listener_manager.c	\
 	network_monitor.c	\
 	path_manager.c		\
 	plugin.c		\
 	sockaddr.c		\
-	murmur_hash.c
-
-#if BUILDING_DLL
-#libmptcpd_la_SOURCES += debug.c
-#endif
+	murmur_hash.c		\
+	hash_sockaddr.c		\
+	hash_sockaddr.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = mptcpd.pc

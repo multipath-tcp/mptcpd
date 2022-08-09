@@ -4,7 +4,7 @@
  *
  * @brief mptcpd path manager private interface.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifndef MPTCPD_PRIVATE_PATH_MANAGER_H
@@ -29,6 +29,7 @@ struct mptcpd_addr_info;
 struct mptcpd_limit;
 struct mptcpd_nm;
 struct mptcpd_idm;
+struct mptcpd_lm;
 
 /**
  * @struct mptcpd_pm path_manager.h <mptcpd/private/path_manager.h>
@@ -86,9 +87,19 @@ struct mptcpd_pm
          * @brief MPTCP address ID manager.
          *
          * Manager that maps IP addresses to MPTCP address IDs, and
-         * generated IDs as needed..
+         * generated IDs as needed.
          */
         struct mptcpd_idm *idm;
+
+        /**
+         * @brief MPTCP listener manager.
+         *
+         * The MPTCP listener manager maps MPTCP local addresses to a
+         * listening socket file descriptors bound to those addresses
+         * to allow passive subflow connections (joins) to be
+         * accepted.
+         */
+        struct mptcpd_lm *lm;
 
         /// List of @c pm_ops_info objects.
         struct l_queue *event_ops;
@@ -127,33 +138,42 @@ struct mptcpd_pm_cmd_ops
         /**
          * @brief Advertise new network address to peers.
          *
+         * @param[in]     pm    The mptcpd path manager object.
+         * @param[in,out] addr  Local IP address and port to be
+         *                      advertised through the MPTCP protocol
+         *                      @c ADD_ADDR option.  If the port is
+         *                      zero an ephemeral port will be chosen,
+         *                      and assigned to the appropriate
+         *                      underlying address family-specific
+         *                      port member, e.g. @c sin_port or
+         *                      @c sin6_port.  The port will be in
+         *                      network byte order.
+         * @param[in]     id    MPTCP local address ID.
+         * @param[in]     token MPTCP connection token.
+         *
+         * @return @c 0 if operation was successful. -1 or @c errno
+         *         otherwise.
+         */
+        int (*add_addr)(struct mptcpd_pm *pm,
+                        struct sockaddr *addr,
+                        mptcpd_aid_t id,
+                        mptcpd_token_t token);
+
+        /**
+         * @brief Stop advertising network address to peers.
+         *
          * @param[in] pm    The mptcpd path manager object.
-         * @param[in] addr  Local IP address and port to be advertised
-         *                  through the MPTCP protocol @c ADD_ADDR
-         *                  option.  The port is optional, and is
-         *                  ignored if it is zero.
+         * @param[in] addr  Local IP address and port that should no
+         *                  longer be advertised through MPTCP.
          * @param[in] id    MPTCP local address ID.
          * @param[in] token MPTCP connection token.
          *
          * @return @c 0 if operation was successful. -1 or @c errno
          *         otherwise.
          */
-        int (*add_addr)(struct mptcpd_pm *pm,
-                        struct sockaddr const *addr,
-                        mptcpd_aid_t id,
-                        mptcpd_token_t token);
-
-        /**
-         * @brief Stop advertising network address to peers.
-         * @param[in] pm         The mptcpd path manager object.
-         * @param[in] address_id MPTCP local address ID.
-         * @param[in] token      MPTCP connection token.
-         *
-         * @return @c 0 if operation was successful. -1 or @c errno
-         *         otherwise.
-         */
         int (*remove_addr)(struct mptcpd_pm *pm,
-                           mptcpd_aid_t address_id,
+                           struct sockaddr const *addr,
+                           mptcpd_aid_t id,
                            mptcpd_token_t token);
 
         /**

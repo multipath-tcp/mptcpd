@@ -39,16 +39,16 @@ AC_DEFUN([MPTCPD_CHECK_KERNEL_HEADER_UPSTREAM],
              [Define to 1 if you have the upstream kernel
              <linux/mptcp.h> header.])
 
- AC_CACHE_CHECK([for MPTCP_PM_CMD_ANNOUNCE in linux/mptcp.h],
+ AC_CACHE_CHECK([for MPTCP_ATTR_SERVER_SIDE in linux/mptcp.h],
    [mptcpd_cv_header_upstream],
    [
-    # Perform a compile-time test since MPTCP_PM_CMD_ANNOUNCE is an
+    # Perform a compile-time test since MPTCP_ATTR_SERVER_SIDE is an
     # enumerator, not a preprocessor symbol.
     AC_COMPILE_IFELSE([
       AC_LANG_SOURCE([
 #include <linux/mptcp.h>
 
-int announce_cmd(void) { return MPTCP_PM_CMD_ANNOUNCE; }
+int get_mptcp_attr(void) { return (int) MPTCP_ATTR_SERVER_SIDE; }
       ])
     ],
     [mptcpd_cv_header_upstream=yes],

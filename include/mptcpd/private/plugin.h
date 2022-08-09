@@ -4,7 +4,7 @@
  *
  * @brief mptcpd private plugin interface.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifndef MPTCPD_PRIVATE_PLUGIN_H
@@ -55,31 +55,35 @@ MPTCPD_API void mptcpd_plugin_unload(struct mptcpd_pm *pm);
 /**
  * @brief Notify plugin of new MPTCP connection pending completion.
  *
- * @param[in] name   Plugin name.
- * @param[in] token  MPTCP connection token.
- * @param[in] laddr  Local address information.
- * @param[in] raddr  Remote address information.
- * @param[in] pm     Opaque pointer to mptcpd path manager object.
+ * @param[in] name        Plugin name.
+ * @param[in] token       MPTCP connection token.
+ * @param[in] laddr       Local address information.
+ * @param[in] raddr       Remote address information.
+ * @param[in] server_side Server side connection flag.
+ * @param[in] pm          Opaque pointer to mptcpd path manager object.
  */
 MPTCPD_API void mptcpd_plugin_new_connection(
         char const *name,
         mptcpd_token_t token,
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
+        bool server_side,
         struct mptcpd_pm *pm);
 
 /**
  * @brief Notify plugin of MPTCP connection completion.
  *
- * @param[in] token  MPTCP connection token.
- * @param[in] laddr  Local address information.
- * @param[in] raddr  Remote address information.
- * @param[in] pm     Opaque pointer to mptcpd path manager object.
+ * @param[in] token       MPTCP connection token.
+ * @param[in] laddr       Local address information.
+ * @param[in] raddr       Remote address information.
+ * @param[in] server_side Server side connection flag.
+ * @param[in] pm          Opaque pointer to mptcpd path manager object.
  */
 MPTCPD_API void mptcpd_plugin_connection_established(
         mptcpd_token_t token,
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
+        bool server_side,
         struct mptcpd_pm *pm);
 
 /**

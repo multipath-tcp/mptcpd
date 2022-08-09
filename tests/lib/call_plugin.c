@@ -28,12 +28,14 @@ void call_plugin_ops(struct plugin_call_count const *count,
                                              args->token,
                                              args->laddr,
                                              args->raddr,
+                                             args->server_side,
                                              args->pm);
 
         for (int i = 0; i < count->connection_established; ++i)
                 mptcpd_plugin_connection_established(args->token,
                                                      args->laddr,
                                                      args->raddr,
+                                                     args->server_side,
                                                      args->pm);
 
         for (int i = 0; i < count->new_address; ++i)

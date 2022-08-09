@@ -153,7 +153,7 @@ static bool append_remote_addr_attr(struct l_genl_msg *msg,
 // ---------------------------------------------------------------------
 
 static int mptcp_org_add_addr(struct mptcpd_pm *pm,
-                              struct sockaddr const *addr,
+                              struct sockaddr *addr,
                               mptcpd_aid_t id,
                               mptcpd_token_t token)
 {
@@ -222,9 +222,12 @@ static int mptcp_org_add_addr(struct mptcpd_pm *pm,
 }
 
 static int mptcp_org_remove_addr(struct mptcpd_pm *pm,
+                                 struct sockaddr const *addr,
                                  mptcpd_aid_t address_id,
                                  mptcpd_token_t token)
 {
+        (void) addr;
+
         /*
           Payload:
               Token

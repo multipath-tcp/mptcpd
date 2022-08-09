@@ -138,20 +138,24 @@ static struct plugin_call_count const test_count_4 = {
  * types of values they correspond to.
  */
 ///@{
-static mptcpd_token_t const test_token_1    = 0x12345678;
-static mptcpd_aid_t   const test_laddr_id_1 = 0x34;
-static mptcpd_aid_t   const test_raddr_id_1 = 0x56;
-static bool           const test_backup_1   = true;
+static mptcpd_token_t const test_token_1       = 0x12345678;
+static mptcpd_aid_t   const test_laddr_id_1    = 0x34;
+static mptcpd_aid_t   const test_raddr_id_1    = 0x56;
+static bool           const test_backup_1      = true;
+static bool           const test_server_side_1 = true;
 
-static mptcpd_token_t const test_token_2    = 0x23456789;
-static mptcpd_aid_t   const test_laddr_id_2 = 0x23;
-static mptcpd_aid_t   const test_raddr_id_2 = 0x45;
-static bool           const test_backup_2   = false;
 
-static mptcpd_token_t const test_token_4    = 0x34567890;
-static mptcpd_aid_t   const test_laddr_id_4 = 0x90;
-static mptcpd_aid_t   const test_raddr_id_4 = 0x01;
-static bool           const test_backup_4   = true;
+static mptcpd_token_t const test_token_2       = 0x23456789;
+static mptcpd_aid_t   const test_laddr_id_2    = 0x23;
+static mptcpd_aid_t   const test_raddr_id_2    = 0x45;
+static bool           const test_backup_2      = false;
+static bool           const test_server_side_2 = true;
+
+static mptcpd_token_t const test_token_4       = 0x34567890;
+static mptcpd_aid_t   const test_laddr_id_4    = 0x90;
+static mptcpd_aid_t   const test_raddr_id_4    = 0x01;
+static bool           const test_backup_4      = true;
+static bool           const test_server_side_4 = false;
 
 // For verifying that a plugin will not be dispatched.
 static mptcpd_token_t const test_bad_token  = 0xFFFFFFFF;
@@ -192,7 +196,7 @@ static struct sockaddr_in6 const test_laddr_2 = {
         .sin6_port   = MPTCPD_CONSTANT_HTONS(0x5678),
         .sin6_addr   = { .s6_addr = { [0]  = 0x20,
                                       [1]  = 0x01,
-                                      [2]  = 0X0D,
+                                      [2]  = 0x0D,
                                       [3]  = 0xB8,
                                       [14] = 0x01,
                                       [15] = 0x02 }  // 2001:DB8::102
@@ -220,7 +224,7 @@ static struct sockaddr_in6 const test_raddr_1 = {
         .sin6_port   = MPTCPD_CONSTANT_HTONS(0x3456),
         .sin6_addr   = { .s6_addr = { [0]  = 0x20,
                                       [1]  = 0x01,
-                                      [2]  = 0X0D,
+                                      [2]  = 0x0D,
                                       [3]  = 0xB8,
                                       [14] = 0x02,
                                       [15] = 0x01 }  // 2001:DB8::201
@@ -290,6 +294,9 @@ struct plugin_call_args
 
         /// MPTCP backup priority.
         bool backup;
+
+        /// Server side connection flag.
+        bool server_side;
 
         /// Mptcpd path manager object.
         struct mptcpd_pm *const pm;

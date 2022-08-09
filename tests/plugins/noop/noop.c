@@ -4,7 +4,7 @@
  *
  * @brief MPTCP test plugin.
  *
- * Copyright (c) 2019-2021, Intel Corporation
+ * Copyright (c) 2019-2022, Intel Corporation
  */
 
 #pragma GCC diagnostic push
@@ -23,11 +23,13 @@
 static void plugin_noop_new_connection(mptcpd_token_t token,
                                        struct sockaddr const *laddr,
                                        struct sockaddr const *raddr,
+                                       bool server_side,
                                        struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
+        (void) server_side;
         (void) pm;
 }
 
@@ -35,11 +37,13 @@ static void plugin_noop_connection_established(
         mptcpd_token_t token,
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
+        bool server_side,
         struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
+        (void) server_side;
         (void) pm;
 }
 

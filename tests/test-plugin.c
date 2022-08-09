@@ -47,11 +47,12 @@ static bool run_plugin_load(mode_t mode, struct l_queue const *queue)
 
         if (loaded) {
                 static struct plugin_call_args const args = {
-                        .token    = test_token_4,
-                        .raddr_id = test_raddr_id_4,
-                        .laddr    = (struct sockaddr const *) &test_laddr_4,
-                        .raddr    = (struct sockaddr const *) &test_raddr_4,
-                        .backup   = test_backup_4
+                        .token       = test_token_4,
+                        .raddr_id    = test_raddr_id_4,
+                        .laddr       = (struct sockaddr const *) &test_laddr_4,
+                        .raddr       = (struct sockaddr const *) &test_raddr_4,
+                        .backup      = test_backup_4,
+                        .server_side = test_server_side_4
                 };
 
                 call_plugin_ops(&test_count_4, &args);
@@ -180,6 +181,7 @@ static void test_nonexistent_plugins(void const *test_data)
                                      0,     // token
                                      NULL,  // laddr
                                      NULL,  // raddr
+                                     false, // server_side
                                      NULL); // pm
 
         assert(!loaded);
@@ -205,36 +207,39 @@ static void test_plugin_dispatch(void const *test_data)
 
         // Notice that we call plugin 1 twice.
         // Plugin 1
-        static struct plugin_call_args const args1 = {
-                .name     = TEST_PLUGIN_ONE,
-                .token    = test_token_1,
-                .raddr_id = test_raddr_id_1,
-                .laddr    = (struct sockaddr const *) &test_laddr_1,
-                .raddr    = (struct sockaddr const *) &test_raddr_1,
-                .backup   = test_backup_1
+        struct plugin_call_args const args1 = {
+                .name        = TEST_PLUGIN_ONE,
+                .token       = test_token_1,
+                .raddr_id    = test_raddr_id_1,
+                .laddr       = (struct sockaddr const *) &test_laddr_1,
+                .raddr       = (struct sockaddr const *) &test_raddr_1,
+                .backup      = test_backup_1,
+                .server_side = test_server_side_1
         };
 
         call_plugin_ops(&test_count_1, &args1);
 
         // Plugin 1 as default (no plugin name specified)
-        static struct plugin_call_args const args1_default = {
-                .token    = test_token_1,
-                .raddr_id = test_raddr_id_1,
-                .laddr    = (struct sockaddr const *) &test_laddr_1,
-                .raddr    = (struct sockaddr const *) &test_raddr_1,
-                .backup   = test_backup_1
+        struct plugin_call_args const args1_default = {
+                .token       = args1.token,
+                .raddr_id    = args1.raddr_id,
+                .laddr       = args1.laddr,
+                .raddr       = args1.raddr,
+                .backup      = args1.backup,
+                .server_side = args1.server_side
         };
 
         call_plugin_ops(&test_count_1, &args1_default);
 
         // Plugin 2
-        static struct plugin_call_args const args2 = {
-                .name     = TEST_PLUGIN_TWO,
-                .token    = test_token_2,
-                .raddr_id = test_raddr_id_2,
-                .laddr    = (struct sockaddr const *) &test_laddr_2,
-                .raddr    = (struct sockaddr const *) &test_raddr_2,
-                .backup   = test_backup_2
+        struct plugin_call_args const args2 = {
+                .name        = TEST_PLUGIN_TWO,
+                .token       = test_token_2,
+                .raddr_id    = test_raddr_id_2,
+                .laddr       = (struct sockaddr const *) &test_laddr_2,
+                .raddr       = (struct sockaddr const *) &test_raddr_2,
+                .backup      = test_backup_2,
+                .server_side = test_server_side_2
         };
 
         call_plugin_ops(&test_count_2, &args2);
@@ -257,6 +262,7 @@ static void test_plugin_dispatch(void const *test_data)
                 test_bad_token,
                 (struct sockaddr const *) &test_laddr_2,
                 (struct sockaddr const *) &test_raddr_2,
+                test_server_side_2,
                 NULL);
 
         // Test assertions will be triggered during plugin unload.
@@ -293,11 +299,12 @@ static void test_null_plugin_ops(void const *test_data)
         static struct sockaddr const *const laddr = NULL;
         static struct sockaddr const *const raddr = NULL;
         static bool backup = false;
+        static bool server_side = false;
         static struct mptcpd_interface const *const interface = NULL;
 
         // No dispatch should occur in the following calls.
-        mptcpd_plugin_new_connection(name, token, laddr, raddr, pm);
-        mptcpd_plugin_connection_established(token, laddr, raddr, pm);
+        mptcpd_plugin_new_connection(name, token, laddr, raddr, server_side, pm);
+        mptcpd_plugin_connection_established(token, laddr, raddr, server_side, pm);
         mptcpd_plugin_connection_closed(token, pm);
         mptcpd_plugin_new_address(token, id, raddr, pm);
         mptcpd_plugin_address_removed(token, id, pm);

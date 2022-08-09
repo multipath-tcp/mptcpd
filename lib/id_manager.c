@@ -17,7 +17,6 @@
 #include <errno.h>
 #include <stdint.h>
 #include <string.h>
-#include <time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -34,6 +33,8 @@
 #include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>
 
+#include "hash_sockaddr.h"
+
 /// Invalid MPTCP address ID.
 #define MPTCPD_INVALID_ID 0
 
@@ -42,27 +43,6 @@
 
 /// Maximum MPTCP address ID.
 #define MPTCPD_MAX_ID UINT8_MAX
-
-
-/**
- * @brief MurmurHash3 seed value.
- *
- * @note This could be tied to each @c mptcpd_idm instance so that the
- *       seed value wouldn't shared between multiple mptcpd_idm
- *       instances but the only way to pass the seed value to the
- *       mptcpd MurmurHash3 hash function through the ELL @c l_hashmap
- *       interface would be to make it a part of the key, such as
- *       through a convenience @c struct.  That would double the size
- *       of the key on 64 bit platforms (sizeof(struct sockaddr*) +
- *       sizeof(uint32_t) + padding).  That may not be a problem for
- *       the common case since most platforms would not have many
- *       local addresses, meaning the larger key size would not impact
- *       the run-time memory footprint by much.  Furthermore, it is
- *       unlikely that such a global seed value shared between
- *       @c mptcpd_idm instances would be a problem since each
- *       @c mptcpd_idm insance would have its own @c l_hashmap.
- */
-static uint32_t _idm_hash_seed = 0;
 
 /**
  * @struct mptcpd_idm
@@ -84,99 +64,10 @@ struct mptcpd_idm
          *       array should perform just as well.
          */
         struct l_hashmap *map;
+
+        /// MurmurHash3 seed value.
+        uint32_t seed;
 };
-
-// ----------------------------------------------------------------------
-
-static inline unsigned int
-mptcpd_hash_sockaddr_in(struct sockaddr_in const *sa)
-{
-        return mptcpd_murmur_hash3(&sa->sin_addr.s_addr,
-                                   sizeof(sa->sin_addr.s_addr),
-                                   _idm_hash_seed);
-}
-
-static inline unsigned int
-mptcpd_hash_sockaddr_in6(struct sockaddr_in6 const *sa)
-{
-        return mptcpd_murmur_hash3(sa->sin6_addr.s6_addr,
-                                   sizeof(sa->sin6_addr.s6_addr),
-                                   _idm_hash_seed);
-}
-
-static unsigned int mptcpd_hash_sockaddr(void const *p)
-{
-        struct sockaddr const *const sa = p;
-        if (sa->sa_family == AF_INET) {
-                struct sockaddr_in const *sa4 =
-                        (struct sockaddr_in const *) sa;
-
-                return mptcpd_hash_sockaddr_in(sa4);
-        } else {
-                struct sockaddr_in6 const *sa6 =
-                        (struct sockaddr_in6 const *) sa;
-
-                return mptcpd_hash_sockaddr_in6(sa6);
-        }
-}
-
-static int mptcpd_hashmap_compare(void const *a, void const *b)
-{
-        struct sockaddr const *const lsa = a;
-        struct sockaddr const *const rsa = b;
-
-        if (lsa->sa_family == rsa->sa_family) {
-                if (lsa->sa_family == AF_INET) {
-                        // IPv4
-                        struct sockaddr_in const *const lin =
-                                (struct sockaddr_in const *) lsa;
-
-                        struct sockaddr_in const *const rin =
-                                (struct sockaddr_in const *) rsa;
-
-                        uint32_t const lhs = lin->sin_addr.s_addr;
-                        uint32_t const rhs = rin->sin_addr.s_addr;
-
-                        return lhs < rhs ? -1 : (lhs > rhs ? 1 : 0);
-                } else {
-                        // IPv6
-                        struct sockaddr_in6 const *const lin =
-                                (struct sockaddr_in6 const *) lsa;
-
-                        struct sockaddr_in6 const *const rin =
-                                (struct sockaddr_in6 const *) rsa;
-
-                        uint8_t const *const lhs = lin->sin6_addr.s6_addr;
-                        uint8_t const *const rhs = rin->sin6_addr.s6_addr;
-
-                        return memcmp(lhs,
-                                      rhs,
-                                      sizeof(lin->sin6_addr.s6_addr));
-                }
-        } else if (lsa->sa_family == AF_INET) {
-                return 1;   // IPv4 > IPv6
-        } else {
-                return -1;  // IPv6 < IPv4
-        }
-}
-
-static void *mptcpd_hashmap_key_copy(void const *p)
-{
-        struct sockaddr const *const sa = p;
-        struct sockaddr *key = NULL;
-
-        if (sa->sa_family == AF_INET) {
-                key = (struct sockaddr *) l_new(struct sockaddr_in, 1);
-
-                memcpy(key, sa, sizeof(struct sockaddr_in));
-        } else {
-                key = (struct sockaddr *) l_new(struct sockaddr_in6, 1);
-
-                memcpy(key, sa, sizeof(struct sockaddr_in6));
-        }
-
-        return key;
-}
 
 // ----------------------------------------------------------------------
 
@@ -199,6 +90,59 @@ static bool mptcpd_hashmap_replace(struct l_hashmap *map,
 
 // ----------------------------------------------------------------------
 
+static inline
+unsigned int hash_sockaddr_in(struct sockaddr_in const *sa,
+                                      uint32_t seed)
+{
+        return mptcpd_murmur_hash3(&sa->sin_addr.s_addr,
+                                   sizeof(sa->sin_addr.s_addr),
+                                   seed);
+}
+
+static inline
+unsigned int hash_sockaddr_in6(struct sockaddr_in6 const *sa,
+                               uint32_t seed)
+{
+        /**
+         * @todo Should we include other sockaddr_in6 members, e.g.
+         *       sin6_flowinfo and sin6_scope_id, as part of the key?
+         */
+
+        return mptcpd_murmur_hash3(sa->sin6_addr.s6_addr,
+                                   sizeof(sa->sin6_addr.s6_addr),
+                                   seed);
+}
+
+/**
+ * @brief Generate a hash value based on IP address alone.
+ *
+ * @param[in] p @c struct @c mptcpd_hash_sockaddr_key instance
+ *              containing the IP address to be hashed.
+ *
+ * @return The hash value.
+ */
+static unsigned int hash_sockaddr(void const *p)
+{
+        struct mptcpd_hash_sockaddr_key const *const key = p;
+        struct sockaddr const *const sa = key->sa;
+
+        assert(sa->sa_family == AF_INET || sa->sa_family == AF_INET6);
+
+        if (sa->sa_family == AF_INET) {
+                struct sockaddr_in const *sa4 =
+                        (struct sockaddr_in const *) sa;
+
+                return hash_sockaddr_in(sa4, key->seed);
+        } else {
+                struct sockaddr_in6 const *sa6 =
+                        (struct sockaddr_in6 const *) sa;
+
+                return hash_sockaddr_in6(sa6, key->seed);
+        }
+}
+
+// ----------------------------------------------------------------------
+
 struct mptcpd_idm *mptcpd_idm_create(void)
 {
         struct mptcpd_idm *idm = l_new(struct mptcpd_idm, 1);
@@ -206,21 +150,19 @@ struct mptcpd_idm *mptcpd_idm_create(void)
         assert(MPTCPD_MIN_ID != MPTCPD_INVALID_ID);
 
         idm->ids = l_uintset_new_from_range(MPTCPD_MIN_ID, MPTCPD_MAX_ID);
-
         idm->map = l_hashmap_new();
+        idm->seed = l_getrandom_uint32();
 
-        if (!l_hashmap_set_hash_function(idm->map, mptcpd_hash_sockaddr)
+        if (!l_hashmap_set_hash_function(idm->map, hash_sockaddr)
             || !l_hashmap_set_compare_function(idm->map,
-                                               mptcpd_hashmap_compare)
+                                               mptcpd_hash_sockaddr_compare)
             || !l_hashmap_set_key_copy_function(idm->map,
-						mptcpd_hashmap_key_copy)
-            || !l_hashmap_set_key_free_function(idm->map, l_free)) {
+						mptcpd_hash_sockaddr_key_copy)
+            || !l_hashmap_set_key_free_function(idm->map,
+                                                mptcpd_hash_sockaddr_key_free)) {
                 mptcpd_idm_destroy(idm);
                 idm = NULL;
         }
-
-        if (_idm_hash_seed == 0)
-                _idm_hash_seed = l_getrandom_uint32();
 
         return idm;
 }
@@ -250,8 +192,12 @@ bool mptcpd_idm_map_id(struct mptcpd_idm *idm,
             || !l_uintset_put(idm->ids, id))
                 return false;
 
+        struct mptcpd_hash_sockaddr_key const key = {
+                .sa = sa, .seed = idm->seed
+        };
+
         if (!mptcpd_hashmap_replace(idm->map,
-                                    sa,
+                                    &key,
                                     L_UINT_TO_PTR(id),
                                     NULL)) {
                 (void) l_uintset_take(idm->ids, id);
@@ -268,8 +214,12 @@ mptcpd_aid_t mptcpd_idm_get_id(struct mptcpd_idm *idm,
         if (idm == NULL || sa == NULL)
                 return MPTCPD_INVALID_ID;
 
+        struct mptcpd_hash_sockaddr_key const key = {
+                .sa = sa, .seed = idm->seed
+        };
+
         // Check if an addr/ID mapping exists.
-        uint32_t id = L_PTR_TO_UINT(l_hashmap_lookup(idm->map, sa));
+        uint32_t id = L_PTR_TO_UINT(l_hashmap_lookup(idm->map, &key));
 
         if (id != MPTCPD_INVALID_ID)
                 return (mptcpd_aid_t) id;
@@ -292,8 +242,12 @@ mptcpd_aid_t mptcpd_idm_remove_id(struct mptcpd_idm *idm,
         if (idm == NULL || sa == NULL)
                 return MPTCPD_INVALID_ID;
 
+        struct mptcpd_hash_sockaddr_key const key = {
+                .sa = sa, .seed = idm->seed
+        };
+
         mptcpd_aid_t const id =
-                L_PTR_TO_UINT(l_hashmap_remove(idm->map, sa));
+                L_PTR_TO_UINT(l_hashmap_remove(idm->map, &key));
 
         if (id == 0 || !l_uintset_take(idm->ids, id))
                 return MPTCPD_INVALID_ID;
