@@ -55,13 +55,13 @@ typedef uint32_t mptcpd_flags_t;
  *
  * @note Do not use with @c MPTCPD_ADDR_FLAG_FULLMESH.
  */
-#define MPTCPD_ADDR_FLAG_SIGNAL   (1U << 0)
+#define MPTCPD_ADDR_FLAG_SIGNAL  (1U << 0)
 
 /// Create a new subflow.
-#define MPTCPD_ADDR_FLAG_SUBFLOW  (1U << 1)
+#define MPTCPD_ADDR_FLAG_SUBFLOW (1U << 1)
 
 /// Set backup priority on the subflow.
-#define MPTCPD_ADDR_FLAG_BACKUP   (1U << 2)
+#define MPTCPD_ADDR_FLAG_BACKUP  (1U << 2)
 
 /**
  * @brief Add remote address to in-kernel fullmesh path management.
@@ -82,7 +82,7 @@ typedef uint32_t mptcpd_flags_t;
 ///@}
 
 /// Notify even the addresses already existing at startup-time.
-#define MPTCPD_NOTIFY_FLAG_EXISTING  (1U << 0)
+#define MPTCPD_NOTIFY_FLAG_EXISTING (1U << 0)
 
 /// Ignore link-local addresses.
 #define MPTCPD_NOTIFY_FLAG_SKIP_LL (1U << 1)
