@@ -50,14 +50,35 @@ typedef uint8_t mptcpd_aid_t;
  */
 typedef uint32_t mptcpd_flags_t;
 
-/// Trigger announcement of a new local IP address.
-#define MPTCPD_ADDR_FLAG_SIGNAL  (1U << 0)
+/**
+ * @brief Trigger announcement of a new local IP address.
+ *
+ * @note Do not use with @c MPTCPD_ADDR_FLAG_FULLMESH.
+ */
+#define MPTCPD_ADDR_FLAG_SIGNAL   (1U << 0)
 
 /// Create a new subflow.
-#define MPTCPD_ADDR_FLAG_SUBFLOW (1U << 1)
+#define MPTCPD_ADDR_FLAG_SUBFLOW  (1U << 1)
 
 /// Set backup priority on the subflow.
-#define MPTCPD_ADDR_FLAG_BACKUP  (1U << 2)
+#define MPTCPD_ADDR_FLAG_BACKUP   (1U << 2)
+
+/**
+ * @brief Add remote address to in-kernel fullmesh path management.
+ *
+ * Create a subflow for each remote address through the local address.
+ *
+ * @note Do not use with @c MPTCPD_ADDR_FLAG_SIGNAL.
+ */
+#define MPTCPD_ADDR_FLAG_FULLMESH (1U << 3)
+
+/**
+ * @brief Allow user replacement of implicitly created endpoints.
+ *
+ * The in-kernel path manager may implictly create endpoints.  Set
+ * this flag to allow user-provided endpoints to replace them.
+ */
+#define MPTCPD_ADDR_FLAG_IMPLICIT (1U << 4)
 ///@}
 
 /// Notify even the addresses already existing at startup-time.

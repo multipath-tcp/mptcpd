@@ -38,7 +38,9 @@
 // Sanity check
 #if MPTCPD_ADDR_FLAG_SIGNAL != MPTCP_PM_ADDR_FLAG_SIGNAL                \
         || MPTCPD_ADDR_FLAG_SUBFLOW != MPTCP_PM_ADDR_FLAG_SUBFLOW       \
-        || MPTCPD_ADDR_FLAG_BACKUP != MPTCP_PM_ADDR_FLAG_BACKUP
+        || MPTCPD_ADDR_FLAG_BACKUP != MPTCP_PM_ADDR_FLAG_BACKUP         \
+        || MPTCPD_ADDR_FLAG_FULLMESH != MPTCP_PM_ADDR_FLAG_FULLMESH     \
+        || MPTCPD_ADDR_FLAG_IMPLICIT != MPTCP_PM_ADDR_FLAG_IMPLICIT
 # error Mismatch between mptcpd and upstream kernel addr flags.
 #endif
 
