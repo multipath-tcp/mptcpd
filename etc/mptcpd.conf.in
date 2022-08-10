@@ -38,8 +38,8 @@ path-manager=@mptcpd_default_pm@
 #   backup
 #   fullmesh  (do not use with the "signal" flag)
 #
-# Plugins that deal with the in-kernel path manager may these flags
-# use when advertising addresses.
+# Plugins that deal with the in-kernel path manager may use these
+# flags when advertising addresses.
 #
 # See the ip-mptcp(8) man page for details.
 #
