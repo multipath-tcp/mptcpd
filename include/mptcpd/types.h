@@ -64,9 +64,11 @@ typedef uint32_t mptcpd_flags_t;
 #define MPTCPD_ADDR_FLAG_BACKUP  (1U << 2)
 
 /**
- * @brief Add remote address to in-kernel fullmesh path management.
+ * @brief Add local address to in-kernel fullmesh path management.
  *
- * Create a subflow for each remote address through the local address.
+ * If this flag is set, create a subflow connection to each known remote
+ * address, originating from this local address. The total number of
+ * subflows is subject to the configured limits.
  *
  * @note Do not use with @c MPTCPD_ADDR_FLAG_SIGNAL.
  */
