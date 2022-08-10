@@ -76,7 +76,7 @@ typedef uint32_t mptcpd_flags_t;
 ///@}
 
 /// Notify even the addresses already existing at startup-time.
-#define MPTCPD_NOTIFY_FLAG_EXISTING (1U << 0)
+#define MPTCPD_NOTIFY_FLAG_EXISTING  (1U << 0)
 
 /// Ignore link-local addresses.
 #define MPTCPD_NOTIFY_FLAG_SKIP_LL (1U << 1)
