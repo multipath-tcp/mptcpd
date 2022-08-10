@@ -35,7 +35,9 @@
 
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/private/sockaddr.h>
+#include <mptcpd/private/network_monitor.h>
 #include <mptcpd/network_monitor.h>
+
 
 
 // See IETF RFC 3849: IPv6 Address Prefix Reserved for Documentation.

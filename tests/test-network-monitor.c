@@ -24,6 +24,7 @@
 #include <ell/queue.h>
 #pragma GCC diagnostic pop
 
+#include <mptcpd/private/network_monitor.h>
 #include <mptcpd/network_monitor.h>
 
 #undef NDEBUG
