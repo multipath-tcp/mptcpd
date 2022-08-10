@@ -119,9 +119,10 @@ struct tok_entry
 };
 
 static struct tok_entry const addr_flags_toks[] = {
-        { MPTCPD_ADDR_FLAG_SUBFLOW, "subflow" },
-        { MPTCPD_ADDR_FLAG_SIGNAL, "signal" },
-        { MPTCPD_ADDR_FLAG_BACKUP, "backup" },
+        { MPTCPD_ADDR_FLAG_SUBFLOW,  "subflow"  },
+        { MPTCPD_ADDR_FLAG_SIGNAL,   "signal"   },
+        { MPTCPD_ADDR_FLAG_BACKUP,   "backup"   },
+        { MPTCPD_ADDR_FLAG_FULLMESH, "fullmesh" },
         { 0, NULL },
 };
 
