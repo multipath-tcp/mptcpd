@@ -71,14 +71,6 @@ typedef uint32_t mptcpd_flags_t;
  * @note Do not use with @c MPTCPD_ADDR_FLAG_SIGNAL.
  */
 #define MPTCPD_ADDR_FLAG_FULLMESH (1U << 3)
-
-/**
- * @brief Allow user replacement of implicitly created endpoints.
- *
- * The in-kernel path manager may implictly create endpoints.  Set
- * this flag to allow user-provided endpoints to replace them.
- */
-#define MPTCPD_ADDR_FLAG_IMPLICIT (1U << 4)
 ///@}
 
 /// Notify even the addresses already existing at startup-time.
