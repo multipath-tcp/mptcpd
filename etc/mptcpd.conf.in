@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
-# Copyright (c) 2018-2019, 2021, Intel Corporation
+# Copyright (c) 2018-2019, 2021-2022 Intel Corporation
 
 # ------------------------------------------------------------------
 #                     mptcpd Configuration File
@@ -34,11 +34,12 @@ path-manager=@mptcpd_default_pm@
 # A comma separated list containing one or more of the flags:
 #
 #   subflow
-#   signal
+#   signal    (do not use with the "fullmesh" flag)
 #   backup
+#   fullmesh  (do not use with the "signal" flag)
 #
-# Plugins that deal with the in-kernel path  manager  may  use  when
-# advertising  addresses.
+# Plugins that deal with the in-kernel path manager may these flags
+# use when advertising addresses.
 #
 # See the ip-mptcp(8) man page for details.
 #
