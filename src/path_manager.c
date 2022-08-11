@@ -33,6 +33,7 @@
 #include <mptcpd/path_manager.h>
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/private/plugin.h>
+#include <mptcpd/private/network_monitor.h>
 #include <mptcpd/network_monitor.h>
 #include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>

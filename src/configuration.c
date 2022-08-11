@@ -33,6 +33,7 @@
 #include <mptcpd/types.h>
 
 #include <mptcpd/private/configuration.h>
+#include <mptcpd/private/network_monitor.h>
 
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>
@@ -126,7 +127,6 @@ static struct tok_entry const addr_flags_toks[] = {
         { 0, NULL },
 };
 
-
 /**
  * @brief Converts the flags into a string representation.
  *
@@ -170,10 +170,10 @@ static char const *addr_flags_string(uint32_t flags,
         return flags_string(addr_flags_toks, flags, str, len);
 }
 
-struct tok_entry const notify_flags_toks[] = {
-        { MPTCPD_NOTIFY_FLAG_EXISTING, "existing" },
-        { MPTCPD_NOTIFY_FLAG_SKIP_LL, "skip_link_local" },
-        { MPTCPD_NOTIFY_FLAG_SKIP_HOST, "skip_loopback" },
+static struct tok_entry const notify_flags_toks[] = {
+        { MPTCPD_NOTIFY_FLAG_EXISTING,    "existing" },
+        { MPTCPD_NOTIFY_FLAG_SKIP_LL,     "skip_link_local" },
+        { MPTCPD_NOTIFY_FLAG_SKIP_HOST,   "skip_loopback" },
         { MPTCPD_NOTIFY_FLAG_ROUTE_CHECK, "check_route" },
         { 0, NULL },
 };

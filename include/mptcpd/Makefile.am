@@ -22,6 +22,7 @@ noinst_HEADERS =			\
 	private/mptcp_upstream.h	\
 	private/murmur_hash.h		\
 	private/netlink_pm.h		\
+	private/network_monitor.h	\
 	private/path_manager.h 		\
 	private/plugin.h		\
 	private/sockaddr.h
