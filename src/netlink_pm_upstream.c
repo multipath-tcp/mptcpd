@@ -158,13 +158,14 @@ static int send_add_addr(struct mptcpd_pm *pm,
 
         /*
           Payload (nested):
-              Local address family
-              Local address
-              Local port (optional)
-              Local address ID (optional)
+              (nested)
+                  Local address family
+                  Local address
+                  Local port (optional)
+                  Local address ID (optional)
+                  Flags (optional)
+                  Network inteface index (optional)
               Token (required for user space MPTCP_PM_CMD_ANNOUNCE)
-              Flags (optional)
-              Network inteface index (optional)
          */
 
         // Types chosen to match MPTCP genl API.
@@ -347,14 +348,16 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
         (void) backup;
 
         /*
-          Payload (nested):
+          Payload:
               Token
-              Local address ID
-              Local address family
-              Local address
-              Remote address family
-              Remote address
-              Remote port
+              (nested)
+                  Local address ID
+                  Local address family
+                  Local address
+              (nested)
+                  Remote address family
+                  Remote address
+                  Remote port
          */
 
         /**
@@ -411,14 +414,16 @@ static int upstream_remove_subflow(struct mptcpd_pm *pm,
                                    struct sockaddr const *remote_addr)
 {
         /*
-          Payload (nested):
+          Payload:
               Token
-              Local address family
-              Local address
-              Local port
-              Remote address family
-              Remote address
-              Remote port
+              (nested)
+                  Local address family
+                  Local address
+                  Local port
+              (nested)
+                  Remote address family
+                  Remote address
+                  Remote port
          */
 
         struct addr_info local = {
@@ -700,7 +705,7 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
               Network address
               Address ID
               Flags
-              Network
+              Network inteface index
         */
 
         uint16_t type;
@@ -801,11 +806,8 @@ static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
         }
 
         /*
-          Payload (nested):
-              Network address
-              Address ID
-              Flags
-              Network
+          Payload:
+              MPTCP limit
         */
 
         uint16_t type;
