@@ -347,6 +347,14 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
         (void) remote_id;
         (void) backup;
 
+        /**
+         * @todo Flags, like @c MPTCP_PM_ADDR_FLAG_BACKUP are not
+         *       parsed in the kernel when the user space creates a
+         *       subflow.  Should we call @c upstream_set_backup() if
+         *       @a backup is @c true or just drop the @a backup
+         *       parameter altogether?
+         */
+
         /*
           Payload:
               Token
