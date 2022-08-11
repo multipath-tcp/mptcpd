@@ -164,7 +164,7 @@ static int send_add_addr(struct mptcpd_pm *pm,
                   Local port (optional)
                   Local address ID (optional)
                   Flags (optional)
-                  Network inteface index (optional)
+                  Network interface index (optional)
               Token (required for user space MPTCP_PM_CMD_ANNOUNCE)
          */
 
@@ -705,7 +705,7 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
               Network address
               Address ID
               Flags
-              Network inteface index
+              Network interface index
         */
 
         uint16_t type;
