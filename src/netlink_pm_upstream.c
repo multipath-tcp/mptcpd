@@ -158,13 +158,14 @@ static int send_add_addr(struct mptcpd_pm *pm,
 
         /*
           Payload (nested):
-              Local address family
-              Local address
-              Local port (optional)
-              Local address ID (optional)
+              (nested)
+                  Local address family
+                  Local address
+                  Local port (optional)
+                  Local address ID (optional)
+                  Flags (optional)
+                  Network interface index (optional)
               Token (required for user space MPTCP_PM_CMD_ANNOUNCE)
-              Flags (optional)
-              Network inteface index (optional)
          */
 
         // Types chosen to match MPTCP genl API.
@@ -346,16 +347,25 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
         (void) remote_id;
         (void) backup;
 
-        /*
-          Payload (nested):
-              Token
-              Local address ID
-              Local address family
-              Local address
-              Remote address family
-              Remote address
-              Remote port
+        /**
+         * @todo Flags, like @c MPTCP_PM_ADDR_FLAG_BACKUP are not
+         *       parsed in the kernel when the user space creates a
+         *       subflow.  Should we call @c upstream_set_backup() if
+         *       @a backup is @c true or just drop the @a backup
+         *       parameter altogether?
+         */
 
+        /*
+          Payload:
+              Token
+              (nested)
+                  Local address ID
+                  Local address family
+                  Local address
+              (nested)
+                  Remote address family
+                  Remote address
+                  Remote port
          */
 
         /**
@@ -412,15 +422,16 @@ static int upstream_remove_subflow(struct mptcpd_pm *pm,
                                    struct sockaddr const *remote_addr)
 {
         /*
-          Payload (nested):
+          Payload:
               Token
-              Local address family
-              Local address
-              Local port
-              Remote address family
-              Remote address
-              Remote port
-
+              (nested)
+                  Local address family
+                  Local address
+                  Local port
+              (nested)
+                  Remote address family
+                  Remote address
+                  Remote port
          */
 
         struct addr_info local = {
@@ -472,13 +483,63 @@ static int upstream_set_backup(struct mptcpd_pm *pm,
                                struct sockaddr const *remote_addr,
                                bool backup)
 {
-        (void) pm;
-        (void) token;
-        (void) local_addr;
-        (void) remote_addr;
-        (void) backup;
+        /*
+          Payload:
+              Token
+              (nested)
+                  Local address family
+                  Local address
+                  Local port
+                  Local flags (backup)
+              (nested)
+                  Remote address family
+                  Remote address
+                  Remote port
+         */
 
-        return ENOTSUP;
+        struct addr_info local = {
+                .addr  = local_addr,
+                .flags = (backup ? MPTCP_PM_ADDR_FLAG_BACKUP : 0)
+        };
+
+        struct addr_info remote = {
+                .addr = remote_addr,
+        };
+
+        size_t const payload_size =
+                MPTCPD_NLA_ALIGN(token)
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))   // local family
+                + MPTCPD_NLA_ALIGN_ADDR(local_addr)
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))   // local port
+                + MPTCPD_NLA_ALIGN(sizeof(local.flags))
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))   // remote family
+                + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
+                + MPTCPD_NLA_ALIGN(sizeof(uint16_t));  // remote port
+
+        struct l_genl_msg *const msg =
+                l_genl_msg_new_sized(MPTCP_PM_CMD_SET_FLAGS,
+                                     payload_size);
+
+        bool const appended =
+                l_genl_msg_append_attr(
+                        msg,
+                        MPTCP_PM_ATTR_TOKEN,
+                        sizeof(token),  // sizeof(uint32_t)
+                        &token)
+                && append_local_addr_attr(msg, &local)
+                && append_remote_addr_attr(msg, &remote);
+
+        if (!appended) {
+                l_genl_msg_unref(msg);
+
+                return ENOMEM;
+        }
+
+        return l_genl_family_send(pm->family,
+                                  msg,
+                                  mptcpd_family_send_callback,
+                                  "set_backup", /* user data */
+                                  NULL  /* destroy */) == 0;
 }
 
 // --------------------------------------------------------------
@@ -652,7 +713,7 @@ static void get_addr_callback(struct l_genl_msg *msg, void *user_data)
               Network address
               Address ID
               Flags
-              Network
+              Network interface index
         */
 
         uint16_t type;
@@ -753,11 +814,8 @@ static void get_limits_callback(struct l_genl_msg *msg, void *user_data)
         }
 
         /*
-          Payload (nested):
-              Network address
-              Address ID
-              Flags
-              Network
+          Payload:
+              MPTCP limit
         */
 
         uint16_t type;
