@@ -1,7 +1,7 @@
 19 August 2022 - mptcpd 0.11
 
-- Support for user space MPTCP path management generic netlink API in
-  the upstream kernel was implemented.
+- Support for the user space MPTCP path management generic netlink API
+  in the Linux 5.19 kernel was implemented.
 
   - MPTCP address advertisements may now be managed through the
     mptcpd_pm_add_addr() and mptcpd_pm_remove_addr() functions.
