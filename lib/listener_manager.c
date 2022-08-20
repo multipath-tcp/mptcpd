@@ -82,7 +82,7 @@ struct lm_value
  * A @c padding member is added to allow the padding bytes to be
  * initialized to zero in a designated initializer, e.g.:
  * @code
- * struct endpoint_in endpoint = {
+ * struct key_in key = {
  *     .addr = 0xC0000202,
  *     .port = 0x4321
  * };
@@ -102,7 +102,7 @@ struct key_in
  * A @c padding member is added to allow the padding bytes to be
  * initialized to zero in a designated initializer, e.g.:
  * @code
- * struct endpoint_in6 endpoint = {
+ * struct key_in6 key = {
  *     .addr = { .s6_addr = { [0]  = 0x20,
  *                            [1]  = 0x01,
  *                            [2]  = 0x0D,
