@@ -1,3 +1,52 @@
+19 August 2022 - mptcpd 0.11
+
+- Support for user space MPTCP path management generic netlink API in
+  the upstream kernel was implemented.
+
+  - MPTCP address advertisements may now be managed through the
+    mptcpd_pm_add_addr() and mptcpd_pm_remove_addr() functions.
+    Listening sockets required for accepting subflow joins through
+    advertised addresses will be handled automatically by mptcpd if
+    not previously created through the mptcpd listener manager API
+    described below.
+
+  - The mptcpd_pm_add_addr() struct sockaddr parameter is now
+    non-const to allow a zero valued TCP port to be updated with the
+    ephemeral port chosen by the kernel and passed back to the user
+    through that struct sockaddr parameter.
+
+  - Subflows may be managed through mptcpd plugins through the
+    mptcpd_pm_add_subflow(), mptcpd_pm_set_backup(), and
+    mptcpd_pm_remove_subflow().
+
+  - A new "mptcpd_lm" listener manager interface was added to the
+    mptcpd library.  It allows plugins to explicitly manage listening
+    sockets that are needed when advertising addresses, such as when
+    creating listener pools.  The global mptcpd listener manager may
+    be retrieved through the mptcpd_pm_get_lm() function.
+
+- Propagate the "server side" flag to "new_connection" and
+  "connection_established" plugin operations.
+
+- Support a new "fullmesh" address flag in the mptcpd configuration
+  file and command line "addr-flags" configuration option.  "fullmesh"
+  is only relevant to the in-kernel path manager.  See the ip-mptcp(8)
+  man page for details on the "fullmesh" address flag.
+
+- Allow the mptcpd network monitor unit test to pass if it detects an
+  active interface without any IPv4 or v6 addresses.  This can occur
+  when an interface is attached to a bridge.  The bridge would have
+  attached IP addresses but not the interface.
+
+- Memory leaks that occured when parsing the "addr-flags" and
+  "notify-flags" entries in the mptcpd configuration file were fixed.
+
+- A use-after-free memory error was corrected in the mptcpd
+  "load-plugins" configuration code.
+
+- Improved the underlying mptcpd ID manager hash algorithm by replacing
+  the existing trivial hash with the MurmurHash3 algorithm.
+
 24 June 2022 - mptcpd 0.10
 
 - Inconsistent byte order handling in mptcpd was corrected.  TCP ports
