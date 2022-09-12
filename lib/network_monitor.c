@@ -219,6 +219,9 @@ static void mptcpd_addr_cancel_timeout(struct nm_addr_info *ai)
  */
 static void mptcpd_addr_put(void *data)
 {
+        if (data == NULL)
+                return;
+
         struct nm_addr_info *const ai = data;
         if (--ai->count == 0) {
                 mptcpd_addr_cancel_timeout(ai);
