@@ -229,7 +229,8 @@ MPTCPD_API int mptcpd_pm_remove_subflow(
  * @param[in] addr  Local IP address and port to be advertised
  *                  through the MPTCP protocol @c ADD_ADDR
  *                  option.  The port is optional, and is
- *                  ignored if it is zero.
+ *                  ignored if it is zero.  A non-zero port implies
+ *                  @c MPTCPD_ADDR_FLAG_SIGNAL in @a flags.
  * @param[in] id    MPTCP local address ID.
  * @param[in] flags Bitset of MPTCP flags associated with the network
  *                  address, e.g. @c MPTCPD_ADDR_FLAG_SUBFLOW @c |
@@ -341,7 +342,8 @@ MPTCPD_API int mptcpd_kpm_get_limits(struct mptcpd_pm *pm,
  * @brief Set MPTCP flags for a local IP address.
  *
  * @param[in] pm    The mptcpd path manager object.
- * @param[in] addr  Local IP address.
+ * @param[in] addr  Local IP address.  A non-zero port implies
+ *                  @c MPTCPD_ADDR_FLAG_SIGNAL in @a flags.
  * @param[in] flags Flags to be associated with @a addr.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
