@@ -836,7 +836,7 @@ static void idle_callback(struct l_idle *idle, void *user_data)
           This gives the mptcpd path manager enough time to process
           replies from commands like get_addr, dump_addrs, and get_limits.
         */
-        static int const trigger_count = 10;
+        static int const trigger_count = 40;
 
         /*
           Maximum number of ELL event loop iterations.
