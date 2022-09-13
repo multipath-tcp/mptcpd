@@ -120,19 +120,18 @@ static struct sockaddr const *const raddr2 =
 
 // -------------------------------------------------------------------
 
-static uint32_t const max_addrs = 3;
-static uint32_t const max_subflows = 5;
+// MPTCP resource limits at test start.
+static uint32_t old_max_addrs;
+static uint32_t old_max_subflows;
 
-static struct mptcpd_limit const _limits[] = {
-        {
-                .type  = MPTCPD_LIMIT_RCV_ADD_ADDRS,
-                .limit = max_addrs
-        },
-        {
-                .type  = MPTCPD_LIMIT_SUBFLOWS,
-                .limit = max_subflows
-        }
-};
+// MPTCP resource limits set by this test.
+static uint32_t max_addrs;
+static uint32_t max_subflows;
+
+// MPTCP resource limit offsets applied to the old ones.
+static uint32_t const absolute_max_limit = 8;  // Hard-coded in the kernel
+static uint32_t const max_addrs_offset = 3;
+static uint32_t const max_subflows_offset = 5;
 
 // -------------------------------------------------------------------
 
@@ -231,6 +230,26 @@ static void dump_addrs_complete(void *user_data)
         info->dump_addrs_complete_count++;
 }
 
+static void reset_old_limits(struct mptcpd_pm *pm)
+{
+        struct mptcpd_limit const limits[] = {
+                {
+                        .type  = MPTCPD_LIMIT_RCV_ADD_ADDRS,
+                        .limit = old_max_addrs
+                },
+                {
+                        .type  = MPTCPD_LIMIT_SUBFLOWS,
+                        .limit = old_max_subflows
+                }
+        };
+
+        int const result = mptcpd_kpm_set_limits(pm,
+                                                 limits,
+                                                 L_ARRAY_SIZE(limits));
+
+        assert(result == 0 || result == ENOTSUP);
+}
+
 static void get_limits_callback(struct mptcpd_limit const *limits,
                                 size_t len,
                                 void *user_data)
@@ -245,14 +264,11 @@ static void get_limits_callback(struct mptcpd_limit const *limits,
                   APIs don't allow reporting such error to the caller.
                   Just assume set_limits() has no effect.
                 */
-                addrs_limit = 0;
-                subflows_limit = 0;
+                addrs_limit = old_max_addrs;
+                subflows_limit = old_max_subflows;
         }
 
-        (void) user_data;
-
         assert(limits != NULL);
-        assert(len == L_ARRAY_SIZE(_limits));
 
         for (struct mptcpd_limit const *l = limits;
              l != limits + len;
@@ -270,6 +286,14 @@ static void get_limits_callback(struct mptcpd_limit const *limits,
                         l_error("Unexpected MPTCP limit type.");
                 }
         }
+
+        /*
+          Done testing get/set_limits.
+
+          Reset MPTCP limits to their original values.
+        */
+        struct mptcpd_pm *const pm = user_data;
+        reset_old_limits(pm);
 }
 
 // -------------------------------------------------------------------
@@ -385,15 +409,28 @@ static void test_set_limits(void const *test_data)
         struct test_info *const info = (struct test_info *) test_data;
         struct mptcpd_pm *const pm   = info->pm;
 
+        struct mptcpd_limit const limits[] = {
+                {
+                        .type  = MPTCPD_LIMIT_RCV_ADD_ADDRS,
+                        .limit = max_addrs
+                },
+                {
+                        .type  = MPTCPD_LIMIT_SUBFLOWS,
+                        .limit = max_subflows
+                }
+        };
+
+        l_debug("SETTING max addrs to: %u", limits[0].limit);
+
         /**
-         * @todo This call potentially overrides previously set MPTCP
-         *       limits and leaves them in place after process exit.
-         *       It would probably be good to restore previous
-         *       values.
+         * @note We're potentially overriding previously set MPTCP
+         *       limits here but we reset them later on once the
+         *       get_limits test is done, assuming the test exits
+         *       gracefully.
          */
         int const result = mptcpd_kpm_set_limits(pm,
-                                                 _limits,
-                                                 L_ARRAY_SIZE(_limits));
+                                                 limits,
+                                                 L_ARRAY_SIZE(limits));
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -405,7 +442,7 @@ static void test_get_limits(void const *test_data)
 
         int const result = mptcpd_kpm_get_limits(pm,
                                                  get_limits_callback,
-                                                 NULL);
+                                                 pm);
 
         assert(result == 0 || result == ENOTSUP);
 }
@@ -582,10 +619,8 @@ static void handle_rtm_deladdr(int errnum,
 
 // -------------------------------------------------------------------
 
-static void run_tests(struct mptcpd_pm *pm, void *user_data)
+static void run_tests(void *user_data)
 {
-        (void) pm;
-
         struct test_info *const t = user_data;
 
         l_test_run();
@@ -593,7 +628,57 @@ static void run_tests(struct mptcpd_pm *pm, void *user_data)
         t->tests_called = true;
 }
 
-static struct mptcpd_pm_ops const pm_ops = { .ready = run_tests };
+void set_new_limit(uint32_t *limit, uint32_t old_limit, uint32_t offset)
+{
+        assert(limit != NULL);
+        assert(offset > 0);
+
+        // Do not exceed kernel hard-coded max.
+        assert(absolute_max_limit - old_limit >= offset);
+
+        *limit = old_limit + offset;
+}
+
+static void get_old_limits_callback(struct mptcpd_limit const *limits,
+                                    size_t len,
+                                    void *user_data)
+{
+        for (struct mptcpd_limit const *l = limits;
+             l != limits + len;
+             ++l) {
+                if (l->type == MPTCPD_LIMIT_RCV_ADD_ADDRS) {
+                        old_max_addrs = l->limit;
+                } else if (l->type == MPTCPD_LIMIT_SUBFLOWS) {
+                        old_max_subflows = l->limit;
+                } else {
+                        /*
+                          Unless more MPTCP limit types are added to
+                          the kernel path management API this should
+                          never be reached.
+                        */
+                        l_warn("Unexpected MPTCP limit type: %u",
+                               l->type);
+                }
+        }
+
+        set_new_limit(&max_addrs, old_max_addrs, max_addrs_offset);
+        set_new_limit(&max_subflows,
+                      old_max_subflows,
+                      max_subflows_offset);
+
+        run_tests(user_data);
+}
+
+static void complete_setup(struct mptcpd_pm *pm, void *user_data)
+{
+        int const result = mptcpd_kpm_get_limits(pm,
+                                                 get_old_limits_callback,
+                                                 user_data);
+
+        assert(result == 0 || result == ENOTSUP);
+}
+
+static struct mptcpd_pm_ops const pm_ops ={ .ready = complete_setup };
 
 static void setup_tests (void *user_data)
 {
