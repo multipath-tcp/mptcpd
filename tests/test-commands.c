@@ -714,10 +714,10 @@ static void setup_tests (void *user_data)
         l_test_add("add_addr - kernel",    test_add_addr_kernel,    info);
         l_test_add("get_addr",             test_get_addr,           info);
         l_test_add("dump_addrs",           test_dump_addrs,         info);
+        l_test_add("set_flags",            test_set_flags,          info);
         l_test_add("remove_addr - kernel", test_remove_addr_kernel, info);
         l_test_add("set_limits",           test_set_limits,         info);
         l_test_add("get_limits",           test_get_limits,         info);
-        l_test_add("set_flags",            test_set_flags,          info);
         l_test_add("flush_addrs",          test_flush_addrs,        info);
 
         // User space path manager tests.
