@@ -634,9 +634,10 @@ void set_new_limit(uint32_t *limit, uint32_t old_limit, uint32_t offset)
         assert(offset > 0);
 
         // Do not exceed kernel hard-coded max.
-        assert(absolute_max_limit - old_limit >= offset);
-
-        *limit = old_limit + offset;
+        if (absolute_max_limit - old_limit >= offset)
+                *limit = old_limit + offset;
+        else
+                *limit = absolute_max_limit;
 }
 
 static void get_old_limits_callback(struct mptcpd_limit const *limits,
