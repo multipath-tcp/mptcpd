@@ -672,6 +672,12 @@ static void get_old_limits_callback(struct mptcpd_limit const *limits,
 
 static void complete_setup(struct mptcpd_pm *pm, void *user_data)
 {
+        /**
+         * @note There is a chicken-and-egg problem here since we're
+         *       relying on mptcpd_kpm_get_limits() to get the MPTCP
+         *       limits at test start even though we're actually
+         *       testing this function in one of the test cases.
+         */
         int const result = mptcpd_kpm_get_limits(pm,
                                                  get_old_limits_callback,
                                                  user_data);
