@@ -628,7 +628,9 @@ static void run_tests(void *user_data)
         t->tests_called = true;
 }
 
-void set_new_limit(uint32_t *limit, uint32_t old_limit, uint32_t offset)
+static void set_new_limit(uint32_t *limit,
+                          uint32_t old_limit,
+                          uint32_t offset)
 {
         assert(limit != NULL);
         assert(offset > 0);
