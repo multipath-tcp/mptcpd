@@ -129,7 +129,7 @@ static uint32_t max_addrs;
 static uint32_t max_subflows;
 
 // MPTCP resource limit offsets applied to the old ones.
-static uint32_t const absolute_max_limit = 8;  // Hard-coded in the kernel
+static uint32_t const absolute_max_limit = 8;  // MPTCP_PM_ADDR_MAX
 static uint32_t const max_addrs_offset = 3;
 static uint32_t const max_subflows_offset = 5;
 
@@ -634,6 +634,7 @@ static void set_new_limit(uint32_t *limit,
 {
         assert(limit != NULL);
         assert(offset > 0);
+        assert(old_limit <= absolute_max_limit);
 
         // Do not exceed kernel hard-coded max.
         if (absolute_max_limit - old_limit >= offset)
