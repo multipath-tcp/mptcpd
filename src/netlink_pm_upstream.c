@@ -1073,6 +1073,14 @@ static int upstream_set_flags(struct mptcpd_pm *pm,
               Flags
          */
 
+        /*
+          The MPTCP_PM_ADDR_FLAG_SIGNAL flag is required when a port
+          is specified.  Make sure it is set.
+        */
+        uint16_t const port = mptcpd_get_port_number(addr);
+        if (port != 0)
+                flags |= MPTCP_PM_ADDR_FLAG_SIGNAL;
+
         struct addr_info info = {
                 .addr  = addr,
                 .flags = flags
