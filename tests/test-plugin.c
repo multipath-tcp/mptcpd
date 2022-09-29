@@ -339,6 +339,7 @@ static void test_null_plugin_dir(void const *test_data)
         bool const loaded =
                 mptcpd_plugin_load(dir,
                                    default_plugin,
+                                   dir,
                                    plugins_to_load,
                                    pm);
         assert(!loaded);
@@ -359,6 +360,7 @@ static void test_bad_plugins(void const *test_data)
         bool const loaded =
                 mptcpd_plugin_load(dir,
                                    default_plugin,
+                                   dir,
                                    plugins_to_load,
                                    pm);
         assert(!loaded);
