@@ -4,7 +4,7 @@
  *
  * @brief mptcpd network device monitoring.
  *
- * Copyright (c) 2017-2020, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifndef MPTCPD_NETWORK_MONITOR_H
@@ -12,6 +12,7 @@
 
 #include <mptcpd/export.h>
 
+#include <stdbool.h>
 #include <net/if.h>  // For IF_NAMESIZE.
 
 #ifdef __cplusplus
@@ -141,30 +142,6 @@ struct mptcpd_nm_ops
 };
 
 /**
- * @brief Create a network monitor.
- *
- * @param[in] flags            flags controlling address notification,
- *                             any of:
- *                             MPTCPD_NOTIFY_FLAG_EXISTING,,
- *                             MPTCPD_NOTIFY_FLAG_SKIP_LL,
- *                             MPTCPD_NOTIFY_FLAG_SKIP_HOST
- *
- * @todo As currently implemented, one could create multiple network
- *       monitors.  Is that useful?
- *
- * @return Pointer to new network monitor on success.  @c NULL on
- *         failure.
- */
-MPTCPD_API struct mptcpd_nm *mptcpd_nm_create(uint32_t flags);
-
-/**
- * @brief Destroy a network monitor.
- *
- * @param[in,out] nm Network monitor to be destroyed.
- */
-MPTCPD_API void mptcpd_nm_destroy(struct mptcpd_nm *nm);
-
-/**
  * @brief Network monitor iteration function type.
  *
  * The mptcpd network monitor will call a function of this type when
@@ -212,6 +189,27 @@ MPTCPD_API void mptcpd_nm_foreach_interface(struct mptcpd_nm const *nm,
 MPTCPD_API bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
                                        struct mptcpd_nm_ops const *ops,
                                        void *user_data);
+
+/**
+ * @brief Enable monitoring of the loopback network interface.
+ *
+ * Mptcpd normally only monitors non-loopback network interfaces.
+ * Call this function to enable monitoring of loopback network
+ * interfaces.
+ *
+ * @note Mptcpd monitoring of loopback network interfaces is meant
+ *       primarily for testing purposes.
+ *
+ * @param[in,out] nm     Pointer to the mptcpd network monitor
+ *                       object.
+ * @param[in]     enable Enable or disable monitoring of loopback
+ *                       network interfaces.
+ *
+ * @retval true  Successfully enable or disabled.
+ * @retval false Invalid @a nm argument.
+ */
+MPTCPD_API bool mptcpd_nm_monitor_loopback(struct mptcpd_nm *nm,
+                                           bool enable);
 
 #ifdef __cplusplus
 }

@@ -2,11 +2,11 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (c) 2017-2021, Intel Corporation
+# Copyright (c) 2017-2022, Intel Corporation
 
 AC_PREREQ([2.69])
 AC_INIT([mptcpd],
-        [0.8],
+        [0.11],
         [mptcp@lists.linux.dev],
         [],
         [https://github.com/intel/mptcpd])
@@ -124,14 +124,12 @@ AC_ARG_WITH([kernel],
 # Allow the user to set the default path manager plugin at 'configure-time'.
 AC_ARG_WITH([path-manager],
      [AS_HELP_STRING([--with-path-manager[=PLUGIN]],
-                     [Set default path manager plugin to PLUGIN (addr_adv, sspi) @<:@default=addr_adv@:>@])],
+                     [Set default path manager plugin to PLUGIN (addr_adv, sspi) @<:@default=auto@:>@])],
      [AS_CASE([$withval],
               [addr_adv | sspi],
               [with_path_manager=$withval],
               [AC_MSG_ERROR([invalid path manager plugin: $withval])])],
-     [with_path_manager=addr_adv])
-
-AC_SUBST([mptcpd_default_pm],[$with_path_manager])
+     [with_path_manager=auto])
 
 # Systemd unit directory detection and handling.
 AC_ARG_WITH([systemdsystemunitdir],
@@ -207,35 +205,7 @@ AC_SUBST([ELL_VERSION])
 # @todo mptcpd ships with a copies of the upstream and
 #       multipath-tcp.org kernel <linux/mptcp.h> header files. Ideally
 #       it should not. Consider removing them from mptcpd.
-AH_TEMPLATE([HAVE_LINUX_MPTCP_H_UPSTREAM],
-            [Define to 1 if you have the upstream kernel
-            <linux/mptcp.h> header.])
-AH_TEMPLATE([HAVE_LINUX_MPTCP_H_MPTCP_ORG],
-            [Define to 1 if you have the multipath-tcp.org kernel
-            <linux/mptcp.h> header.])
-AC_CHECK_HEADERS([linux/mptcp.h],
-  [
-   MPTCPD_IF_UPSTREAM_KERNEL(
-     [
-      AC_DEFINE([HAVE_LINUX_MPTCP_H_UPSTREAM], [1])
-      AS_IF([test "x$with_kernel" = "xauto"],
-            [with_kernel=upstream])
-     ],
-     [
-      MPTCPD_IF_MPTCP_ORG_KERNEL(
-        [
-         AC_DEFINE([HAVE_LINUX_MPTCP_H_MPTCP_ORG], [1])
-         AS_IF([test "x$with_kernel" = "xauto"],
-               [with_kernel=multipath-tcp.org])
-        ],
-        [
-         AC_MSG_WARN([Unsupported <linux/mptcp.h> header. Using fallback.])
-        ])
-      ])
-  ],
-  [
-   AC_MSG_WARN([<linux/mptcp.h> header not found. Using fallback.])
-  ])
+MPTCPD_CHECK_LINUX_MPTCP_H
 
 AS_IF([test "x$with_kernel" = "xauto"], [with_kernel=upstream])
 
@@ -248,6 +218,19 @@ AS_IF([test "x$with_kernel" = "xupstream"],
       [AC_DEFINE([HAVE_UPSTREAM_KERNEL])
        AC_MSG_NOTICE([Building support for upstream kernel.])],
       [AC_MSG_NOTICE([Building support for multipath-tcp.org kernel.])])
+
+dnl Set default path manager based on selected kernel as needed.
+dnl
+dnl The multipath-tcp.org kernel doesn't support the in-kernel path
+dnl manager netlink API used by the addr_adv mptcpd plugin.  Use the
+dnl sspi plugin in that case.
+AS_IF([test "x$with_path_manager" = "xauto"],
+      [AS_IF([test "x$with_kernel" = "xupstream"],
+             [with_path_manager=addr_adv],
+             [with_path_manager=sspi])
+       AC_MSG_NOTICE([Default mptcpd path manager plugin: $with_path_manager.])])
+
+AC_SUBST([mptcpd_default_pm],[$with_path_manager])
 
 # ---------------------------------------------------------------
 # Checks for typedefs, structures, and compiler characteristics.
@@ -305,21 +288,29 @@ AC_ARG_ENABLE(stack-protection,
         [enable_stack_protection=yes])
 
 AS_IF([test "x$enable_stack_protection" = "xyes"],
-        [
-        # Fortify source
-        # Enabling optimization implies _FORTIFY_SOURCE on some platforms.
-        # Explicitly redefine to _FORTIFY_SOURCE=2 to make sure we have the
-        # desired fortification level.
-        AX_APPEND_FLAG([-U_FORTIFY_SOURCE], [CPPFLAGS])
-        AX_APPEND_FLAG([-D_FORTIFY_SOURCE=2], [CPPFLAGS])
+      [
+       # Harden/fortify source
+       #
+       # _FORTIFY_SOURCE=2 is the desired level of fortification for
+       # mptcpd, but we should still avoid overriding user defined
+       # values, including the case where _FORTIFY_SOURCE is
+       # implicitly defined under some levels optimization.
+       #
+       # Note that _FORTIFY_SOURCE is defined on the preprocessor
+       # command line instead of in <mptcpd/config.h> since the latter
+       # is not included in all mptcpd source files, and may also be
+       # included after C library headers.
+       AC_CHECK_DEFINE([_FORTIFY_SOURCE],
+                       [],
+                       [AX_APPEND_FLAG([-D_FORTIFY_SOURCE=2], [CPPFLAGS])])
 
-        # Stack-based buffer overrun detection
-        MPTCPD_ADD_COMPILE_FLAG([-fstack-protector-strong],
-                                [# GCC < 4.9
-                                 MPTCPD_ADD_COMPILE_FLAG([-fstack-protector])
-                                ])
-        ],[]
-        )
+       # Stack-based buffer overrun detection
+       MPTCPD_ADD_COMPILE_FLAG([-fstack-protector-strong],
+                               [# GCC < 4.9
+                                MPTCPD_ADD_COMPILE_FLAG([-fstack-protector])
+                               ])
+      ],
+      [])
 
 # Format string vulnerabilities
 # -Wformat=2 implies:
@@ -371,6 +362,7 @@ AC_CONFIG_FILES([Makefile
                  tests/Makefile
                  tests/lib/Makefile
                  tests/plugins/Makefile
+                 tests/plugins/bad/Makefile
                  tests/plugins/noop/Makefile
                  tests/plugins/priority/Makefile
                  tests/plugins/security/Makefile])

@@ -4,7 +4,7 @@
  *
  * @brief mptcpd network device monitoring.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -23,20 +23,32 @@
 #include <net/if.h>  // For standard network interface flags.
 #include <netinet/in.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/netlink.h>
 #include <ell/log.h>
 #include <ell/util.h>
 #include <ell/queue.h>
 #include <ell/timeout.h>
 #include <ell/rtnl.h>
+#pragma GCC diagnostic pop
 
 #include <mptcpd/private/path_manager.h>
+#include <mptcpd/private/sockaddr.h>
+#include <mptcpd/private/network_monitor.h>
 #include <mptcpd/network_monitor.h>
+
+
 
 // See IETF RFC 3849: IPv6 Address Prefix Reserved for Documentation.
 // 2001:DB8::/32
-static struct in6_addr test_net_v6 = { .s6_addr = {0x20, 0x01, 0x0d, 0xb8, } };
-static struct in_addr test_net_v4;
+static struct in6_addr const test_net_v6 = {
+        .s6_addr = {0x20, 0x01, 0x0d, 0xb8, } };
+
+// See IETF RFC 5737: IPv4 Address Blocks Reserved for Documentation.
+static struct in_addr const test_net_v4 = {
+        .s_addr = MPTCPD_CONSTANT_HTONL(0xc0000201) };
+
 // -------------------------------------------------------------------
 
 /**
@@ -78,6 +90,9 @@ struct mptcpd_nm
 
         /// Flags controlling address notification.
         uint32_t notify_flags;
+
+        /// Enable/disable loopback network interface monitoring.
+        bool monitor_loopback;
 };
 
 // -------------------------------------------------------------------
@@ -204,6 +219,9 @@ static void mptcpd_addr_cancel_timeout(struct nm_addr_info *ai)
  */
 static void mptcpd_addr_put(void *data)
 {
+        if (data == NULL)
+                return;
+
         struct nm_addr_info *const ai = data;
         if (--ai->count == 0) {
                 mptcpd_addr_cancel_timeout(ai);
@@ -525,16 +543,15 @@ static void mptcpd_interface_callback(void *data, void *user_data)
  *
  * @return @c true if network interface is ready, and @c false other.
  */
-static bool is_interface_ready(struct ifinfomsg const *ifi)
+static bool is_interface_ready(struct mptcpd_nm const *nm,
+                               struct ifinfomsg const *ifi)
 {
-        /*
-          Only accept non-loopback network interfaces that are
-          up and running.
-        */
-        static unsigned int const iff_ready = IFF_UP | IFF_RUNNING;
+        // Only accept network interfaces that are up and running.
+        static unsigned int iff_ready = IFF_UP | IFF_RUNNING;
 
         return (ifi->ifi_flags & iff_ready) == iff_ready
-                && (ifi->ifi_flags & IFF_LOOPBACK) == 0;
+                && ((ifi->ifi_flags & IFF_LOOPBACK) == 0
+                    || nm->monitor_loopback);
 }
 
 /**
@@ -708,7 +725,7 @@ static void handle_link(uint16_t type,
 
         switch (type) {
         case RTM_NEWLINK:
-                if (is_interface_ready(ifi))
+                if (is_interface_ready(nm, ifi))
                         update_link(ifi, len, nm);
                 else
                         remove_link(ifi, nm);  // Interface disabled.
@@ -784,6 +801,8 @@ insert_addr_return(struct mptcpd_interface *interface,
                 addr = NULL;
 
                 l_error("Unable to track internet address information.");
+
+                return addr;
         }
 
         addr->index = interface->index;
@@ -997,13 +1016,13 @@ static void check_default_route(struct nm_addr_info *ai)
         mptcpd_addr_get(ai);
 
         if (l_netlink_send(ai->nm->rtnl,
-            RTM_GETROUTE,
-            0,
-            &store,
-            buf - (char *)&store,
-            handle_rtm_getroute,
-            ai,
-            NULL) == 0) {
+                           RTM_GETROUTE,
+                           0,
+                           &store,
+                           buf - (char *) &store,
+                           handle_rtm_getroute,
+                           ai,
+                           NULL) == 0) {
                 l_debug("Route lookup failed");
                 mptcpd_addr_put(ai);
         }
@@ -1301,7 +1320,7 @@ static void handle_rtm_getlink(int error,
         struct ifinfomsg const *const ifi = data;
         struct mptcpd_nm *const nm        = user_data;
 
-        if (is_interface_ready(ifi)) {
+        if (is_interface_ready(nm, ifi)) {
                 (void) insert_link(ifi, len, nm);
         }
 }
@@ -1442,9 +1461,10 @@ struct mptcpd_nm *mptcpd_nm_create(uint32_t flags)
                 return NULL;
         }
 
-        nm->notify_flags = flags;
-        nm->interfaces   = l_queue_new();
-        nm->ops          = l_queue_new();
+        nm->notify_flags     = flags;
+        nm->interfaces       = l_queue_new();
+        nm->ops              = l_queue_new();
+        nm->monitor_loopback = false;
 
         /**
          * Get network interface information.
@@ -1529,9 +1549,6 @@ bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
         if (nm == NULL || ops == NULL)
                 return false;
 
-        // See IETF RFC 5737: IPv4 Address Blocks Reserved for Documentation.
-        test_net_v4.s_addr = htonl(0xc0000201);
-
         if (ops->new_interface       == NULL
             && ops->update_interface == NULL
             && ops->delete_interface == NULL
@@ -1555,6 +1572,15 @@ bool mptcpd_nm_register_ops(struct mptcpd_nm *nm,
         return registered;
 }
 
+bool mptcpd_nm_monitor_loopback(struct mptcpd_nm *nm, bool enable)
+{
+        if (nm == NULL)
+                return false;
+
+        nm->monitor_loopback = enable;
+
+        return true;
+}
 
 /*
   Local Variables:

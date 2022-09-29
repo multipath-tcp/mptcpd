@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file plugin_two.c
+ * @file two.c
  *
  * @brief MPTCP test plugin.
  *
- * Copyright (c) 2019-2021, Intel Corporation
+ * Copyright (c) 2019-2022, Intel Corporation
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
+#pragma GCC diagnostic pop
 
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>
@@ -37,6 +40,7 @@ static struct sockaddr const *const remote_addr =
 static void plugin_two_new_connection(mptcpd_token_t token,
                                       struct sockaddr const *laddr,
                                       struct sockaddr const *raddr,
+                                      bool server_side,
                                       struct mptcpd_pm *pm)
 {
         (void) pm;
@@ -46,6 +50,7 @@ static void plugin_two_new_connection(mptcpd_token_t token,
         assert(!sockaddr_is_equal(laddr, raddr));
         assert(sockaddr_is_equal(laddr, local_addr));
         assert(sockaddr_is_equal(raddr, remote_addr));
+        assert(server_side == test_server_side_2);
 
         ++call_count.new_connection;
 }
@@ -54,6 +59,7 @@ static void plugin_two_connection_established(
         mptcpd_token_t token,
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
+        bool server_side,
         struct mptcpd_pm *pm)
 {
         (void) pm;
@@ -63,6 +69,7 @@ static void plugin_two_connection_established(
         assert(!sockaddr_is_equal(laddr, raddr));
         assert(sockaddr_is_equal(laddr, local_addr));
         assert(sockaddr_is_equal(raddr, remote_addr));
+        assert(server_side == test_server_side_2);
 
         ++call_count.connection_established;
 }
@@ -153,6 +160,55 @@ static void plugin_two_subflow_priority(mptcpd_token_t token,
         ++call_count.subflow_priority;
 }
 
+void plugin_two_new_interface(struct mptcpd_interface const *i,
+                              struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+
+        ++call_count.new_interface;
+}
+
+void plugin_two_update_interface(struct mptcpd_interface const *i,
+                                 struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+
+        ++call_count.update_interface;
+}
+
+void plugin_two_delete_interface(struct mptcpd_interface const *i,
+                                 struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+
+        ++call_count.delete_interface;
+}
+
+void plugin_two_new_local_address(struct mptcpd_interface const *i,
+                                  struct sockaddr const *sa,
+                                  struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) sa;
+        (void) pm;
+
+        ++call_count.new_local_address;
+}
+
+void plugin_two_delete_local_address(struct mptcpd_interface const *i,
+                                     struct sockaddr const *sa,
+                                     struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) sa;
+        (void) pm;
+
+        ++call_count.delete_local_address;
+}
+
 static struct mptcpd_plugin_ops const pm_ops = {
         .new_connection         = plugin_two_new_connection,
         .connection_established = plugin_two_connection_established,
@@ -161,7 +217,12 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .address_removed        = plugin_two_address_removed,
         .new_subflow            = plugin_two_new_subflow,
         .subflow_closed         = plugin_two_subflow_closed,
-        .subflow_priority       = plugin_two_subflow_priority
+        .subflow_priority       = plugin_two_subflow_priority,
+        .new_interface          = plugin_two_new_interface,
+        .update_interface       = plugin_two_update_interface,
+        .delete_interface       = plugin_two_delete_interface,
+        .new_local_address      = plugin_two_new_local_address,
+        .delete_local_address   = plugin_two_delete_local_address
 };
 
 static int plugin_two_init(struct mptcpd_pm *pm)

@@ -1,3 +1,143 @@
+19 August 2022 - mptcpd 0.11
+
+- Support for the user space MPTCP path management generic netlink API
+  in the Linux 5.19 kernel was implemented.
+
+  - MPTCP address advertisements may now be managed through the
+    mptcpd_pm_add_addr() and mptcpd_pm_remove_addr() functions.
+    Listening sockets required for accepting subflow joins through
+    advertised addresses will be handled automatically by mptcpd if
+    not previously created through the mptcpd listener manager API
+    described below.
+
+  - The mptcpd_pm_add_addr() struct sockaddr parameter is now
+    non-const to allow a zero valued TCP port to be updated with the
+    ephemeral port chosen by the kernel and passed back to the user
+    through that struct sockaddr parameter.
+
+  - Subflows may be managed through mptcpd plugins through the
+    mptcpd_pm_add_subflow(), mptcpd_pm_set_backup(), and
+    mptcpd_pm_remove_subflow().
+
+  - A new "mptcpd_lm" listener manager interface was added to the
+    mptcpd library.  It allows plugins to explicitly manage listening
+    sockets that are needed when advertising addresses, such as when
+    creating listener pools.  The global mptcpd listener manager may
+    be retrieved through the mptcpd_pm_get_lm() function.
+
+- Propagate the "server side" flag to "new_connection" and
+  "connection_established" plugin operations.
+
+- Support a new "fullmesh" address flag in the mptcpd configuration
+  file and command line "addr-flags" configuration option.  "fullmesh"
+  is only relevant to the in-kernel path manager.  See the ip-mptcp(8)
+  man page for details on the "fullmesh" address flag.
+
+- Allow the mptcpd network monitor unit test to pass if it detects an
+  active interface without any IPv4 or v6 addresses.  This can occur
+  when an interface is attached to a bridge.  The bridge would have
+  attached IP addresses but not the interface.
+
+- Memory leaks that occured when parsing the "addr-flags" and
+  "notify-flags" entries in the mptcpd configuration file were fixed.
+
+- A use-after-free memory error was corrected in the mptcpd
+  "load-plugins" configuration code.
+
+- Improved the underlying mptcpd ID manager hash algorithm by replacing
+  the existing trivial hash with the MurmurHash3 algorithm.
+
+24 June 2022 - mptcpd 0.10
+
+- Inconsistent byte order handling in mptcpd was corrected.  TCP ports
+  sent in path management commands and events now have the correct
+  byte order.  Furthermore, the mptcpd unit test suite no longer
+  assumes that the tests will be run on a little endian host.  IPv4
+  addresses and TCP ports used in the mptcpd unit test suite are now
+  byte swapped as needed according to the endianness of the platform.
+  As always, IPv4 addresses and TCP ports passed through pointers to
+  struct sockaddr should be in network byte order by convention.
+
+- A potential memory violation caused when attempting to register NULL
+  networking monitoring operations with mptcpd was fixed.
+
+- Mptcpd now supports gcc 12.  Link-time errors found in gcc 12 mptcpd
+  builds were fixed.
+
+- ELL 0.45 or greater is supported.
+
+- Code coverage was further expanded.
+
+- The mptcpd network monitor supports loopback interface monitoring if
+  so desired.
+
+- Improved support for reproducible builds by disabling HTML
+  timestamps in Doxygen generated mptcpd documentation.
+
+- Some mptcpd unit tests will be skipped rather than allowed to fail
+  on hosts running a kernel without MPTCP support.
+
+28 January 2022 - mptcpd 0.9
+
+- mptcpd
+    - Several security hardening fixes were made including missing
+      hardening flags for the `mptcpize' program and compile-time
+      hardening (e.g. _FORTIFY_SOURCE) that was inadvertently disabled
+      in some cases.
+
+    - Systemd based start of mptcpd has been delayed until the
+      multi-user environment is fully operational.
+
+    - mptcpd will only support one kernel at run-time.  The kernel may
+      be selected through the new "--with-kernel" `configure' script
+      option, e.g. "./configure --with-kernel=upstream".  Supported
+      kernels are "upstream" and "multipath-tcp.org".  The `configure'
+      script will attempt to automatically detect the kernel, and
+      fallback on the upstream kernel if it cannot do so.
+
+    - mptcpd_addr_info is now an opaque structure.  Field accessor
+      functions were added to the <mptcpd/addr_info.h> header,
+      accordingly.
+
+    - Address filtering based on default route availability was
+      implemented in the mptcpd network monitor through a new
+      "check_route" mptcpd command line option notify flag,
+      e.g. --notify-flags=check_route.
+
+    - mptcpd initialization order issues were addressed to ensure that
+      the internal mptcpd state is stable and consistent prior to
+      invoking user provided callbacks such as "pm_ready".
+
+    - A "complete" callback parameter was added to
+      mptcpd_kpm_get_addr() and mptcpd_kpm_dump_addr() to allow the
+      user to be notified when these asynchronous calls complete.
+      This is particularly useful for the case where no results are
+      available, which consequently prevents the "results" callback
+      from being called.
+
+    - The mptcpd_kpm_add_addr() function no longer ignores the port
+      parameter.
+
+    - A new command line option "--load-plugins" was added to allow
+      the user to specify which mptcpd plugins to load instead of
+      loading all plugins.
+
+    - ELL >= 0.30 is now required.
+
+    - The mptcpd unit test suite was expanded to further improve code
+      coverage.
+
+- mptcpize
+    - mptcpize will now hijack socket() calls that specify the
+      IPPROTO_IP protocol.
+
+    - An issue that prevented mptcpize from updating systemd unit
+      files on a different filesystem was corrected.
+
+    - The libmptcpwrap library is now installed in ${libdir}/mptcpize
+      instead of ${libdir}/mptcpd to differentiate it from mptcpd
+      plugins.
+
 24 September 2021 - mptcpd 0.8
 
 - The mptcpd library API now splits path management operations

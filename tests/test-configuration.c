@@ -7,10 +7,13 @@
  * Copyright (c) 2019, 2021, Intel Corporation
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/main.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
 #include <ell/log.h>
 #include <ell/test.h>
+#pragma GCC diagnostic pop
 
 #include <mptcpd/private/configuration.h>  // INTERNAL!
 

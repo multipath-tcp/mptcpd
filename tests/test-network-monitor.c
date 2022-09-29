@@ -4,7 +4,7 @@
  *
  * @brief mptcpd network monitor test.
  *
- * Copyright (c) 2018-2020, Intel Corporation
+ * Copyright (c) 2018-2020, 2022, Intel Corporation
  */
 
 #define _DEFAULT_SOURCE  // Enable IFF_... interface flags in <net/if.h>.
@@ -15,12 +15,16 @@
 #include <netinet/in.h>  // For INET_ADDRSTRLEN and INET6_ADDRSTRLEN.
 #include <net/if.h>      // For standard network interface flags.
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/main.h>
 #include <ell/idle.h>
 #include <ell/util.h>      // Needed by <ell/log.h>
 #include <ell/log.h>
 #include <ell/queue.h>
+#pragma GCC diagnostic pop
 
+#include <mptcpd/private/network_monitor.h>
 #include <mptcpd/network_monitor.h>
 
 #undef NDEBUG
@@ -109,18 +113,18 @@ static void check_interface(struct mptcpd_interface const *i, void *data)
                 i->flags,
                 i->name);
 
-        assert(l_queue_length(i->addrs) > 0);
-
-        l_debug("  addrs:");
-        l_queue_foreach(i->addrs, dump_addr, NULL);
+        /* Ifaces can have no addresses, e.g. if attached to a bridge. */
+        if (l_queue_length(i->addrs) > 0) {
+                l_debug("  addrs:");
+                l_queue_foreach(i->addrs, dump_addr, NULL);
+        }
 
         /*
-          Only non-loopback interfaces that are up and running should
-          be monitored.
+          Only network interfaces that are up and running should be
+          monitored.
         */
         static unsigned int const ready = IFF_UP | IFF_RUNNING;
         assert(ready == (i->flags & ready));
-        assert(!(i->flags & IFF_LOOPBACK));
 
         if (data) {
                 struct foreach_data *const fdata = data;
@@ -249,7 +253,15 @@ int main(void)
         struct mptcpd_nm *const nm = mptcpd_nm_create(0);
         assert(nm);
 
-        struct mptcpd_nm_ops const nm_events[] = {
+        assert(!mptcpd_nm_monitor_loopback(NULL, true)); // Bad arg
+
+        /*
+          Enable loopback network interface monitoring for this unit
+          test in case non-loopback network interfaces are unavailable.
+        */
+        assert(mptcpd_nm_monitor_loopback(nm, true));
+
+        static struct mptcpd_nm_ops const nm_events[] = {
                 {
                         .new_interface    = handle_new_interface,
                         .update_interface = handle_update_interface,
@@ -265,14 +277,28 @@ int main(void)
                 {
                         .new_address      = handle_new_address,
                         .delete_address   = handle_delete_address
+                },
+                {
+                        .new_address      = NULL
                 }
         };
 
         // Subscribe to network monitoring related events.
-        for (size_t i = 0; i < L_ARRAY_SIZE(nm_events); ++i)
-                mptcpd_nm_register_ops(nm,
-                                       &nm_events[i],
-                                       (void *) &coffee);
+        for (struct mptcpd_nm_ops const *ops = nm_events;
+             ops != nm_events + L_ARRAY_SIZE(nm_events);
+             ++ops) {
+                bool const all_null_ops =
+                        (ops->new_interface       == NULL
+                         && ops->update_interface == NULL
+                         && ops->delete_interface == NULL
+                         && ops->new_address      == NULL
+                         && ops->delete_address   == NULL);
+
+                bool const registered =
+                        mptcpd_nm_register_ops(nm, ops, (void *) &coffee);
+
+                assert(registered || (all_null_ops && !registered));
+        }
 
         struct foreach_data data = { .nm = nm, .cup = coffee };
 

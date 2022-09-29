@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file plugin_three.c
+ * @file three.c
  *
  * @brief MPTCP test plugin.
  *
- * Copyright (c) 2019-2021, Intel Corporation
+ * Copyright (c) 2019-2022, Intel Corporation
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
+#pragma GCC diagnostic pop
 
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>
@@ -31,11 +34,13 @@ static struct plugin_call_count call_count;
 static void plugin_three_new_connection(mptcpd_token_t token,
                                         struct sockaddr const *laddr,
                                         struct sockaddr const *raddr,
+                                        bool server_side,
                                         struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
+        (void) server_side;
         (void) pm;
 
         ++call_count.new_connection;
@@ -45,11 +50,13 @@ static void plugin_three_connection_established(
         mptcpd_token_t token,
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
+        bool server_side,
         struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
+        (void) server_side;
         (void) pm;
 
         ++call_count.connection_established;

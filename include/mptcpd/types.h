@@ -52,7 +52,11 @@ typedef uint8_t mptcpd_aid_t;
  */
 typedef uint32_t mptcpd_flags_t;
 
-/// Trigger announcement of a new local IP address.
+/**
+ * @brief Trigger announcement of a new local IP address.
+ *
+ * @note Do not use with @c MPTCPD_ADDR_FLAG_FULLMESH.
+ */
 #define MPTCPD_ADDR_FLAG_SIGNAL  (1U << 0)
 
 /// Create a new subflow.
@@ -60,19 +64,18 @@ typedef uint32_t mptcpd_flags_t;
 
 /// Set backup priority on the subflow.
 #define MPTCPD_ADDR_FLAG_BACKUP  (1U << 2)
+
+/**
+ * @brief Add local address to in-kernel fullmesh path management.
+ *
+ * If this flag is set, create a subflow connection to each known remote
+ * address, originating from this local address. The total number of
+ * subflows is subject to the configured limits.
+ *
+ * @note Do not use with @c MPTCPD_ADDR_FLAG_SIGNAL.
+ */
+#define MPTCPD_ADDR_FLAG_FULLMESH (1U << 3)
 ///@}
-
-/// Notify even the addresses already existing at startup-time.
-#define MPTCPD_NOTIFY_FLAG_EXISTING  (1U << 0)
-
-/// Ignore link-local addresses.
-#define MPTCPD_NOTIFY_FLAG_SKIP_LL (1U << 1)
-
-/// Ignore host (loopback) addresses.
-#define MPTCPD_NOTIFY_FLAG_SKIP_HOST (1U << 2)
-
-/// Notify address only if a default route is available from the given interface
-#define MPTCPD_NOTIFY_FLAG_ROUTE_CHECK (1U << 3)
 
 /**
  * @enum mptcpd_limit_types
