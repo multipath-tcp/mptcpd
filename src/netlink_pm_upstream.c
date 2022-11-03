@@ -386,6 +386,7 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
                 + MPTCPD_NLA_ALIGN(local_id)
                 + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // local family
                 + MPTCPD_NLA_ALIGN_ADDR(local_addr)
+                + MPTCPD_NLA_ALIGN_OPT(uint16_t)      // local port
                 + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // remote family
                 + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
                 + MPTCPD_NLA_ALIGN(sizeof(uint16_t));  // remote port
