@@ -361,6 +361,7 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
                   Local address ID
                   Local address family
                   Local address
+                  Local port (optional, unused by kernel)
               (nested)
                   Remote address ID
                   Remote address family
@@ -382,15 +383,18 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
                 .id   = remote_id
         };
 
+        uint16_t const local_port  = mptcpd_get_port_number(local_addr);
+
         size_t const payload_size =
                 MPTCPD_NLA_ALIGN(token)
                 + MPTCPD_NLA_ALIGN(local_id)
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // local family
+                + MPTCPD_NLA_ALIGN(uint16_t)          // local family
                 + MPTCPD_NLA_ALIGN_ADDR(local_addr)
+                + MPTCPD_NLA_ALIGN_OPT(local_port)
                 + MPTCPD_NLA_ALIGN(remote_id)
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // remote family
+                + MPTCPD_NLA_ALIGN(uint16_t)          // remote family
                 + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t)); // remote port
+                + MPTCPD_NLA_ALIGN(uint16_t);         // remote port
 
         struct l_genl_msg *const msg =
                 l_genl_msg_new_sized(MPTCP_PM_CMD_SUBFLOW_CREATE,
@@ -446,12 +450,12 @@ static int upstream_remove_subflow(struct mptcpd_pm *pm,
 
         size_t const payload_size =
                 MPTCPD_NLA_ALIGN(token)
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // local family
+                + MPTCPD_NLA_ALIGN(uint16_t)          // local family
                 + MPTCPD_NLA_ALIGN_ADDR(local_addr)
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // local port
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // remote family
+                + MPTCPD_NLA_ALIGN(uint16_t)          // local port
+                + MPTCPD_NLA_ALIGN(uint16_t)          // remote family
                 + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t)); // remote port
+                + MPTCPD_NLA_ALIGN(uint16_t);         // remote port
 
         struct l_genl_msg *const msg =
                 l_genl_msg_new_sized(MPTCP_PM_CMD_SUBFLOW_DESTROY,
@@ -510,13 +514,13 @@ static int upstream_set_backup(struct mptcpd_pm *pm,
 
         size_t const payload_size =
                 MPTCPD_NLA_ALIGN(token)
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))   // local family
+                + MPTCPD_NLA_ALIGN(uint16_t)           // local family
                 + MPTCPD_NLA_ALIGN_ADDR(local_addr)
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))   // local port
-                + MPTCPD_NLA_ALIGN(sizeof(local.flags))
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t))   // remote family
+                + MPTCPD_NLA_ALIGN(uint16_t)           // local port
+                + MPTCPD_NLA_ALIGN(local.flags)
+                + MPTCPD_NLA_ALIGN(uint16_t)           // remote family
                 + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
-                + MPTCPD_NLA_ALIGN(sizeof(uint16_t));  // remote port
+                + MPTCPD_NLA_ALIGN(uint16_t);          // remote port
 
         struct l_genl_msg *const msg =
                 l_genl_msg_new_sized(MPTCP_PM_CMD_SET_FLAGS,
@@ -1090,7 +1094,7 @@ static int upstream_set_flags(struct mptcpd_pm *pm,
 
         // Types chosen to match MPTCP genl API.
         size_t const payload_size =
-                MPTCPD_NLA_ALIGN(sizeof(uint16_t))  // family
+                MPTCPD_NLA_ALIGN(uint16_t)    // family
                 + MPTCPD_NLA_ALIGN_ADDR(addr)
                 + MPTCPD_NLA_ALIGN(flags);
 
