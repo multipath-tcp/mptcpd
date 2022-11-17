@@ -344,7 +344,6 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
                                 struct sockaddr const *remote_addr,
                                 bool backup)
 {
-        (void) remote_id;
         (void) backup;
 
         /**
@@ -364,6 +363,7 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
                   Local address
                   Local port (optional, unused by kernel)
               (nested)
+                  Remote address ID
                   Remote address family
                   Remote address
                   Remote port
@@ -380,6 +380,7 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
 
         struct addr_info remote = {
                 .addr = remote_addr,
+                .id   = remote_id
         };
 
         uint16_t const local_port  = mptcpd_get_port_number(local_addr);
@@ -390,6 +391,7 @@ static int upstream_add_subflow(struct mptcpd_pm *pm,
                 + MPTCPD_NLA_ALIGN(uint16_t)          // local family
                 + MPTCPD_NLA_ALIGN_ADDR(local_addr)
                 + MPTCPD_NLA_ALIGN_OPT(local_port)
+                + MPTCPD_NLA_ALIGN(remote_id)
                 + MPTCPD_NLA_ALIGN(uint16_t)          // remote family
                 + MPTCPD_NLA_ALIGN_ADDR(remote_addr)
                 + MPTCPD_NLA_ALIGN(uint16_t);         // remote port
