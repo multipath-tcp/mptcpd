@@ -7,7 +7,6 @@
  * Copyright (c) 2022, Intel Corporation
  */
 
-
 #include "../src/path_manager.h"    // INTERNAL!
 #include <mptcpd/path_manager.h>
 #include <mptcpd/plugin.h>
@@ -44,10 +43,13 @@ static void test_new_connection(void const *test_data)
         struct plugin_call_args *const args =
                 (struct plugin_call_args *) test_data;
 
+        static bool const server_side = false;
+
         mptcpd_plugin_new_connection(args->name,
                                      args->token,
                                      args->laddr,
                                      args->raddr,
+                                     server_side,
                                      args->pm);
 }
 
@@ -56,9 +58,12 @@ static void test_connection_established(void const *test_data)
         struct plugin_call_args *const args =
                 (struct plugin_call_args *) test_data;
 
+        static bool const server_side = false;
+
         mptcpd_plugin_connection_established(args->token,
                                              args->laddr,
                                              args->raddr,
+                                             server_side,
                                              args->pm);
 }
 
@@ -187,10 +192,6 @@ int main(void)
 
         /*
           Bound the time we wait for the tests to run.
-
-          Do this so to avoid waiting indefinitely for the generic
-          netlink based user space path manager to be available in the
-          Linux kernel.
         */
         static unsigned long const milliseconds = 500;
         struct l_timeout *const timeout =
