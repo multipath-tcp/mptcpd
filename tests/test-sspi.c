@@ -174,6 +174,7 @@ int main(void)
 
         static char *argv[] = {
                 "test-sspi",
+                "--load-plugins=sspi",
                 "--plugin-dir",
                 TEST_PLUGIN_DIR
         };
