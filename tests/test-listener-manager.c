@@ -21,6 +21,7 @@
 #include <mptcpd/private/listener_manager.h>
 #include <mptcpd/listener_manager.h>
 
+#include "test-util.h"
 #include "test-plugin.h"  // For test sockaddrs
 
 #undef NDEBUG
@@ -151,6 +152,9 @@ static void test_destroy(void const *test_data)
 
 int main(int argc, char *argv[])
 {
+        // Skip this test if the kernel is not MPTCP capable.
+        tests_skip_if_no_mptcp();
+
         l_log_set_stderr();
         //l_debug_enable("*");
 
