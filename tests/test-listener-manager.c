@@ -22,7 +22,6 @@
 #include <mptcpd/listener_manager.h>
 
 #include "test-util.h"
-#include "test-plugin.h"  // For test sockaddrs
 
 #undef NDEBUG
 #include <assert.h>
