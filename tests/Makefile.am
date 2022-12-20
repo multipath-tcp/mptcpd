@@ -106,6 +106,7 @@ test_id_manager_LDADD =				\
 test_listener_manager_SOURCES = test-listener-manager.c
 test_listener_manager_LDADD =			\
 	$(top_builddir)/lib/libmptcpd.la	\
+	$(builddir)/lib/libmptcpd_test.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
 
