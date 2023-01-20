@@ -31,13 +31,13 @@ details on how to report security related bugs.
 
 #### General Bugs
 Please report all general bugs unrelated to security through a GitHub
-[issue](https://github.com/intel/mptcpd/issues), using the *Bug
-report* template.
+[issue](https://github.com/multipath-tcp/mptcpd/issues), using the
+*Bug report* template.
 
 ### Feature Requests
 As with bug report submission, feature requests may be created through
-a GitHub [issue](https://github.com/intel/mptcpd/issues), using the
-provided *Feature request* template.
+a GitHub [issue](https://github.com/multipath-tcp/mptcpd/issues),
+using the provided *Feature request* template.
 
 ### Submitting Changes
 Please ensure contributions do not introduce regressions, and conform
