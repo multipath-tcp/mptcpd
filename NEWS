@@ -1,3 +1,26 @@
+23 January 2023 - mptcpd 0.12
+
+- mptcpd will be hosted at https://github.com/multipath-tcp/mptcpd
+  after this release.
+
+- The payload sizes of path management commands sent to the kernel
+  were reduced in some cases, slightly improving performance.
+
+- Automatically set the "signal" flag when a TCP/IP address with a
+  non-zero port is passed to the mptcpd_kpm_set_flags() function.  The
+  "signal" flag is required when a port is specified.
+
+- A potential memory violation that occurred when cleaning up
+  resources in the case of a failed attempt to track a network
+  address was corrected.
+
+- Several order of operation problems in the `test-commands' unit test
+  were addressed.  The `test-commands' unit test now succeeds as
+  expected.
+
+- Skip the listener manager unit test if the kernel doesn't support
+  MPTCP.
+
 19 August 2022 - mptcpd 0.11
 
 - Support for the user space MPTCP path management generic netlink API
