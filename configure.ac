@@ -9,7 +9,7 @@ AC_INIT([mptcpd],
         [0.11],
         [mptcp@lists.linux.dev],
         [],
-        [https://github.com/intel/mptcpd])
+        [https://github.com/multipath-tcp/mptcpd])
 
 # ---------------------------------------------------------------
 # Libtool Based Library Versioning

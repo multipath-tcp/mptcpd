@@ -22,8 +22,10 @@ reported vulnerability, what to expect if the vulnerability is accepted or
 declined, etc.
 -->
 
-Please report all security related issues through the private e-mail
-mptcp-owner@lists.01.org.  Include the following information:
+Please report all security related issues through the Linux kernel
+MPTCP subsystem owner listed in the kernel
+[`MAINTAINERS`](https://www.kernel.org/doc/linux/MAINTAINERS) file.
+Include the following information:
   * Description of the security problem
   * Steps to reproduce
   * Expected behavior
