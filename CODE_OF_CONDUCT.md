@@ -63,8 +63,7 @@ Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement at the
 e-mail address for the Linux kernel MPTCP subsystem owner listed in
 the kernel
-[https://github.com/multipath-tcp/mptcp_net-next/blob/export/MAINTAINERS][`MAINTAINERS`]
-file.
+[https://www.kernel.org/doc/linux/MAINTAINERS][`MAINTAINERS`] file.
 All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the
