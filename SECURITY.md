@@ -24,7 +24,7 @@ declined, etc.
 
 Please report all security related issues through the Linux kernel
 MPTCP subsystem owner listed in the kernel
-[https://www.kernel.org/doc/linux/MAINTAINERS][`MAINTAINERS`] file.
+[`MAINTAINERS`](https://www.kernel.org/doc/linux/MAINTAINERS) file.
 Include the following information:
   * Description of the security problem
   * Steps to reproduce
