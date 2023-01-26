@@ -1,6 +1,8 @@
 <map id="include/mptcpd/private/sockaddr.h" name="include/mptcpd/private/sockaddr.h">
-<area shape="rect" id="node1" title="mptcpd struct sockaddr related utility functions." alt="" coords="153,5,325,47"/>
-<area shape="rect" id="node2" href="$sockaddr_8c.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="5,95,116,121"/>
-<area shape="rect" id="node3" href="$netlink__pm__upstream_8c.html" title="Upstream kernel generic netlink path manager details." alt="" coords="140,95,339,121"/>
-<area shape="rect" id="node4" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="362,95,511,121"/>
+<area shape="rect" id="node1" title="mptcpd struct sockaddr related utility functions." alt="" coords="329,5,501,47"/>
+<area shape="rect" id="node2" href="$network__monitor_8c.html" title="mptcpd network device monitoring." alt="" coords="5,102,168,129"/>
+<area shape="rect" id="node3" href="$sockaddr_8c.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="193,102,303,129"/>
+<area shape="rect" id="node4" href="$sspi_8c.html" title="MPTCP single&#45;subflow&#45;per&#45;interface path manager plugin." alt="" coords="327,95,502,136"/>
+<area shape="rect" id="node5" href="$netlink__pm__upstream_8c.html" title="Upstream kernel generic netlink path manager details." alt="" coords="526,102,725,129"/>
+<area shape="rect" id="node6" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="748,102,897,129"/>
 </map>

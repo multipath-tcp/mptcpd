@@ -67,32 +67,32 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><dl class="reflist">
-<dt>Member <a class="el" href="src_2path__manager_8c.html#a23c9dc1e9f8f202101bd14c1e120565d">mptcpd_pm_create</a>  (struct <a class="el" href="structmptcpd__config.html" title="mptcpd configuration parameters">mptcpd_config</a> const *config)</dt>
-<dd><a class="anchor" id="_todo000038"></a>As currently implemented, one could create multiple path manager instances? Is that useful? </dd>
 <dt>Member <a class="el" href="mptcpd_8c.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>  (int argc, char *argv[])</dt>
-<dd><p class="startdd"><a class="anchor" id="_todo000028"></a>Call <code>mptcpd_config_free()</code> as soon we're done with reading the configuration, e.g. after the path manager has been initialized. </p>
-<p class="interdd"><a class="anchor" id="_todo000027"></a>Should we daemonize the the mptcpd process the canonical way - fork() then orphan to make it owned by the 'init' process, among other steps - when systemd isn't used? </p>
-<p class="interdd"><a class="anchor" id="_todo000026"></a>Make this daemon socket-activatable when using systemd.</p>
-<p class="enddd"><a class="anchor" id="_todo000025"></a>Start D-Bus once we support a mptcpd D-Bus API. </p>
+<dd><p class="startdd"><a class="anchor" id="_todo000028"></a>Make this daemon socket-activatable when using systemd.</p>
+<p class="interdd"><a class="anchor" id="_todo000030"></a>Call <code>mptcpd_config_free()</code> as soon we're done with reading the configuration, e.g. after the path manager has been initialized. </p>
+<p class="interdd"><a class="anchor" id="_todo000029"></a>Should we daemonize the the mptcpd process the canonical way - fork() then orphan to make it owned by the 'init' process, among other steps - when systemd isn't used? </p>
+<p class="enddd"><a class="anchor" id="_todo000027"></a>Start D-Bus once we support a mptcpd D-Bus API. </p>
 </dd>
 <dt>Member <a class="el" href="plugin_8c.html#a985ec6b7afa5f46ad0e5533d62f7873b">MPTCP_PM_NAME_LEN</a>  </dt>
-<dd><a class="anchor" id="_todo000015"></a>Remove this preprocessor symbol definition once support for path management strategy names are supported in the new generic netlink API. </dd>
+<dd><a class="anchor" id="_todo000016"></a>Remove this preprocessor symbol definition once support for path management strategy names are supported in the new generic netlink API. </dd>
 <dt>Member <a class="el" href="structmptcpd__addr__info.html#a15d6781dd09910a1d56915fe57b2f6f8">mptcpd_addr_info::index</a>  </dt>
-<dd><a class="anchor" id="_todo000003"></a>Will this value ever be zero, i.e. not set?  </dd>
+<dd><a class="anchor" id="_todo000002"></a>Will this value ever be zero, i.e. not set?  </dd>
 <dt>Member <a class="el" href="addr__info_8c.html#a607fc946f6060f7d7a3b81942ac6cc1d">mptcpd_addr_info_get_id</a>  (struct <a class="el" href="structmptcpd__addr__info.html" title="Information associated with a network address.">mptcpd_addr_info</a> const *info)</dt>
 <dd><a class="anchor" id="_todo000006"></a>Good value to return on error?  </dd>
 <dt>Member <a class="el" href="structmptcpd__idm.html#a001fb1299be67c14cc358b4192ad3362">mptcpd_idm::map</a>  </dt>
 <dd><a class="anchor" id="_todo000009"></a>A hashmap may be overkill for this use case since a given host isn't likely to have many local IP addresses. Assuming that is the case, a simple O(n) based lookup on a linked list (e.g. <code>l_queue</code>) or an array should perform just as well.  </dd>
 <dt>Member <a class="el" href="network__monitor_8c.html#a4168061a0acd0a409ceb8d31ef1fd6b3">mptcpd_nm_create</a>  (uint32_t flags)</dt>
-<dd><a class="anchor" id="_todo000001"></a>As currently implemented, one could create multiple network monitors. Is that useful? </dd>
+<dd><a class="anchor" id="_todo000003"></a>As currently implemented, one could create multiple network monitors. Is that useful? </dd>
 <dt>Member <a class="el" href="plugin_8c.html#a165106a65f54a3d4067e3c709cd1559d">mptcpd_plugin_load</a>  (char const *dir, char const *default_name, struct l_queue const *plugins_to_load, struct <a class="el" href="structmptcpd__pm.html" title="Data needed to run the path manager.">mptcpd_pm</a> *pm)</dt>
-<dd><a class="anchor" id="_todo000020"></a>Determine if this is a performance bottleneck on 64 bit platforms since it is possible that connection IDs may end up in the same hash bucket due to the truncation from 64 bits to 32 bits in ELL's direct hash function, assuming <code>unsigned</code> <code>int</code> is a 32 bit type.  </dd>
+<dd><a class="anchor" id="_todo000021"></a>Determine if this is a performance bottleneck on 64 bit platforms since it is possible that connection IDs may end up in the same hash bucket due to the truncation from 64 bits to 32 bits in ELL's direct hash function, assuming <code>unsigned</code> <code>int</code> is a 32 bit type.  </dd>
 <dt>Member <a class="el" href="plugin_8c.html#a04d5b40d21e262c386b4f3db0dd1ba62">mptcpd_plugin_register_ops</a>  (char const *name, struct <a class="el" href="structmptcpd__plugin__ops.html" title="Mptcpd plugin interface.">mptcpd_plugin_ops</a> const *ops)</dt>
-<dd><a class="anchor" id="_todo000021"></a>Should we return <code>false</code> if all of the callbacks in <em>ops</em> are <code>NULL</code>?  </dd>
+<dd><a class="anchor" id="_todo000022"></a>Should we return <code>false</code> if all of the callbacks in <em>ops</em> are <code>NULL</code>?  </dd>
 <dt>Member <a class="el" href="lib_2path__manager_8c.html#a3b8783192848743adb90b2a3cd573e10">mptcpd_pm_add_subflow</a>  (struct <a class="el" href="structmptcpd__pm.html" title="Data needed to run the path manager.">mptcpd_pm</a> *pm, mptcpd_token_t token, mptcpd_aid_t local_address_id, mptcpd_aid_t remote_address_id, struct sockaddr const *local_addr, struct sockaddr const *remote_addr, bool backup)</dt>
-<dd><a class="anchor" id="_todo000002"></a>There far too many parameters. Reduce.  </dd>
+<dd><a class="anchor" id="_todo000001"></a>There far too many parameters. Reduce.  </dd>
 <dt>Member <a class="el" href="structmptcpd__pm__cmd__ops.html#a6368e402765f94ea505fd51a8209b5bd">mptcpd_pm_cmd_ops::add_subflow</a>  )(struct <a class="el" href="structmptcpd__pm.html" title="Data needed to run the path manager.">mptcpd_pm</a> *pm, mptcpd_token_t token, mptcpd_aid_t local_address_id, mptcpd_aid_t remote_address_id, struct sockaddr const *local_addr, struct sockaddr const *remote_addr, bool backup)</dt>
 <dd><a class="anchor" id="_todo000004"></a>There far too many parameters. Reduce.  </dd>
+<dt>Member <a class="el" href="src_2path__manager_8c.html#a23c9dc1e9f8f202101bd14c1e120565d">mptcpd_pm_create</a>  (struct <a class="el" href="structmptcpd__config.html" title="mptcpd configuration parameters">mptcpd_config</a> const *config)</dt>
+<dd><a class="anchor" id="_todo000047"></a>As currently implemented, one could create multiple path manager instances? Is that useful? </dd>
 <dt>Member <a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a>  </dt>
 <dd><a class="anchor" id="_todo000005"></a>These rely on MPTCP genl related implementation details in the kernel. Should we move these typedefs to <code>&lt;linux/mptcp.h&gt;</code>, e.g. 'typedef uint32_t mptcp_token_t'? </dd>
 </dl>
@@ -100,7 +100,7 @@ $(function() {
 </div><!-- PageDoc -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

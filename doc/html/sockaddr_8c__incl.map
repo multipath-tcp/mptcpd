@@ -1,9 +1,12 @@
 <map id="lib/sockaddr.c" name="lib/sockaddr.c">
-<area shape="rect" id="node1" title="mptcpd struct sockaddr related utility functions." alt="" coords="157,5,268,32"/>
+<area shape="rect" id="node1" title="mptcpd struct sockaddr related utility functions." alt="" coords="185,5,296,32"/>
 <area shape="rect" id="node2" title=" " alt="" coords="5,80,76,107"/>
 <area shape="rect" id="node3" title=" " alt="" coords="100,80,203,107"/>
-<area shape="rect" id="node4" title=" " alt="" coords="227,80,323,107"/>
-<area shape="rect" id="node5" href="$sockaddr_8h.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="347,80,542,107"/>
-<area shape="rect" id="node6" title=" " alt="" coords="338,155,421,181"/>
-<area shape="rect" id="node7" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="445,155,575,181"/>
+<area shape="rect" id="node4" title=" " alt="" coords="199,155,295,181"/>
+<area shape="rect" id="node5" title=" " alt="" coords="278,80,353,107"/>
+<area shape="rect" id="node6" href="$sockaddr_8h.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="377,80,571,107"/>
+<area shape="rect" id="node7" title=" " alt="" coords="323,155,406,181"/>
+<area shape="rect" id="node8" title=" " alt="" coords="431,155,509,181"/>
+<area shape="rect" id="node9" title=" " alt="" coords="533,155,631,181"/>
+<area shape="rect" id="node10" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="655,155,784,181"/>
 </map>

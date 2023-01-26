@@ -80,12 +80,12 @@ Public Attributes</h2></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>Mptcpd plugin path management event tracking operations.</p>
 <p>A set of functions to be called when MPTCP path management related events occur. </p>
 </div></td></tr>
-<tr class="memitem:a64fa70962dcfb2639d4fd9f3ee82493b"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmptcpd__plugin__ops.html#a64fa70962dcfb2639d4fd9f3ee82493b">new_connection</a> )(<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td></tr>
-<tr class="memdesc:a64fa70962dcfb2639d4fd9f3ee82493b"><td class="mdescLeft">&#160;</td><td class="mdescRight">New MPTCP-capable connection has been created.  <a href="structmptcpd__plugin__ops.html#a64fa70962dcfb2639d4fd9f3ee82493b">More...</a><br /></td></tr>
-<tr class="separator:a64fa70962dcfb2639d4fd9f3ee82493b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6383d5955eb4bc982523f8b17a6fe50a"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmptcpd__plugin__ops.html#a6383d5955eb4bc982523f8b17a6fe50a">connection_established</a> )(<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td></tr>
-<tr class="memdesc:a6383d5955eb4bc982523f8b17a6fe50a"><td class="mdescLeft">&#160;</td><td class="mdescRight">New MPTCP-capable connection has been established.  <a href="structmptcpd__plugin__ops.html#a6383d5955eb4bc982523f8b17a6fe50a">More...</a><br /></td></tr>
-<tr class="separator:a6383d5955eb4bc982523f8b17a6fe50a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3bd6c90cdf26977213cdbf0d8fe118f"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmptcpd__plugin__ops.html#ac3bd6c90cdf26977213cdbf0d8fe118f">new_connection</a> )(<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, bool server_side, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td></tr>
+<tr class="memdesc:ac3bd6c90cdf26977213cdbf0d8fe118f"><td class="mdescLeft">&#160;</td><td class="mdescRight">New MPTCP-capable connection has been created.  <a href="structmptcpd__plugin__ops.html#ac3bd6c90cdf26977213cdbf0d8fe118f">More...</a><br /></td></tr>
+<tr class="separator:ac3bd6c90cdf26977213cdbf0d8fe118f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a238a66b59c2fd337824f8972f024532b"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmptcpd__plugin__ops.html#a238a66b59c2fd337824f8972f024532b">connection_established</a> )(<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, bool server_side, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td></tr>
+<tr class="memdesc:a238a66b59c2fd337824f8972f024532b"><td class="mdescLeft">&#160;</td><td class="mdescRight">New MPTCP-capable connection has been established.  <a href="structmptcpd__plugin__ops.html#a238a66b59c2fd337824f8972f024532b">More...</a><br /></td></tr>
+<tr class="separator:a238a66b59c2fd337824f8972f024532b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65579518c4c1bcc7497a56335d901714"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmptcpd__plugin__ops.html#a65579518c4c1bcc7497a56335d901714">connection_closed</a> )(<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td></tr>
 <tr class="memdesc:a65579518c4c1bcc7497a56335d901714"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPTCP connection as a whole was closed.  <a href="structmptcpd__plugin__ops.html#a65579518c4c1bcc7497a56335d901714">More...</a><br /></td></tr>
 <tr class="separator:a65579518c4c1bcc7497a56335d901714"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -176,14 +176,14 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a6383d5955eb4bc982523f8b17a6fe50a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6383d5955eb4bc982523f8b17a6fe50a">&#9670;&nbsp;</a></span>connection_established</h2>
+<a id="a238a66b59c2fd337824f8972f024532b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a238a66b59c2fd337824f8972f024532b">&#9670;&nbsp;</a></span>connection_established</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void(* mptcpd_plugin_ops::connection_established) (<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td>
+          <td class="memname">void(* mptcpd_plugin_ops::connection_established) (<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, bool server_side, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -194,6 +194,7 @@ Public Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">token</td><td>MPTCP connection token. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">laddr</td><td>Local address information. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">raddr</td><td>Remote address information. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">server_side</td><td><code>true</code> if this peer was the listener (server), <code>false</code> if this peer initiated the connection. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pm</td><td>Opaque pointer to mptcpd path manager object. </td></tr>
   </table>
   </dd>
@@ -272,14 +273,14 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a64fa70962dcfb2639d4fd9f3ee82493b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a64fa70962dcfb2639d4fd9f3ee82493b">&#9670;&nbsp;</a></span>new_connection</h2>
+<a id="ac3bd6c90cdf26977213cdbf0d8fe118f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3bd6c90cdf26977213cdbf0d8fe118f">&#9670;&nbsp;</a></span>new_connection</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void(* mptcpd_plugin_ops::new_connection) (<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td>
+          <td class="memname">void(* mptcpd_plugin_ops::new_connection) (<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, bool server_side, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -291,6 +292,7 @@ Public Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">token</td><td>MPTCP connection token. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">laddr</td><td>Local address information. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">raddr</td><td>Remote address information. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">server_side</td><td><code>true</code> if this peer was the listener (server), <code>false</code> if this peer initiated the connection. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pm</td><td>Opaque pointer to mptcpd path manager object. </td></tr>
   </table>
   </dd>
@@ -452,7 +454,7 @@ Public Attributes</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

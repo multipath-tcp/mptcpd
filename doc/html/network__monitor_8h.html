@@ -78,15 +78,17 @@ $(function() {
 <p>mptcpd network device monitoring.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;<a class="el" href="export_8h_source.html">mptcpd/export.h</a>&gt;</code><br />
+<code>#include &lt;stdbool.h&gt;</code><br />
 <code>#include &lt;net/if.h&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for network_monitor.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="network__monitor_8h__incl.png" border="0" usemap="#ainclude_2mptcpd_2network__monitor_8h" alt=""/></div>
 <map name="ainclude_2mptcpd_2network__monitor_8h" id="ainclude_2mptcpd_2network__monitor_8h">
-<area shape="rect" title="mptcpd network device monitoring." alt="" coords="42,5,221,47"/>
+<area shape="rect" title="mptcpd network device monitoring." alt="" coords="111,5,290,47"/>
 <area shape="rect" href="export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="5,95,135,121"/>
-<area shape="rect" title=" " alt="" coords="159,95,226,121"/>
+<area shape="rect" title=" " alt="" coords="159,95,242,121"/>
+<area shape="rect" title=" " alt="" coords="266,95,333,121"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -121,22 +123,19 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a5396fa749c0d6e207e69daf8bb097d2c"><td class="memItemLeft" align="right" valign="top">MPTCPD_API struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="network__monitor_8h.html#a5396fa749c0d6e207e69daf8bb097d2c">mptcpd_nm_create</a> (uint32_t flags)</td></tr>
-<tr class="memdesc:a5396fa749c0d6e207e69daf8bb097d2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a network monitor.  <a href="network__monitor_8h.html#a5396fa749c0d6e207e69daf8bb097d2c">More...</a><br /></td></tr>
-<tr class="separator:a5396fa749c0d6e207e69daf8bb097d2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76da7206668ad9784530c5284a6262d8"><td class="memItemLeft" align="right" valign="top">MPTCPD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="network__monitor_8h.html#a76da7206668ad9784530c5284a6262d8">mptcpd_nm_destroy</a> (struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a> *nm)</td></tr>
-<tr class="memdesc:a76da7206668ad9784530c5284a6262d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy a network monitor.  <a href="network__monitor_8h.html#a76da7206668ad9784530c5284a6262d8">More...</a><br /></td></tr>
-<tr class="separator:a76da7206668ad9784530c5284a6262d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47f057fe20111eec54516b46875f4042"><td class="memItemLeft" align="right" valign="top">MPTCPD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="network__monitor_8h.html#a47f057fe20111eec54516b46875f4042">mptcpd_nm_foreach_interface</a> (struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a> const *nm, <a class="el" href="network__monitor_8h.html#a4d9b9187f52bffadd4bdea0558f3ca1f">mptcpd_nm_callback</a> callback, void *data)</td></tr>
 <tr class="memdesc:a47f057fe20111eec54516b46875f4042"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterate over all monitored network interfaces.  <a href="network__monitor_8h.html#a47f057fe20111eec54516b46875f4042">More...</a><br /></td></tr>
 <tr class="separator:a47f057fe20111eec54516b46875f4042"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac7aa196e84001d2bd57f3c4dbef006b3"><td class="memItemLeft" align="right" valign="top">MPTCPD_API bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="network__monitor_8h.html#ac7aa196e84001d2bd57f3c4dbef006b3">mptcpd_nm_register_ops</a> (struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a> *nm, struct <a class="el" href="structmptcpd__nm__ops.html">mptcpd_nm_ops</a> const *ops, void *user_data)</td></tr>
 <tr class="memdesc:ac7aa196e84001d2bd57f3c4dbef006b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribe to mptcpd network monitor events.  <a href="network__monitor_8h.html#ac7aa196e84001d2bd57f3c4dbef006b3">More...</a><br /></td></tr>
 <tr class="separator:ac7aa196e84001d2bd57f3c4dbef006b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1bb925cd0bff0ea1d02c1a61e434613"><td class="memItemLeft" align="right" valign="top">MPTCPD_API bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="network__monitor_8h.html#ac1bb925cd0bff0ea1d02c1a61e434613">mptcpd_nm_monitor_loopback</a> (struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a> *nm, bool enable)</td></tr>
+<tr class="memdesc:ac1bb925cd0bff0ea1d02c1a61e434613"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable monitoring of the loopback network interface.  <a href="network__monitor_8h.html#ac1bb925cd0bff0ea1d02c1a61e434613">More...</a><br /></td></tr>
+<tr class="separator:ac1bb925cd0bff0ea1d02c1a61e434613"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>mptcpd network device monitoring. </p>
-<p>Copyright (c) 2017-2020, Intel Corporation </p>
+<p>Copyright (c) 2017-2022, Intel Corporation </p>
 </div><h2 class="groupheader">Typedef Documentation</h2>
 <a id="a4d9b9187f52bffadd4bdea0558f3ca1f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4d9b9187f52bffadd4bdea0558f3ca1f">&#9670;&nbsp;</a></span>mptcpd_nm_callback</h2>
@@ -163,62 +162,6 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a5396fa749c0d6e207e69daf8bb097d2c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5396fa749c0d6e207e69daf8bb097d2c">&#9670;&nbsp;</a></span>mptcpd_nm_create()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MPTCPD_API struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a>* mptcpd_nm_create </td>
-          <td>(</td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>flags</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Create a network monitor. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td>flags controlling address notification, any of: MPTCPD_NOTIFY_FLAG_EXISTING,, MPTCPD_NOTIFY_FLAG_SKIP_LL, MPTCPD_NOTIFY_FLAG_SKIP_HOST</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>As currently implemented, one could create multiple network monitors. Is that useful?</dd></dl>
-<dl class="section return"><dt>Returns</dt><dd>Pointer to new network monitor on success. <code>NULL</code> on failure. </dd></dl>
-<p>Get network interface information.</p>
-<dl class="section note"><dt>Note</dt><dd>We force the second rtnetlink command, RTM_GETADDR, to be sent after this one completes by doing so in the destroy callback for this command. That guarantees that the potential multipart message response from this dump is fully read prior to sending the second command. This works around an issue in ELL where it was possible that the second command would be sent prior to receiving all of the parts of the multipart <code>RTM_GETLINK</code> response, which resulted in an EBUSY error.</dd></dl>
-
-</div>
-</div>
-<a id="a76da7206668ad9784530c5284a6262d8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a76da7206668ad9784530c5284a6262d8">&#9670;&nbsp;</a></span>mptcpd_nm_destroy()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MPTCPD_API void mptcpd_nm_destroy </td>
-          <td>(</td>
-          <td class="paramtype">struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a> *&#160;</td>
-          <td class="paramname"><em>nm</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Destroy a network monitor. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">nm</td><td>Network monitor to be destroyed. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a47f057fe20111eec54516b46875f4042"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a47f057fe20111eec54516b46875f4042">&#9670;&nbsp;</a></span>mptcpd_nm_foreach_interface()</h2>
 
@@ -257,6 +200,52 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">nm</td><td>Pointer to the mptcpd network monitor object. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">callback</td><td>Function to be called during each network interface iteration. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>Data to pass to the <em>callback</em> function during each iteration. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac1bb925cd0bff0ea1d02c1a61e434613"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1bb925cd0bff0ea1d02c1a61e434613">&#9670;&nbsp;</a></span>mptcpd_nm_monitor_loopback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MPTCPD_API bool mptcpd_nm_monitor_loopback </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a> *&#160;</td>
+          <td class="paramname"><em>nm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>enable</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Enable monitoring of the loopback network interface. </p>
+<p>Mptcpd normally only monitors non-loopback network interfaces. Call this function to enable monitoring of loopback network interfaces.</p>
+<dl class="section note"><dt>Note</dt><dd>Mptcpd monitoring of loopback network interfaces is meant primarily for testing purposes.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">nm</td><td>Pointer to the mptcpd network monitor object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">enable</td><td>Enable or disable monitoring of loopback network interfaces.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">true</td><td>Successfully enable or disabled. </td></tr>
+    <tr><td class="paramname">false</td><td>Invalid <em>nm</em> argument. </td></tr>
   </table>
   </dd>
 </dl>
@@ -318,7 +307,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

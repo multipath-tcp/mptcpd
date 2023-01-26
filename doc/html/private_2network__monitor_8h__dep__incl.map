@@ -1,0 +1,6 @@
+<map id="include/mptcpd/private/network_monitor.h" name="include/mptcpd/private/network_monitor.h">
+<area shape="rect" id="node1" title="mptcpd network device monitoring &#45; internal API." alt="" coords="177,5,349,47"/>
+<area shape="rect" id="node2" href="$network__monitor_8c.html" title="mptcpd network device monitoring." alt="" coords="5,95,168,121"/>
+<area shape="rect" id="node3" href="$configuration_8c.html" title="Mptcpd configuration parser implementation." alt="" coords="192,95,333,121"/>
+<area shape="rect" id="node4" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="357,95,507,121"/>
+</map>

@@ -79,13 +79,14 @@ Collaboration diagram for mptcpd_pm:</div>
 <div class="dyncontent">
 <div class="center"><img src="structmptcpd__pm__coll__graph.png" border="0" usemap="#amptcpd__pm_coll__map" alt="Collaboration graph"/></div>
 <map name="amptcpd__pm_coll__map" id="amptcpd__pm_coll__map">
-<area shape="rect" title="Data needed to run the path manager." alt="" coords="197,184,296,211"/>
-<area shape="rect" href="structmptcpd__nm.html" title="Data needed to run the network monitor." alt="" coords="5,95,104,121"/>
-<area shape="rect" href="structmptcpd__idm.html" title="Internal mptcpd address ID manager data." alt="" coords="129,95,231,121"/>
-<area shape="rect" href="structmptcpd__config.html" title="mptcpd configuration parameters" alt="" coords="256,95,373,121"/>
-<area shape="rect" href="structmptcpd__netlink__pm.html" title=" " alt="" coords="398,95,549,121"/>
-<area shape="rect" href="structmptcpd__pm__cmd__ops.html" title="MPTCP path management generic netlink command functions." alt="" coords="295,5,459,32"/>
-<area shape="rect" href="structmptcpd__kpm__cmd__ops.html" title="Kernel&#45;side MPTCP path management netlink commands." alt="" coords="483,5,655,32"/>
+<area shape="rect" title="Data needed to run the path manager." alt="" coords="250,184,349,211"/>
+<area shape="rect" href="structmptcpd__lm.html" title="Internal mptcpd listern manager data." alt="" coords="5,95,100,121"/>
+<area shape="rect" href="structmptcpd__nm.html" title="Data needed to run the network monitor." alt="" coords="125,95,223,121"/>
+<area shape="rect" href="structmptcpd__idm.html" title="Internal mptcpd address ID manager data." alt="" coords="248,95,351,121"/>
+<area shape="rect" href="structmptcpd__config.html" title="mptcpd configuration parameters" alt="" coords="375,95,493,121"/>
+<area shape="rect" href="structmptcpd__netlink__pm.html" title=" " alt="" coords="517,95,668,121"/>
+<area shape="rect" href="structmptcpd__pm__cmd__ops.html" title="MPTCP path management generic netlink command functions." alt="" coords="415,5,579,32"/>
+<area shape="rect" href="structmptcpd__kpm__cmd__ops.html" title="Kernel&#45;side MPTCP path management netlink commands." alt="" coords="603,5,775,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -119,6 +120,9 @@ unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:aef8f9e3c1e17ac62839a3e08b64e0513"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structmptcpd__idm.html">mptcpd_idm</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmptcpd__pm.html#aef8f9e3c1e17ac62839a3e08b64e0513">idm</a></td></tr>
 <tr class="memdesc:aef8f9e3c1e17ac62839a3e08b64e0513"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPTCP address ID manager.  <a href="structmptcpd__pm.html#aef8f9e3c1e17ac62839a3e08b64e0513">More...</a><br /></td></tr>
 <tr class="separator:aef8f9e3c1e17ac62839a3e08b64e0513"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91598a5af8bf8f606f39e6328b6257cc"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structmptcpd__lm.html">mptcpd_lm</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmptcpd__pm.html#a91598a5af8bf8f606f39e6328b6257cc">lm</a></td></tr>
+<tr class="memdesc:a91598a5af8bf8f606f39e6328b6257cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPTCP listener manager.  <a href="structmptcpd__pm.html#a91598a5af8bf8f606f39e6328b6257cc">More...</a><br /></td></tr>
+<tr class="separator:a91598a5af8bf8f606f39e6328b6257cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2fdf5f9286458f04830eae9948c46687"><td class="memItemLeft" align="right" valign="top"><a id="a2fdf5f9286458f04830eae9948c46687"></a>
 struct l_queue *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmptcpd__pm.html#a2fdf5f9286458f04830eae9948c46687">event_ops</a></td></tr>
 <tr class="memdesc:a2fdf5f9286458f04830eae9948c46687"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of <code><a class="el" href="structpm__ops__info.html" title="Path manager event tracking callback information.">pm_ops_info</a></code> objects. <br /></td></tr>
@@ -174,7 +178,32 @@ struct l_queue *&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 </div><div class="memdoc">
 
 <p>MPTCP address ID manager. </p>
-<p>Manager that maps IP addresses to MPTCP address IDs, and generated IDs as needed.. </p>
+<p>Manager that maps IP addresses to MPTCP address IDs, and generated IDs as needed. </p>
+
+</div>
+</div>
+<a id="a91598a5af8bf8f606f39e6328b6257cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91598a5af8bf8f606f39e6328b6257cc">&#9670;&nbsp;</a></span>lm</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="structmptcpd__lm.html">mptcpd_lm</a>* mptcpd_pm::lm</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>MPTCP listener manager. </p>
+<p>The MPTCP listener manager maps MPTCP local addresses to a listening socket file descriptors bound to those addresses to allow passive subflow connections (joins) to be accepted. </p>
 
 </div>
 </div>
@@ -234,7 +263,7 @@ struct l_queue *&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

@@ -118,23 +118,14 @@ Macros</h2></td></tr>
 <tr class="memitem:afba689114d7119616d1fd9af9d4fefab"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="commands_8h.html#afba689114d7119616d1fd9af9d4fefab">MPTCPD_NLA_ALIGN_OPT</a>(v)&#160;&#160;&#160;((v) == 0 ? 0 : (<a class="el" href="commands_8h.html#a34f8a591fb80662ab4ca8d098d644500">MPTCPD_NLA_ALIGN</a>(v)))</td></tr>
 <tr class="memdesc:afba689114d7119616d1fd9af9d4fefab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return netlink aligned size of an optional variable.  <a href="commands_8h.html#afba689114d7119616d1fd9af9d4fefab">More...</a><br /></td></tr>
 <tr class="separator:afba689114d7119616d1fd9af9d4fefab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4405fd620ef9e6b677ababc0e8b651bc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="commands_8h.html#a4405fd620ef9e6b677ababc0e8b651bc">MPTCPD_NLA_ALIGN_ADDR</a>(v)&#160;&#160;&#160;        (NLA_HDRLEN + NLA_ALIGN(<a class="el" href="commands_8h.html#a4c656e482a65a1fe5bf5cbd79eabd0a3">mptcpd_get_addr_size</a>(v)))</td></tr>
+<tr class="memitem:a4405fd620ef9e6b677ababc0e8b651bc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="commands_8h.html#a4405fd620ef9e6b677ababc0e8b651bc">MPTCPD_NLA_ALIGN_ADDR</a>(v)&#160;&#160;&#160;        (NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(v)))</td></tr>
 <tr class="memdesc:a4405fd620ef9e6b677ababc0e8b651bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return netlink aligned size of an IP address.  <a href="commands_8h.html#a4405fd620ef9e6b677ababc0e8b651bc">More...</a><br /></td></tr>
 <tr class="separator:a4405fd620ef9e6b677ababc0e8b651bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a4398981d4bbdb37da35ef2a65475510a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="commands_8h.html#a4398981d4bbdb37da35ef2a65475510a">mptcpd_is_inet_family</a> (struct sockaddr const *addr)</td></tr>
-<tr class="memdesc:a4398981d4bbdb37da35ef2a65475510a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check for internet address family.  <a href="commands_8h.html#a4398981d4bbdb37da35ef2a65475510a">More...</a><br /></td></tr>
-<tr class="separator:a4398981d4bbdb37da35ef2a65475510a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c656e482a65a1fe5bf5cbd79eabd0a3"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="commands_8h.html#a4c656e482a65a1fe5bf5cbd79eabd0a3">mptcpd_get_addr_size</a> (struct sockaddr const *addr)</td></tr>
-<tr class="memdesc:a4c656e482a65a1fe5bf5cbd79eabd0a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the underlying internet address size.  <a href="commands_8h.html#a4c656e482a65a1fe5bf5cbd79eabd0a3">More...</a><br /></td></tr>
-<tr class="separator:a4c656e482a65a1fe5bf5cbd79eabd0a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f25d0beb90ec385b77e0c84800ec547"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="commands_8h.html#a0f25d0beb90ec385b77e0c84800ec547">mptcpd_get_addr_family</a> (struct sockaddr const *addr)</td></tr>
-<tr class="memdesc:a0f25d0beb90ec385b77e0c84800ec547"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get network address family.  <a href="commands_8h.html#a0f25d0beb90ec385b77e0c84800ec547">More...</a><br /></td></tr>
-<tr class="separator:a0f25d0beb90ec385b77e0c84800ec547"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6873c477a23a3ea20f70530da5d777d1"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="commands_8h.html#a6873c477a23a3ea20f70530da5d777d1">mptcpd_get_port_number</a> (struct sockaddr const *addr)</td></tr>
-<tr class="memdesc:a6873c477a23a3ea20f70530da5d777d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get IP port number.  <a href="commands_8h.html#a6873c477a23a3ea20f70530da5d777d1">More...</a><br /></td></tr>
+<tr class="memdesc:a6873c477a23a3ea20f70530da5d777d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get TCP port number (host byte order).  <a href="commands_8h.html#a6873c477a23a3ea20f70530da5d777d1">More...</a><br /></td></tr>
 <tr class="separator:a6873c477a23a3ea20f70530da5d777d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a482a26266e1e162f7a9868e8cda34885"><td class="memItemLeft" align="right" valign="top"><a id="a482a26266e1e162f7a9868e8cda34885"></a>
 struct <a class="el" href="structmptcpd__pm__cmd__ops.html">mptcpd_pm_cmd_ops</a> const  *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="commands_8h.html#a482a26266e1e162f7a9868e8cda34885">mptcpd_get_upstream_cmd_ops</a> (void)</td></tr>
@@ -153,7 +144,7 @@ struct <a class="el" href="structmptcpd__pm__cmd__ops.html">mptcpd_pm_cmd_ops</a
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>mptcpd generic netlink command utilities. </p>
-<p>Copyright (c) 2017-2021, Intel Corporation </p>
+<p>Copyright (c) 2017-2022, Intel Corporation </p>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a34f8a591fb80662ab4ca8d098d644500"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a34f8a591fb80662ab4ca8d098d644500">&#9670;&nbsp;</a></span>MPTCPD_NLA_ALIGN</h2>
@@ -192,7 +183,7 @@ struct <a class="el" href="structmptcpd__pm__cmd__ops.html">mptcpd_pm_cmd_ops</a
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">v</td><td>)</td>
-          <td>&#160;&#160;&#160;        (NLA_HDRLEN + NLA_ALIGN(<a class="el" href="commands_8h.html#a4c656e482a65a1fe5bf5cbd79eabd0a3">mptcpd_get_addr_size</a>(v)))</td>
+          <td>&#160;&#160;&#160;        (NLA_HDRLEN + NLA_ALIGN(mptcpd_get_addr_size(v)))</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -312,77 +303,6 @@ struct <a class="el" href="structmptcpd__pm__cmd__ops.html">mptcpd_pm_cmd_ops</a
 
 </div>
 </div>
-<a id="a0f25d0beb90ec385b77e0c84800ec547"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0f25d0beb90ec385b77e0c84800ec547">&#9670;&nbsp;</a></span>mptcpd_get_addr_family()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint16_t mptcpd_get_addr_family </td>
-          <td>(</td>
-          <td class="paramtype">struct sockaddr const *&#160;</td>
-          <td class="paramname"><em>addr</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get network address family. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Network address information.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>Get network address family suitably typed for use in MPTCP generic netlink API calls, or zero if no address was provided.</p>
-<dl class="section return"><dt>Returns</dt><dd>Network address family, or zero if no address family was provided. </dd></dl>
-
-</div>
-</div>
-<a id="a4c656e482a65a1fe5bf5cbd79eabd0a3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4c656e482a65a1fe5bf5cbd79eabd0a3">&#9670;&nbsp;</a></span>mptcpd_get_addr_size()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">size_t mptcpd_get_addr_size </td>
-          <td>(</td>
-          <td class="paramtype">struct sockaddr const *&#160;</td>
-          <td class="paramname"><em>addr</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the underlying internet address size. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Network address information.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Size of the underlying internet address (e.g., <code>struct</code> <code>in_addr6</code>). </dd></dl>
-
-</div>
-</div>
 <a id="a6873c477a23a3ea20f70530da5d777d1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6873c477a23a3ea20f70530da5d777d1">&#9670;&nbsp;</a></span>mptcpd_get_port_number()</h2>
 
@@ -399,57 +319,22 @@ struct <a class="el" href="structmptcpd__pm__cmd__ops.html">mptcpd_pm_cmd_ops</a
       </table>
 </div><div class="memdoc">
 
-<p>Get IP port number. </p>
+<p>Get TCP port number (host byte order). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Network address information.</td></tr>
   </table>
   </dd>
 </dl>
-<p>Get IP port suitably typed for use in MPTCP generic netlink API calls, or zero if no address was provided.</p>
-<dl class="section return"><dt>Returns</dt><dd>IP port number, or zero if no IP address was provided. </dd></dl>
-
-</div>
-</div>
-<a id="a4398981d4bbdb37da35ef2a65475510a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4398981d4bbdb37da35ef2a65475510a">&#9670;&nbsp;</a></span>mptcpd_is_inet_family()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool mptcpd_is_inet_family </td>
-          <td>(</td>
-          <td class="paramtype">struct sockaddr const *&#160;</td>
-          <td class="paramname"><em>addr</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Check for internet address family. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Network address information.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><code>true</code> if the <em>addr</em> is an internet address, and <code>false</code> otherwise. </dd></dl>
+<p>Get TCP port suitably typed for use in MPTCP generic netlink API calls, or zero if no address was provided.</p>
+<dl class="section return"><dt>Returns</dt><dd>TCP port number in host byte order, or zero if no IP address was provided. </dd></dl>
 
 </div>
 </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
