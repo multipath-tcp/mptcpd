@@ -69,8 +69,7 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">configuration.c File Reference</div>  </div>
 </div><!--header-->
@@ -94,30 +93,34 @@ $(function() {
 <code>#include &lt;ell/string.h&gt;</code><br />
 <code>#include &lt;<a class="el" href="types_8h_source.html">mptcpd/types.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="configuration_8h_source.html">mptcpd/private/configuration.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="private_2network__monitor_8h_source.html">mptcpd/private/network_monitor.h</a>&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for configuration.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="configuration_8c__incl.png" border="0" usemap="#asrc_2configuration_8c" alt=""/></div>
 <map name="asrc_2configuration_8c" id="asrc_2configuration_8c">
-<area shape="rect" title="Mptcpd configuration parser implementation." alt="" coords="723,5,865,32"/>
-<area shape="rect" title=" " alt="" coords="5,80,76,107"/>
-<area shape="rect" title=" " alt="" coords="101,80,167,107"/>
-<area shape="rect" title=" " alt="" coords="191,80,274,107"/>
-<area shape="rect" title=" " alt="" coords="299,80,361,107"/>
-<area shape="rect" title=" " alt="" coords="385,80,456,107"/>
-<area shape="rect" title=" " alt="" coords="481,80,555,107"/>
-<area shape="rect" title=" " alt="" coords="579,80,675,107"/>
-<area shape="rect" title=" " alt="" coords="699,80,785,107"/>
-<area shape="rect" title=" " alt="" coords="809,80,883,107"/>
-<area shape="rect" title=" " alt="" coords="907,80,982,107"/>
-<area shape="rect" title=" " alt="" coords="1006,80,1081,107"/>
-<area shape="rect" title=" " alt="" coords="1105,80,1211,107"/>
-<area shape="rect" title=" " alt="" coords="1236,80,1331,107"/>
-<area shape="rect" title=" " alt="" coords="1355,80,1446,107"/>
-<area shape="rect" href="types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="1470,80,1593,107"/>
-<area shape="rect" href="configuration_8h.html" title="Mptcpd configuration parser header." alt="" coords="1617,80,1840,107"/>
-<area shape="rect" title=" " alt="" coords="1441,155,1515,181"/>
-<area shape="rect" title=" " alt="" coords="1540,155,1627,181"/>
+<area shape="rect" title="Mptcpd configuration parser implementation." alt="" coords="775,5,917,32"/>
+<area shape="rect" title=" " alt="" coords="5,87,76,114"/>
+<area shape="rect" title=" " alt="" coords="101,87,167,114"/>
+<area shape="rect" title=" " alt="" coords="191,87,274,114"/>
+<area shape="rect" title=" " alt="" coords="299,87,361,114"/>
+<area shape="rect" title=" " alt="" coords="385,87,456,114"/>
+<area shape="rect" title=" " alt="" coords="481,87,555,114"/>
+<area shape="rect" title=" " alt="" coords="579,87,675,114"/>
+<area shape="rect" title=" " alt="" coords="699,87,785,114"/>
+<area shape="rect" title=" " alt="" coords="809,87,883,114"/>
+<area shape="rect" title=" " alt="" coords="907,87,982,114"/>
+<area shape="rect" title=" " alt="" coords="1006,87,1081,114"/>
+<area shape="rect" title=" " alt="" coords="1105,87,1211,114"/>
+<area shape="rect" title=" " alt="" coords="1236,87,1331,114"/>
+<area shape="rect" title=" " alt="" coords="1355,87,1446,114"/>
+<area shape="rect" href="types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="1470,87,1593,114"/>
+<area shape="rect" href="configuration_8h.html" title="Mptcpd configuration parser header." alt="" coords="1617,87,1840,114"/>
+<area shape="rect" href="private_2network__monitor_8h.html" title="mptcpd network device monitoring &#45; internal API." alt="" coords="1865,80,2043,121"/>
+<area shape="rect" title=" " alt="" coords="1442,169,1517,196"/>
+<area shape="rect" title=" " alt="" coords="1541,169,1628,196"/>
+<area shape="rect" href="export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="1827,169,1956,196"/>
+<area shape="rect" title=" " alt="" coords="1980,169,2051,196"/>
 </map>
 </div>
 </div><table class="memberdecls">
@@ -132,6 +135,9 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="configuration_8c.html#a32f760294e1db8e5bf1814a5eaa3f397">MPTCPD_SET_LOG_FUNCTION</a>&#160;&#160;&#160;<a class="el" href="configuration_8c.html#a1b37a9135dd82e82de70a4d3eccc34f6">MPTCPD_CONCAT</a>(l_log_set_, MPTCPD_LOGGER)</td></tr>
 <tr class="memdesc:a32f760294e1db8e5bf1814a5eaa3f397"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of the default logging function determined at compile-time. <br /></td></tr>
 <tr class="separator:a32f760294e1db8e5bf1814a5eaa3f397"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee94819c574583a779a95cb26cd9cb36"><td class="memItemLeft" align="right" valign="top"><a id="aee94819c574583a779a95cb26cd9cb36"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MPTCPD_KERNEL</b>&#160;&#160;&#160;&quot;multipath-tcp.org&quot;</td></tr>
+<tr class="separator:aee94819c574583a779a95cb26cd9cb36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Preprocessor Based String Concatenation</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>Preprocessor concatenation that expands preprocessor tokens as needed by leveraging the usual indirection technique. </p>
 </div></td></tr>
@@ -171,15 +177,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a31639fd100c83fa70fb7727ffdde0a10"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="configuration_8c.html#a31639fd100c83fa70fb7727ffdde0a10">mptcpd_config_destroy</a> (struct <a class="el" href="structmptcpd__config.html">mptcpd_config</a> *config)</td></tr>
 <tr class="memdesc:a31639fd100c83fa70fb7727ffdde0a10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the mptcpd configuration.  <a href="configuration_8c.html#a31639fd100c83fa70fb7727ffdde0a10">More...</a><br /></td></tr>
 <tr class="separator:a31639fd100c83fa70fb7727ffdde0a10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a714f260fd457c16f6f700d0d759d95c7"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structtok__entry.html">tok_entry</a> const&#160;</td><td class="memItemRight" valign="bottom"><b>notify_flags_toks</b> []</td></tr>
-<tr class="separator:a714f260fd457c16f6f700d0d759d95c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Mptcpd configuration parser implementation. </p>
-<p>Copyright (c) 2017-2021, Intel Corporation </p>
+<p>Copyright (c) 2017-2022, Intel Corporation </p>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a4829404c477131b1d6f640b234eddcba"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4829404c477131b1d6f640b234eddcba">&#9670;&nbsp;</a></span>MPTCPD_CONCAT_IMPL</h2>
@@ -291,36 +292,10 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<h2 class="groupheader">Variable Documentation</h2>
-<a id="a714f260fd457c16f6f700d0d759d95c7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a714f260fd457c16f6f700d0d759d95c7">&#9670;&nbsp;</a></span>notify_flags_toks</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">struct <a class="el" href="structtok__entry.html">tok_entry</a> const notify_flags_toks[]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
-<div class="line">        { <a class="code" href="types_8h.html#a6e6265f028a2c24d7b534470d708264d">MPTCPD_NOTIFY_FLAG_EXISTING</a>, <span class="stringliteral">&quot;existing&quot;</span> },</div>
-<div class="line">        { <a class="code" href="types_8h.html#ad5c322f5ee6109505f81b48b1bd53dc1">MPTCPD_NOTIFY_FLAG_SKIP_LL</a>, <span class="stringliteral">&quot;skip_link_local&quot;</span> },</div>
-<div class="line">        { <a class="code" href="types_8h.html#aa5f549264418f20feeae1ebc1bf84942">MPTCPD_NOTIFY_FLAG_SKIP_HOST</a>, <span class="stringliteral">&quot;skip_loopback&quot;</span> },</div>
-<div class="line">        { <a class="code" href="types_8h.html#adb011b3a7e1aa7c03f8226b451aee23a">MPTCPD_NOTIFY_FLAG_ROUTE_CHECK</a>, <span class="stringliteral">&quot;check_route&quot;</span> },</div>
-<div class="line">        { 0, NULL },</div>
-<div class="line">}</div>
-<div class="ttc" id="atypes_8h_html_a6e6265f028a2c24d7b534470d708264d"><div class="ttname"><a href="types_8h.html#a6e6265f028a2c24d7b534470d708264d">MPTCPD_NOTIFY_FLAG_EXISTING</a></div><div class="ttdeci">#define MPTCPD_NOTIFY_FLAG_EXISTING</div><div class="ttdoc">Notify even the addresses already existing at startup-time.</div><div class="ttdef"><b>Definition:</b> types.h:64</div></div>
-<div class="ttc" id="atypes_8h_html_aa5f549264418f20feeae1ebc1bf84942"><div class="ttname"><a href="types_8h.html#aa5f549264418f20feeae1ebc1bf84942">MPTCPD_NOTIFY_FLAG_SKIP_HOST</a></div><div class="ttdeci">#define MPTCPD_NOTIFY_FLAG_SKIP_HOST</div><div class="ttdoc">Ignore host (loopback) addresses.</div><div class="ttdef"><b>Definition:</b> types.h:70</div></div>
-<div class="ttc" id="atypes_8h_html_ad5c322f5ee6109505f81b48b1bd53dc1"><div class="ttname"><a href="types_8h.html#ad5c322f5ee6109505f81b48b1bd53dc1">MPTCPD_NOTIFY_FLAG_SKIP_LL</a></div><div class="ttdeci">#define MPTCPD_NOTIFY_FLAG_SKIP_LL</div><div class="ttdoc">Ignore link-local addresses.</div><div class="ttdef"><b>Definition:</b> types.h:67</div></div>
-<div class="ttc" id="atypes_8h_html_adb011b3a7e1aa7c03f8226b451aee23a"><div class="ttname"><a href="types_8h.html#adb011b3a7e1aa7c03f8226b451aee23a">MPTCPD_NOTIFY_FLAG_ROUTE_CHECK</a></div><div class="ttdeci">#define MPTCPD_NOTIFY_FLAG_ROUTE_CHECK</div><div class="ttdoc">Notify address only if a default route is available from the given interface.</div><div class="ttdef"><b>Definition:</b> types.h:73</div></div>
-</div><!-- fragment -->
-</div>
-</div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

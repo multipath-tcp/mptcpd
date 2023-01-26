@@ -90,75 +90,69 @@ $(function() {
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
 <div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="types_8h.html#a4ffe8fd7255be40d0a26c4e13cd0a225">   51</a></span>&#160;<span class="keyword">typedef</span> uint32_t <a class="code" href="types_8h.html#a4ffe8fd7255be40d0a26c4e13cd0a225">mptcpd_flags_t</a>;</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
-<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="types_8h.html#a8eb86a4dd997d4dba6c82245c8c91a5c">   54</a></span>&#160;<span class="preprocessor">#define MPTCPD_ADDR_FLAG_SIGNAL  (1U &lt;&lt; 0)</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="types_8h.html#a3281a8e8253d4ff74d45b6d826c9715f">   57</a></span>&#160;<span class="preprocessor">#define MPTCPD_ADDR_FLAG_SUBFLOW (1U &lt;&lt; 1)</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="types_8h.html#a19c224662f35fdfddbcbc4b63decaa7f">   60</a></span>&#160;<span class="preprocessor">#define MPTCPD_ADDR_FLAG_BACKUP  (1U &lt;&lt; 2)</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno"><a class="line" href="types_8h.html#a8eb86a4dd997d4dba6c82245c8c91a5c">   58</a></span>&#160;<span class="preprocessor">#define MPTCPD_ADDR_FLAG_SIGNAL  (1U &lt;&lt; 0)</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
+<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="types_8h.html#a3281a8e8253d4ff74d45b6d826c9715f">   61</a></span>&#160;<span class="preprocessor">#define MPTCPD_ADDR_FLAG_SUBFLOW (1U &lt;&lt; 1)</span></div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00064"></a><span class="lineno"><a class="line" href="types_8h.html#a6e6265f028a2c24d7b534470d708264d">   64</a></span>&#160;<span class="preprocessor">#define MPTCPD_NOTIFY_FLAG_EXISTING  (1U &lt;&lt; 0)</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno"><a class="line" href="types_8h.html#a19c224662f35fdfddbcbc4b63decaa7f">   64</a></span>&#160;<span class="preprocessor">#define MPTCPD_ADDR_FLAG_BACKUP  (1U &lt;&lt; 2)</span></div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="types_8h.html#ad5c322f5ee6109505f81b48b1bd53dc1">   67</a></span>&#160;<span class="preprocessor">#define MPTCPD_NOTIFY_FLAG_SKIP_LL (1U &lt;&lt; 1)</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
-<div class="line"><a name="l00070"></a><span class="lineno"><a class="line" href="types_8h.html#aa5f549264418f20feeae1ebc1bf84942">   70</a></span>&#160;<span class="preprocessor">#define MPTCPD_NOTIFY_FLAG_SKIP_HOST (1U &lt;&lt; 2)</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="types_8h.html#adb011b3a7e1aa7c03f8226b451aee23a">   73</a></span>&#160;<span class="preprocessor">#define MPTCPD_NOTIFY_FLAG_ROUTE_CHECK (1U &lt;&lt; 3)</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00080"></a><span class="lineno"><a class="line" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9">   80</a></span>&#160;<span class="keyword">enum</span> <a class="code" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9">mptcpd_limit_types</a></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;{</div>
-<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9a79f07590749c63108d1d3b3c65fa8dd8">   83</a></span>&#160;        <a class="code" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9a79f07590749c63108d1d3b3c65fa8dd8">MPTCPD_LIMIT_RCV_ADD_ADDRS</a>,</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        <a class="code" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9ae6f41d39f324c6d5ddcea96ab298c2d5">MPTCPD_LIMIT_SUBFLOWS</a></div>
-<div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9ae6f41d39f324c6d5ddcea96ab298c2d5">   87</a></span>&#160;};</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="keyword">struct </span><a class="code" href="structmptcpd__addr__info.html">mptcpd_addr_info</a>;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
-<div class="line"><a name="l00096"></a><span class="lineno"><a class="line" href="structmptcpd__limit.html">   96</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structmptcpd__limit.html">mptcpd_limit</a></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;{</div>
-<div class="line"><a name="l00099"></a><span class="lineno"><a class="line" href="structmptcpd__limit.html#ac43bb987e67f199ea72a670791a39d76">   99</a></span>&#160;        uint16_t <a class="code" href="structmptcpd__limit.html#ac43bb987e67f199ea72a670791a39d76">type</a>;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno"><a class="line" href="structmptcpd__limit.html#a09a6f9a79fe2da07cf62cfbd1a10b9d1">  102</a></span>&#160;        uint32_t <a class="code" href="structmptcpd__limit.html#a09a6f9a79fe2da07cf62cfbd1a10b9d1">limit</a>;</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;};</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
-<div class="line"><a name="l00118"></a><span class="lineno"><a class="line" href="types_8h.html#a2c5df02b5f1329e7e8d937cc689ced26">  118</a></span>&#160;<span class="keyword">typedef</span> void (*<a class="code" href="types_8h.html#a2c5df02b5f1329e7e8d937cc689ced26">mptcpd_kpm_get_addr_cb_t</a>)(</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        <span class="keyword">struct </span><a class="code" href="structmptcpd__addr__info.html">mptcpd_addr_info</a> const *info,</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        <span class="keywordtype">void</span> *callback_data);</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
-<div class="line"><a name="l00144"></a><span class="lineno"><a class="line" href="types_8h.html#a7908016e0dacfce897b1bd840ccef81e">  144</a></span>&#160;<span class="keyword">typedef</span> void (*<a class="code" href="types_8h.html#a7908016e0dacfce897b1bd840ccef81e">mptcpd_complete_func_t</a>)(<span class="keywordtype">void</span> *user_data);</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160; </div>
-<div class="line"><a name="l00160"></a><span class="lineno"><a class="line" href="types_8h.html#a5e1e4baeb0fa13c04433b890ce339368">  160</a></span>&#160;<span class="keyword">typedef</span> void (*<a class="code" href="types_8h.html#a5e1e4baeb0fa13c04433b890ce339368">mptcpd_pm_get_limits_cb</a>)(</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;        <span class="keyword">struct </span><a class="code" href="structmptcpd__limit.html">mptcpd_limit</a> const *limits,</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;        <span class="keywordtype">size_t</span> len,</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;        <span class="keywordtype">void</span> *callback_data);</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160; </div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;}</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160; </div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* MPTCPD_TYPES_H */</span><span class="preprocessor"></span></div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160; </div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;<span class="comment">/*</span></div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;<span class="comment">  Local Variables:</span></div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;<span class="comment">  c-file-style: &quot;linux&quot;</span></div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="comment">  End:</span></div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="comment">*/</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno"><a class="line" href="types_8h.html#a9a37fd17d270255fd27069fa5aa63c39">   75</a></span>&#160;<span class="preprocessor">#define MPTCPD_ADDR_FLAG_FULLMESH (1U &lt;&lt; 3)</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9">   83</a></span>&#160;<span class="keyword">enum</span> <a class="code" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9">mptcpd_limit_types</a></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;{</div>
+<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9a79f07590749c63108d1d3b3c65fa8dd8">   86</a></span>&#160;        <a class="code" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9a79f07590749c63108d1d3b3c65fa8dd8">MPTCPD_LIMIT_RCV_ADD_ADDRS</a>,</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        <a class="code" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9ae6f41d39f324c6d5ddcea96ab298c2d5">MPTCPD_LIMIT_SUBFLOWS</a></div>
+<div class="line"><a name="l00090"></a><span class="lineno"><a class="line" href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9ae6f41d39f324c6d5ddcea96ab298c2d5">   90</a></span>&#160;};</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="keyword">struct </span><a class="code" href="structmptcpd__addr__info.html">mptcpd_addr_info</a>;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
+<div class="line"><a name="l00099"></a><span class="lineno"><a class="line" href="structmptcpd__limit.html">   99</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structmptcpd__limit.html">mptcpd_limit</a></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;{</div>
+<div class="line"><a name="l00102"></a><span class="lineno"><a class="line" href="structmptcpd__limit.html#ac43bb987e67f199ea72a670791a39d76">  102</a></span>&#160;        uint16_t <a class="code" href="structmptcpd__limit.html#ac43bb987e67f199ea72a670791a39d76">type</a>;</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
+<div class="line"><a name="l00105"></a><span class="lineno"><a class="line" href="structmptcpd__limit.html#a09a6f9a79fe2da07cf62cfbd1a10b9d1">  105</a></span>&#160;        uint32_t <a class="code" href="structmptcpd__limit.html#a09a6f9a79fe2da07cf62cfbd1a10b9d1">limit</a>;</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;};</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
+<div class="line"><a name="l00121"></a><span class="lineno"><a class="line" href="types_8h.html#a2c5df02b5f1329e7e8d937cc689ced26">  121</a></span>&#160;<span class="keyword">typedef</span> void (*<a class="code" href="types_8h.html#a2c5df02b5f1329e7e8d937cc689ced26">mptcpd_kpm_get_addr_cb_t</a>)(</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        <span class="keyword">struct </span><a class="code" href="structmptcpd__addr__info.html">mptcpd_addr_info</a> const *info,</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        <span class="keywordtype">void</span> *callback_data);</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160; </div>
+<div class="line"><a name="l00147"></a><span class="lineno"><a class="line" href="types_8h.html#a7908016e0dacfce897b1bd840ccef81e">  147</a></span>&#160;<span class="keyword">typedef</span> void (*<a class="code" href="types_8h.html#a7908016e0dacfce897b1bd840ccef81e">mptcpd_complete_func_t</a>)(<span class="keywordtype">void</span> *user_data);</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
+<div class="line"><a name="l00163"></a><span class="lineno"><a class="line" href="types_8h.html#a5e1e4baeb0fa13c04433b890ce339368">  163</a></span>&#160;<span class="keyword">typedef</span> void (*<a class="code" href="types_8h.html#a5e1e4baeb0fa13c04433b890ce339368">mptcpd_pm_get_limits_cb</a>)(</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;        <span class="keyword">struct </span><a class="code" href="structmptcpd__limit.html">mptcpd_limit</a> const *limits,</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;        <span class="keywordtype">size_t</span> len,</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;        <span class="keywordtype">void</span> *callback_data);</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160; </div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;}</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160; </div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* MPTCPD_TYPES_H */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160; </div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="comment">  Local Variables:</span></div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="comment">  c-file-style: &quot;linux&quot;</span></div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="comment">  End:</span></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="comment">*/</span></div>
 <div class="ttc" id="astructmptcpd__addr__info_html"><div class="ttname"><a href="structmptcpd__addr__info.html">mptcpd_addr_info</a></div><div class="ttdoc">Information associated with a network address.</div><div class="ttdef"><b>Definition:</b> addr_info.h:32</div></div>
-<div class="ttc" id="astructmptcpd__limit_html"><div class="ttname"><a href="structmptcpd__limit.html">mptcpd_limit</a></div><div class="ttdoc">MPTCP resource type/limit pair.</div><div class="ttdef"><b>Definition:</b> types.h:97</div></div>
-<div class="ttc" id="astructmptcpd__limit_html_a09a6f9a79fe2da07cf62cfbd1a10b9d1"><div class="ttname"><a href="structmptcpd__limit.html#a09a6f9a79fe2da07cf62cfbd1a10b9d1">mptcpd_limit::limit</a></div><div class="ttdeci">uint32_t limit</div><div class="ttdoc">MPTCP resource limit value.</div><div class="ttdef"><b>Definition:</b> types.h:102</div></div>
-<div class="ttc" id="astructmptcpd__limit_html_ac43bb987e67f199ea72a670791a39d76"><div class="ttname"><a href="structmptcpd__limit.html#ac43bb987e67f199ea72a670791a39d76">mptcpd_limit::type</a></div><div class="ttdeci">uint16_t type</div><div class="ttdoc">MPTCP resource type, e.g. MPTCPD_LIMIT_SUBFLOWS.</div><div class="ttdef"><b>Definition:</b> types.h:99</div></div>
-<div class="ttc" id="atypes_8h_html_a2c5df02b5f1329e7e8d937cc689ced26"><div class="ttname"><a href="types_8h.html#a2c5df02b5f1329e7e8d937cc689ced26">mptcpd_kpm_get_addr_cb_t</a></div><div class="ttdeci">void(* mptcpd_kpm_get_addr_cb_t)(struct mptcpd_addr_info const *info, void *callback_data)</div><div class="ttdoc">Type of function called when an address is available.</div><div class="ttdef"><b>Definition:</b> types.h:118</div></div>
+<div class="ttc" id="astructmptcpd__limit_html"><div class="ttname"><a href="structmptcpd__limit.html">mptcpd_limit</a></div><div class="ttdoc">MPTCP resource type/limit pair.</div><div class="ttdef"><b>Definition:</b> types.h:100</div></div>
+<div class="ttc" id="astructmptcpd__limit_html_a09a6f9a79fe2da07cf62cfbd1a10b9d1"><div class="ttname"><a href="structmptcpd__limit.html#a09a6f9a79fe2da07cf62cfbd1a10b9d1">mptcpd_limit::limit</a></div><div class="ttdeci">uint32_t limit</div><div class="ttdoc">MPTCP resource limit value.</div><div class="ttdef"><b>Definition:</b> types.h:105</div></div>
+<div class="ttc" id="astructmptcpd__limit_html_ac43bb987e67f199ea72a670791a39d76"><div class="ttname"><a href="structmptcpd__limit.html#ac43bb987e67f199ea72a670791a39d76">mptcpd_limit::type</a></div><div class="ttdeci">uint16_t type</div><div class="ttdoc">MPTCP resource type, e.g. MPTCPD_LIMIT_SUBFLOWS.</div><div class="ttdef"><b>Definition:</b> types.h:102</div></div>
+<div class="ttc" id="atypes_8h_html_a2c5df02b5f1329e7e8d937cc689ced26"><div class="ttname"><a href="types_8h.html#a2c5df02b5f1329e7e8d937cc689ced26">mptcpd_kpm_get_addr_cb_t</a></div><div class="ttdeci">void(* mptcpd_kpm_get_addr_cb_t)(struct mptcpd_addr_info const *info, void *callback_data)</div><div class="ttdoc">Type of function called when an address is available.</div><div class="ttdef"><b>Definition:</b> types.h:121</div></div>
 <div class="ttc" id="atypes_8h_html_a4ffe8fd7255be40d0a26c4e13cd0a225"><div class="ttname"><a href="types_8h.html#a4ffe8fd7255be40d0a26c4e13cd0a225">mptcpd_flags_t</a></div><div class="ttdeci">uint32_t mptcpd_flags_t</div><div class="ttdoc">MPTCP flags type.</div><div class="ttdef"><b>Definition:</b> types.h:51</div></div>
-<div class="ttc" id="atypes_8h_html_a5e1e4baeb0fa13c04433b890ce339368"><div class="ttname"><a href="types_8h.html#a5e1e4baeb0fa13c04433b890ce339368">mptcpd_pm_get_limits_cb</a></div><div class="ttdeci">void(* mptcpd_pm_get_limits_cb)(struct mptcpd_limit const *limits, size_t len, void *callback_data)</div><div class="ttdoc">Type of function called when MPTCP resource limits are available.</div><div class="ttdef"><b>Definition:</b> types.h:160</div></div>
+<div class="ttc" id="atypes_8h_html_a5e1e4baeb0fa13c04433b890ce339368"><div class="ttname"><a href="types_8h.html#a5e1e4baeb0fa13c04433b890ce339368">mptcpd_pm_get_limits_cb</a></div><div class="ttdeci">void(* mptcpd_pm_get_limits_cb)(struct mptcpd_limit const *limits, size_t len, void *callback_data)</div><div class="ttdoc">Type of function called when MPTCP resource limits are available.</div><div class="ttdef"><b>Definition:</b> types.h:163</div></div>
 <div class="ttc" id="atypes_8h_html_a6e9641b2e99dcb57c5815a84af404700"><div class="ttname"><a href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a></div><div class="ttdeci">uint32_t mptcpd_token_t</div><div class="ttdoc">MPTCP connection token type.</div><div class="ttdef"><b>Definition:</b> types.h:26</div></div>
-<div class="ttc" id="atypes_8h_html_a7908016e0dacfce897b1bd840ccef81e"><div class="ttname"><a href="types_8h.html#a7908016e0dacfce897b1bd840ccef81e">mptcpd_complete_func_t</a></div><div class="ttdeci">void(* mptcpd_complete_func_t)(void *user_data)</div><div class="ttdoc">Type of function called on asynchronous call completion.</div><div class="ttdef"><b>Definition:</b> types.h:144</div></div>
-<div class="ttc" id="atypes_8h_html_a7edd2b10cb36f51ceba227c550eb74f9"><div class="ttname"><a href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9">mptcpd_limit_types</a></div><div class="ttdeci">mptcpd_limit_types</div><div class="ttdoc">MPTCP resource limit type identifiers.</div><div class="ttdef"><b>Definition:</b> types.h:81</div></div>
-<div class="ttc" id="atypes_8h_html_a7edd2b10cb36f51ceba227c550eb74f9a79f07590749c63108d1d3b3c65fa8dd8"><div class="ttname"><a href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9a79f07590749c63108d1d3b3c65fa8dd8">MPTCPD_LIMIT_RCV_ADD_ADDRS</a></div><div class="ttdeci">@ MPTCPD_LIMIT_RCV_ADD_ADDRS</div><div class="ttdoc">Maximum number of address advertisements to receive.</div><div class="ttdef"><b>Definition:</b> types.h:83</div></div>
-<div class="ttc" id="atypes_8h_html_a7edd2b10cb36f51ceba227c550eb74f9ae6f41d39f324c6d5ddcea96ab298c2d5"><div class="ttname"><a href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9ae6f41d39f324c6d5ddcea96ab298c2d5">MPTCPD_LIMIT_SUBFLOWS</a></div><div class="ttdeci">@ MPTCPD_LIMIT_SUBFLOWS</div><div class="ttdoc">Maximum number of subflows.</div><div class="ttdef"><b>Definition:</b> types.h:86</div></div>
+<div class="ttc" id="atypes_8h_html_a7908016e0dacfce897b1bd840ccef81e"><div class="ttname"><a href="types_8h.html#a7908016e0dacfce897b1bd840ccef81e">mptcpd_complete_func_t</a></div><div class="ttdeci">void(* mptcpd_complete_func_t)(void *user_data)</div><div class="ttdoc">Type of function called on asynchronous call completion.</div><div class="ttdef"><b>Definition:</b> types.h:147</div></div>
+<div class="ttc" id="atypes_8h_html_a7edd2b10cb36f51ceba227c550eb74f9"><div class="ttname"><a href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9">mptcpd_limit_types</a></div><div class="ttdeci">mptcpd_limit_types</div><div class="ttdoc">MPTCP resource limit type identifiers.</div><div class="ttdef"><b>Definition:</b> types.h:84</div></div>
+<div class="ttc" id="atypes_8h_html_a7edd2b10cb36f51ceba227c550eb74f9a79f07590749c63108d1d3b3c65fa8dd8"><div class="ttname"><a href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9a79f07590749c63108d1d3b3c65fa8dd8">MPTCPD_LIMIT_RCV_ADD_ADDRS</a></div><div class="ttdeci">@ MPTCPD_LIMIT_RCV_ADD_ADDRS</div><div class="ttdoc">Maximum number of address advertisements to receive.</div><div class="ttdef"><b>Definition:</b> types.h:86</div></div>
+<div class="ttc" id="atypes_8h_html_a7edd2b10cb36f51ceba227c550eb74f9ae6f41d39f324c6d5ddcea96ab298c2d5"><div class="ttname"><a href="types_8h.html#a7edd2b10cb36f51ceba227c550eb74f9ae6f41d39f324c6d5ddcea96ab298c2d5">MPTCPD_LIMIT_SUBFLOWS</a></div><div class="ttdeci">@ MPTCPD_LIMIT_SUBFLOWS</div><div class="ttdoc">Maximum number of subflows.</div><div class="ttdef"><b>Definition:</b> types.h:89</div></div>
 <div class="ttc" id="atypes_8h_html_adf127168dbffeda9346f486f7356c7eb"><div class="ttname"><a href="types_8h.html#adf127168dbffeda9346f486f7356c7eb">mptcpd_aid_t</a></div><div class="ttdeci">uint8_t mptcpd_aid_t</div><div class="ttdoc">MPTCP address ID type.</div><div class="ttdef"><b>Definition:</b> types.h:29</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

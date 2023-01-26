@@ -1,5 +1,8 @@
 <map id="include/mptcpd/private/sockaddr.h" name="include/mptcpd/private/sockaddr.h">
-<area shape="rect" id="node1" title="mptcpd struct sockaddr related utility functions." alt="" coords="26,5,198,47"/>
+<area shape="rect" id="node1" title="mptcpd struct sockaddr related utility functions." alt="" coords="178,5,350,47"/>
 <area shape="rect" id="node2" title=" " alt="" coords="5,95,88,121"/>
-<area shape="rect" id="node3" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="113,95,242,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="113,95,191,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="215,95,313,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="337,95,433,121"/>
+<area shape="rect" id="node6" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="458,95,587,121"/>
 </map>

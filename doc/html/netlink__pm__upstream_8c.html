@@ -82,13 +82,14 @@ $(function() {
 <code>#include &lt;ell/genl.h&gt;</code><br />
 <code>#include &lt;ell/util.h&gt;</code><br />
 <code>#include &lt;ell/log.h&gt;</code><br />
-<code>#include &lt;<a class="el" href="mptcp__upstream_8h_source.html">mptcpd/private/mptcp_upstream.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="types_8h_source.html">mptcpd/types.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="listener__manager_8h_source.html">mptcpd/listener_manager.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="include_2mptcpd_2path__manager_8h_source.html">mptcpd/path_manager.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="include_2mptcpd_2private_2netlink__pm_8h_source.html">mptcpd/private/netlink_pm.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="include_2mptcpd_2private_2path__manager_8h_source.html">mptcpd/private/path_manager.h</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="include_2mptcpd_2path__manager_8h_source.html">mptcpd/path_manager.h</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="types_8h_source.html">mptcpd/types.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="private_2addr__info_8h_source.html">mptcpd/private/addr_info.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="sockaddr_8h_source.html">mptcpd/private/sockaddr.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="mptcp__upstream_8h_source.html">mptcpd/private/mptcp_upstream.h</a>&gt;</code><br />
 <code>#include &quot;<a class="el" href="commands_8h_source.html">commands.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="src_2netlink__pm_8h_source.html">netlink_pm.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="src_2path__manager_8h_source.html">path_manager.h</a>&quot;</code><br />
@@ -97,36 +98,43 @@ Include dependency graph for netlink_pm_upstream.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="netlink__pm__upstream_8c__incl.png" border="0" usemap="#asrc_2netlink__pm__upstream_8c" alt=""/></div>
 <map name="asrc_2netlink__pm__upstream_8c" id="asrc_2netlink__pm__upstream_8c">
-<area shape="rect" title="Upstream kernel generic netlink path manager details." alt="" coords="816,5,1015,32"/>
-<area shape="rect" title=" " alt="" coords="1586,169,1661,196"/>
-<area shape="rect" title=" " alt="" coords="203,87,271,114"/>
-<area shape="rect" title=" " alt="" coords="1875,169,1977,196"/>
-<area shape="rect" title=" " alt="" coords="346,87,429,114"/>
-<area shape="rect" title=" " alt="" coords="453,87,527,114"/>
-<area shape="rect" title=" " alt="" coords="551,87,626,114"/>
-<area shape="rect" href="mptcp__upstream_8h.html" title="mptcpd convenience wrapper around upstream &lt;linux/mptcp.h&gt;." alt="" coords="12,80,179,121"/>
-<area shape="rect" href="include_2mptcpd_2private_2netlink__pm_8h.html" title="Kernel generic netlink path manager details." alt="" coords="405,169,615,196"/>
-<area shape="rect" href="include_2mptcpd_2private_2path__manager_8h.html" title="mptcpd path manager private interface." alt="" coords="781,80,935,121"/>
-<area shape="rect" href="types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="937,169,1059,196"/>
-<area shape="rect" href="include_2mptcpd_2path__manager_8h.html" title="mptcpd generic netlink commands." alt="" coords="1011,87,1191,114"/>
-<area shape="rect" href="private_2addr__info_8h.html" title="mptcpd_addr_info related code." alt="" coords="1434,80,1589,121"/>
-<area shape="rect" href="sockaddr_8h.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="1215,87,1410,114"/>
-<area shape="rect" href="commands_8h.html" title="mptcpd generic netlink command utilities." alt="" coords="1663,87,1770,114"/>
-<area shape="rect" href="src_2netlink__pm_8h.html" title="Kernel generic netlink path manager details." alt="" coords="650,87,757,114"/>
-<area shape="rect" href="src_2path__manager_8h.html" title="mptcpd user space path manager header file (internal)." alt="" coords="1845,87,1972,114"/>
-<area shape="rect" title=" " alt="" coords="5,169,185,196"/>
-<area shape="rect" title=" " alt="" coords="1443,244,1518,271"/>
-<area shape="rect" title=" " alt="" coords="955,244,1041,271"/>
-<area shape="rect" href="export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="1109,169,1239,196"/>
-<area shape="rect" title=" " alt="" coords="1263,169,1346,196"/>
-<area shape="rect" title=" " alt="" coords="1371,169,1441,196"/>
-<area shape="rect" title=" " alt="" coords="1466,169,1562,196"/>
-<area shape="rect" title=" " alt="" coords="1685,169,1799,196"/>
+<area shape="rect" title="Upstream kernel generic netlink path manager details." alt="" coords="1081,5,1279,32"/>
+<area shape="rect" title=" " alt="" coords="5,169,80,196"/>
+<area shape="rect" title=" " alt="" coords="1574,87,1642,114"/>
+<area shape="rect" title=" " alt="" coords="294,169,397,196"/>
+<area shape="rect" title=" " alt="" coords="1667,87,1749,114"/>
+<area shape="rect" title=" " alt="" coords="1773,87,1848,114"/>
+<area shape="rect" title=" " alt="" coords="1872,87,1947,114"/>
+<area shape="rect" href="types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="643,169,765,196"/>
+<area shape="rect" href="listener__manager_8h.html" title="Map of MPTCP local address to listener." alt="" coords="1080,87,1280,114"/>
+<area shape="rect" href="include_2mptcpd_2path__manager_8h.html" title="mptcpd generic netlink commands." alt="" coords="745,87,925,114"/>
+<area shape="rect" href="include_2mptcpd_2private_2netlink__pm_8h.html" title="Kernel generic netlink path manager details." alt="" coords="1400,169,1611,196"/>
+<area shape="rect" href="include_2mptcpd_2private_2path__manager_8h.html" title="mptcpd path manager private interface." alt="" coords="515,80,669,121"/>
+<area shape="rect" href="private_2addr__info_8h.html" title="mptcpd_addr_info related code." alt="" coords="336,80,491,121"/>
+<area shape="rect" href="sockaddr_8h.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="1304,87,1499,114"/>
+<area shape="rect" href="mptcp__upstream_8h.html" title="mptcpd convenience wrapper around upstream &lt;linux/mptcp.h&gt;." alt="" coords="1971,80,2138,121"/>
+<area shape="rect" href="commands_8h.html" title="mptcpd generic netlink command utilities." alt="" coords="155,87,261,114"/>
+<area shape="rect" href="src_2netlink__pm_8h.html" title="Kernel generic netlink path manager details." alt="" coords="949,87,1056,114"/>
+<area shape="rect" href="src_2path__manager_8h.html" title="mptcpd user space path manager header file (internal)." alt="" coords="2162,87,2289,114"/>
+<area shape="rect" title=" " alt="" coords="324,244,399,271"/>
+<area shape="rect" title=" " alt="" coords="661,244,747,271"/>
+<area shape="rect" title=" " alt="" coords="961,169,1044,196"/>
+<area shape="rect" href="export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="1093,169,1222,196"/>
+<area shape="rect" title=" " alt="" coords="542,169,613,196"/>
+<area shape="rect" title=" " alt="" coords="421,169,517,196"/>
+<area shape="rect" title=" " alt="" coords="1634,169,1713,196"/>
+<area shape="rect" title=" " alt="" coords="1278,169,1375,196"/>
+<area shape="rect" title=" " alt="" coords="1965,169,2145,196"/>
+<area shape="rect" title=" " alt="" coords="155,169,269,196"/>
 </map>
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structaddr__info.html">addr_info</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structremove__info.html">remove_info</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structget__addr__user__callback.html">get_addr_user_callback</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience struct for passing addr to user callback.  <a href="structget__addr__user__callback.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -143,11 +151,11 @@ struct <a class="el" href="structmptcpd__netlink__pm.html">mptcpd_netlink_pm</a>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Upstream kernel generic netlink path manager details. </p>
-<p>Copyright (c) 2020-2021, Intel Corporation </p>
+<p>Copyright (c) 2020-2022, Intel Corporation </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
