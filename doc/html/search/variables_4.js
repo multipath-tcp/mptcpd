@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['family_394',['family',['../structmptcpd__interface.html#a003322d8c2123af2457c8846e1d8afef',1,'mptcpd_interface::family()'],['../structmptcpd__pm.html#aeb1c3cee225629cadb9f62cac7183a3b',1,'mptcpd_pm::family()']]],
-  ['flags_395',['flags',['../structmptcpd__interface.html#acff8e9be62af3660a2578813c24271f0',1,'mptcpd_interface::flags()'],['../structmptcpd__addr__info.html#a39b25a520e6fd36feb98ac54115f56be',1,'mptcpd_addr_info::flags()']]],
-  ['flush_5faddrs_396',['flush_addrs',['../structmptcpd__kpm__cmd__ops.html#a9ffed54fd136f4e87039ea68069946fe',1,'mptcpd_kpm_cmd_ops']]]
+  ['error_455',['error',['../structpm__event__attrs.html#ae84eeb39499cf0557fb69c439919f5cf',1,'pm_event_attrs']]],
+  ['event_5fops_456',['event_ops',['../structmptcpd__pm.html#a2fdf5f9286458f04830eae9948c46687',1,'mptcpd_pm']]],
+  ['exit_457',['exit',['../structmptcpd__plugin__desc.html#ae46965a8ac32e92ef21a14d59ce76599',1,'mptcpd_plugin_desc']]]
 ];

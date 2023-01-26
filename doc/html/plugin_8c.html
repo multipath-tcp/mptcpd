@@ -149,12 +149,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a04d5b40d21e262c386b4f3db0dd1ba62"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="plugin_8c.html#a04d5b40d21e262c386b4f3db0dd1ba62">mptcpd_plugin_register_ops</a> (char const *name, struct <a class="el" href="structmptcpd__plugin__ops.html">mptcpd_plugin_ops</a> const *ops)</td></tr>
 <tr class="memdesc:a04d5b40d21e262c386b4f3db0dd1ba62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register path manager operations.  <a href="plugin_8c.html#a04d5b40d21e262c386b4f3db0dd1ba62">More...</a><br /></td></tr>
 <tr class="separator:a04d5b40d21e262c386b4f3db0dd1ba62"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada75e3842c08c01cbee8ac260f26fd31"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="plugin_8c.html#ada75e3842c08c01cbee8ac260f26fd31">mptcpd_plugin_new_connection</a> (char const *name, <a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td></tr>
-<tr class="memdesc:ada75e3842c08c01cbee8ac260f26fd31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notify plugin of new MPTCP connection pending completion.  <a href="plugin_8c.html#ada75e3842c08c01cbee8ac260f26fd31">More...</a><br /></td></tr>
-<tr class="separator:ada75e3842c08c01cbee8ac260f26fd31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a2b3c30eeee7da87705a1080e46f1c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="plugin_8c.html#a2a2b3c30eeee7da87705a1080e46f1c7">mptcpd_plugin_connection_established</a> (<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td></tr>
-<tr class="memdesc:a2a2b3c30eeee7da87705a1080e46f1c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notify plugin of MPTCP connection completion.  <a href="plugin_8c.html#a2a2b3c30eeee7da87705a1080e46f1c7">More...</a><br /></td></tr>
-<tr class="separator:a2a2b3c30eeee7da87705a1080e46f1c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a760650212b50b2c330097ab72225fa04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="plugin_8c.html#a760650212b50b2c330097ab72225fa04">mptcpd_plugin_new_connection</a> (char const *name, <a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, bool server_side, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td></tr>
+<tr class="memdesc:a760650212b50b2c330097ab72225fa04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notify plugin of new MPTCP connection pending completion.  <a href="plugin_8c.html#a760650212b50b2c330097ab72225fa04">More...</a><br /></td></tr>
+<tr class="separator:a760650212b50b2c330097ab72225fa04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae114d859979a5d6f8aa34ad90199bfa0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="plugin_8c.html#ae114d859979a5d6f8aa34ad90199bfa0">mptcpd_plugin_connection_established</a> (<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct sockaddr const *laddr, struct sockaddr const *raddr, bool server_side, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td></tr>
+<tr class="memdesc:ae114d859979a5d6f8aa34ad90199bfa0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notify plugin of MPTCP connection completion.  <a href="plugin_8c.html#ae114d859979a5d6f8aa34ad90199bfa0">More...</a><br /></td></tr>
+<tr class="separator:ae114d859979a5d6f8aa34ad90199bfa0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72bfbcf16777f9beb1d453594902aa80"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="plugin_8c.html#a72bfbcf16777f9beb1d453594902aa80">mptcpd_plugin_connection_closed</a> (<a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm)</td></tr>
 <tr class="memdesc:a72bfbcf16777f9beb1d453594902aa80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notify plugin of MPTCP connection closure.  <a href="plugin_8c.html#a72bfbcf16777f9beb1d453594902aa80">More...</a><br /></td></tr>
 <tr class="separator:a72bfbcf16777f9beb1d453594902aa80"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -191,7 +191,7 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Common path manager plugin functions. </p>
-<p>Copyright (c) 2018-2021, Intel Corporation </p>
+<p>Copyright (c) 2018-2022, Intel Corporation </p>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a985ec6b7afa5f46ad0e5533d62f7873b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a985ec6b7afa5f46ad0e5533d62f7873b">&#9670;&nbsp;</a></span>MPTCP_PM_NAME_LEN</h2>
@@ -204,7 +204,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo:</a></b></dt><dd>Remove this preprocessor symbol definition once support for path management strategy names are supported in the new generic netlink API.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000016">Todo:</a></b></dt><dd>Remove this preprocessor symbol definition once support for path management strategy names are supported in the new generic netlink API.</dd></dl>
 <dl class="section note"><dt>Note</dt><dd><code>GENL_NAMSIZ</code> is used as the size since the path manager name attribute in the deprecated MPTCP generic netlink API contained a fixed length string of that size. </dd></dl>
 
 </div>
@@ -291,8 +291,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a2a2b3c30eeee7da87705a1080e46f1c7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2a2b3c30eeee7da87705a1080e46f1c7">&#9670;&nbsp;</a></span>mptcpd_plugin_connection_established()</h2>
+<a id="ae114d859979a5d6f8aa34ad90199bfa0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae114d859979a5d6f8aa34ad90199bfa0">&#9670;&nbsp;</a></span>mptcpd_plugin_connection_established()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -318,6 +318,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>server_side</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *&#160;</td>
           <td class="paramname"><em>pm</em>&#160;</td>
         </tr>
@@ -335,6 +341,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">token</td><td>MPTCP connection token. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">laddr</td><td>Local address information. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">raddr</td><td>Remote address information. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">server_side</td><td>Server side connection flag. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pm</td><td>Opaque pointer to mptcpd path manager object. </td></tr>
   </table>
   </dd>
@@ -474,7 +481,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd><code>true</code> on successful load, <code>false</code> otherwise. </dd></dl>
 <p>Create map of connection token to path manager plugin.</p>
 <dl class="section note"><dt>Note</dt><dd>We use the default ELL direct hash function that converts from a pointer to an <code>unsigned</code> <code>int</code>.</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000020">Todo:</a></b></dt><dd>Determine if this is a performance bottleneck on 64 bit platforms since it is possible that connection IDs may end up in the same hash bucket due to the truncation from 64 bits to 32 bits in ELL's direct hash function, assuming <code>unsigned</code> <code>int</code> is a 32 bit type. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000021">Todo:</a></b></dt><dd>Determine if this is a performance bottleneck on 64 bit platforms since it is possible that connection IDs may end up in the same hash bucket due to the truncation from 64 bits to 32 bits in ELL's direct hash function, assuming <code>unsigned</code> <code>int</code> is a 32 bit type. </dd></dl>
 
 </div>
 </div>
@@ -529,8 +536,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ada75e3842c08c01cbee8ac260f26fd31"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ada75e3842c08c01cbee8ac260f26fd31">&#9670;&nbsp;</a></span>mptcpd_plugin_new_connection()</h2>
+<a id="a760650212b50b2c330097ab72225fa04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a760650212b50b2c330097ab72225fa04">&#9670;&nbsp;</a></span>mptcpd_plugin_new_connection()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -562,6 +569,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>server_side</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *&#160;</td>
           <td class="paramname"><em>pm</em>&#160;</td>
         </tr>
@@ -580,6 +593,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">token</td><td>MPTCP connection token. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">laddr</td><td>Local address information. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">raddr</td><td>Remote address information. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">server_side</td><td>Server side connection flag. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pm</td><td>Opaque pointer to mptcpd path manager object. </td></tr>
   </table>
   </dd>
@@ -768,7 +782,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000021">Todo:</a></b></dt><dd>Should we return <code>false</code> if all of the callbacks in <em>ops</em> are <code>NULL</code>? </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000022">Todo:</a></b></dt><dd>Should we return <code>false</code> if all of the callbacks in <em>ops</em> are <code>NULL</code>? </dd></dl>
 
 </div>
 </div>
@@ -955,7 +969,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

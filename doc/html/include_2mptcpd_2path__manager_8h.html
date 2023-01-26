@@ -127,15 +127,18 @@ Functions</h2></td></tr>
 <tr class="memitem:aa240c9f91f24740c9a0772f22f3805c8"><td class="memItemLeft" align="right" valign="top">MPTCPD_API struct <a class="el" href="structmptcpd__idm.html">mptcpd_idm</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="include_2mptcpd_2path__manager_8h.html#aa240c9f91f24740c9a0772f22f3805c8">mptcpd_pm_get_idm</a> (struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> const *pm)</td></tr>
 <tr class="memdesc:aa240c9f91f24740c9a0772f22f3805c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get pointer to the global MPTCP address ID manager.  <a href="include_2mptcpd_2path__manager_8h.html#aa240c9f91f24740c9a0772f22f3805c8">More...</a><br /></td></tr>
 <tr class="separator:aa240c9f91f24740c9a0772f22f3805c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6a2eb44d91de838d7f5596b8623a473"><td class="memItemLeft" align="right" valign="top">MPTCPD_API struct <a class="el" href="structmptcpd__lm.html">mptcpd_lm</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="include_2mptcpd_2path__manager_8h.html#ad6a2eb44d91de838d7f5596b8623a473">mptcpd_pm_get_lm</a> (struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> const *pm)</td></tr>
+<tr class="memdesc:ad6a2eb44d91de838d7f5596b8623a473"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get pointer to the global MPTCP listener manager.  <a href="include_2mptcpd_2path__manager_8h.html#ad6a2eb44d91de838d7f5596b8623a473">More...</a><br /></td></tr>
+<tr class="separator:ad6a2eb44d91de838d7f5596b8623a473"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Client-oriented Path Management Commands</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>Client-oriented path management commands that allow for per-connection path management. </p>
 </div></td></tr>
-<tr class="memitem:a020f380c575d31324a0e9e9fc315fbe3"><td class="memItemLeft" align="right" valign="top">MPTCPD_API int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="include_2mptcpd_2path__manager_8h.html#a020f380c575d31324a0e9e9fc315fbe3">mptcpd_pm_add_addr</a> (struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm, struct sockaddr const *addr, <a class="el" href="types_8h.html#adf127168dbffeda9346f486f7356c7eb">mptcpd_aid_t</a> id, <a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token)</td></tr>
-<tr class="memdesc:a020f380c575d31324a0e9e9fc315fbe3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advertise new network address to peers.  <a href="include_2mptcpd_2path__manager_8h.html#a020f380c575d31324a0e9e9fc315fbe3">More...</a><br /></td></tr>
-<tr class="separator:a020f380c575d31324a0e9e9fc315fbe3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8b8f1b8ef735d40adac6f0ac9e349b4c"><td class="memItemLeft" align="right" valign="top">MPTCPD_API int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="include_2mptcpd_2path__manager_8h.html#a8b8f1b8ef735d40adac6f0ac9e349b4c">mptcpd_pm_remove_addr</a> (struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm, <a class="el" href="types_8h.html#adf127168dbffeda9346f486f7356c7eb">mptcpd_aid_t</a> address_id, <a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token)</td></tr>
-<tr class="memdesc:a8b8f1b8ef735d40adac6f0ac9e349b4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop advertising network address to peers.  <a href="include_2mptcpd_2path__manager_8h.html#a8b8f1b8ef735d40adac6f0ac9e349b4c">More...</a><br /></td></tr>
-<tr class="separator:a8b8f1b8ef735d40adac6f0ac9e349b4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5182419eb142c1900e06070dd2a9d4fe"><td class="memItemLeft" align="right" valign="top">MPTCPD_API int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="include_2mptcpd_2path__manager_8h.html#a5182419eb142c1900e06070dd2a9d4fe">mptcpd_pm_add_addr</a> (struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm, struct sockaddr *addr, <a class="el" href="types_8h.html#adf127168dbffeda9346f486f7356c7eb">mptcpd_aid_t</a> id, <a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token)</td></tr>
+<tr class="memdesc:a5182419eb142c1900e06070dd2a9d4fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advertise new network address to peers.  <a href="include_2mptcpd_2path__manager_8h.html#a5182419eb142c1900e06070dd2a9d4fe">More...</a><br /></td></tr>
+<tr class="separator:a5182419eb142c1900e06070dd2a9d4fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a700436847daece158bac32281acce6ec"><td class="memItemLeft" align="right" valign="top">MPTCPD_API int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="include_2mptcpd_2path__manager_8h.html#a700436847daece158bac32281acce6ec">mptcpd_pm_remove_addr</a> (struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm, struct sockaddr const *addr, <a class="el" href="types_8h.html#adf127168dbffeda9346f486f7356c7eb">mptcpd_aid_t</a> address_id, <a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token)</td></tr>
+<tr class="memdesc:a700436847daece158bac32281acce6ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop advertising network address to peers.  <a href="include_2mptcpd_2path__manager_8h.html#a700436847daece158bac32281acce6ec">More...</a><br /></td></tr>
+<tr class="separator:a700436847daece158bac32281acce6ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6db7bae0caab2fc4e6f5b620dde79d2"><td class="memItemLeft" align="right" valign="top">MPTCPD_API int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="include_2mptcpd_2path__manager_8h.html#af6db7bae0caab2fc4e6f5b620dde79d2">mptcpd_pm_add_subflow</a> (struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *pm, <a class="el" href="types_8h.html#a6e9641b2e99dcb57c5815a84af404700">mptcpd_token_t</a> token, <a class="el" href="types_8h.html#adf127168dbffeda9346f486f7356c7eb">mptcpd_aid_t</a> local_address_id, <a class="el" href="types_8h.html#adf127168dbffeda9346f486f7356c7eb">mptcpd_aid_t</a> remote_address_id, struct sockaddr const *local_addr, struct sockaddr const *remote_addr, bool backup)</td></tr>
 <tr class="memdesc:af6db7bae0caab2fc4e6f5b620dde79d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new subflow.  <a href="include_2mptcpd_2path__manager_8h.html#af6db7bae0caab2fc4e6f5b620dde79d2">More...</a><br /></td></tr>
 <tr class="separator:af6db7bae0caab2fc4e6f5b620dde79d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -175,7 +178,7 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>mptcpd generic netlink commands. </p>
-<p>Copyright (c) 2017-2021, Intel Corporation </p>
+<p>Copyright (c) 2017-2022, Intel Corporation </p>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="ab42fdc538888312e3f812bd8677a7a94"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab42fdc538888312e3f812bd8677a7a94">&#9670;&nbsp;</a></span>mptcpd_kpm_add_addr()</h2>
@@ -225,7 +228,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">pm</td><td>The mptcpd path manager object. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Local IP address and port to be advertised through the MPTCP protocol <code>ADD_ADDR</code> option. The port is optional, and is ignored if it is zero. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Local IP address and port to be advertised through the MPTCP protocol <code>ADD_ADDR</code> option. The port is optional, and is ignored if it is zero. A non-zero port implies <code>MPTCPD_ADDR_FLAG_SIGNAL</code> in <em>flags</em>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">id</td><td>MPTCP local address ID. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td>Bitset of MPTCP flags associated with the network address, e.g. <code>MPTCPD_ADDR_FLAG_SUBFLOW</code> <code></code>| <code>MPTCPD_ADDR_FLAG_BACKUP</code>. Optional for upstream kernel (e.g. set to zero). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>Network interface index. Optional for upstream Linux kernel (e.g. set to zero).</td></tr>
@@ -494,7 +497,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">pm</td><td>The mptcpd path manager object. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Local IP address. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Local IP address. A non-zero port implies <code>MPTCPD_ADDR_FLAG_SIGNAL</code> in <em>flags</em>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td>Flags to be associated with <em>addr</em>.</td></tr>
   </table>
   </dd>
@@ -548,8 +551,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a020f380c575d31324a0e9e9fc315fbe3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a020f380c575d31324a0e9e9fc315fbe3">&#9670;&nbsp;</a></span>mptcpd_pm_add_addr()</h2>
+<a id="a5182419eb142c1900e06070dd2a9d4fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5182419eb142c1900e06070dd2a9d4fe">&#9670;&nbsp;</a></span>mptcpd_pm_add_addr()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -563,7 +566,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">struct sockaddr const *&#160;</td>
+          <td class="paramtype">struct sockaddr *&#160;</td>
           <td class="paramname"><em>addr</em>, </td>
         </tr>
         <tr>
@@ -590,13 +593,13 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">pm</td><td>The mptcpd path manager object. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Local IP address and port to be advertised through the MPTCP protocol <code>ADD_ADDR</code> option. The port is optional, and is ignored if it is zero. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">addr</td><td>Local IP address and port to be advertised through the MPTCP protocol <code>ADD_ADDR</code> option. If the port is zero an ephemeral port will be chosen, and assigned to the appropriate underlying address family-specific port member, e.g. <code>sin_port</code> or <code>sin6_port</code>. The port will be in network byte order. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">id</td><td>MPTCP local address ID. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">token</td><td>MPTCP connection token.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>0</code> if operation was successful. <code>errno</code> otherwise. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><code>0</code> if operation was successful. -1 or <code>errno</code> otherwise. </dd></dl>
 
 </div>
 </div>
@@ -670,7 +673,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><code>0</code> if operation was successful. -1 or <code>errno</code> otherwise.</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>There far too many parameters. Reduce. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>There far too many parameters. Reduce. </dd></dl>
 
 </div>
 </div>
@@ -699,6 +702,34 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>The global MPTCP address ID manager is meant to track address IDs associated with the in-kernel path manager.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>Global mptcpd MPTCP address ID manager. </dd></dl>
+
+</div>
+</div>
+<a id="ad6a2eb44d91de838d7f5596b8623a473"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6a2eb44d91de838d7f5596b8623a473">&#9670;&nbsp;</a></span>mptcpd_pm_get_lm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MPTCPD_API struct <a class="el" href="structmptcpd__lm.html">mptcpd_lm</a>* mptcpd_pm_get_lm </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> const *&#160;</td>
+          <td class="paramname"><em>pm</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get pointer to the global MPTCP listener manager. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">pm</td><td>Mptcpd path manager data.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>The global MPTCP listener manager tracks MPTCP listening sockets associated with a local address.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Global mptcpd MPTCP listener manager. </dd></dl>
 
 </div>
 </div>
@@ -809,8 +840,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a8b8f1b8ef735d40adac6f0ac9e349b4c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8b8f1b8ef735d40adac6f0ac9e349b4c">&#9670;&nbsp;</a></span>mptcpd_pm_remove_addr()</h2>
+<a id="a700436847daece158bac32281acce6ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a700436847daece158bac32281acce6ec">&#9670;&nbsp;</a></span>mptcpd_pm_remove_addr()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -820,6 +851,12 @@ Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype">struct <a class="el" href="structmptcpd__pm.html">mptcpd_pm</a> *&#160;</td>
           <td class="paramname"><em>pm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct sockaddr const *&#160;</td>
+          <td class="paramname"><em>addr</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -845,6 +882,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">pm</td><td>The mptcpd path manager object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">addr</td><td>Local IP address and port that should no longer be advertised through MPTCP. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">address_id</td><td>MPTCP local address ID to be sent in the MPTCP protocol <code>REMOVE_ADDR</code> option corresponding to the local address that will no longer be available. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">token</td><td>MPTCP connection token.</td></tr>
   </table>
@@ -968,7 +1006,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

@@ -78,34 +78,63 @@ $(function() {
 <div class="textblock"><code>#include &lt;string.h&gt;</code><br />
 <code>#include &lt;sys/socket.h&gt;</code><br />
 <code>#include &lt;netinet/in.h&gt;</code><br />
+<code>#include &lt;ell/util.h&gt;</code><br />
 <code>#include &lt;<a class="el" href="sockaddr_8h_source.html">mptcpd/private/sockaddr.h</a>&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for sockaddr.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="sockaddr_8c__incl.png" border="0" usemap="#alib_2sockaddr_8c" alt=""/></div>
 <map name="alib_2sockaddr_8c" id="alib_2sockaddr_8c">
-<area shape="rect" title="mptcpd struct sockaddr related utility functions." alt="" coords="157,5,268,32"/>
+<area shape="rect" title="mptcpd struct sockaddr related utility functions." alt="" coords="185,5,296,32"/>
 <area shape="rect" title=" " alt="" coords="5,80,76,107"/>
 <area shape="rect" title=" " alt="" coords="100,80,203,107"/>
-<area shape="rect" title=" " alt="" coords="227,80,323,107"/>
-<area shape="rect" href="sockaddr_8h.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="347,80,542,107"/>
-<area shape="rect" title=" " alt="" coords="338,155,421,181"/>
-<area shape="rect" href="export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="445,155,575,181"/>
+<area shape="rect" title=" " alt="" coords="199,155,295,181"/>
+<area shape="rect" title=" " alt="" coords="278,80,353,107"/>
+<area shape="rect" href="sockaddr_8h.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="377,80,571,107"/>
+<area shape="rect" title=" " alt="" coords="323,155,406,181"/>
+<area shape="rect" title=" " alt="" coords="431,155,509,181"/>
+<area shape="rect" title=" " alt="" coords="533,155,631,181"/>
+<area shape="rect" href="export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="655,155,784,181"/>
 </map>
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a8b32d8e3816bca302cdc4e18820066a8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sockaddr_8c.html#a8b32d8e3816bca302cdc4e18820066a8">mptcpd_sockaddr_storage_init</a> (struct in_addr const *addr4, struct in6_addr const *addr6, unsigned short port, struct sockaddr_storage *addr)</td></tr>
-<tr class="memdesc:a8b32d8e3816bca302cdc4e18820066a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize <code>sockaddr_storage</code> instance.  <a href="sockaddr_8c.html#a8b32d8e3816bca302cdc4e18820066a8">More...</a><br /></td></tr>
-<tr class="separator:a8b32d8e3816bca302cdc4e18820066a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7a4958a378d5bffda1f81b363c0c206"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sockaddr_8c.html#ab7a4958a378d5bffda1f81b363c0c206">mptcpd_sockaddr_storage_init</a> (in_addr_t const *addr4, struct in6_addr const *addr6, in_port_t port, struct sockaddr_storage *addr)</td></tr>
+<tr class="memdesc:ab7a4958a378d5bffda1f81b363c0c206"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize <code>sockaddr_storage</code> instance.  <a href="sockaddr_8c.html#ab7a4958a378d5bffda1f81b363c0c206">More...</a><br /></td></tr>
+<tr class="separator:ab7a4958a378d5bffda1f81b363c0c206"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bed93451378ed69bcbae240df560b90"><td class="memItemLeft" align="right" valign="top">struct sockaddr *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="sockaddr_8c.html#a8bed93451378ed69bcbae240df560b90">mptcpd_sockaddr_copy</a> (struct sockaddr const *sa)</td></tr>
+<tr class="memdesc:a8bed93451378ed69bcbae240df560b90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deep copy a <code>sockaddr</code>.  <a href="sockaddr_8c.html#a8bed93451378ed69bcbae240df560b90">More...</a><br /></td></tr>
+<tr class="separator:a8bed93451378ed69bcbae240df560b90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>mptcpd <code>struct</code> <code>sockaddr</code> related utility functions. </p>
-<p>Copyright (c) 2019-2021, Intel Corporation </p>
+<p>Copyright (c) 2019-2022, Intel Corporation </p>
 </div><h2 class="groupheader">Function Documentation</h2>
-<a id="a8b32d8e3816bca302cdc4e18820066a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8b32d8e3816bca302cdc4e18820066a8">&#9670;&nbsp;</a></span>mptcpd_sockaddr_storage_init()</h2>
+<a id="a8bed93451378ed69bcbae240df560b90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8bed93451378ed69bcbae240df560b90">&#9670;&nbsp;</a></span>mptcpd_sockaddr_copy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct sockaddr* mptcpd_sockaddr_copy </td>
+          <td>(</td>
+          <td class="paramtype">struct sockaddr const *&#160;</td>
+          <td class="paramname"><em>sa</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Deep copy a <code>sockaddr</code>. </p>
+<p>Copy the address family-specific contents of a <code>sockaddr</code>. For an <code>AF_INET</code> address family, a <code>struct</code> <code>sockaddr_in</code> will be dynamically allocated and copied from <em>sa</em>. Similarly, <code>struct</code> <code>sockaddr_in6</code> will be allocated and copied from <em>sa</em> for the <code>AF_INET6</code> address family case.</p>
+<dl class="section return"><dt>Returns</dt><dd>Dynamically allocated copy of <em>sa</em> if the <code>sa_family</code> member is <code>AF_INET</code> or <code>AF_INET6</code>, and <code>NULL</code> otherwise. Deallocate with <code>l_free()</code>. </dd></dl>
+
+</div>
+</div>
+<a id="ab7a4958a378d5bffda1f81b363c0c206"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7a4958a378d5bffda1f81b363c0c206">&#9670;&nbsp;</a></span>mptcpd_sockaddr_storage_init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -113,7 +142,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">bool mptcpd_sockaddr_storage_init </td>
           <td>(</td>
-          <td class="paramtype">struct in_addr const *&#160;</td>
+          <td class="paramtype">in_addr_t const *&#160;</td>
           <td class="paramname"><em>addr4</em>, </td>
         </tr>
         <tr>
@@ -125,7 +154,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned short&#160;</td>
+          <td class="paramtype">in_port_t&#160;</td>
           <td class="paramname"><em>port</em>, </td>
         </tr>
         <tr>
@@ -146,9 +175,9 @@ Functions</h2></td></tr>
 <p>Initialize a <code>sockaddr_storage</code> instance with the provided IPv4 or IPv6 address. Only one is required and used. The <em>port</em> may be zero in cases where it is optional.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">addr4</td><td>IPv4 internet address. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">addr4</td><td>IPv4 internet address (network byte order). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">addr6</td><td>IPv6 internet address. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">port</td><td>IP port. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">port</td><td>TCP port (network byte order). </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">addr</td><td>mptcpd network address information.</td></tr>
   </table>
   </dd>
@@ -160,7 +189,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

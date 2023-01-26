@@ -92,32 +92,40 @@ $(function() {
 <code>#include &lt;ell/timeout.h&gt;</code><br />
 <code>#include &lt;ell/rtnl.h&gt;</code><br />
 <code>#include &lt;<a class="el" href="include_2mptcpd_2private_2path__manager_8h_source.html">mptcpd/private/path_manager.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="sockaddr_8h_source.html">mptcpd/private/sockaddr.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="private_2network__monitor_8h_source.html">mptcpd/private/network_monitor.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="network__monitor_8h_source.html">mptcpd/network_monitor.h</a>&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for network_monitor.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="network__monitor_8c__incl.png" border="0" usemap="#alib_2network__monitor_8c" alt=""/></div>
 <map name="alib_2network__monitor_8c" id="alib_2network__monitor_8c">
-<area shape="rect" title="mptcpd network device monitoring." alt="" coords="699,5,862,32"/>
+<area shape="rect" title="mptcpd network device monitoring." alt="" coords="869,5,1031,32"/>
 <area shape="rect" title=" " alt="" coords="5,87,76,114"/>
 <area shape="rect" title=" " alt="" coords="100,87,171,114"/>
 <area shape="rect" title=" " alt="" coords="195,87,270,114"/>
 <area shape="rect" title=" " alt="" coords="294,87,419,114"/>
 <area shape="rect" title=" " alt="" coords="444,87,536,114"/>
-<area shape="rect" title=" " alt="" coords="942,169,1009,196"/>
-<area shape="rect" title=" " alt="" coords="611,87,707,114"/>
-<area shape="rect" title=" " alt="" coords="731,87,830,114"/>
-<area shape="rect" title=" " alt="" coords="854,87,929,114"/>
-<area shape="rect" title=" " alt="" coords="953,87,1027,114"/>
-<area shape="rect" title=" " alt="" coords="1052,87,1147,114"/>
-<area shape="rect" title=" " alt="" coords="1171,87,1276,114"/>
-<area shape="rect" title=" " alt="" coords="1300,87,1376,114"/>
-<area shape="rect" href="include_2mptcpd_2private_2path__manager_8h.html" title="mptcpd path manager private interface." alt="" coords="1622,80,1777,121"/>
-<area shape="rect" href="network__monitor_8h.html" title="mptcpd network device monitoring." alt="" coords="1401,87,1598,114"/>
-<area shape="rect" href="types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="1638,169,1761,196"/>
-<area shape="rect" title=" " alt="" coords="1609,244,1683,271"/>
-<area shape="rect" title=" " alt="" coords="1708,244,1795,271"/>
-<area shape="rect" href="export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="1435,169,1564,196"/>
+<area shape="rect" title=" " alt="" coords="2065,169,2131,196"/>
+<area shape="rect" title=" " alt="" coords="1005,169,1101,196"/>
+<area shape="rect" title=" " alt="" coords="790,87,889,114"/>
+<area shape="rect" title=" " alt="" coords="913,87,987,114"/>
+<area shape="rect" title=" " alt="" coords="1011,87,1086,114"/>
+<area shape="rect" title=" " alt="" coords="1111,87,1205,114"/>
+<area shape="rect" title=" " alt="" coords="1229,87,1335,114"/>
+<area shape="rect" title=" " alt="" coords="1359,87,1435,114"/>
+<area shape="rect" href="include_2mptcpd_2private_2path__manager_8h.html" title="mptcpd path manager private interface." alt="" coords="561,80,715,121"/>
+<area shape="rect" href="sockaddr_8h.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="1459,87,1654,114"/>
+<area shape="rect" href="private_2network__monitor_8h.html" title="mptcpd network device monitoring &#45; internal API." alt="" coords="1899,80,2078,121"/>
+<area shape="rect" href="network__monitor_8h.html" title="mptcpd network device monitoring." alt="" coords="1678,87,1875,114"/>
+<area shape="rect" href="types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="577,169,699,196"/>
+<area shape="rect" title=" " alt="" coords="549,244,623,271"/>
+<area shape="rect" title=" " alt="" coords="648,244,735,271"/>
+<area shape="rect" title=" " alt="" coords="1630,169,1713,196"/>
+<area shape="rect" title=" " alt="" coords="1405,169,1484,196"/>
+<area shape="rect" title=" " alt="" coords="1508,169,1605,196"/>
+<area shape="rect" href="export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="1737,169,1867,196"/>
+<area shape="rect" title=" " alt="" coords="1953,169,2024,196"/>
 </map>
 </div>
 </div><table class="memberdecls">
@@ -174,10 +182,13 @@ Functions</h2></td></tr>
 <tr class="memitem:ac210bff5a98ca98db704021190b4bcb5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="network__monitor_8c.html#ac210bff5a98ca98db704021190b4bcb5">mptcpd_nm_register_ops</a> (struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a> *nm, struct <a class="el" href="structmptcpd__nm__ops.html">mptcpd_nm_ops</a> const *ops, void *user_data)</td></tr>
 <tr class="memdesc:ac210bff5a98ca98db704021190b4bcb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribe to mptcpd network monitor events.  <a href="network__monitor_8c.html#ac210bff5a98ca98db704021190b4bcb5">More...</a><br /></td></tr>
 <tr class="separator:ac210bff5a98ca98db704021190b4bcb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0b4d1974843169d9b072f085208aca1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="network__monitor_8c.html#aa0b4d1974843169d9b072f085208aca1">mptcpd_nm_monitor_loopback</a> (struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a> *nm, bool enable)</td></tr>
+<tr class="memdesc:aa0b4d1974843169d9b072f085208aca1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable monitoring of the loopback network interface.  <a href="network__monitor_8c.html#aa0b4d1974843169d9b072f085208aca1">More...</a><br /></td></tr>
+<tr class="separator:aa0b4d1974843169d9b072f085208aca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>mptcpd network device monitoring. </p>
-<p>Copyright (c) 2017-2021, Intel Corporation </p>
+<p>Copyright (c) 2017-2022, Intel Corporation </p>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="a4168061a0acd0a409ceb8d31ef1fd6b3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4168061a0acd0a409ceb8d31ef1fd6b3">&#9670;&nbsp;</a></span>mptcpd_nm_create()</h2>
@@ -198,11 +209,11 @@ Functions</h2></td></tr>
 <p>Create a network monitor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td>flags controlling address notification, any of: MPTCPD_NOTIFY_FLAG_EXISTING,, MPTCPD_NOTIFY_FLAG_SKIP_LL, MPTCPD_NOTIFY_FLAG_SKIP_HOST</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td>Flags controlling address notification, any of: MPTCPD_NOTIFY_FLAG_EXISTING, MPTCPD_NOTIFY_FLAG_SKIP_LL, MPTCPD_NOTIFY_FLAG_SKIP_HOST</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>As currently implemented, one could create multiple network monitors. Is that useful?</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>As currently implemented, one could create multiple network monitors. Is that useful?</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>Pointer to new network monitor on success. <code>NULL</code> on failure. </dd></dl>
 <p>Get network interface information.</p>
 <dl class="section note"><dt>Note</dt><dd>We force the second rtnetlink command, RTM_GETADDR, to be sent after this one completes by doing so in the destroy callback for this command. That guarantees that the potential multipart message response from this dump is fully read prior to sending the second command. This works around an issue in ELL where it was possible that the second command would be sent prior to receiving all of the parts of the multipart <code>RTM_GETLINK</code> response, which resulted in an EBUSY error.</dd></dl>
@@ -279,6 +290,52 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="aa0b4d1974843169d9b072f085208aca1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0b4d1974843169d9b072f085208aca1">&#9670;&nbsp;</a></span>mptcpd_nm_monitor_loopback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mptcpd_nm_monitor_loopback </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="structmptcpd__nm.html">mptcpd_nm</a> *&#160;</td>
+          <td class="paramname"><em>nm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>enable</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Enable monitoring of the loopback network interface. </p>
+<p>Mptcpd normally only monitors non-loopback network interfaces. Call this function to enable monitoring of loopback network interfaces.</p>
+<dl class="section note"><dt>Note</dt><dd>Mptcpd monitoring of loopback network interfaces is meant primarily for testing purposes.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">nm</td><td>Pointer to the mptcpd network monitor object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">enable</td><td>Enable or disable monitoring of loopback network interfaces.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">true</td><td>Successfully enable or disabled. </td></tr>
+    <tr><td class="paramname">false</td><td>Invalid <em>nm</em> argument. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ac210bff5a98ca98db704021190b4bcb5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac210bff5a98ca98db704021190b4bcb5">&#9670;&nbsp;</a></span>mptcpd_nm_register_ops()</h2>
 
@@ -334,7 +391,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 28 2022 16:14:47 for mptcpd by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

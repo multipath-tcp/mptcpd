@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['id_5fmanager_2ec_285',['id_manager.c',['../id__manager_8c.html',1,'']]],
-  ['id_5fmanager_2eh_286',['id_manager.h',['../id__manager_8h.html',1,'(Global Namespace)'],['../private_2id__manager_8h.html',1,'(Global Namespace)']]]
+  ['hash_5fsockaddr_2ec_334',['hash_sockaddr.c',['../hash__sockaddr_8c.html',1,'']]],
+  ['hash_5fsockaddr_2eh_335',['hash_sockaddr.h',['../hash__sockaddr_8h.html',1,'']]]
 ];
