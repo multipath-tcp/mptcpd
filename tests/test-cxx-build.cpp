@@ -4,7 +4,7 @@
  *
  * @brief Verify mptcpd API can be used in C++ code.
  *
- * Copyright (c) 2019, 2021, Intel Corporation
+ * Copyright (c) 2019, 2021-2022, Intel Corporation
  */
 
 #include <memory>
@@ -17,6 +17,7 @@
 #include <mptcpd/network_monitor.h>
 #include <mptcpd/plugin.h>
 
+#include <mptcpd/private/network_monitor.h>
 #include <mptcpd/private/plugin.h>
 
 #include "test-plugin.h"
@@ -74,13 +75,15 @@ public:
                         mptcpd_plugin_load(dir, default_plugin, NULL, this->pm);
                 assert(loaded);
 
-                call_plugin_ops(&test_count_4,
-                                NULL,
-                                test_token_4,
-                                test_raddr_id_4,
-                                (struct sockaddr const *) &test_laddr_4,
-                                (struct sockaddr const *) &test_raddr_4,
-                                test_backup_4);
+                static struct plugin_call_args const args = {
+                        .token    = test_token_4,
+                        .raddr_id = test_raddr_id_4,
+                        .laddr    = (struct sockaddr const *) &test_laddr_4,
+                        .raddr    = (struct sockaddr const *) &test_raddr_4,
+                        .backup   = test_backup_4
+                };
+
+                call_plugin_ops(&test_count_4, &args);
         }
 
         ~test_plugin() { mptcpd_plugin_unload(this->pm); }

@@ -4,7 +4,7 @@
  *
  * @brief Common path manager plugin functions.
  *
- * Copyright (c) 2018-2021, Intel Corporation
+ * Copyright (c) 2018-2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -20,10 +20,13 @@
 #include <unistd.h>
 #include <assert.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/queue.h>
 #include <ell/hashmap.h>
 #include <ell/util.h>
 #include <ell/log.h>
+#pragma GCC diagnostic pop
 
 /**
  * @todo Remove this preprocessor symbol definition once support for
@@ -577,6 +580,7 @@ void mptcpd_plugin_new_connection(char const *name,
                                   mptcpd_token_t token,
                                   struct sockaddr const *laddr,
                                   struct sockaddr const *raddr,
+                                  bool server_side,
                                   struct mptcpd_pm *pm)
 {
         struct mptcpd_plugin_ops const *const ops = name_to_ops(name);
@@ -588,18 +592,23 @@ void mptcpd_plugin_new_connection(char const *name,
                 l_error("Unable to map connection to plugin.");
 
         if (ops && ops->new_connection)
-                ops->new_connection(token, laddr, raddr, pm);
+                ops->new_connection(token, laddr, raddr, server_side, pm);
 }
 
 void mptcpd_plugin_connection_established(mptcpd_token_t token,
                                           struct sockaddr const *laddr,
                                           struct sockaddr const *raddr,
+                                          bool server_side,
                                           struct mptcpd_pm *pm)
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
 
         if (ops && ops->connection_established)
-                ops->connection_established(token, laddr, raddr, pm);
+                ops->connection_established(token,
+                                            laddr,
+                                            raddr,
+                                            server_side,
+                                            pm);
 }
 
 void mptcpd_plugin_connection_closed(mptcpd_token_t token,

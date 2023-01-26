@@ -17,7 +17,7 @@
  * subflows, etc.
  *
  * @see Additional higher level documentation is available in the
- *      [`mptcpd` Wiki](https://github.com/intel/mptcpd/wiki).
+ *      [`mptcpd` Wiki](https://github.com/multipath-tcp/mptcpd/wiki).
  */
 
 /*

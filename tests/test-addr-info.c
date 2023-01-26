@@ -4,9 +4,10 @@
  *
  * @brief mptcpd_addr_info related functions test.
  *
- * Copyright (c) 2021, Intel Corporation
+ * Copyright (c) 2021, 2022, Intel Corporation
  */
 
+#include <arpa/inet.h>  // htonl() and htons()
 #include <ell/log.h>
 #include <ell/test.h>
 
@@ -43,11 +44,8 @@ static void test_addr_info(void const *test_data)
 {
         (void) test_data;
 
-        static struct in_addr const addr = {
-                .s_addr = 0x010200C0  // 192.0.2.1
-        };
-
-        static in_port_t const port = 12;
+        in_addr_t const addr = htonl(0xC0000201);  // 192.0.2.1
+        in_port_t const port = htons(0x1234);
         
         struct mptcpd_addr_info info = {
                 .id    = 5,
@@ -66,7 +64,7 @@ static void test_addr_info(void const *test_data)
         assert(sa != NULL && sa->sa_family == AF_INET);
 
         struct sockaddr_in const *sai = (struct sockaddr_in const *) sa;
-        assert(sai->sin_addr.s_addr == addr.s_addr);
+        assert(sai->sin_addr.s_addr == addr);
         assert(sai->sin_port == port);
 
         // Check MPTCP address ID.

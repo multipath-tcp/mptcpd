@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * @file plugin_noop.c
+ * @file noop.c
  *
  * @brief MPTCP test plugin.
  *
- * Copyright (c) 2019-2021, Intel Corporation
+ * Copyright (c) 2019-2022, Intel Corporation
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/util.h>  // For L_STRINGIFY needed by l_error().
 #include <ell/log.h>
+#pragma GCC diagnostic pop
 
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>
@@ -20,11 +23,13 @@
 static void plugin_noop_new_connection(mptcpd_token_t token,
                                        struct sockaddr const *laddr,
                                        struct sockaddr const *raddr,
+                                       bool server_side,
                                        struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
+        (void) server_side;
         (void) pm;
 }
 
@@ -32,11 +37,13 @@ static void plugin_noop_connection_established(
         mptcpd_token_t token,
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
+        bool server_side,
         struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
+        (void) server_side;
         (void) pm;
 }
 
@@ -106,6 +113,45 @@ static void plugin_noop_subflow_priority(mptcpd_token_t token,
         (void) pm;
 }
 
+void plugin_noop_new_interface(struct mptcpd_interface const *i,
+                               struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+}
+
+void plugin_noop_update_interface(struct mptcpd_interface const *i,
+                                  struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+}
+
+void plugin_noop_delete_interface(struct mptcpd_interface const *i,
+                                  struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) pm;
+}
+
+void plugin_noop_new_local_address(struct mptcpd_interface const *i,
+                                   struct sockaddr const *sa,
+                                   struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) sa;
+        (void) pm;
+}
+
+void plugin_noop_delete_local_address(struct mptcpd_interface const *i,
+                                      struct sockaddr const *sa,
+                                      struct mptcpd_pm *pm)
+{
+        (void) i;
+        (void) sa;
+        (void) pm;
+}
+
 static struct mptcpd_plugin_ops const pm_ops = {
         .new_connection         = plugin_noop_new_connection,
         .connection_established = plugin_noop_connection_established,
@@ -114,7 +160,12 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .address_removed        = plugin_noop_address_removed,
         .new_subflow            = plugin_noop_new_subflow,
         .subflow_closed         = plugin_noop_subflow_closed,
-        .subflow_priority       = plugin_noop_subflow_priority
+        .subflow_priority       = plugin_noop_subflow_priority,
+        .new_interface          = plugin_noop_new_interface,
+        .update_interface       = plugin_noop_update_interface,
+        .delete_interface       = plugin_noop_delete_interface,
+        .new_local_address      = plugin_noop_new_local_address,
+        .delete_local_address   = plugin_noop_delete_local_address
 };
 
 static int plugin_noop_init(struct mptcpd_pm *pm)

@@ -60,8 +60,10 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-mptcp-owner@lists.01.org.
+reported to the community leaders responsible for enforcement at the
+e-mail address for the Linux kernel MPTCP subsystem owner listed in
+the kernel
+[`MAINTAINERS`](https://www.kernel.org/doc/linux/MAINTAINERS) file.
 All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the

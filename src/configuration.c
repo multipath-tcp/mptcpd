@@ -4,7 +4,7 @@
  *
  * @brief Mptcpd configuration parser implementation.
  *
- * Copyright (c) 2017-2021, Intel Corporation
+ * Copyright (c) 2017-2022, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -21,15 +21,19 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <ell/log.h>
 #include <ell/util.h>
 #include <ell/settings.h>
 #include <ell/queue.h>
 #include <ell/string.h>
+#pragma GCC diagnostic pop
 
 #include <mptcpd/types.h>
 
 #include <mptcpd/private/configuration.h>
+#include <mptcpd/private/network_monitor.h>
 
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>
@@ -116,12 +120,12 @@ struct tok_entry
 };
 
 static struct tok_entry const addr_flags_toks[] = {
-        { MPTCPD_ADDR_FLAG_SUBFLOW, "subflow" },
-        { MPTCPD_ADDR_FLAG_SIGNAL, "signal" },
-        { MPTCPD_ADDR_FLAG_BACKUP, "backup" },
+        { MPTCPD_ADDR_FLAG_SUBFLOW,  "subflow"  },
+        { MPTCPD_ADDR_FLAG_SIGNAL,   "signal"   },
+        { MPTCPD_ADDR_FLAG_BACKUP,   "backup"   },
+        { MPTCPD_ADDR_FLAG_FULLMESH, "fullmesh" },
         { 0, NULL },
 };
-
 
 /**
  * @brief Converts the flags into a string representation.
@@ -166,10 +170,10 @@ static char const *addr_flags_string(uint32_t flags,
         return flags_string(addr_flags_toks, flags, str, len);
 }
 
-struct tok_entry const notify_flags_toks[] = {
-        { MPTCPD_NOTIFY_FLAG_EXISTING, "existing" },
-        { MPTCPD_NOTIFY_FLAG_SKIP_LL, "skip_link_local" },
-        { MPTCPD_NOTIFY_FLAG_SKIP_HOST, "skip_loopback" },
+static struct tok_entry const notify_flags_toks[] = {
+        { MPTCPD_NOTIFY_FLAG_EXISTING,    "existing" },
+        { MPTCPD_NOTIFY_FLAG_SKIP_LL,     "skip_link_local" },
+        { MPTCPD_NOTIFY_FLAG_SKIP_HOST,   "skip_loopback" },
         { MPTCPD_NOTIFY_FLAG_ROUTE_CHECK, "check_route" },
         { 0, NULL },
 };
@@ -337,7 +341,15 @@ static void set_plugins_to_load(struct mptcpd_config *config,
 // ---------------------------------------------------------------
 // Command line options
 // ---------------------------------------------------------------
-static char const doc[] = "Start the Multipath TCP daemon.";
+#ifdef HAVE_UPSTREAM_KERNEL
+#  define MPTCPD_KERNEL "upstream"
+#else
+#  define MPTCPD_KERNEL "multipath-tcp.org"
+#endif
+static char const doc[] =
+        "Start the Multipath TCP daemon."
+        "\v"
+        "Supported Linux kernel: " MPTCPD_KERNEL;
 
 /**
  * @name Command Line Option Key Values
@@ -571,8 +583,11 @@ static void parse_config_addr_flags(struct mptcpd_config *config,
                                       group,
                                       "addr-flags");
 
-        if (addr_flags != NULL)
+        if (addr_flags != NULL) {
                 config->addr_flags = addr_flags_from_string(addr_flags);
+
+                l_free(addr_flags);
+        }
 }
 
 static void parse_config_notify_flags(struct mptcpd_config *config,
@@ -587,8 +602,11 @@ static void parse_config_notify_flags(struct mptcpd_config *config,
                                       group,
                                       "notify-flags");
 
-        if (notify_flags != NULL)
+        if (notify_flags != NULL) {
                 config->notify_flags = notify_flags_from_string(notify_flags);
+
+                l_free(notify_flags);
+        }
 }
 
 static void parse_config_default_plugin(struct mptcpd_config *config,
@@ -755,7 +773,7 @@ static bool merge_config(struct mptcpd_config       *dst,
                 while (entry) {
                         l_queue_push_tail(
                                 (struct l_queue *) dst->plugins_to_load,
-                                entry->data);
+                                l_strdup(entry->data));
 
                         entry = entry->next;
                 }

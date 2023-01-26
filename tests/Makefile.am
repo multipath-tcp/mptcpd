@@ -19,6 +19,7 @@ AM_LDFLAGS  = $(EXECUTABLE_LDFLAGS)
 TEST_PLUGIN_DIR_SECURITY = $(abs_builddir)/plugins/security/.libs
 TEST_PLUGIN_DIR_PRIORITY = $(abs_builddir)/plugins/priority/.libs
 TEST_PLUGIN_DIR_NOOP     = $(abs_builddir)/plugins/noop/.libs
+TEST_PLUGIN_DIR_BAD      = $(abs_builddir)/plugins/bad/.libs
 
 check_PROGRAMS =		\
 	test-plugin		\
@@ -27,8 +28,10 @@ check_PROGRAMS =		\
 	test-commands		\
 	test-configuration	\
 	test-id-manager		\
+	test-listener-manager	\
 	test-sockaddr		\
-	test-addr-info
+	test-addr-info		\
+	test-murmur-hash
 
 noinst_PROGRAMS = mptcpwrap-tester
 
@@ -49,6 +52,7 @@ test_plugin_CPPFLAGS =							\
 	-DTEST_PLUGIN_DIR_SECURITY=\"$(TEST_PLUGIN_DIR_SECURITY)\"	\
 	-DTEST_PLUGIN_DIR_PRIORITY=\"$(TEST_PLUGIN_DIR_PRIORITY)\"	\
 	-DTEST_PLUGIN_DIR_NOOP=\"$(TEST_PLUGIN_DIR_NOOP)\"		\
+	-DTEST_PLUGIN_DIR_BAD=\"$(TEST_PLUGIN_DIR_BAD)\"		\
 	-DTEST_PLUGIN_ONE=\"@TEST_PLUGIN_ONE@\"				\
 	-DTEST_PLUGIN_TWO=\"@TEST_PLUGIN_TWO@\"				\
 	-DTEST_PLUGIN_FOUR=\"@TEST_PLUGIN_FOUR@\"
@@ -99,6 +103,13 @@ test_id_manager_LDADD =				\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
 
+test_listener_manager_SOURCES = test-listener-manager.c
+test_listener_manager_LDADD =			\
+	$(top_builddir)/lib/libmptcpd.la	\
+	$(builddir)/lib/libmptcpd_test.la	\
+	$(ELL_LIBS)				\
+	$(CODE_COVERAGE_LIBS)
+
 test_sockaddr_SOURCES = test-sockaddr.c
 test_sockaddr_LDADD =				\
 	$(top_builddir)/lib/libmptcpd.la	\
@@ -108,6 +119,12 @@ test_sockaddr_LDADD =				\
 
 test_addr_info_SOURCES = test-addr-info.c
 test_addr_info_LDADD =				\
+	$(top_builddir)/lib/libmptcpd.la	\
+	$(ELL_LIBS)				\
+	$(CODE_COVERAGE_LIBS)
+
+test_murmur_hash_SOURCES = test-murmur-hash.c
+test_murmur_hash_LDADD =			\
 	$(top_builddir)/lib/libmptcpd.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
