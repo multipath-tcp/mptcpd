@@ -62,14 +62,23 @@ static void help(void)
 
 static int run(int argc, char *av[])
 {
-	int i, nr = 0, debug = 0;
+	int i, nr = 0, debug = 0, toa = 0;
 	char **envp, **argv;
+        //TII
+        char* tmp;
 
 	if (argc > 0 && strcmp(av[0], "-d") == 0) {
 		debug = 1;
 		argc--;
 		av++;
 	}
+    
+        //TII - Option for type of application
+        if (argc > 0 && strcmp(av[0], "-a") == 0) {
+		toa = atoi(av[1]);
+                argc = argc - 2;
+                av = av + 2;
+        }
 
 	if (argc < 1) {
 		fprintf(stderr, "missing command argument\n");
@@ -103,6 +112,11 @@ static int run(int argc, char *av[])
 	if (debug)
 		envp[i++] = "MPTCPWRAP_DEBUG=1";
 
+        //TII - Setting the application type as environment variable
+        if (toa){
+		asprintf(&tmp, "MPTCPWRAP_TOA=%d",toa);
+                envp[i++] = tmp;
+        }
 	// build the NULL terminated arg list
 	argv = calloc(argc + 1, sizeof(char *));
 	if (!argv)
