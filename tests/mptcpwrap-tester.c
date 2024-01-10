@@ -64,7 +64,7 @@ static void test_socket_data(struct socket_data const *data)
                                 "WARNING: Ignoring unsupported "
                                 "protocol: %d - %s\n",
                                 data->protocol,
-                                p->p_name);
+                                p ? p->p_name : "Unknown");
 
                         return;
                 }
