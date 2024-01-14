@@ -54,6 +54,8 @@ tests/test-listener-manager
 tests/test-sockaddr
 tests/test-addr-info
 tests/test-murmur-hash
+tests/test-sspi
+
 tests/mptcpwrap-tester
 tests/*.log
 tests/*.trs
