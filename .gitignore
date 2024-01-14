@@ -36,6 +36,7 @@ mptcpd-*/
 core*
 doc/
 etc/*.conf
+etc/init.d/mptcpd
 lib/mptcpd.pc
 src/mptcpd
 src/mptcpize

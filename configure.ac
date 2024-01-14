@@ -349,6 +349,7 @@ AC_SUBST([TEST_PLUGIN_NOOP],  [plugin_noop])
 # ---------------------------------------------------------------
 AC_CONFIG_FILES([Makefile
                  etc/Makefile
+                 etc/init.d/Makefile
                  man/Makefile
                  include/Makefile
                  include/linux/Makefile
