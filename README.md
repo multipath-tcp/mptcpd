@@ -99,6 +99,32 @@ like so:
 make check
 ```
 
+Assuming [Valgrind](https://valgrind.org/) is installed in your Linux
+platform, the unit tests may also be run through Valgrind to perform
+run-time memory checks on mptcpd binaries using the following
+`configure` script command line and `make` invocation:
+
+```sh
+./configure --enable-valgrind
+make
+make check-valgrind
+```
+
+The `check-valgrind` Makefile target causes each of the unit test
+programs in the mptcpd test suite to be run through the Valgrind
+`memcheck` tool.  In addition to unit test output, Valgrind results
+will also be dumped to the log file for each unit test, such as
+`test-plugin.log`, as well as the file `test-suite-memcheck.log` that
+contains the `memcheck` error logs for all tests that fail due to
+errors detected by Valgrind.
+
+Individual tests may also be executed through Valgrind like so:
+
+```sh
+cd tests
+../libtool --mode=execute valgrind --leak-check=full ./test-plugin
+```
+
 Once again, these steps may be performed in an alternate build
 directory.
 
@@ -120,6 +146,9 @@ overriden by using the `--enable-debug` configuration option:
 The usual build flags, such as `CFLAGS`, `LDFLAGS`, etc, may be
 provided on the `configure` script command line.  See the output from
 `./configure --help`, or the `INSTALL` file, for additional details.
+
+### Memory Checking
+It is good practice to  [Valgrind](https://valgrind.org/) (only needed to run unit test suite through Valgrind via `make check-valgrind` for memory access errors)
 
 ### Code Coverage
 To aid with identifying areas of the `mptcpd` code that are or are not

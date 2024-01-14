@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2017-2020, Intel Corporation
+## Copyright (c) 2017-2021, Intel Corporation
 
 include $(top_srcdir)/aminclude_static.am
 
@@ -46,3 +46,6 @@ four_la_LIBADD =				\
 
 # Clean up code coverage related generated files.
 clean-local: code-coverage-clean
+
+# Force check_LTLIBRARIES to be built on check-valgrind.
+check-valgrind-local: check
