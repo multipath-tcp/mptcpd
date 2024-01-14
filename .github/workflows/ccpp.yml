@@ -41,5 +41,12 @@ jobs:
       run: sudo make install
     - name: make installcheck
       run: LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH make installcheck
+    - name: systemd check
+      run: |
+        sudo systemctl daemon-reload
+        systemd-analyze --no-pager verify   mptcp.service
+        systemd-analyze --no-pager security mptcp.service
+        sudo systemctl start mptcp.service
+        sudo systemctl stop  mptcp.service
     - name: make uninstall
       run: sudo make uninstall
