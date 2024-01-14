@@ -42,6 +42,7 @@ struct mptcpd_interface;
  */
 MPTCPD_API bool mptcpd_plugin_load(char const *dir,
                                    char const *default_name,
+                                   char const *plugins_conf_dir,
                                    struct l_queue const *plugins_to_load,
                                    struct mptcpd_pm *pm);
 
