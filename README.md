@@ -2,7 +2,7 @@
      Copyright (c) 2017-2021, Intel Corporation -->
 
 [![C/C++ CI](https://github.com/multipath-tcp/mptcpd/actions/workflows/ccpp.yml/badge.svg)](https://github.com/multipath-tcp/mptcpd/actions/workflows/ccpp.yml)
-[![Coverage Status](https://coveralls.io/repos/github/multipath-tcp/mptcpd/badge.svg?branch=master)](https://coveralls.io/github/multipath-tcp/mptcpd?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/multipath-tcp/mptcpd/badge.svg?branch=main)](https://coveralls.io/github/multipath-tcp/mptcpd?branch=main)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
 # Multipath TCP Daemon
