@@ -4,6 +4,10 @@
  *
  * @brief MPTCP single-subflow-per-interface path manager plugin.
  *
+ * The single-subflow-per-interface path manager plugin performs MPTCP
+ * path management in the user space, only allowing one subflow per
+ * local network interface.
+ *
  * Copyright (c) 2018-2022, Intel Corporation
  */
 
@@ -28,11 +32,21 @@
 #include <mptcpd/path_manager.h>
 #include <mptcpd/plugin.h>
 #include <mptcpd/private/sockaddr.h>
+#include <mptcpd/id_manager.h>
 
 /**
  * @brief Local address to interface mapping failure value.
  */
 #define SSPI_BAD_INDEX INT_MAX
+
+
+/**
+ * @brief sspi plugin local address ID manager.
+ *
+ * Local MPTCP address IDs are generated and managed through this
+ * @c mptcpd_idm instance.
+ */
+static struct mptcpd_idm *sspi_idm;
 
 /**
  * List of @c sspi_interface_info objects that contain MPTCP
@@ -44,6 +58,12 @@
  *       interfaces.
  */
 static struct l_queue *sspi_interfaces;
+
+/**
+ * List of @c sspi_adv objects that contain data for all local
+ * address MPTCP advertisements.
+ */
+static struct l_queue *sspi_advs;
 
 /**
  * @struct sspi_interface_info
@@ -92,6 +112,49 @@ struct sspi_new_connection_info
 
         /// Pointer to path manager.
         struct mptcpd_pm *const pm;
+};
+
+/**
+ * @struct sspi_local_addr_info
+ *
+ * @brief Data to be used when a new local address becomes available.
+ *
+ * This is a convenience structure for the purpose of making it easy
+ * to pass data needed for new address advertisement when iterating
+ * over all existing MPTCP connection tokens.
+ */
+struct sspi_local_addr_info
+{
+        /// Pointer to path manager.
+        struct mptcpd_pm *const pm;
+
+        /// The internet address (AF_INET or AF_INET6 family).
+        struct sockaddr const *const addr;
+
+        /// MPTCP address ID.
+        mptcpd_aid_t const id;
+};
+
+/**
+ * @struct sspi_adv
+ *
+ * @brief Local address advertisement data.
+ *
+ * This structure contains data related to local address MPTCP
+ * advertisement.  An instance of this structure is created each time
+ * a local address is advertised, and destroyed when the advertisement
+ * is removed.
+ */
+struct sspi_adv
+{
+        /// Advertised local internet address.
+        struct sockaddr *sa;
+
+        /// MPTCP address ID.
+        mptcpd_aid_t id;
+
+        /// MPTCP connection token.
+        mptcpd_token_t token;
 };
 
 // ----------------------------------------------------------------
@@ -458,6 +521,144 @@ static bool sspi_remove_token(void *data, void *user_data)
 // ----------------------------------------------------------------
 
 /**
+ * @brief Create a @c struct @c sspi_adv object.
+ *
+ * @param[in] sa    Local address.
+ * @param[in] token MPTCP connection token.
+ *
+ * @return A dynamically allocated @c struct @c sspi_adv object or
+ *         @c NULL on error.  Destroy with @c sspi_adv_destroy().
+ */
+static struct sspi_adv *sspi_adv_create(struct sockaddr const *sa,
+                                        mptcpd_token_t token)
+{
+
+        mptcpd_aid_t const id = mptcpd_idm_get_id(sspi_idm, sa);
+
+        if (id == 0) {
+                // Ran out of address IDs.  Unlikely to occur.
+                l_error("Unable to associate address ID "
+                        "with local address.");
+
+                return NULL;
+        }
+
+        struct sspi_adv *const adv = l_malloc(sizeof(*adv));
+
+        adv->sa    = mptcpd_sockaddr_copy(sa);
+        adv->id    = id;
+        adv->token = token;
+
+        return adv;
+}
+
+/**
+ * @brief Destroy a @c sspi_adv object.
+ *
+ * @param[in,out] p Pointer to @c sspi_adv object.
+ */
+static void sspi_adv_destroy(void *p)
+{
+        struct sspi_adv *const adv = (struct sspi_adv *) p;
+
+        if (adv != NULL) {
+                mptcpd_idm_remove_id(sspi_idm, adv->sa);
+                l_free(adv->sa);
+                l_free(adv);
+        }
+}
+
+/**
+ * @brief Compare two @c sspi_adv objects.
+ *
+ * Compare @c sspi_adv objects to determine where in the local
+ * advertisement list the first object, @a a, will be inserted
+ * relative to the second object, @a b.
+ *
+ * @return Always returns 1 to make insertions append to the queue
+ *         since there is no need to sort.
+ *
+ * @see l_queue_insert()
+ */
+static int sspi_adv_compare(void const *a, void const *b, void *user_data)
+{
+        (void) a;
+        (void) b;
+        (void) user_data;
+
+        // No need to sort.
+        return 1;
+}
+
+/**
+ * @brief Match a @c sspi_adv object.
+ *
+ * A @c sspi_adv object (@a a) matches if its @c family and @c addr
+ * members match those in the @c sspi_adv object @a b.
+ *
+ * @param[in] a Address advertisement (@c sspi_adv) data in queue.
+ * @param[in] b Address advertisement (@c sspi_adv) data passed from
+ *              user.
+ *
+ * @return @c true if the address advertisement data represented by @a
+ *         a matches the corresponding data in @a b, and @c false otherwise.
+ *
+ * @see l_queue_find()
+ * @see l_queue_remove_if()
+ */
+static bool sspi_adv_match(void const *a, void const *b)
+{
+        struct sspi_adv const *const lhs = a;
+        struct sspi_adv const *const rhs = b;
+
+        return sspi_sockaddr_match(lhs->sa, rhs->sa)
+                && lhs->id == rhs->id
+                && lhs->token == rhs->token;
+}
+
+/**
+ * @brief Check if local address advertisement is being tracked.
+ *
+ * @return The tracked @c struct @c sspi_adv object or @c NULL if no
+ *         such matching advertisement was found.
+ */
+static struct sspi_adv *sspi_adv_lookup(struct sspi_adv const *adv)
+{
+        return l_queue_find(sspi_advs, sspi_adv_match, adv);
+}
+
+/**
+ * @brief Track local address advertisement related data.
+ *
+ * @param[in] sa    Local address.
+ * @param[in] token MPTCP connection token.
+ *
+ * @note This function does not check for duplicates.
+ *       @c sspi_adv_lookup() before this function as needed.
+ *
+ * @return A dynamically allocated @c struct @c sspi_adv object or
+ *         @c NULL on error.  Destroy with @c sspi_adv_destroy().
+ */
+static struct sspi_adv *sspi_adv_track(struct sockaddr const *sa,
+                                       mptcpd_token_t token)
+{
+        struct sspi_adv *adv = sspi_adv_create(sa, token);
+
+        if (adv != NULL
+            && !l_queue_insert(sspi_advs,
+                               adv,
+                               sspi_adv_compare,
+                               NULL)) {
+                sspi_adv_destroy(adv);
+                adv = NULL;
+        }
+
+        return adv;
+}
+
+// ----------------------------------------------------------------
+
+/**
  * @brief Inform kernel of local address available for subflows.
  *
  * @param[in] data      @c struct @c sockaddr containing address to
@@ -469,33 +670,21 @@ static void sspi_send_addr(void *data, void *user_data)
         struct sockaddr                 const *const addr = data;
         struct sspi_new_connection_info const *const info = user_data;
 
-        /**
-         * @bug Use real values instead of these placeholders!  The
-         *      @c port, in particular, is problematic because no
-         *      subflows exist for the addr in question, meaning there
-         *      is no port associated with it.
-         */
-        mptcpd_aid_t address_id = 0;
+        struct sspi_adv *const adv = sspi_adv_track(addr, info->token);
 
         /*
-          mptcpd_pm_add_addr() will modify the sockaddr passed to it
-          if the port is zero.  Make a copy to avoid modifying the
-          original.
-         */
-        struct sockaddr *const sa = mptcpd_sockaddr_copy(addr);
+          Advertise the local address if it hasn't already been
+          advertised.
+        */
+        if (sspi_adv_lookup(adv) == NULL
+            || mptcpd_pm_add_addr(info->pm,
+                                  adv->sa,
+                                  adv->id,
+                                  info->token) != 0) {
+                sspi_adv_destroy(adv);
 
-        mptcpd_pm_add_addr(info->pm,
-                           sa,
-                           address_id,
-                           info->token);
-
-        /**
-         * @todo The sspi plugin currently doesn't stop advertising IP
-         *       addresses.  The address will need to be stored for later
-         *       use in mptcpd_pm_remove_addr() once the need for that
-         *       occurs.
-         */
-        l_free(sa);
+                l_error("Unable to advertise IP address.");
+        }
 }
 
 /**
@@ -538,6 +727,63 @@ static void sspi_send_addrs(struct mptcpd_interface const *i, void *data)
                                 sspi_send_addr,
                                 info);
         }
+}
+
+static void sspi_send_addr_via_token(void *data, void *user_data)
+{
+        mptcpd_token_t const token = L_PTR_TO_UINT(data);
+        struct sspi_local_addr_info *const info = user_data;
+
+        struct sspi_adv *const adv = sspi_adv_track(info->addr, token);
+
+        /*
+          Advertise the local address if it hasn't already been
+          advertised.
+        */
+        if (sspi_adv_lookup(adv) == NULL
+            || mptcpd_pm_add_addr(info->pm,
+                                  adv->sa,
+                                  adv->id,
+                                  token) != 0) {
+                sspi_adv_destroy(adv);
+
+                l_error("Unable to advertise IP address.");
+        }
+
+        /**
+         * @todo Refactor common code found in this function and
+         *       @c sspi_send_addr().
+         */
+}
+
+static void sspi_send_addr_via_interface(void *data, void *user_data)
+{
+        struct sspi_interface_info *const info = data;
+
+        l_queue_foreach(info->tokens,
+                        sspi_send_addr_via_token,
+                        user_data);
+}
+
+static void sspi_rm_addr_via_token(void *data, void *user_data)
+{
+        mptcpd_token_t const token = L_PTR_TO_UINT(data);
+        struct sspi_local_addr_info const *const info = user_data;
+
+        if (mptcpd_pm_remove_addr(info->pm,
+                                  info->addr,
+                                  info->id,
+                                  token) != 0)
+                l_error("Unable to stop advertising IP address.");
+}
+
+static void sspi_rm_addr_via_interface(void *data, void *user_data)
+{
+        struct sspi_interface_info *const info = data;
+
+        l_queue_foreach(info->tokens,
+                        sspi_rm_addr_via_token,
+                        user_data);
 }
 
 // ----------------------------------------------------------------
@@ -781,6 +1027,85 @@ static void sspi_subflow_priority(mptcpd_token_t token,
         */
 }
 
+static void sspi_new_local_address(struct mptcpd_interface const *i,
+                                   struct sockaddr const *sa,
+                                   struct mptcpd_pm *pm)
+{
+        (void) i;
+
+        struct mptcpd_nm const *const nm = mptcpd_pm_get_nm(pm);
+
+        /*
+          Track the network interface associated with the new local
+          address as needed.
+        */
+        struct sspi_interface_info *const interface_info =
+                sspi_interface_info_lookup(nm, sa);
+
+        if (interface_info == NULL) {
+                l_error("Unable to track new local address.");
+
+                return;
+        }
+
+        mptcpd_aid_t const id = mptcpd_idm_get_id(sspi_idm, sa);
+
+        if (id == 0) {
+                l_error("Unable to map addr to ID.");
+                return;
+        }
+
+        struct sspi_local_addr_info info = {
+                .pm = pm,
+                .addr = sa,
+                .id = id
+        };
+
+        /*
+          A specific MPTCP connection token is not available since
+          this a network monitoring event not a MPTCP connection
+          event.  Advertise the address through existing MPTCP
+          connections by iterating over their corresponding tokens.
+          Subsequent MPTCP connections or joins may be rejected if a
+          subflow exists on the network interface through which
+          connection or join occurs.
+         */
+        l_queue_foreach(sspi_interfaces,
+                        sspi_send_addr_via_interface,
+                        &info);
+}
+
+static void sspi_delete_local_address(struct mptcpd_interface const *i,
+                                      struct sockaddr const *sa,
+                                      struct mptcpd_pm *pm)
+{
+        (void) i;
+
+        mptcpd_aid_t const id = mptcpd_idm_remove_id(sspi_idm, sa);
+
+        if (id == 0) {
+                // Not necessarily an error.
+                l_info("No address ID associated with addr.");
+                return;
+        }
+
+        struct sspi_local_addr_info info = {
+                .pm   = pm,
+                .addr = sa,
+                .id   = id
+        };
+
+        /*
+          A specific MPTCP connection token is not available since
+          this a network monitoring event not a MPTCP connection
+          event.  Stop advertising the address through existing MPTCP
+          connections by iterating over their corresponding tokens.
+         */
+        l_queue_foreach(sspi_interfaces,
+                        sspi_rm_addr_via_interface,
+                        &info);
+}
+
 static struct mptcpd_plugin_ops const pm_ops = {
         .new_connection         = sspi_new_connection,
         .connection_established = sspi_connection_established,
@@ -789,15 +1114,26 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .address_removed        = sspi_address_removed,
         .new_subflow            = sspi_new_subflow,
         .subflow_closed         = sspi_subflow_closed,
-        .subflow_priority       = sspi_subflow_priority
+        .subflow_priority       = sspi_subflow_priority,
+        .new_local_address      = sspi_new_local_address,
+        .delete_local_address   = sspi_delete_local_address
 };
 
 static int sspi_init(struct mptcpd_pm *pm)
 {
         (void) pm;
 
+        /*
+          Create local address ID manager for this user space path
+          manager plugin.
+        */
+        sspi_idm = mptcpd_idm_create();
+
         // Create list of connection tokens on each network interface.
         sspi_interfaces = l_queue_new();
+
+        // Create list of local address MPTCP advertisements.
+        sspi_advs = l_queue_new();
 
         static char const name[] = "sspi";
 
@@ -819,7 +1155,9 @@ static void sspi_exit(struct mptcpd_pm *pm)
 {
         (void) pm;
 
+        l_queue_destroy(sspi_advs, sspi_adv_destroy);
         l_queue_destroy(sspi_interfaces, sspi_interface_info_destroy);
+        mptcpd_idm_destroy(sspi_idm);
 
         l_info("MPTCP single-subflow-per-interface path manager exited.");
 }

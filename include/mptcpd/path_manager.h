@@ -13,6 +13,9 @@
 #include <mptcpd/export.h>
 #include <mptcpd/types.h>
 
+#include <stdbool.h>
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
