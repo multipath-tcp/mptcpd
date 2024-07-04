@@ -96,11 +96,11 @@ void *mptcpd_hash_sockaddr_key_copy(void const *p)
         if (src->sa->sa_family == AF_INET) {
                 sa = (struct sockaddr *) l_new(struct sockaddr_in, 1);
 
-                memcpy(sa, src->sa, sizeof(struct sockaddr_in));
+                memcpy(sa, src->sa, sizeof(*src->sa));
         } else {
                 sa = (struct sockaddr *) l_new(struct sockaddr_in6, 1);
 
-                memcpy(sa, src->sa, sizeof(struct sockaddr_in6));
+                memcpy(sa, src->sa, sizeof(*src->sa));
         }
 
         key->sa = sa;
