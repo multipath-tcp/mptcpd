@@ -3,3 +3,5 @@
 ## Copyright (c) 2018, 2019, Intel Corporation
 
 dist_noinst_SCRIPTS = check-permissions
+
+dist_libexec_SCRIPTS = mptcp-get-debug
