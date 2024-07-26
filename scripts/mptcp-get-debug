@@ -1,0 +1,129 @@
+#! /bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# Copyright (c) 2024, Matthieu Baerts
+
+SCRIPT="$(basename "${0}")"
+VERSION="1"
+PID_IP=
+
+EQ="========================================"
+
+title() {
+    printf "\n%s\n%s\n%s\n" "${EQ}" "${*}" "${EQ}"
+}
+
+stdout() {
+    printf "\n%s\n" "${*}"
+}
+
+stderr() {
+    stdout "${@}" >&2
+}
+
+cmd() {
+    title "${*}"
+    "${@}" 2>&1
+}
+
+start_ip_mptcp_monitor() {
+    title "ip mptcp monitor: start"
+    ip mptcp monitor 2>&1 &  # not using cmd to get the right PID
+    PID_IP=$!
+
+    sleep 0.1 2>/dev/null || sleep 1
+
+    for _ in $(seq 20); do
+        out="$(ss -f netlink -H "src = rtnl:${PID_IP}" 2>/dev/null)" || break
+        [ "$(echo "${out}" | wc -l)" != 0 ] && return 0
+
+        sleep 0.1 2>/dev/null || break
+    done
+
+    if [ ! -d "/proc/${PID_IP}" ]; then
+        stdout "ip monitor has been killed"
+        return 1
+    fi
+}
+
+stop_ip_mptcp_monitor() {
+    title "ip mptcp monitor: stop"
+
+    if [ -n "${PID_IP}" ] && [ -d "/proc/${PID_IP}" ]; then
+        kill "${PID_IP}"
+    fi
+}
+
+collect_data_pre() {
+    stdout "${SCRIPT}: version ${VERSION}"
+
+    if [ "$(id -u)" != 0 ]; then
+        stderr "This script is not executed as root, not all info can be collected."
+        stderr "Press Enter to continue, Ctrl+C to stop"
+        read -r _
+    fi
+
+    cmd sysctl net.mptcp
+    cmd ip mptcp endpoint show
+    cmd ip mptcp limits show
+}
+
+collect_data_post() {
+    cmd ss -ManiH
+    cmd nstat
+}
+
+collect_data() {
+    collect_data_pre
+    collect_data_post
+}
+
+collect_data_repro() {
+    collect_data_pre
+
+    cmd ss -ManiH
+    nstat -n 2>&1
+    start_ip_mptcp_monitor
+
+    stderr "Please reproduce the issue now, then press the Enter key when it is done."
+    read -r _
+
+    collect_data_post
+    stop_ip_mptcp_monitor
+}
+
+version() {
+    printf "%s: version %s\n" "${SCRIPT}" ${VERSION}
+}
+
+usage() {
+    version
+    printf "\n"
+    printf "  -c | --collect      Collect info and exit.\n"
+    printf "  -r | --reproduce    Collect info, start monitor, wait for user and exit.\n"
+    printf "  -h | --help         Show this and exit.\n"
+    printf "  -v | --version      Show the version and exit.\n"
+    printf "\n"
+    printf "Please check https://mptcp.dev website for more info.\n"
+}
+
+case "${1}" in
+    "-c" | "--collect")
+        collect_data
+        ;;
+    "-r" | "--reproduce")
+        collect_data_repro
+        ;;
+    "-h" | "--help")
+        usage
+        ;;
+    "-v" | "--version")
+        version
+        ;;
+    *)
+        usage >&2
+        exit 1
+        ;;
+esac
+
+exit 0
