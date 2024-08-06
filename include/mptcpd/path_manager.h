@@ -118,13 +118,15 @@ MPTCPD_API bool mptcpd_pm_ready(struct mptcpd_pm const *pm);
  *                      byte order.
  * @param[in]     id    MPTCP local address ID.
  * @param[in]     token MPTCP connection token.
+ * @param[in]     nolst Don't create listener.
  *
  * @return @c 0 if operation was successful. -1 or @c errno otherwise.
  */
 MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
                                   struct sockaddr *addr,
                                   mptcpd_aid_t id,
-                                  mptcpd_token_t token);
+                                  mptcpd_token_t token,
+                                  bool nolst);
 
 /**
  * @brief Stop advertising network address to peers.

@@ -219,20 +219,21 @@ static int send_add_addr(struct mptcpd_pm *pm,
 static int upstream_announce(struct mptcpd_pm *pm,
                              struct sockaddr *addr,
                              mptcpd_aid_t id,
-                             mptcpd_token_t token)
+                             mptcpd_token_t token,
+                             bool nolst)
 {
-        /**
-         * Set up MPTCP listening socket.
-         *
-         * @note An ephemeral port will be assigned to the port in
-         *       @a addr if it is zero.
-         *
-         * @todo This should be optional.
-         */
-        int const r = mptcpd_lm_listen(pm->lm, addr);
+        if (!nolst) {
+                /**
+                 * Set up MPTCP listening socket.
+                 *
+                 * @note An ephemeral port will be assigned to the port in
+                 *       @a addr if it is zero.
+                 */
+                int const r = mptcpd_lm_listen(pm->lm, addr);
 
-        if (r != 0)
-                return r;
+                if (r != 0)
+                        return r;
+        }
 
         /**
          * @todo Add support for the optional network interface index

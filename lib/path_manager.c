@@ -241,7 +241,8 @@ int mptcpd_kpm_set_flags(struct mptcpd_pm *pm,
 int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
                        struct sockaddr *addr,
                        mptcpd_aid_t address_id,
-                       mptcpd_token_t token)
+                       mptcpd_token_t token,
+                       bool nolst)
 {
         if (pm == NULL || addr == NULL || address_id == 0)
                 return EINVAL;
@@ -258,7 +259,8 @@ int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
         return ops->add_addr(pm,
                              addr,
                              address_id,
-                             token);
+                             token,
+                             nolst);
 }
 
 int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,

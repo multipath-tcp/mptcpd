@@ -487,7 +487,8 @@ static void sspi_send_addr(void *data, void *user_data)
         mptcpd_pm_add_addr(info->pm,
                            sa,
                            address_id,
-                           info->token);
+                           info->token,
+                           false);
 
         /**
          * @todo The sspi plugin currently doesn't stop advertising IP
