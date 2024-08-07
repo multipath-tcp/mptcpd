@@ -43,31 +43,6 @@ static bool is_pm_ready(struct mptcpd_pm const *pm, char const *fname)
         return ready;
 }
 
-static int do_pm_add_addr(struct mptcpd_pm *pm,
-                          struct sockaddr *addr,
-                          mptcpd_aid_t address_id,
-                          mptcpd_token_t token,
-                          bool nolst)
-{
-        if (pm == NULL || addr == NULL || address_id == 0)
-                return EINVAL;
-
-        if (!is_pm_ready(pm, __func__))
-                return EAGAIN;
-
-        struct mptcpd_pm_cmd_ops const *const ops =
-                pm->netlink_pm->cmd_ops;
-
-        if (ops == NULL || ops->add_addr == NULL)
-                return ENOTSUP;
-
-        return ops->add_addr(pm,
-                             addr,
-                             address_id,
-                             token,
-                             nolst);
-}
-
 // --------------------------------------------------------------------
 
 bool mptcpd_pm_register_ops(struct mptcpd_pm *pm,
@@ -263,12 +238,37 @@ int mptcpd_kpm_set_flags(struct mptcpd_pm *pm,
 
 // -------------------------------------------------------------------
 
+static int do_pm_add_addr(struct mptcpd_pm *pm,
+                          struct sockaddr *addr,
+                          mptcpd_aid_t address_id,
+                          mptcpd_token_t token,
+                          bool listener)
+{
+        if (pm == NULL || addr == NULL || address_id == 0)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
+
+        if (ops == NULL || ops->add_addr == NULL)
+                return ENOTSUP;
+
+        return ops->add_addr(pm,
+                             addr,
+                             address_id,
+                             token,
+                             listener);
+}
+
 int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
                        struct sockaddr *addr,
                        mptcpd_aid_t address_id,
                        mptcpd_token_t token)
 {
-        return do_pm_add_addr(pm, addr, address_id, token, false);
+        return do_pm_add_addr(pm, addr, address_id, token, true);
 }
 
 int mptcpd_pm_add_addr_no_listener(struct mptcpd_pm *pm,
@@ -276,7 +276,7 @@ int mptcpd_pm_add_addr_no_listener(struct mptcpd_pm *pm,
                                    mptcpd_aid_t address_id,
                                    mptcpd_token_t token)
 {
-        return do_pm_add_addr(pm, addr, address_id, token, true);
+        return do_pm_add_addr(pm, addr, address_id, token, false);
 }
 
 int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,
