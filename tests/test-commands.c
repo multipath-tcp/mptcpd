@@ -473,8 +473,7 @@ static void test_add_addr_user(void const *test_data)
         int const result = mptcpd_pm_add_addr(pm,
                                               u_addr->addr,
                                               u_addr->id,
-                                              u_addr->token,
-                                              false);
+                                              u_addr->token);
 
         /*
           EADDRNOTAVAIL error will generally occur if the test is run
