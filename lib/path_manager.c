@@ -238,10 +238,11 @@ int mptcpd_kpm_set_flags(struct mptcpd_pm *pm,
 
 // -------------------------------------------------------------------
 
-int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
-                       struct sockaddr *addr,
-                       mptcpd_aid_t address_id,
-                       mptcpd_token_t token)
+static int do_pm_add_addr(struct mptcpd_pm *pm,
+                          struct sockaddr *addr,
+                          mptcpd_aid_t address_id,
+                          mptcpd_token_t token,
+                          bool listener)
 {
         if (pm == NULL || addr == NULL || address_id == 0)
                 return EINVAL;
@@ -258,7 +259,24 @@ int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
         return ops->add_addr(pm,
                              addr,
                              address_id,
-                             token);
+                             token,
+                             listener);
+}
+
+int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
+                       struct sockaddr *addr,
+                       mptcpd_aid_t address_id,
+                       mptcpd_token_t token)
+{
+        return do_pm_add_addr(pm, addr, address_id, token, true);
+}
+
+int mptcpd_pm_add_addr_no_listener(struct mptcpd_pm *pm,
+                                   struct sockaddr *addr,
+                                   mptcpd_aid_t address_id,
+                                   mptcpd_token_t token)
+{
+        return do_pm_add_addr(pm, addr, address_id, token, false);
 }
 
 int mptcpd_pm_remove_addr(struct mptcpd_pm *pm,

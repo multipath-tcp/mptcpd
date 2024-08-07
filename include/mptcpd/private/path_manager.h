@@ -138,18 +138,22 @@ struct mptcpd_pm_cmd_ops
         /**
          * @brief Advertise new network address to peers.
          *
-         * @param[in]     pm    The mptcpd path manager object.
-         * @param[in,out] addr  Local IP address and port to be
-         *                      advertised through the MPTCP protocol
-         *                      @c ADD_ADDR option.  If the port is
-         *                      zero an ephemeral port will be chosen,
-         *                      and assigned to the appropriate
-         *                      underlying address family-specific
-         *                      port member, e.g. @c sin_port or
-         *                      @c sin6_port.  The port will be in
-         *                      network byte order.
-         * @param[in]     id    MPTCP local address ID.
-         * @param[in]     token MPTCP connection token.
+         * @param[in]     pm       The mptcpd path manager object.
+         * @param[in,out] addr     Local IP address and port to be
+         *                         advertised through the MPTCP protocol
+         *                         @c ADD_ADDR option.  If the port is
+         *                         zero an ephemeral port will be chosen,
+         *                         and assigned to the appropriate
+         *                         underlying address family-specific
+         *                         port member, e.g. @c sin_port or
+         *                         @c sin6_port.  The port will be in
+         *                         network byte order.
+         *                         If listener is not created, port zero
+         *                         will cause no port specification at
+         *                         protocol level.
+         * @param[in]     id       MPTCP local address ID.
+         * @param[in]     token    MPTCP connection token.
+         * @param[in]     listener Create listener.
          *
          * @return @c 0 if operation was successful. -1 or @c errno
          *         otherwise.
@@ -157,7 +161,8 @@ struct mptcpd_pm_cmd_ops
         int (*add_addr)(struct mptcpd_pm *pm,
                         struct sockaddr *addr,
                         mptcpd_aid_t id,
-                        mptcpd_token_t token);
+                        mptcpd_token_t token,
+                        bool listener);
 
         /**
          * @brief Stop advertising network address to peers.
