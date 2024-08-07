@@ -156,7 +156,7 @@ static int mptcp_org_add_addr(struct mptcpd_pm *pm,
                               struct sockaddr *addr,
                               mptcpd_aid_t id,
                               mptcpd_token_t token,
-                              bool nolst);
+                              bool nolst)
 {
 	(void) nolst;
 
