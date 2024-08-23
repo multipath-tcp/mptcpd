@@ -127,6 +127,24 @@ MPTCPD_API int mptcpd_pm_add_addr(struct mptcpd_pm *pm,
                                   mptcpd_token_t token);
 
 /**
+ * @brief Advertise new network address to peers without creating a listener.
+ *
+ * @param[in]     pm    The mptcpd path manager object.
+ * @param[in,out] addr  Local IP address and port to be advertised
+ *                      through the MPTCP protocol @c ADD_ADDR
+ *                      option.  If the port is zero no port will be
+ *                      specified on the underlying protocol level.
+ * @param[in]     id    MPTCP local address ID.
+ * @param[in]     token MPTCP connection token.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_pm_add_addr_no_listener(struct mptcpd_pm *pm,
+                                              struct sockaddr *addr,
+                                              mptcpd_aid_t id,
+                                              mptcpd_token_t token);
+
+/**
  * @brief Stop advertising network address to peers.
  *
  * @param[in] pm         The mptcpd path manager object.

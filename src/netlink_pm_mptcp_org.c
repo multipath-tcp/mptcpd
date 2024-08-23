@@ -155,8 +155,11 @@ static bool append_remote_addr_attr(struct l_genl_msg *msg,
 static int mptcp_org_add_addr(struct mptcpd_pm *pm,
                               struct sockaddr *addr,
                               mptcpd_aid_t id,
-                              mptcpd_token_t token)
+                              mptcpd_token_t token,
+                              bool listener)
 {
+	(void) listener;
+
         /*
           Payload:
               Token
