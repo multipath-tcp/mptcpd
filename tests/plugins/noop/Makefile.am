@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2017-2020, Intel Corporation
+## Copyright (c) 2017-2021, Intel Corporation
 
 include $(top_srcdir)/aminclude_static.am
 
@@ -33,3 +33,6 @@ noop_la_LIBADD = $(top_builddir)/lib/libmptcpd.la $(CODE_COVERAGE_LIBS)
 
 # Clean up code coverage related generated files.
 clean-local: code-coverage-clean
+
+# Force check_LTLIBRARIES to be built on check-valgrind.
+check-valgrind-local: check

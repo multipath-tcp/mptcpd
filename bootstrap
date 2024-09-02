@@ -1,6 +1,53 @@
 #! /bin/sh
 # SPDX-License-Identifier: BSD-3-Clause
 
-# Copyright (c) 2019, Intel Corporation
+# Copyright (c) 2019, 2021, Intel Corporation
+
+# Check if the AX_VALGRIND_CHECK Autoconf Archive macro has the
+# recursive Makefile rule target corrections found in the GitHub pull
+# request at:
+#
+#   https://github.com/autoconf-archive/autoconf-archive/pull/242
+#
+# Download the patched `ax_valgrind_check.m4' file if the corrections
+# don't exist.
+
+local_m4_exists=0
+test -f m4/ax_valgrind_check.m4 && local_m4_exists=1
+
+do_download=no
+
+if test $local_m4_exists -eq 1
+then
+    echo Using local m4/ax_valgrind_check.m4 file.
+else
+    ac_dir=`aclocal --print-ac-dir`
+    grep --quiet check-valgrind-local $ac_dir/ax_valgrind_check.m4
+    if test $? -ne 0
+    then
+        do_download=yes
+    fi
+fi
+
+if test "x$do_download" = "xyes"
+then
+    # The expected recursive `make' target "check-valgrind-local"
+    # doesn't exist in versions of the GNU Autoconf Archive prior to
+    # v2022.02.11.  Attempt to download the patched file from the GNU
+    # Autoconf Archive git repository to the mptcpd/m4 directory so
+    # that autoreconf will use the updated AX_VALGRIND_CHECK macro.
+    echo Patched AX_VALGRIND_CHECK GNU Autoconf Archive macro not found.
+    echo -n "Attempting to download patched ax_valgrind_check.m4... "
+    cd m4
+    wget --quiet --timeout 10 http://git.savannah.gnu.org/cgit/autoconf-archive.git/plain/m4/ax_valgrind_check.m4
+    if test $? -eq 0
+    then
+        echo done
+    else
+        echo failed
+        echo WARNING: "make check-valgrind" may not work properly.
+    fi
+    cd ..
+fi
 
 autoreconf --install --symlink --force
