@@ -1,6 +1,6 @@
 ## SPDX-License-Identifier: BSD-3-Clause
 ##
-## Copyright (c) 2017-2021, Intel Corporation
+## Copyright (c) 2017-2022, Intel Corporation
 
 include $(top_srcdir)/aminclude_static.am
 
@@ -20,6 +20,7 @@ TEST_PLUGIN_DIR_SECURITY = $(abs_builddir)/plugins/security/.libs
 TEST_PLUGIN_DIR_PRIORITY = $(abs_builddir)/plugins/priority/.libs
 TEST_PLUGIN_DIR_NOOP     = $(abs_builddir)/plugins/noop/.libs
 TEST_PLUGIN_DIR_BAD      = $(abs_builddir)/plugins/bad/.libs
+TEST_PLUGIN_DIR_PM       = $(abs_top_builddir)/plugins/path_managers/.libs
 
 check_PROGRAMS =		\
 	test-plugin		\
@@ -31,7 +32,8 @@ check_PROGRAMS =		\
 	test-listener-manager	\
 	test-sockaddr		\
 	test-addr-info		\
-	test-murmur-hash
+	test-murmur-hash	\
+	test-sspi
 
 noinst_PROGRAMS = mptcpwrap-tester
 
@@ -126,6 +128,17 @@ test_addr_info_LDADD =				\
 test_murmur_hash_SOURCES = test-murmur-hash.c
 test_murmur_hash_LDADD =			\
 	$(top_builddir)/lib/libmptcpd.la	\
+	$(ELL_LIBS)				\
+	$(CODE_COVERAGE_LIBS)
+
+test_sspi_SOURCES = test-sspi.c
+test_sspi_CPPFLAGS =					\
+	$(AM_CPPFLAGS)					\
+	-DTEST_PLUGIN_DIR=\"$(TEST_PLUGIN_DIR_PM)\"
+test_sspi_LDADD =				\
+	$(top_builddir)/src/libpath_manager.la	\
+	$(top_builddir)/lib/libmptcpd.la	\
+	$(builddir)/lib/libmptcpd_test.la	\
 	$(ELL_LIBS)				\
 	$(CODE_COVERAGE_LIBS)
 
