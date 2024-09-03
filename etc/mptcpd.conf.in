@@ -59,10 +59,17 @@ path-manager=@mptcpd_default_pm@
 #   skip_loopback
 #     Ignore (do not notify) host (loopback) address updates
 #
+#   check_route
+#     Notify address only if a default route is available from such
+#     address and the related device. If the route check fails, it
+#     will be re-done after a little timeout, to allow e.g. DHCP to
+#     configure the host properly. Complex policy routing
+#     configuration may confuse or circumvent this check.
+#
 # These flags determine whether mptpcd plugins will be notified when
 # related addresses are updated.
 #
-# notify-flags=existing,skip_link_local,skip_loopback
+# notify-flags=existing,skip_link_local,skip_loopback,check_route
 
 # --------------------------
 # Plugins to load
