@@ -4,7 +4,7 @@
  *
  * @brief mptcpd network device monitoring.
  *
- * Copyright (c) 2017-2022, Intel Corporation
+ * Copyright (c) 2017-2022, 2024, Intel Corporation
  */
 
 #ifdef HAVE_CONFIG_H
@@ -94,6 +94,51 @@ struct mptcpd_nm
         /// Enable/disable loopback network interface monitoring.
         bool monitor_loopback;
 };
+
+// -------------------------------------------------------------------
+//                         Helper Functions
+// -------------------------------------------------------------------
+
+/**
+ * @brief Wrap different versions of ELL @c l_netlink_send().
+ *
+ * ELL 0.68 changed the API for @c l_netlink_send().  This helper
+ * function wraps the two different function calls so that mptcpd will
+ * work with both pre- and post-0.68 @c l_netlink_send() APIs.
+ */
+static unsigned int netlink_send(struct l_netlink *netlink,
+                                 uint16_t type,
+                                 uint16_t flags,
+                                 void const *data,
+                                 uint32_t len,
+                                 l_netlink_command_func_t function,
+                                 void *user_data,
+                                 l_netlink_destroy_func_t destroy)
+{
+#ifdef HAVE_L_NETLINK_MESSAGE_NEW_SIZED
+        // ELL >= 0.68
+        struct l_netlink_message *const message =
+                l_netlink_message_new_sized(type, flags, len);
+
+        l_netlink_message_add_header(message, data, len);
+
+        return l_netlink_send(netlink,
+                              message,
+                              function,
+                              user_data,
+                              destroy);
+#else
+        // ELL < 0.68
+        return l_netlink_send(netlink,
+                              type,
+                              flags,
+                              data,
+                              len,
+                              function,
+                              user_data,
+                              destroy);
+#endif
+}
 
 // -------------------------------------------------------------------
 //               Network Address Information Handling
@@ -1015,36 +1060,14 @@ static void check_default_route(struct nm_addr_info *ai)
          */
         mptcpd_addr_get(ai);
 
-	unsigned int result = 0;
-
-#ifdef HAVE_L_NETLINK_MESSAGE_NEW_SIZED
-	// ELL >= 0.68
-        ptrdiff_t const msg_size = buf - (char *) &store;
-        struct l_netlink_message *const nlm =
-                l_netlink_message_new_sized(RTM_GETROUTE,
-                                            0,
-                                            msg_size);
-
-        l_netlink_message_add_header(nlm, &store, msg_size);
-
-	result = l_netlink_send(ai->nm->rtnl,
-				nlm,
-				handle_rtm_getroute,
-				ai,
-				NULL);
-#else
-	// ELL < 0.68
-	result = l_netlink_send(ai->nm->rtnl,
-				RTM_GETROUTE,
-				0,
-				&store,
-				buf - (char *) &store,
-				handle_rtm_getroute,
-				ai,
-				NULL);
-#endif
-
-        if (result == 0) {
+        if (netlink_send(ai->nm->rtnl,
+                         RTM_GETROUTE,
+                         0,
+                         &store,
+                         buf - (char *) &store,
+                         handle_rtm_getroute,
+                         ai,
+                         NULL) == 0) {
                 l_debug("Route lookup failed");
                 mptcpd_addr_put(ai);
         }
@@ -1410,36 +1433,14 @@ static void send_getaddr_command(void *user_data)
 
         // Get IP addresses.
         struct ifaddrmsg addr_msg = { .ifa_family = AF_UNSPEC };
-
-	unsigned int result = 0;
-
-#ifdef HAVE_L_NETLINK_MESSAGE_NEW_SIZED
-	// ELL >= 0.68
-        struct l_netlink_message *const nlm =
-                l_netlink_message_new_sized(RTM_GETADDR,
-                                            NLM_F_DUMP,
-                                            sizeof(addr_msg));
-
-        l_netlink_message_add_header(nlm, &addr_msg, sizeof(addr_msg));
-
-	result = l_netlink_send(nm->rtnl,
-				nlm,
-				handle_rtm_getaddr,
-				nm,
-				NULL);
-#else
-	// ELL < 0.68
-	result = l_netlink_send(nm->rtnl,
-				RTM_GETADDR,
-				NLM_F_DUMP,
-				&addr_msg,
-				sizeof(addr_msg),
-				handle_rtm_getaddr,
-				nm,
-				NULL);
-#endif
-
-	if (result == 0) {
+        if (netlink_send(nm->rtnl,
+                         RTM_GETADDR,
+                         NLM_F_DUMP,
+                         &addr_msg,
+                         sizeof(addr_msg),
+                         handle_rtm_getaddr,
+                         nm,
+                         NULL) == 0) {
                 l_error("Unable to obtain IP addresses.");
 
                 /*
@@ -1525,36 +1526,15 @@ struct mptcpd_nm *mptcpd_nm_create(uint32_t flags)
          *       resulted in an EBUSY error.
          */
         struct ifinfomsg link_msg = { .ifi_family = AF_UNSPEC };
-
-	unsigned int result = 0;
-
-#ifdef HAVE_L_NETLINK_MESSAGE_NEW_SIZED
-	// ELL >= 0.68
-        struct l_netlink_message *const nlm =
-                l_netlink_message_new_sized(RTM_GETLINK,
-                                            NLM_F_DUMP,
-                                            sizeof(link_msg));
-
-        l_netlink_message_add_header(nlm, &link_msg, sizeof(link_msg));
-
-        result = l_netlink_send(nm->rtnl,
-				nlm,
-				handle_rtm_getlink,
-				nm,
-				send_getaddr_command);
-#else
-	// ELL < 0.68
-	result = l_netlink_send(nm->rtnl,
-				RTM_GETLINK,
-				NLM_F_DUMP,
-				&link_msg,
-				sizeof(link_msg),
-				handle_rtm_getlink,
-				nm,
-				send_getaddr_command);
-#endif
-
-        if (result == 0) {
+        if (netlink_send(nm->rtnl,
+                         RTM_GETLINK,
+                         NLM_F_DUMP,
+                         &link_msg,
+                         sizeof(link_msg),
+                         handle_rtm_getlink,
+                         nm,
+                         send_getaddr_command)
+            == 0) {
                 l_error("Unable to obtain network devices.");
                 mptcpd_nm_destroy(nm);
                 return NULL;
