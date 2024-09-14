@@ -2,7 +2,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (c) 2017-2023, Intel Corporation
+# Copyright (c) 2017-2024, Intel Corporation
 
 AC_PREREQ([2.69])
 AC_INIT([mptcpd],
@@ -265,6 +265,12 @@ AC_CHECK_FUNC([l_hashmap_replace],
               [AC_DEFINE([HAVE_L_HASHMAP_REPLACE],
                          [],
                          [ELL has l_hashmap_replace()])])
+
+dnl l_netlink_message_new_sized() was introduced in ELL v0.68.
+AC_CHECK_FUNC([l_netlink_message_new_sized],
+              [AC_DEFINE([HAVE_L_NETLINK_MESSAGE_NEW_SIZED],
+                         [],
+                         [ELL has l_netlink_message_new_sized()])])
 LIBS=$mptcpd_save_libs
 
 # ---------------------------------------------------------------
