@@ -2,7 +2,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (c) 2017-2023, Intel Corporation
+# Copyright (c) 2017-2024, Intel Corporation
 
 AC_PREREQ([2.69])
 AC_INIT([mptcpd],
