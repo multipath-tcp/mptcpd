@@ -338,6 +338,23 @@ static void set_plugins_to_load(struct mptcpd_config *config,
         l_free((char *) plugins);
 }
 
+/**
+ * @brief Set mptcpd plugins configuration directory.
+ *
+ * Set mptcpd plugins configuration directory in the mptcpd configuration,
+ * @a config, being careful to deallocate a previously set plugins
+ * configuration directory.
+ *
+ * @param[in,out] config Mptcpd configuration.
+ * @param[in]     dir    Mptcpd plugins configuration directory. Ownership
+ *                       of memory is transferred to @a config.
+ */
+static void set_plugins_conf_dir(struct mptcpd_config *config,
+                                 char *dir)
+{
+        reset_string(&config->plugins_conf_dir, dir);
+}
+
 // ---------------------------------------------------------------
 // Command line options
 // ---------------------------------------------------------------
@@ -371,6 +388,9 @@ static char const doc[] =
 
 /// Command line option key for "--load-plugins"
 #define MPTCPD_LOAD_PLUGINS_KEY 0x104
+
+/// Command line option key for "--plugins-conf-dir"
+#define MPTCPD_PLUGINS_CONF_DIR_KEY 0x105
 ///@}
 
 static struct argp_option const options[] = {
@@ -413,6 +433,12 @@ static struct argp_option const options[] = {
           0,
           "Specify which plugins to load, e.g. --load-plugins=addr_adv,"
           "sspi",
+          0 },
+        { "plugins-conf-dir",
+          MPTCPD_PLUGINS_CONF_DIR_KEY,
+          "DIR",
+          0,
+          "Set plugins configuration directory to DIR",
           0 },
         { 0 }
 };
@@ -464,6 +490,14 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
                 set_plugins_to_load(config, l_strdup(arg));
                 break;
+        case MPTCPD_PLUGINS_CONF_DIR_KEY:
+                if (strlen(arg) == 0)
+                        argp_error(state,
+                                   "Empty plugins configuration directory"
+                                   " command line option.");
+
+                set_plugins_conf_dir(config, l_strdup(arg));
+                break;
         default:
                 return ARGP_ERR_UNKNOWN;
         };
@@ -498,45 +532,6 @@ parse_options(struct mptcpd_config *config, int argc, char *argv[])
 // ---------------------------------------------------------------
 // Configuration files
 // ---------------------------------------------------------------
-
-/**
- * @brief Verify file permissions are secure.
- *
- * Mptcpd requires that its files are only writable by the owner and
- * group.  Verify that the "other" write mode, @c S_IWOTH, isn't set.
- *
- * @param[in] f Name of file to check for expected permissions.
- *
- * @note There is a TOCTOU race condition between this file
- *       permissions check and subsequent calls to functions that
- *       access the given file @a f, such as the call to
- *       @c l_settings_load_from_file().  There is currently no way
- *       to avoid that with the existing ELL API.
- */
-static bool check_file_perms(char const *f)
-{
-        struct stat sb;
-        bool perms_ok = false;
-
-        if (stat(f, &sb) == 0) {
-                perms_ok = S_ISREG(sb.st_mode)
-                           && (sb.st_mode & S_IWOTH) == 0;
-
-                if (!perms_ok)
-                        l_error("\"%s\" should be a file that is not "
-                                "world writable.",
-                                f);
-        } else if (errno == ENOENT) {
-                perms_ok = true;
-
-                l_debug("File \"%s\" does not exist.", f);
-        } else {
-                l_debug("Unexpected error during file "
-                        "permissions check.");
-        }
-
-        return perms_ok;
-}
 
 static void parse_config_log(struct mptcpd_config *config,
                              struct l_settings const *settings,
@@ -643,6 +638,23 @@ static void parse_config_plugins_to_load(
                 set_plugins_to_load(config, plugins_to_load);
 }
 
+static void parse_config_plugins_conf_dir(
+        struct mptcpd_config *config,
+        struct l_settings const *settings,
+        char const *group)
+{
+        if (config->plugins_conf_dir != NULL)
+                return;  // Previously set, e.g. via command line.
+
+        char *const plugins_conf_dir =
+                l_settings_get_string(settings,
+                                      group,
+                                      "plugins-conf-dir");
+
+        if (plugins_conf_dir != NULL)
+                set_plugins_conf_dir(config, plugins_conf_dir);
+}
+
 /**
  * @brief Parse configuration file.
  *
@@ -652,49 +664,33 @@ static void parse_config_plugins_to_load(
  * @return @c true on successful configuration file parse, and
  *         @c false otherwise.
  */
-static bool parse_config_file(struct mptcpd_config *config,
-                              char const *filename)
+static void parse_config_file(struct l_settings const* settings,
+                              void *user_data)
 {
-        assert(filename != NULL);
+        struct mptcpd_config *config = user_data;
 
-        if (!check_file_perms(filename))
-                return false;
+        static char const group[] = "core";
 
-        struct l_settings *const settings = l_settings_new();
-        if (settings == NULL) {
-                l_error("Unable to create mptcpd settings.");
+        // Logging mechanism.
+        parse_config_log(config, settings, group);
 
-                return false;
-        }
+        // Plugin directory.
+        parse_config_plugin_dir(config, settings, group);
 
-        if (l_settings_load_from_file(settings, filename)) {
-                static char const group[] = "core";
+        // Notification for existing addresses.
+        parse_config_notify_flags(config, settings, group);
 
-                // Logging mechanism.
-                parse_config_log(config, settings, group);
+        // Address flags.
+        parse_config_addr_flags(config, settings, group);
 
-                // Plugin directory.
-                parse_config_plugin_dir(config, settings, group);
+        // Default plugin.
+        parse_config_default_plugin(config, settings, group);
 
-                // Notification for existing addresses.
-                parse_config_notify_flags(config, settings, group);
+        // Plugins to load.
+        parse_config_plugins_to_load(config, settings, group);
 
-                // Address flags.
-                parse_config_addr_flags(config, settings, group);
-
-                // Default plugin.
-                parse_config_default_plugin(config, settings, group);
-
-                // Plugins to load.
-                parse_config_plugins_to_load(config, settings, group);
-        } else {
-                l_debug("Unable to load mptcpd settings from file '%s'",
-                        filename);
-        }
-
-        l_settings_free(settings);
-
-        return true;
+        // Plugins configuration directory.
+        parse_config_plugins_conf_dir(config, settings, group);
 }
 
 /**
@@ -728,7 +724,9 @@ static bool parse_config_files(struct mptcpd_config *config)
         for (char const *const *file = files;
              file != end && parsed;
              ++file) {
-                parsed = parse_config_file(config, *file);
+                parsed = mptcpd_config_read(*file,
+                                            parse_config_file,
+                                            config);
         }
 
         return parsed;
@@ -779,6 +777,9 @@ static bool merge_config(struct mptcpd_config       *dst,
                 }
         }
 
+        if (dst->plugins_conf_dir == NULL)
+                dst->plugins_conf_dir = l_strdup(src->plugins_conf_dir);
+
         return true;
 }
 
@@ -794,6 +795,13 @@ static bool check_config(struct mptcpd_config const *config)
 {
         if (config->plugin_dir == NULL) {
                 l_error("mptcpd plugin directory was not configured.");
+
+                return false;
+        }
+
+        if (config->plugins_conf_dir == NULL) {
+                l_error("mptcpd plugins configuration directory was not "
+                        "configured.");
 
                 return false;
         }
@@ -817,7 +825,8 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
         // System configuration, e.g. /etc/mptcpd/mptcpd.conf.
         struct mptcpd_config sys_config = { .log_set = NULL };
         static struct mptcpd_config const def_config = {
-                .plugin_dir = MPTCPD_DEFAULT_PLUGINDIR };
+                .plugin_dir = MPTCPD_DEFAULT_PLUGINDIR,
+                .plugins_conf_dir = MPTCPD_DEFAULT_PLUGINSCONFDIR };
         char flags[128];
 
         /*
@@ -833,6 +842,7 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
                 && merge_config(config, &def_config)
                 && check_config(config);
 
+        l_free(sys_config.plugins_conf_dir);
         l_queue_destroy(sys_config.plugins_to_load, l_free);
         l_free(sys_config.default_plugin);
         l_free(sys_config.plugin_dir);
@@ -871,6 +881,9 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[])
                 l_free(str);
         }
 
+        l_debug("plugins configuration directory: %s",
+                config->plugins_conf_dir);
+
         return config;
 }
 
@@ -879,12 +892,12 @@ void mptcpd_config_destroy(struct mptcpd_config *config)
         if (config == NULL)
                 return;
 
+        l_free(config->plugins_conf_dir);
         l_queue_destroy(config->plugins_to_load, l_free);
         l_free(config->default_plugin);
         l_free(config->plugin_dir);
         l_free(config);
 }
-
 
 /*
   Local Variables:

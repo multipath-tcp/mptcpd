@@ -72,7 +72,11 @@ public:
                 struct mptcpd_pm *const pm = NULL;
 
                 bool const loaded =
-                        mptcpd_plugin_load(dir, default_plugin, NULL, this->pm);
+                        mptcpd_plugin_load(dir,
+                                           default_plugin,
+                                           dir,
+                                           NULL,
+                                           this->pm);
                 assert(loaded);
 
                 static struct plugin_call_args const args = {

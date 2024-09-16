@@ -353,6 +353,10 @@ MPTCPD_API bool mptcpd_plugin_register_ops(
         char const *name,
         struct mptcpd_plugin_ops const *ops);
 
+MPTCPD_API bool mptcpd_plugin_read_config(char const *filename,
+                                          mptcpd_parse_func_t fun,
+                                          void *user_data);
+
 #ifdef __cplusplus
 }
 #endif
