@@ -7,8 +7,6 @@
  * Copyright (c) 2019, 2021-2022, Intel Corporation
  */
 
-#include <memory>
-
 #include <ell/main.h>
 #include <ell/idle.h>
 #include <ell/log.h>

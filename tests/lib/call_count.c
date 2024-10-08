@@ -7,8 +7,6 @@
  * Copyright (c) 2019, 2022, Intel Corporation
  */
 
-#include <stdlib.h>
-
 #include "test-plugin.h"
 
 
