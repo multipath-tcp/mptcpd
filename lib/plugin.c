@@ -290,7 +290,7 @@ static void load_plugin(char const *filename)
 static void load_plugins_queue(char const *dir,
                                struct l_queue const* plugins_to_load)
 {
-        struct l_queue_entry const *entry = 
+        struct l_queue_entry const *entry =
                 l_queue_get_entries((struct l_queue *) plugins_to_load);
 
         while (entry) {
@@ -359,8 +359,8 @@ static int load_plugins_all(int const fd,
 }
 
 
-static int load_plugins(char const *dir, 
-                        struct l_queue const *plugins_to_load, 
+static int load_plugins(char const *dir,
+                        struct l_queue const *plugins_to_load,
                         struct mptcpd_pm *pm)
 {
         /**

@@ -82,7 +82,7 @@ static void test_socket_data(struct socket_data const *data)
         assert(verified);
 }
 
-int main()
+int main(void)
 {
         /*
           libmptcpwrap.so should be preloaded when running this

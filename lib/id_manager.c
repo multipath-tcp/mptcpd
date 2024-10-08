@@ -14,7 +14,6 @@
 #define _POSIX_C_SOURCE 200112L  ///< For XSI-compliant strerror_r().
 
 #include <assert.h>
-#include <errno.h>
 #include <stdint.h>
 #include <string.h>
 #include <sys/socket.h>

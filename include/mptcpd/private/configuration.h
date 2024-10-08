@@ -10,6 +10,8 @@
 #ifndef MPTCPD_CONFIGURATION_H
 #define MPTCPD_CONFIGURATION_H
 
+#include <stdint.h>
+
 
 /**
  * Function pointer corresponding to the ELL functions that set the
