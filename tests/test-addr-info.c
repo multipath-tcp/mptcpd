@@ -46,7 +46,7 @@ static void test_addr_info(void const *test_data)
 
         in_addr_t const addr = htonl(0xC0000201);  // 192.0.2.1
         in_port_t const port = htons(0x1234);
-        
+
         struct mptcpd_addr_info info = {
                 .id    = 5,
                 .flags = 10,
