@@ -50,6 +50,8 @@ struct plugin_call_count
         int new_subflow;
         int subflow_closed;
         int subflow_priority;
+        int listener_created;
+        int listener_closed;
         int new_interface;
         int update_interface;
         int delete_interface;
