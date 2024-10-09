@@ -167,6 +167,28 @@ MPTCPD_API void mptcpd_plugin_subflow_priority(
         struct sockaddr const *raddr,
         bool backup,
         struct mptcpd_pm *pm);
+
+/**
+ * @brief Notify plugin of MPTCP listener creation.
+ *
+ * @param[in] laddr  Local address information.
+ * @param[in] pm     Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_listener_created(
+        char const *name,
+        struct sockaddr const *laddr,
+        struct mptcpd_pm *pm);
+
+/**
+ * @brief Notify plugin of MPTCP listener closure.
+ *
+ * @param[in] laddr  Local address information.
+ * @param[in] pm     Opaque pointer to mptcpd path manager object.
+ */
+MPTCPD_API void mptcpd_plugin_listener_closed(
+        char const *name,
+        struct sockaddr const *laddr,
+        struct mptcpd_pm *pm);
 ///@}
 
 /**

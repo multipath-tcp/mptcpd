@@ -263,6 +263,26 @@ struct mptcpd_plugin_ops
                                  struct sockaddr const *raddr,
                                  bool backup,
                                  struct mptcpd_pm *pm);
+
+        /**
+         * @brief New MPTCP listener socket has been created.
+         *
+         * @param[in] laddr       Local address information.
+         * @param[in] pm          Opaque pointer to mptcpd path
+         *                        manager object.
+         */
+        void (*listener_created)(struct sockaddr const *laddr,
+                                 struct mptcpd_pm *pm);
+
+        /**
+         * @brief MPTCP listener socket has been closed.
+         *
+         * @param[in] laddr       Local address information.
+         * @param[in] pm          Opaque pointer to mptcpd path
+         *                        manager object.
+         */
+        void (*listener_closed)(struct sockaddr const *laddr,
+                                struct mptcpd_pm *pm);
         ///@}
 
         // --------------------------------------------------------
