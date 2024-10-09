@@ -99,7 +99,9 @@ static struct plugin_call_count const test_count_1 = {
         .address_removed        = 0,
         .new_subflow            = 0,
         .subflow_closed         = 0,
-        .subflow_priority       = 0
+        .subflow_priority       = 0,
+        .listener_created       = 1,
+        .listener_closed        = 1
 };
 
 static struct plugin_call_count const test_count_2 = {
@@ -111,6 +113,8 @@ static struct plugin_call_count const test_count_2 = {
         .new_subflow            = 1,
         .subflow_closed         = 1,
         .subflow_priority       = 1,
+        .listener_created       = 1,
+        .listener_closed        = 1,
         .new_interface          = 1,
         .update_interface       = 2,
         .delete_interface       = 1,
@@ -126,7 +130,9 @@ static struct plugin_call_count const test_count_4 = {
         .address_removed        = 1,
         .new_subflow            = 0,
         .subflow_closed         = 0,
-        .subflow_priority       = 0
+        .subflow_priority       = 0,
+        .listener_created       = 0,
+        .listener_closed        = 0
 };
 ///@}
 
