@@ -311,6 +311,8 @@ static void test_null_plugin_ops(void const *test_data)
         mptcpd_plugin_new_subflow(token, laddr, raddr, backup, pm);
         mptcpd_plugin_subflow_closed(token, laddr, raddr, backup, pm);
         mptcpd_plugin_subflow_priority(token, laddr, raddr, backup, pm);
+        mptcpd_plugin_listener_created(name, laddr, pm);
+        mptcpd_plugin_listener_closed(name, laddr, pm);
         mptcpd_plugin_new_interface(interface, pm);
         mptcpd_plugin_update_interface(interface, pm);
         mptcpd_plugin_delete_interface(interface, pm);

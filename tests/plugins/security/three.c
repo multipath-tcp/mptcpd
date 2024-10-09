@@ -140,6 +140,24 @@ static void plugin_three_subflow_priority(mptcpd_token_t token,
         ++call_count.subflow_priority;
 }
 
+static void plugin_three_listener_created(struct sockaddr const *laddr,
+                                          struct mptcpd_pm *pm)
+{
+        (void) laddr;
+        (void) pm;
+
+        ++call_count.listener_created;
+}
+
+static void plugin_three_listener_closed(struct sockaddr const *laddr,
+                                         struct mptcpd_pm *pm)
+{
+        (void) laddr;
+        (void) pm;
+
+        ++call_count.listener_closed;
+}
+
 static struct mptcpd_plugin_ops const pm_ops = {
         .new_connection         = plugin_three_new_connection,
         .connection_established = plugin_three_connection_established,
@@ -149,6 +167,8 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .new_subflow            = plugin_three_new_subflow,
         .subflow_closed         = plugin_three_subflow_closed,
         .subflow_priority       = plugin_three_subflow_priority,
+        .listener_created       = plugin_three_listener_created,
+        .listener_closed        = plugin_three_listener_closed,
 };
 
 static int plugin_three_init(struct mptcpd_pm *pm)

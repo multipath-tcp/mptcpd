@@ -539,6 +539,89 @@ static void handle_priority_changed(struct pm_event_attrs const *attrs,
                                        pm);
 }
 
+#ifdef HAVE_UPSTREAM_KERNEL
+/**
+ * @brief Retrieve listener event attributes.
+ *
+ * All listener events have the same payload attributes.  Share
+ * attribute validation and addr initialization in one location.
+ *
+ * @param[in]     attrs Generic netlink MPTCP subflow event message.
+ * @param[in,out] laddr MPTCP subflow local address and port.
+ *
+ * @return @c true on success, @c false otherwise.
+ */
+static bool handle_listener(struct pm_event_attrs const *attrs,
+                            struct sockaddr_storage *laddr)
+{
+        assert(attrs != NULL);
+        assert(laddr != NULL);
+
+        /*
+          Payload:
+              Address family
+              Local address
+              Local port
+         */
+        if (!(attrs->laddr4 || attrs->laddr6)
+            || !attrs->local_port) {
+                l_error("Required MPTCP_EVENT_LISTENER_*"
+                        "message attributes are missing.");
+
+                return false;
+        }
+
+        if (!mptcpd_sockaddr_storage_init(attrs->laddr4,
+                                          attrs->laddr6,
+                                          *attrs->local_port,
+                                          laddr)) {
+                l_error("Unable to initialize address information");
+
+                return false;
+        }
+
+        return true;
+}
+
+static void handle_listener_created(struct pm_event_attrs const *attrs,
+                                    struct mptcpd_pm *pm)
+{
+        /*
+          Payload:
+              Address family
+              Local address
+              Local port
+         */
+        struct sockaddr_storage laddr;
+
+        if (!handle_listener(attrs, &laddr))
+                return;
+
+        static char const *const pm_name = NULL;
+
+        mptcpd_plugin_listener_created(pm_name, (struct sockaddr *) &laddr, pm);
+}
+
+static void handle_listener_closed(struct pm_event_attrs const *attrs,
+                                   struct mptcpd_pm *pm)
+{
+        /*
+          Payload:
+              Address family
+              Local address
+              Local port
+         */
+        struct sockaddr_storage laddr;
+
+        if (!handle_listener(attrs, &laddr))
+                return;
+
+        static char const *const pm_name = NULL;
+
+        mptcpd_plugin_listener_closed(pm_name, (struct sockaddr *) &laddr, pm);
+}
+#endif  // HAVE_UPSTREAM_KERNEL
+
 static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
 {
         int const cmd = l_genl_msg_get_command(msg);
@@ -582,6 +665,16 @@ static void handle_mptcp_event(struct l_genl_msg *msg, void *user_data)
         case MPTCP_EVENT_SUB_PRIORITY:
                 handle_priority_changed(&attrs, pm);
                 break;
+
+#ifdef HAVE_UPSTREAM_KERNEL
+        case MPTCP_EVENT_LISTENER_CREATED:
+                handle_listener_created(&attrs, pm);
+                break;
+
+        case MPTCP_EVENT_LISTENER_CLOSED:
+                handle_listener_closed(&attrs, pm);
+                break;
+#endif  // HAVE_UPSTREAM_KERNEL
 
         default:
                 l_error("Unhandled MPTCP event: %d", cmd);

@@ -113,6 +113,20 @@ static void plugin_noop_subflow_priority(mptcpd_token_t token,
         (void) pm;
 }
 
+static void plugin_noop_listener_created(struct sockaddr const *laddr,
+                                         struct mptcpd_pm *pm)
+{
+        (void) laddr;
+        (void) pm;
+}
+
+static void plugin_noop_listener_closed(struct sockaddr const *laddr,
+                                        struct mptcpd_pm *pm)
+{
+        (void) laddr;
+        (void) pm;
+}
+
 void plugin_noop_new_interface(struct mptcpd_interface const *i,
                                struct mptcpd_pm *pm)
 {
@@ -161,6 +175,8 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .new_subflow            = plugin_noop_new_subflow,
         .subflow_closed         = plugin_noop_subflow_closed,
         .subflow_priority       = plugin_noop_subflow_priority,
+        .listener_created       = plugin_noop_listener_created,
+        .listener_closed        = plugin_noop_listener_closed,
         .new_interface          = plugin_noop_new_interface,
         .update_interface       = plugin_noop_update_interface,
         .delete_interface       = plugin_noop_delete_interface,

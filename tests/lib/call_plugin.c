@@ -70,6 +70,16 @@ void call_plugin_ops(struct plugin_call_count const *count,
                                                args->backup,
                                                args->pm);
 
+        for (int i = 0; i < count->listener_created; ++i)
+                mptcpd_plugin_listener_created(args->name,
+                                               args->laddr,
+                                               args->pm);
+
+        for (int i = 0; i < count->listener_closed; ++i)
+                mptcpd_plugin_listener_closed(args->name,
+                                              args->laddr,
+                                              args->pm);
+
         for (int i = 0; i < count->connection_closed; ++i)
                 mptcpd_plugin_connection_closed(args->token, args->pm);
 
