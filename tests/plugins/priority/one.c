@@ -158,6 +158,28 @@ static void plugin_one_subflow_priority(mptcpd_token_t token,
         ++call_count.subflow_priority;
 }
 
+static void plugin_one_listener_created(struct sockaddr const *laddr,
+                                        struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        assert(laddr != NULL);
+        assert(sockaddr_is_equal(laddr, local_addr));
+
+        ++call_count.listener_created;
+}
+
+static void plugin_one_listener_closed(struct sockaddr const *laddr,
+                                        struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        assert(laddr != NULL);
+        assert(sockaddr_is_equal(laddr, local_addr));
+
+        ++call_count.listener_closed;
+}
+
 static struct mptcpd_plugin_ops const pm_ops = {
         .new_connection         = plugin_one_new_connection,
         .connection_established = plugin_one_connection_established,
@@ -166,7 +188,9 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .address_removed        = plugin_one_address_removed,
         .new_subflow            = plugin_one_new_subflow,
         .subflow_closed         = plugin_one_subflow_closed,
-        .subflow_priority       = plugin_one_subflow_priority
+        .subflow_priority       = plugin_one_subflow_priority,
+        .listener_created       = plugin_one_listener_created,
+        .listener_closed        = plugin_one_listener_closed
 };
 
 static int plugin_one_init(struct mptcpd_pm *pm)
@@ -204,6 +228,8 @@ static void plugin_one_exit(struct mptcpd_pm *pm)
                 .new_subflow       = test_count_1.new_subflow       * 2,
                 .subflow_closed    = test_count_1.subflow_closed    * 2,
                 .subflow_priority  = test_count_1.subflow_priority  * 2,
+                .listener_created  = test_count_1.listener_created  * 2,
+                .listener_closed   = test_count_1.listener_closed   * 2,
         };
 
         assert(call_count_is_sane(&call_count));

@@ -160,6 +160,28 @@ static void plugin_two_subflow_priority(mptcpd_token_t token,
         ++call_count.subflow_priority;
 }
 
+static void plugin_two_listener_created(struct sockaddr const *laddr,
+                                        struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        assert(laddr != NULL);
+        assert(sockaddr_is_equal(laddr, local_addr));
+
+        ++call_count.listener_created;
+}
+
+static void plugin_two_listener_closed(struct sockaddr const *laddr,
+                                        struct mptcpd_pm *pm)
+{
+        (void) pm;
+
+        assert(laddr != NULL);
+        assert(sockaddr_is_equal(laddr, local_addr));
+
+        ++call_count.listener_closed;
+}
+
 void plugin_two_new_interface(struct mptcpd_interface const *i,
                               struct mptcpd_pm *pm)
 {
@@ -218,6 +240,8 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .new_subflow            = plugin_two_new_subflow,
         .subflow_closed         = plugin_two_subflow_closed,
         .subflow_priority       = plugin_two_subflow_priority,
+        .listener_created       = plugin_two_listener_created,
+        .listener_closed        = plugin_two_listener_closed,
         .new_interface          = plugin_two_new_interface,
         .update_interface       = plugin_two_update_interface,
         .delete_interface       = plugin_two_delete_interface,
