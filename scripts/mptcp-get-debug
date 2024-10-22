@@ -63,6 +63,8 @@ collect_data_pre() {
         read -r _
     fi
 
+    cmd uname -a
+    cmd cat /etc/os-release
     cmd sysctl net.mptcp
     cmd ip mptcp endpoint show
     cmd ip mptcp limits show
