@@ -18,7 +18,7 @@ jobs:
         cc: [gcc, clang]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: dependencies
       run: sudo apt-get -y install autoconf-archive git clang
     - name: build and install ELL

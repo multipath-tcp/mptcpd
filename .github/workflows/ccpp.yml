@@ -16,7 +16,7 @@ jobs:
         debug: [enable-debug, disable-debug]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: dependencies
       run: sudo apt-get -y install autoconf-archive pandoc git
     - name: build and install ELL
