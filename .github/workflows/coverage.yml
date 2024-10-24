@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: dependencies
       run: sudo apt-get -y install autoconf-archive lcov git
     - name: build and install ELL
@@ -30,7 +30,7 @@ jobs:
              CODE_COVERAGE_OUTPUT_FILE=lcov.info \
              CODE_COVERAGE_LCOV_OPTIONS="--no-external --exclude */tests/*"
     - name: Coveralls
-      uses: coverallsapp/github-action@master
+      uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: ./lcov.info
+        file: ./lcov.info
