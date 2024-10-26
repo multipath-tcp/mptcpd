@@ -10,12 +10,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/util.h>  // Needed by <ell/log.h>.
-#include <ell/log.h>
-#include <ell/test.h>
-#pragma GCC diagnostic pop
+#include <ell/ell.h>
 
 #include <mptcpd/private/murmur_hash.h>
 

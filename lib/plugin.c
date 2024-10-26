@@ -20,13 +20,7 @@
 #include <unistd.h>
 #include <assert.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/queue.h>
-#include <ell/hashmap.h>
-#include <ell/util.h>
-#include <ell/log.h>
-#pragma GCC diagnostic pop
+#include <ell/ell.h>
 
 /**
  * @todo Remove this preprocessor symbol definition once support for

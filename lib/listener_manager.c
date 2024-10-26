@@ -19,13 +19,7 @@
 #include <errno.h>
 #include <string.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/hashmap.h>
-#include <ell/util.h>
-#include <ell/log.h>
-#include <ell/random.h>
-#pragma GCC diagnostic pop
+#include <ell/ell.h>
 
 #include <mptcpd/private/murmur_hash.h>
 #include <mptcpd/private/listener_manager.h>

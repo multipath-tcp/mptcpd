@@ -15,14 +15,7 @@
 #include <netinet/in.h>  // For INET_ADDRSTRLEN and INET6_ADDRSTRLEN.
 #include <net/if.h>      // For standard network interface flags.
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/main.h>
-#include <ell/idle.h>
-#include <ell/util.h>      // Needed by <ell/log.h>
-#include <ell/log.h>
-#include <ell/queue.h>
-#pragma GCC diagnostic pop
+#include <ell/ell.h>
 
 #include <mptcpd/private/network_monitor.h>
 #include <mptcpd/network_monitor.h>

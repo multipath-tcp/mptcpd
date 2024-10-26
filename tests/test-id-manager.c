@@ -9,8 +9,7 @@
 
 #include <stddef.h>
 
-#include <ell/log.h>
-#include <ell/test.h>
+#include <ell/ell.h>
 
 #include <mptcpd/private/id_manager.h>
 #include <mptcpd/id_manager.h>

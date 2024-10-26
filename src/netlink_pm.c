@@ -10,11 +10,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/log.h>
-#include <ell/util.h>
-#pragma GCC diagnostic pop
+#include <ell/ell.h>
 
 #include "netlink_pm.h"
 

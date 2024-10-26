@@ -15,12 +15,7 @@
 #include <errno.h>
 #include <sys/socket.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/genl.h>
-#include <ell/util.h>  // For L_STRINGIFY needed by l_error(), etc.
-#include <ell/log.h>
-#pragma GCC diagnostic pop
+#include <ell/ell.h>
 
 #include <mptcpd/types.h>
 #include <mptcpd/listener_manager.h>
