@@ -1,3 +1,4 @@
+.*
 *.o
 *.lo
 *.la
@@ -59,3 +60,5 @@ tests/*.log
 tests/*.trs
 tests/test-suite.log
 README
+compile_commands.json
+*.plist

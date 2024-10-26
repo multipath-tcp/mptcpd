@@ -10,6 +10,8 @@
 #ifndef MPTCPD_PRIVATE_ID_MANAGER_H
 #define MPTCPD_PRIVATE_ID_MANAGER_H
 
+#include <stdbool.h>
+
 #include <mptcpd/export.h>
 #include <mptcpd/types.h>
 

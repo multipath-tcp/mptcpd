@@ -10,6 +10,8 @@
 #ifndef MPTCPD_LIB_PATH_MANAGER_H
 #define MPTCPD_LIB_PATH_MANAGER_H
 
+#include <stdbool.h>
+
 #include <mptcpd/export.h>
 #include <mptcpd/types.h>
 
