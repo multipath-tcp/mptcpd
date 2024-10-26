@@ -11,10 +11,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/util.h>
-#pragma GCC diagnostic pop
+#include <ell/ell.h>
 
 #include <mptcpd/private/sockaddr.h>
 

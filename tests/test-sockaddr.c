@@ -9,12 +9,7 @@
 
 #include <sys/un.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/log.h>
-#include <ell/test.h>
-#include <ell/util.h>
-#pragma GCC diagnostic pop
+#include <ell/ell.h>
 
 #include <mptcpd/private/sockaddr.h>
 

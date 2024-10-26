@@ -21,14 +21,7 @@
 #include <arpa/inet.h>   // For inet_ntop().
 #include <netinet/in.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/genl.h>
-#include <ell/log.h>
-#include <ell/queue.h>
-#include <ell/timeout.h>
-#include <ell/util.h>
-#pragma GCC diagnostic pop
+#include <ell/ell.h>
 
 #include <mptcpd/path_manager.h>
 #include <mptcpd/private/path_manager.h>

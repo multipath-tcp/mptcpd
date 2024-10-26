@@ -21,14 +21,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/log.h>
-#include <ell/util.h>
-#include <ell/settings.h>
-#include <ell/queue.h>
-#include <ell/string.h>
-#pragma GCC diagnostic pop
+#include <ell/ell.h>
 
 #include <mptcpd/types.h>
 

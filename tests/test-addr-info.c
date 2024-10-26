@@ -8,8 +8,7 @@
  */
 
 #include <arpa/inet.h>  // htonl() and htons()
-#include <ell/log.h>
-#include <ell/test.h>
+#include <ell/ell.h>
 
 #include <mptcpd/addr_info.h>
 #include <mptcpd/private/addr_info.h>

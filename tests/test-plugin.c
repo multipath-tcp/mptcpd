@@ -14,8 +14,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <ell/test.h>
-#include <ell/queue.h>
+#include <ell/ell.h>
 
 #include <mptcpd/plugin.h>
 #include <mptcpd/private/plugin.h>

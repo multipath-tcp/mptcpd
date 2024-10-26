@@ -13,12 +13,7 @@
 
 #include <errno.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <ell/util.h>  // For L_STRINGIFY needed by ELL log macros.
-#include <ell/log.h>
-#pragma GCC diagnostic pop
-
+#include <ell/ell.h>
 
 #include <mptcpd/private/path_manager.h>
 #include <mptcpd/private/configuration.h>

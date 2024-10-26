@@ -15,9 +15,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include <ell/genl.h>
-#include <ell/util.h>  // For L_STRINGIFY needed by l_error(), etc.
-#include <ell/log.h>
+#include <ell/ell.h>
 
 #include "commands.h"
 #include "netlink_pm.h"
