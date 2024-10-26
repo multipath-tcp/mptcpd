@@ -781,6 +781,29 @@ static void sspi_subflow_priority(mptcpd_token_t token,
         */
 }
 
+static void sspi_listener_created(struct sockaddr const *laddr,
+                                  struct mptcpd_pm *pm)
+{
+        (void) laddr;
+        (void) pm;
+
+        /*
+          The sspi plugin doesn't do anything with newly created listener
+          sockets.
+        */
+}
+
+static void sspi_listener_closed(struct sockaddr const *laddr,
+                                 struct mptcpd_pm *pm)
+{
+        (void) laddr;
+        (void) pm;
+
+        /*
+          The sspi plugin doesn't do anything with closed listener sockets.
+        */
+}
+
 static struct mptcpd_plugin_ops const pm_ops = {
         .new_connection         = sspi_new_connection,
         .connection_established = sspi_connection_established,
@@ -789,7 +812,9 @@ static struct mptcpd_plugin_ops const pm_ops = {
         .address_removed        = sspi_address_removed,
         .new_subflow            = sspi_new_subflow,
         .subflow_closed         = sspi_subflow_closed,
-        .subflow_priority       = sspi_subflow_priority
+        .subflow_priority       = sspi_subflow_priority,
+        .listener_created       = sspi_listener_created,
+        .listener_closed        = sspi_listener_closed
 };
 
 static int sspi_init(struct mptcpd_pm *pm)

@@ -679,6 +679,28 @@ void mptcpd_plugin_subflow_priority(mptcpd_token_t token,
 
 }
 
+void mptcpd_plugin_listener_created(char const *name,
+                                    struct sockaddr const *laddr,
+                                    struct mptcpd_pm *pm)
+{
+        struct mptcpd_plugin_ops const *const ops = name_to_ops(name);
+
+        if (ops && ops->listener_created)
+                ops->listener_created(laddr, pm);
+
+}
+
+void mptcpd_plugin_listener_closed(char const *name,
+                                   struct sockaddr const *laddr,
+                                   struct mptcpd_pm *pm)
+{
+        struct mptcpd_plugin_ops const *const ops = name_to_ops(name);
+
+        if (ops && ops->listener_closed)
+                ops->listener_closed(laddr, pm);
+
+}
+
 // ----------------------------------------------------------------
 // Network Monitoring Related Plugin Operation Callback Invocation
 // ----------------------------------------------------------------

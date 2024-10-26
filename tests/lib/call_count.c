@@ -22,6 +22,8 @@ void call_count_reset(struct plugin_call_count *p)
         p->new_subflow            = 0;
         p->subflow_closed         = 0;
         p->subflow_priority       = 0;
+        p->listener_created       = 0;
+        p->listener_closed        = 0;
         p->new_interface          = 0;
         p->update_interface       = 0;
         p->delete_interface       = 0;
@@ -39,6 +41,8 @@ bool call_count_all_positive(struct plugin_call_count const *p)
                 && p->new_subflow            >= 0
                 && p->subflow_closed         >= 0
                 && p->subflow_priority       >= 0
+                && p->listener_created       >= 0
+                && p->listener_closed        >= 0
                 && p->new_interface          >= 0
                 && p->update_interface       >= 0
                 && p->delete_interface       >= 0
@@ -71,6 +75,8 @@ bool call_count_is_equal(struct plugin_call_count const *lhs,
             && lhs->new_subflow            == rhs->new_subflow
             && lhs->subflow_closed         == rhs->subflow_closed
             && lhs->subflow_priority       == rhs->subflow_priority
+            && lhs->listener_created       == rhs->listener_created
+            && lhs->listener_closed        == rhs->listener_closed
             && lhs->new_interface          == rhs->new_interface
             && lhs->update_interface       == rhs->update_interface
             && lhs->delete_interface       == rhs->delete_interface
