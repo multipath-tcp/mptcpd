@@ -32,10 +32,12 @@ libpath_manager_la_LIBADD =			\
 	$(top_builddir)/lib/libmptcpd.la	\
 	$(ELL_LIBS) $(CODE_COVERAGE_LIBS)
 
-libpath_manager_la_CPPFLAGS =	\
-	$(AM_CPPFLAGS)		\
+libpath_manager_la_CPPFLAGS =						\
+	$(AM_CPPFLAGS)							\
 	-DMPTCPD_CONFIG_FILE='"$(sysconfdir)/@PACKAGE@/@PACKAGE@.conf"' \
-	-DMPTCPD_DEFAULT_PLUGINDIR='"$(libdir)/@PACKAGE@"'
+	-DMPTCPD_DEFAULT_PLUGINDIR='"$(libdir)/@PACKAGE@"' 		\
+	-DMPTCPD_DEFAULT_PLUGINSCONFDIR='"$(sysconfdir)/@PACKAGE@/$\
+					 plugins.conf.d/"'
 
 EXTRA_DIST = mptcp.service.in
 

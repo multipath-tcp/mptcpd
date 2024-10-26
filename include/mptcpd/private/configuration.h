@@ -10,6 +10,8 @@
 #ifndef MPTCPD_CONFIGURATION_H
 #define MPTCPD_CONFIGURATION_H
 
+#include <mptcpd/export.h>
+#include <mptcpd/types.h>
 
 /**
  * Function pointer corresponding to the ELL functions that set the
@@ -66,6 +68,9 @@ struct mptcpd_config
 
         /// A list of plugins to load.
         struct l_queue *plugins_to_load;
+
+        /// Location of mptcpd plugins configuration files
+        char *plugins_conf_dir;
 };
 
 /**
@@ -86,6 +91,10 @@ struct mptcpd_config *mptcpd_config_create(int argc, char *argv[]);
  * @param[in,out] config Mptcpd configuration to be finalized.
  */
 void mptcpd_config_destroy(struct mptcpd_config *config);
+
+MPTCPD_API bool mptcpd_config_read(char const *filename,
+                                   mptcpd_parse_func_t fun,
+                                   void *user_data);
 
 #endif  // MPTCPD_CONFIGURATION_H
 

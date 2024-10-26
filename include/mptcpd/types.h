@@ -17,6 +17,8 @@
 extern "C" {
 #endif
 
+struct l_settings;
+
 /**
  * @todo These rely on MPTCP genl related implementation details in
  *        the kernel. Should we move these typedefs to
@@ -164,6 +166,10 @@ typedef void (*mptcpd_pm_get_limits_cb)(
         struct mptcpd_limit const *limits,
         size_t len,
         void *callback_data);
+
+typedef void (*mptcpd_parse_func_t) (
+        struct l_settings const* settings,
+        void *user_data);
 
 #ifdef __cplusplus
 }

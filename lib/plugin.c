@@ -42,6 +42,7 @@
 # define MPTCP_PM_NAME_LEN GENL_NAMSIZ
 #endif
 
+#include <mptcpd/private/configuration.h>
 #include <mptcpd/private/plugin.h>
 #include <mptcpd/plugin.h>
 
@@ -88,6 +89,8 @@ static char _default_name[MPTCP_PM_NAME_LEN + 1];
  * the chosen strategy doesn't exist.
  */
 static struct mptcpd_plugin_ops const *_default_ops;
+
+static char *_conf_dir;
 
 // ----------------------------------------------------------------
 //                      Implementation Details
@@ -435,6 +438,7 @@ static void unload_plugins(struct mptcpd_pm *pm)
 
 bool mptcpd_plugin_load(char const *dir,
                         char const *default_name,
+                        char const *plugins_conf_dir,
                         struct l_queue const *plugins_to_load,
                         struct mptcpd_pm *pm)
 {
@@ -442,6 +446,14 @@ bool mptcpd_plugin_load(char const *dir,
                 l_error("No plugin directory specified.");
                 return false;
         }
+
+        if (plugins_conf_dir == NULL) {
+                l_error("No plugins configuration directory specified.");
+                return false;
+        }
+
+        if (_conf_dir == NULL)
+                _conf_dir = l_strdup(plugins_conf_dir);
 
         if (_plugin_infos == NULL)
                 _plugin_infos = l_queue_new();
@@ -571,6 +583,25 @@ bool mptcpd_plugin_register_ops(char const *name,
 
         return registered;
 }
+
+bool mptcpd_plugin_read_config(char const *filename,
+                               mptcpd_parse_func_t fun,
+                               void *user_data)
+{
+        assert(filename != NULL);
+        assert(fun != NULL);
+
+        char *const path = l_strdup_printf("%s/%s.conf",
+                                           _conf_dir,
+                                           filename);
+
+        bool success = mptcpd_config_read(path, fun, user_data);
+
+        l_free(path);
+
+        return success;
+}
+                                
 
 // ----------------------------------------------------------------
 //               Plugin Operation Callback Invocation
