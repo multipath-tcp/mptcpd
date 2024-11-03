@@ -5,7 +5,7 @@
 - Documentation was improved for the "check_route" address
   notification flag.
 
-- Listening socket creation is now optional for users space path
+- Listening socket creation is now optional for user space path
   manager plugins.  Plugins may now call
   mptcpd_pm_add_addr_no_listener() instead of mptcpd_pm_add_addr() to
   announce a new address without creating a new listener socket.
