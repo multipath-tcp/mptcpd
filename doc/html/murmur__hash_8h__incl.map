@@ -1,5 +1,7 @@
 <map id="include/mptcpd/private/murmur_hash.h" name="include/mptcpd/private/murmur_hash.h">
-<area shape="rect" id="node1" title=" " alt="" coords="16,5,188,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,76,121"/>
-<area shape="rect" id="node3" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="100,95,229,121"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="16,5,188,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,76,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,47,60,84,56,81,85,44"/>
+<area shape="rect" id="Node000003" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="100,93,229,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="119,44,149,81,145,84,115,47"/>
 </map>

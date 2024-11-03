@@ -1,9 +1,15 @@
 <map id="include/mptcpd/private/plugin.h" name="include/mptcpd/private/plugin.h">
-<area shape="rect" id="node1" title="mptcpd private plugin interface." alt="" coords="166,5,338,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,88,121"/>
-<area shape="rect" id="node3" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="113,95,242,121"/>
-<area shape="rect" id="node4" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="267,95,389,121"/>
-<area shape="rect" id="node7" title=" " alt="" coords="414,95,509,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="237,169,312,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="337,169,423,196"/>
+<area shape="rect" id="Node000001" title="mptcpd private plugin interface." alt="" coords="166,5,338,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,88,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,48,91,91,89,86,202,43"/>
+<area shape="rect" id="Node000003" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="113,93,242,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,47,200,85,196,81,232,44"/>
+<area shape="rect" id="Node000004" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="267,93,389,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="272,44,309,81,305,85,268,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="414,93,509,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="303,43,419,86,417,91,301,48"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="237,167,312,192"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="321,121,294,157,289,154,317,117"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="337,167,423,192"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="339,117,366,154,361,157,334,121"/>
 </map>

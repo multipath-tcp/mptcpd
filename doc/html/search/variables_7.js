@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['handle_466',['handle',['../structplugin__info.html#a0ce66e257fb171ca513c26ea48d7dd62',1,'plugin_info']]]
+  ['handle_0',['handle',['../structplugin__info.html#a0ce66e257fb171ca513c26ea48d7dd62',1,'plugin_info']]]
 ];

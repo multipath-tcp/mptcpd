@@ -1,30 +1,73 @@
 <map id="src/netlink_pm_upstream.c" name="src/netlink_pm_upstream.c">
-<area shape="rect" id="node1" title="Upstream kernel generic netlink path manager details." alt="" coords="1081,5,1279,32"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,169,80,196"/>
-<area shape="rect" id="node3" title=" " alt="" coords="1574,87,1642,114"/>
-<area shape="rect" id="node4" title=" " alt="" coords="294,169,397,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="1667,87,1749,114"/>
-<area shape="rect" id="node6" title=" " alt="" coords="1773,87,1848,114"/>
-<area shape="rect" id="node7" title=" " alt="" coords="1872,87,1947,114"/>
-<area shape="rect" id="node8" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="643,169,765,196"/>
-<area shape="rect" id="node11" href="$listener__manager_8h.html" title="Map of MPTCP local address to listener." alt="" coords="1080,87,1280,114"/>
-<area shape="rect" id="node14" href="$include_2mptcpd_2path__manager_8h.html" title="mptcpd generic netlink commands." alt="" coords="745,87,925,114"/>
-<area shape="rect" id="node15" href="$include_2mptcpd_2private_2netlink__pm_8h.html" title="Kernel generic netlink path manager details." alt="" coords="1400,169,1611,196"/>
-<area shape="rect" id="node16" href="$include_2mptcpd_2private_2path__manager_8h.html" title="mptcpd path manager private interface." alt="" coords="515,80,669,121"/>
-<area shape="rect" id="node17" href="$private_2addr__info_8h.html" title="mptcpd_addr_info related code." alt="" coords="336,80,491,121"/>
-<area shape="rect" id="node20" href="$sockaddr_8h.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="1304,87,1499,114"/>
-<area shape="rect" id="node23" href="$mptcp__upstream_8h.html" title="mptcpd convenience wrapper around upstream &lt;linux/mptcp.h&gt;." alt="" coords="1971,80,2138,121"/>
-<area shape="rect" id="node25" href="$commands_8h.html" title="mptcpd generic netlink command utilities." alt="" coords="155,87,261,114"/>
-<area shape="rect" id="node27" href="$src_2netlink__pm_8h.html" title="Kernel generic netlink path manager details." alt="" coords="949,87,1056,114"/>
-<area shape="rect" id="node28" href="$src_2path__manager_8h.html" title="mptcpd user space path manager header file (internal)." alt="" coords="2162,87,2289,114"/>
-<area shape="rect" id="node9" title=" " alt="" coords="324,244,399,271"/>
-<area shape="rect" id="node10" title=" " alt="" coords="661,244,747,271"/>
-<area shape="rect" id="node12" title=" " alt="" coords="961,169,1044,196"/>
-<area shape="rect" id="node13" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="1093,169,1222,196"/>
-<area shape="rect" id="node18" title=" " alt="" coords="542,169,613,196"/>
-<area shape="rect" id="node19" title=" " alt="" coords="421,169,517,196"/>
-<area shape="rect" id="node21" title=" " alt="" coords="1634,169,1713,196"/>
-<area shape="rect" id="node22" title=" " alt="" coords="1278,169,1375,196"/>
-<area shape="rect" id="node24" title=" " alt="" coords="1965,169,2145,196"/>
-<area shape="rect" id="node26" title=" " alt="" coords="155,169,269,196"/>
+<area shape="rect" id="Node000001" title="Upstream kernel generic netlink path manager details." alt="" coords="929,5,1127,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,167,80,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="928,22,746,24,526,32,417,39,317,50,232,64,169,81,138,97,109,117,64,158,60,154,106,113,135,92,167,76,231,58,316,44,417,34,526,26,746,18,928,16"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="1599,86,1667,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1128,20,1337,37,1460,53,1581,76,1592,79,1591,84,1579,81,1459,59,1337,43,1127,26"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="294,167,397,192"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="929,24,768,28,587,39,432,56,379,67,351,81,342,96,338,115,341,153,336,153,332,115,337,94,348,77,377,62,431,50,586,33,768,23,929,18"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="1691,86,1762,111"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1128,17,1242,21,1381,30,1531,48,1681,76,1690,79,1689,84,1679,81,1531,53,1380,35,1241,26,1128,22"/>
+<area shape="rect" id="Node000006" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="637,167,760,192"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="929,28,715,48,626,63,596,72,581,81,575,89,573,98,581,117,605,142,637,159,634,164,602,147,576,120,568,98,570,87,577,77,594,67,625,58,715,43,928,23"/>
+<area shape="rect" id="Node000009" href="$listener__manager_8h.html" title="Map of MPTCP local address to listener." alt="" coords="1105,86,1305,111"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="1055,28,1168,78,1166,83,1053,33"/>
+<area shape="rect" id="Node000012" href="$include_2mptcpd_2path__manager_8h.html" title="mptcpd generic netlink commands." alt="" coords="770,86,950,111"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="1005,33,898,83,895,78,1002,28"/>
+<area shape="rect" id="Node000013" href="$include_2mptcpd_2private_2netlink__pm_8h.html" title="Kernel generic netlink path manager details." alt="" coords="1376,167,1587,192"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="1128,21,1247,29,1375,40,1481,56,1518,66,1538,77,1544,87,1546,98,1540,120,1526,141,1508,160,1504,156,1522,138,1535,118,1541,98,1539,89,1534,81,1516,71,1480,61,1374,46,1247,34,1127,27"/>
+<area shape="rect" id="Node000014" href="$include_2mptcpd_2private_2path__manager_8h.html" title="mptcpd path manager private interface." alt="" coords="591,79,745,119"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="976,33,760,80,758,75,975,28"/>
+<area shape="rect" id="Node000015" href="$private_2addr__info_8h.html" title="mptcpd_addr_info related code." alt="" coords="361,79,516,119"/>
+<area shape="poly" id="edge19_Node000001_Node000015" title=" " alt="" coords="929,32,745,52,535,81,530,82,529,77,534,76,745,47,928,27"/>
+<area shape="rect" id="Node000018" href="$sockaddr_8h.html" title="mptcpd struct sockaddr related utility functions." alt="" coords="1329,86,1524,111"/>
+<area shape="poly" id="edge26_Node000001_Node000018" title=" " alt="" coords="1086,28,1356,81,1355,86,1085,33"/>
+<area shape="rect" id="Node000021" href="$mptcp__upstream_8h.html" title="mptcpd convenience wrapper around upstream &lt;linux/mptcp.h&gt;." alt="" coords="1786,79,1953,119"/>
+<area shape="poly" id="edge32_Node000001_Node000021" title=" " alt="" coords="1128,21,1414,39,1591,55,1773,76,1772,81,1591,60,1413,44,1127,26"/>
+<area shape="rect" id="Node000023" href="$commands_8h.html" title="mptcpd generic netlink command utilities." alt="" coords="180,86,287,111"/>
+<area shape="poly" id="edge34_Node000001_Node000023" title=" " alt="" coords="929,25,647,41,476,57,306,81,286,85,285,80,305,76,476,52,647,36,928,19"/>
+<area shape="rect" id="Node000025" href="$src_2netlink__pm_8h.html" title="Kernel generic netlink path manager details." alt="" coords="975,86,1081,111"/>
+<area shape="poly" id="edge41_Node000001_Node000025" title=" " alt="" coords="1031,31,1031,72,1025,72,1025,31"/>
+<area shape="rect" id="Node000026" href="$src_2path__manager_8h.html" title="mptcpd user space path manager header file (internal)." alt="" coords="1977,86,2103,111"/>
+<area shape="poly" id="edge45_Node000001_Node000026" title=" " alt="" coords="1128,17,1288,20,1498,30,1731,47,1966,76,1987,80,1986,85,1965,81,1731,53,1497,35,1288,26,1127,22"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="319,240,393,265"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="644,195,407,243,406,238,643,189"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="655,240,742,265"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="701,192,701,226,696,226,696,192"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="819,167,901,192"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="1156,114,916,168,914,163,1155,109"/>
+<area shape="rect" id="Node000011" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="1034,167,1163,192"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="1191,114,1127,161,1124,156,1188,109"/>
+<area shape="poly" id="edge14_Node000012_Node000006" title=" " alt="" coords="838,114,735,163,733,158,835,109"/>
+<area shape="poly" id="edge12_Node000012_Node000010" title=" " alt="" coords="863,112,863,153,857,153,857,112"/>
+<area shape="poly" id="edge13_Node000012_Node000011" title=" " alt="" coords="896,109,1052,160,1050,165,894,114"/>
+<area shape="poly" id="edge18_Node000014_Node000006" title=" " alt="" coords="678,118,692,153,687,155,673,120"/>
+<area shape="poly" id="edge17_Node000014_Node000010" title=" " alt="" coords="715,116,820,159,818,164,713,121"/>
+<area shape="poly" id="edge22_Node000015_Node000004" title=" " alt="" coords="418,121,372,160,368,155,414,117"/>
+<area shape="poly" id="edge25_Node000015_Node000006" title=" " alt="" coords="502,116,648,160,647,165,500,121"/>
+<area shape="poly" id="edge20_Node000015_Node000010" title=" " alt="" coords="517,112,806,165,805,170,516,117"/>
+<area shape="poly" id="edge24_Node000015_Node000011" title=" " alt="" coords="516,108,579,116,1020,167,1020,172,578,121,516,113"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="542,167,613,192"/>
+<area shape="poly" id="edge21_Node000015_Node000016" title=" " alt="" coords="473,116,546,157,544,162,471,121"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="421,167,517,192"/>
+<area shape="poly" id="edge23_Node000015_Node000017" title=" " alt="" coords="449,118,462,153,457,155,444,120"/>
+<area shape="poly" id="edge27_Node000018_Node000010" title=" " alt="" coords="1363,114,1318,121,1095,152,916,174,915,169,1094,147,1317,116,1362,109"/>
+<area shape="poly" id="edge31_Node000018_Node000011" title=" " alt="" coords="1380,114,1160,166,1159,161,1378,109"/>
+<area shape="poly" id="edge30_Node000018_Node000017" title=" " alt="" coords="1368,114,1318,121,1199,133,1098,140,926,144,753,150,651,157,532,169,531,164,651,151,753,144,926,139,1098,134,1199,128,1317,116,1367,109"/>
+<area shape="rect" id="Node000019" title=" " alt="" coords="1610,167,1689,192"/>
+<area shape="poly" id="edge28_Node000018_Node000019" title=" " alt="" coords="1460,109,1605,160,1603,165,1458,114"/>
+<area shape="rect" id="Node000020" title=" " alt="" coords="1254,167,1351,192"/>
+<area shape="poly" id="edge29_Node000018_Node000020" title=" " alt="" coords="1410,114,1334,161,1331,157,1407,109"/>
+<area shape="rect" id="Node000022" title=" " alt="" coords="1779,167,1959,192"/>
+<area shape="poly" id="edge33_Node000021_Node000022" title=" " alt="" coords="1872,119,1872,153,1867,153,1867,119"/>
+<area shape="poly" id="edge37_Node000023_Node000002" title=" " alt="" coords="207,114,84,164,82,159,205,109"/>
+<area shape="poly" id="edge38_Node000023_Node000004" title=" " alt="" coords="251,109,319,157,316,161,248,114"/>
+<area shape="poly" id="edge36_Node000023_Node000007" title=" " alt="" coords="208,114,180,129,154,148,140,169,140,180,145,190,170,207,211,222,306,242,305,247,209,227,167,212,141,194,134,181,135,168,151,144,177,124,205,109"/>
+<area shape="poly" id="edge35_Node000023_Node000010" title=" " alt="" coords="287,107,350,116,561,141,772,164,805,168,805,173,772,169,560,146,349,121,287,112"/>
+<area shape="poly" id="edge39_Node000023_Node000017" title=" " alt="" coords="268,109,423,160,421,165,267,114"/>
+<area shape="rect" id="Node000024" title=" " alt="" coords="155,167,269,192"/>
+<area shape="poly" id="edge40_Node000023_Node000024" title=" " alt="" coords="233,112,221,154,216,153,228,111"/>
+<area shape="poly" id="edge43_Node000025_Node000006" title=" " alt="" coords="989,114,962,121,767,166,765,161,961,116,988,109"/>
+<area shape="poly" id="edge44_Node000025_Node000010" title=" " alt="" coords="1005,114,898,163,895,159,1002,109"/>
+<area shape="poly" id="edge42_Node000025_Node000013" title=" " alt="" coords="1065,109,1094,116,1238,143,1371,162,1371,168,1237,148,1093,121,1064,114"/>
 </map>

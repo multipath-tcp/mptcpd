@@ -1,10 +1,17 @@
 <map id="mptcpd_pm" name="mptcpd_pm">
-<area shape="rect" id="node1" title="Data needed to run the path manager." alt="" coords="250,184,349,211"/>
-<area shape="rect" id="node2" href="$structmptcpd__lm.html" title="Internal mptcpd listern manager data." alt="" coords="5,95,100,121"/>
-<area shape="rect" id="node3" href="$structmptcpd__nm.html" title="Data needed to run the network monitor." alt="" coords="125,95,223,121"/>
-<area shape="rect" id="node4" href="$structmptcpd__idm.html" title="Internal mptcpd address ID manager data." alt="" coords="248,95,351,121"/>
-<area shape="rect" id="node5" href="$structmptcpd__config.html" title="mptcpd configuration parameters" alt="" coords="375,95,493,121"/>
-<area shape="rect" id="node6" href="$structmptcpd__netlink__pm.html" title=" " alt="" coords="517,95,668,121"/>
-<area shape="rect" id="node7" href="$structmptcpd__pm__cmd__ops.html" title="MPTCP path management generic netlink command functions." alt="" coords="415,5,579,32"/>
-<area shape="rect" id="node8" href="$structmptcpd__kpm__cmd__ops.html" title="Kernel&#45;side MPTCP path management netlink commands." alt="" coords="603,5,775,32"/>
+<area shape="rect" id="Node000001" title="Data needed to run the path manager." alt="" coords="323,181,421,207"/>
+<area shape="rect" id="Node000002" href="$structmptcpd__config.html" title="mptcpd configuration parameters" alt="" coords="5,93,123,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,121,221,155,323,180,322,185,219,160,109,126"/>
+<area shape="rect" id="Node000003" href="$structmptcpd__netlink__pm.html" title=" " alt="" coords="147,93,298,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="248,125,291,155,342,179,339,184,288,160,245,130"/>
+<area shape="rect" id="Node000004" href="$structmptcpd__pm__cmd__ops.html" title="MPTCP path management generic netlink command functions." alt="" coords="45,5,209,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="151,38,211,91,208,95,148,42"/>
+<area shape="rect" id="Node000005" href="$structmptcpd__kpm__cmd__ops.html" title="Kernel&#45;side MPTCP path management netlink commands." alt="" coords="233,5,405,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="297,42,238,95,234,91,294,38"/>
+<area shape="rect" id="Node000006" href="$structmptcpd__nm.html" title="Data needed to run the network monitor." alt="" coords="323,93,421,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="375,133,375,181,369,181,369,133"/>
+<area shape="rect" id="Node000007" href="$structmptcpd__idm.html" title="Internal mptcpd address ID manager data." alt="" coords="446,93,549,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="471,129,391,183,388,179,468,124"/>
+<area shape="rect" id="Node000008" href="$structmptcpd__lm.html" title="Internal mptcpd listern manager data." alt="" coords="573,93,667,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="576,126,477,160,407,184,405,179,475,155,574,121"/>
 </map>

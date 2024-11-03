@@ -1,4 +1,5 @@
 <map id="include/mptcpd/addr_info.h" name="include/mptcpd/addr_info.h">
-<area shape="rect" id="node1" title="mptcpd_addr_info related functions." alt="" coords="5,5,160,47"/>
-<area shape="rect" id="node2" href="$addr__info_8c.html" title="mptcpd_addr_info related functions." alt="" coords="25,95,140,121"/>
+<area shape="rect" id="Node000001" title="mptcpd_addr_info related functions." alt="" coords="5,5,160,45"/>
+<area shape="rect" id="Node000002" href="$addr__info_8c.html" title="mptcpd_addr_info related functions." alt="" coords="25,93,140,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,59,85,93,80,93,80,59"/>
 </map>

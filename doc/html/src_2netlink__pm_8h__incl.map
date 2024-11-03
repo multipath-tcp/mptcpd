@@ -1,8 +1,13 @@
 <map id="src/netlink_pm.h" name="src/netlink_pm.h">
-<area shape="rect" id="node1" title="Kernel generic netlink path manager details." alt="" coords="236,5,367,32"/>
-<area shape="rect" id="node2" href="$include_2mptcpd_2private_2netlink__pm_8h.html" title="Kernel generic netlink path manager details." alt="" coords="5,80,216,107"/>
-<area shape="rect" id="node3" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="240,80,363,107"/>
-<area shape="rect" id="node6" title=" " alt="" coords="387,80,469,107"/>
-<area shape="rect" id="node4" title=" " alt="" coords="211,155,285,181"/>
-<area shape="rect" id="node5" title=" " alt="" coords="310,155,397,181"/>
+<area shape="rect" id="Node000001" title="Kernel generic netlink path manager details." alt="" coords="236,5,367,31"/>
+<area shape="rect" id="Node000002" href="$include_2mptcpd_2private_2netlink__pm_8h.html" title="Kernel generic netlink path manager details." alt="" coords="5,79,216,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="272,33,156,76,154,71,270,28"/>
+<area shape="rect" id="Node000003" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="240,79,363,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="304,31,304,65,299,65,299,31"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="387,79,469,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="323,28,397,69,394,74,320,33"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="211,152,285,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="295,106,267,143,263,140,290,103"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="310,152,397,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="312,103,339,139,335,142,308,106"/>
 </map>

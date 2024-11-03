@@ -1,6 +1,9 @@
 <map id="lib/hash_sockaddr.h" name="lib/hash_sockaddr.h">
-<area shape="rect" id="node1" title="struct sockaddr hash related functions." alt="" coords="167,5,317,32"/>
-<area shape="rect" id="node2" href="$hash__sockaddr_8c.html" title="struct sockaddr hash related functions." alt="" coords="5,80,153,107"/>
-<area shape="rect" id="node3" href="$id__manager_8c.html" title="Map of network address to MPTCP address ID." alt="" coords="177,80,307,107"/>
-<area shape="rect" id="node4" href="$listener__manager_8c.html" title="Map of MPTCP local address ID to listener." alt="" coords="331,80,497,107"/>
+<area shape="rect" id="Node000001" title="struct sockaddr hash related functions." alt="" coords="167,5,317,31"/>
+<area shape="rect" id="Node000002" href="$hash__sockaddr_8c.html" title="struct sockaddr hash related functions." alt="" coords="5,79,153,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,39,107,81,105,76,202,34"/>
+<area shape="rect" id="Node000003" href="$id__manager_8c.html" title="Map of network address to MPTCP address ID." alt="" coords="177,79,307,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="245,44,245,79,239,79,239,44"/>
+<area shape="rect" id="Node000004" href="$listener__manager_8c.html" title="Map of MPTCP local address ID to listener." alt="" coords="331,79,497,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="283,33,387,76,385,81,281,38"/>
 </map>

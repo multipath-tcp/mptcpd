@@ -1,5 +1,7 @@
 <map id="include/mptcpd/private/network_monitor.h" name="include/mptcpd/private/network_monitor.h">
-<area shape="rect" id="node1" title="mptcpd network device monitoring &#45; internal API." alt="" coords="45,5,217,47"/>
-<area shape="rect" id="node2" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="5,95,135,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="159,95,229,121"/>
+<area shape="rect" id="Node000001" title="mptcpd network device monitoring &#45; internal API." alt="" coords="45,5,217,45"/>
+<area shape="rect" id="Node000002" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="5,93,135,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,47,90,84,85,81,114,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="159,93,229,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="149,44,178,81,174,84,144,47"/>
 </map>

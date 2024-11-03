@@ -1,6 +1,11 @@
 <map id="include/mptcpd/private/path_manager.h" name="include/mptcpd/private/path_manager.h">
-<area shape="rect" id="node1" title="mptcpd path manager private interface." alt="" coords="9,5,181,47"/>
-<area shape="rect" id="node2" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="33,95,156,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="5,169,80,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="105,169,191,196"/>
+<area shape="rect" id="Node000001" title="mptcpd path manager private interface." alt="" coords="23,5,195,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,88,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,47,67,84,63,81,92,44"/>
+<area shape="rect" id="Node000003" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="112,93,235,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="127,44,157,81,153,84,123,47"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="83,167,157,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="167,121,139,157,135,154,162,117"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="182,167,269,192"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="184,117,211,154,207,157,180,121"/>
 </map>

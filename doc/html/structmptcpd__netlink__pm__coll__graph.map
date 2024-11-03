@@ -1,5 +1,7 @@
 <map id="mptcpd_netlink_pm" name="mptcpd_netlink_pm">
-<area shape="rect" id="node1" title=" " alt="" coords="108,95,259,121"/>
-<area shape="rect" id="node2" href="$structmptcpd__pm__cmd__ops.html" title="MPTCP path management generic netlink command functions." alt="" coords="5,5,169,32"/>
-<area shape="rect" id="node3" href="$structmptcpd__kpm__cmd__ops.html" title="Kernel&#45;side MPTCP path management netlink commands." alt="" coords="193,5,365,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="108,93,259,119"/>
+<area shape="rect" id="Node000002" href="$structmptcpd__pm__cmd__ops.html" title="MPTCP path management generic netlink command functions." alt="" coords="5,5,169,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,38,172,91,168,95,109,42"/>
+<area shape="rect" id="Node000003" href="$structmptcpd__kpm__cmd__ops.html" title="Kernel&#45;side MPTCP path management netlink commands." alt="" coords="193,5,365,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="258,42,198,95,195,91,255,38"/>
 </map>

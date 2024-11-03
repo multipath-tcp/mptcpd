@@ -1,7 +1,11 @@
 <map id="include/mptcpd/private/configuration.h" name="include/mptcpd/private/configuration.h">
-<area shape="rect" id="node1" title="Mptcpd configuration parser header." alt="" coords="263,5,435,47"/>
-<area shape="rect" id="node2" href="$addr__adv_8c.html" title="MPTCP address advertiser path manager plugin." alt="" coords="5,95,180,136"/>
-<area shape="rect" id="node3" href="$configuration_8c.html" title="Mptcpd configuration parser implementation." alt="" coords="205,102,346,129"/>
-<area shape="rect" id="node4" href="$mptcpd_8c.html" title="Main mptcpd source file." alt="" coords="371,102,476,129"/>
-<area shape="rect" id="node5" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="499,102,649,129"/>
+<area shape="rect" id="Node000001" title="Mptcpd configuration parser header." alt="" coords="263,5,435,45"/>
+<area shape="rect" id="Node000002" href="$addr__adv_8c.html" title="MPTCP address advertiser path manager plugin." alt="" coords="5,93,180,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="280,52,150,96,148,91,279,47"/>
+<area shape="rect" id="Node000003" href="$configuration_8c.html" title="Mptcpd configuration parser implementation." alt="" coords="205,101,346,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="325,58,287,102,283,98,321,54"/>
+<area shape="rect" id="Node000004" href="$mptcpd_8c.html" title="Main mptcpd source file." alt="" coords="371,101,476,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="376,54,415,98,411,102,372,58"/>
+<area shape="rect" id="Node000005" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="499,101,649,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="412,48,545,98,543,103,410,53"/>
 </map>
