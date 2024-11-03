@@ -1,3 +1,24 @@
+3 November 2024 - mptcpd 0.13
+
+- mptcpd now supports ELL 0.68.
+
+- Documentation was improved for the "check_route" address
+  notification flag.
+
+- Listening socket creation is now optional for users space path
+  manager plugins.  Plugins may now call
+  mptcpd_pm_add_addr_no_listener() instead of mptcpd_pm_add_addr() to
+  announce a new address without creating a new listener socket.
+
+- The script `mptcp-get-debug' was added to help simplify information
+  collection for MPTCP related bug reports in general, not just for
+  mptcpd alone.  It is installed in the `libexec' directory for a
+  given Linux distribution, such as `/usr/local/libexec'.  Run it with
+  the '--help' command line argument to list available options.
+
+- A crash (seg fault) that occured if the `/etc/protocols' file does
+  not exist was fixed.
+
 23 January 2023 - mptcpd 0.12
 
 - mptcpd will be hosted at https://github.com/multipath-tcp/mptcpd
