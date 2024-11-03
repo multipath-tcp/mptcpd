@@ -1,6 +1,9 @@
 <map id="src/commands.h" name="src/commands.h">
-<area shape="rect" id="node1" title="mptcpd generic netlink command utilities." alt="" coords="177,5,306,32"/>
-<area shape="rect" id="node2" href="$commands_8c.html" title="mptcpd generic netlink command utilities." alt="" coords="5,87,133,114"/>
-<area shape="rect" id="node3" href="$netlink__pm__mptcp__org_8c.html" title="mptcpd generic netlink commands." alt="" coords="158,80,325,121"/>
-<area shape="rect" id="node4" href="$netlink__pm__upstream_8c.html" title="Upstream kernel generic netlink path manager details." alt="" coords="349,87,547,114"/>
+<area shape="rect" id="Node000001" title="mptcpd generic netlink command utilities." alt="" coords="177,5,306,31"/>
+<area shape="rect" id="Node000002" href="$commands_8c.html" title="mptcpd generic netlink command utilities." alt="" coords="5,86,133,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,39,95,88,93,84,203,34"/>
+<area shape="rect" id="Node000003" href="$netlink__pm__mptcp__org_8c.html" title="mptcpd generic netlink commands." alt="" coords="158,79,325,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="244,44,244,79,239,79,239,44"/>
+<area shape="rect" id="Node000004" href="$netlink__pm__upstream_8c.html" title="Upstream kernel generic netlink path manager details." alt="" coords="349,86,547,111"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="285,33,419,83,417,88,283,38"/>
 </map>

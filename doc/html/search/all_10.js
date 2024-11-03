@@ -1,16 +1,13 @@
 var searchData=
 [
-  ['path_5fmanager_2ec_241',['path_manager.c',['../src_2path__manager_8c.html',1,'(Global Namespace)'],['../lib_2path__manager_8c.html',1,'(Global Namespace)']]],
-  ['path_5fmanager_2eh_242',['path_manager.h',['../include_2mptcpd_2path__manager_8h.html',1,'(Global Namespace)'],['../include_2mptcpd_2private_2path__manager_8h.html',1,'(Global Namespace)'],['../src_2path__manager_8h.html',1,'(Global Namespace)']]],
-  ['plugin_2ec_243',['plugin.c',['../plugin_8c.html',1,'']]],
-  ['plugin_2eh_244',['plugin.h',['../plugin_8h.html',1,'(Global Namespace)'],['../private_2plugin_8h.html',1,'(Global Namespace)']]],
-  ['plugin_5faddress_5finfo_245',['plugin_address_info',['../structplugin__address__info.html',1,'']]],
-  ['plugin_5fdir_246',['plugin_dir',['../structmptcpd__config.html#ae4c5ee3603c596172f8cce38caf3d73f',1,'mptcpd_config']]],
-  ['plugin_5finfo_247',['plugin_info',['../structplugin__info.html',1,'']]],
-  ['plugin_5finterface_5finfo_248',['plugin_interface_info',['../structplugin__interface__info.html',1,'']]],
-  ['plugins_5fto_5fload_249',['plugins_to_load',['../structmptcpd__config.html#a05d382986529bd3fb92881ca505a1028',1,'mptcpd_config']]],
-  ['pm_250',['pm',['../structplugin__address__info.html#a547b03cffa9d3c23bfda49fbb0707186',1,'plugin_address_info::pm()'],['../structplugin__interface__info.html#ae5b0447988c536d84b7ed1f88853b471',1,'plugin_interface_info::pm()'],['../structsspi__new__connection__info.html#a1ae49c34c3e042e19aeac03a8ad196e8',1,'sspi_new_connection_info::pm()']]],
-  ['pm_5fevent_5fattrs_251',['pm_event_attrs',['../structpm__event__attrs.html',1,'']]],
-  ['pm_5fops_5finfo_252',['pm_ops_info',['../structpm__ops__info.html',1,'']]],
-  ['priority_253',['priority',['../structmptcpd__plugin__desc.html#a73e301b2b645246a866c313727109504',1,'mptcpd_plugin_desc']]]
+  ['raddr4_0',['raddr4',['../structpm__event__attrs.html#a9468d5937f677b033a4440505f90dcf8',1,'pm_event_attrs']]],
+  ['raddr6_1',['raddr6',['../structpm__event__attrs.html#a3edc04bfa0606c60627b3cfcf25ddc83',1,'pm_event_attrs']]],
+  ['raddr_5fid_2',['raddr_id',['../structpm__event__attrs.html#a5cae975cd96bb15cad178d76cadf4e25',1,'pm_event_attrs']]],
+  ['ready_3',['ready',['../structmptcpd__pm__ops.html#ae301539328a6d57d8c5673dec5cf538b',1,'mptcpd_pm_ops']]],
+  ['refcnt_4',['refcnt',['../structlm__value.html#a055751a8be09c45cde5c3ae5539c27f1',1,'lm_value']]],
+  ['remote_5fport_5',['remote_port',['../structpm__event__attrs.html#a13b5bf3cc4459b37e7387e86571e91da',1,'pm_event_attrs']]],
+  ['remove_5faddr_6',['remove_addr',['../structmptcpd__pm__cmd__ops.html#a111c003a05791d45c28ab1461b6dad24',1,'mptcpd_pm_cmd_ops::remove_addr'],['../structmptcpd__kpm__cmd__ops.html#afbadef04eb1f01f3458f6832f5df282c',1,'mptcpd_kpm_cmd_ops::remove_addr']]],
+  ['remove_5finfo_7',['remove_info',['../structremove__info.html',1,'']]],
+  ['remove_5fsubflow_8',['remove_subflow',['../structmptcpd__pm__cmd__ops.html#a10c479a23f0fef4d871fc9b5533e1262',1,'mptcpd_pm_cmd_ops']]],
+  ['rtnl_9',['rtnl',['../structmptcpd__nm.html#a622566cca3a16bcc7e19cedd563b1f2e',1,'mptcpd_nm']]]
 ];

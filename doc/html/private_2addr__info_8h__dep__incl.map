@@ -1,6 +1,9 @@
 <map id="include/mptcpd/private/addr_info.h" name="include/mptcpd/private/addr_info.h">
-<area shape="rect" id="node1" title="mptcpd_addr_info related code." alt="" coords="158,5,330,47"/>
-<area shape="rect" id="node2" href="$addr__info_8c.html" title="mptcpd_addr_info related functions." alt="" coords="5,95,120,121"/>
-<area shape="rect" id="node3" href="$netlink__pm__upstream_8c.html" title="Upstream kernel generic netlink path manager details." alt="" coords="145,95,343,121"/>
-<area shape="rect" id="node4" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="367,95,516,121"/>
+<area shape="rect" id="Node000001" title="mptcpd_addr_info related code." alt="" coords="158,5,330,45"/>
+<area shape="rect" id="Node000002" href="$addr__info_8c.html" title="mptcpd_addr_info related functions." alt="" coords="5,93,120,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,53,90,96,88,91,187,48"/>
+<area shape="rect" id="Node000003" href="$netlink__pm__upstream_8c.html" title="Upstream kernel generic netlink path manager details." alt="" coords="145,93,343,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="247,59,247,93,241,93,241,59"/>
+<area shape="rect" id="Node000004" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="367,93,516,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="305,48,413,91,411,96,303,53"/>
 </map>

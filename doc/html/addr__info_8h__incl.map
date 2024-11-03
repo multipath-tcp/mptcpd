@@ -1,7 +1,11 @@
 <map id="include/mptcpd/addr_info.h" name="include/mptcpd/addr_info.h">
-<area shape="rect" id="node1" title="mptcpd_addr_info related functions." alt="" coords="67,5,222,47"/>
-<area shape="rect" id="node2" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="5,95,135,121"/>
-<area shape="rect" id="node3" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="159,95,282,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="130,169,205,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="229,169,316,196"/>
+<area shape="rect" id="Node000001" title="mptcpd_addr_info related functions." alt="" coords="67,5,222,45"/>
+<area shape="rect" id="Node000002" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="5,93,135,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,47,93,85,89,81,125,44"/>
+<area shape="rect" id="Node000003" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="159,93,282,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,44,202,81,198,85,161,47"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="130,167,205,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="214,121,186,157,182,154,210,117"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="229,167,316,192"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="231,117,258,154,254,157,227,121"/>
 </map>

@@ -1,5 +1,7 @@
 <map id="include/mptcpd/private/mptcp_upstream.h" name="include/mptcpd/private/mptcp_upstream.h">
-<area shape="rect" id="node1" title="mptcpd convenience wrapper around upstream &lt;linux/mptcp.h&gt;." alt="" coords="117,5,289,47"/>
-<area shape="rect" id="node2" href="$netlink__pm__upstream_8c.html" title="Upstream kernel generic netlink path manager details." alt="" coords="5,95,204,121"/>
-<area shape="rect" id="node3" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="227,95,377,121"/>
+<area shape="rect" id="Node000001" title="mptcpd convenience wrapper around upstream &lt;linux/mptcp.h&gt;." alt="" coords="117,5,289,45"/>
+<area shape="rect" id="Node000002" href="$netlink__pm__upstream_8c.html" title="Upstream kernel generic netlink path manager details." alt="" coords="5,93,204,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,56,121,95,118,91,167,52"/>
+<area shape="rect" id="Node000003" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="227,93,377,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="240,52,289,91,286,95,236,56"/>
 </map>

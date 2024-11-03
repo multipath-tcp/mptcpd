@@ -1,6 +1,9 @@
 <map id="include/mptcpd/id_manager.h" name="include/mptcpd/id_manager.h">
-<area shape="rect" id="node1" title="Map of network address to MPTCP address ID." alt="" coords="139,5,353,32"/>
-<area shape="rect" id="node2" href="$id__manager_8c.html" title="Map of network address to MPTCP address ID." alt="" coords="5,87,135,114"/>
-<area shape="rect" id="node3" href="$addr__adv_8c.html" title="MPTCP address advertiser path manager plugin." alt="" coords="159,80,333,121"/>
-<area shape="rect" id="node4" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="358,87,507,114"/>
+<area shape="rect" id="Node000001" title="Map of network address to MPTCP address ID." alt="" coords="139,5,353,31"/>
+<area shape="rect" id="Node000002" href="$id__manager_8c.html" title="Map of network address to MPTCP address ID." alt="" coords="5,86,135,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,39,97,88,95,84,207,34"/>
+<area shape="rect" id="Node000003" href="$addr__adv_8c.html" title="MPTCP address advertiser path manager plugin." alt="" coords="159,79,333,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="249,44,249,79,243,79,243,44"/>
+<area shape="rect" id="Node000004" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="358,86,507,111"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="287,33,407,84,404,88,285,38"/>
 </map>

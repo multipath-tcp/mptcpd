@@ -1,5 +1,7 @@
 <map id="nm_addr_info" name="nm_addr_info">
-<area shape="rect" id="node1" title="Convenience structure to bundle address information." alt="" coords="70,95,181,121"/>
-<area shape="rect" id="node2" href="$structmptcpd__nm.html" title="Data needed to run the network monitor." alt="" coords="5,5,104,32"/>
-<area shape="rect" id="node3" href="$structmptcpd__interface.html" title="Network interface&#45;specific information." alt="" coords="128,5,264,32"/>
+<area shape="rect" id="Node000001" title="Convenience structure to bundle address information." alt="" coords="89,93,199,119"/>
+<area shape="rect" id="Node000002" href="$structmptcpd__interface.html" title="Network interface&#45;specific information." alt="" coords="5,5,141,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,39,136,91,132,94,89,43"/>
+<area shape="rect" id="Node000003" href="$structmptcpd__nm.html" title="Data needed to run the network monitor." alt="" coords="165,5,264,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,44,183,71,159,95,156,91,179,68,199,41"/>
 </map>

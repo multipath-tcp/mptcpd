@@ -1,4 +1,5 @@
 <map id="nm_ops_info" name="nm_ops_info">
-<area shape="rect" id="node1" title="Network monitoring event tracking callback information." alt="" coords="17,95,123,121"/>
-<area shape="rect" id="node2" href="$structmptcpd__nm__ops.html" title="Network monitor event tracking operations." alt="" coords="5,5,135,32"/>
+<area shape="rect" id="Node000001" title="Network monitoring event tracking callback information." alt="" coords="17,93,123,119"/>
+<area shape="rect" id="Node000002" href="$structmptcpd__nm__ops.html" title="Network monitor event tracking operations." alt="" coords="5,5,135,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,45,73,93,67,93,67,45"/>
 </map>

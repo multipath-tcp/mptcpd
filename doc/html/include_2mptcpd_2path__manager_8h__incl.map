@@ -1,7 +1,13 @@
 <map id="include/mptcpd/path_manager.h" name="include/mptcpd/path_manager.h">
-<area shape="rect" id="node1" title="mptcpd generic netlink commands." alt="" coords="67,5,222,47"/>
-<area shape="rect" id="node2" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="5,95,135,121"/>
-<area shape="rect" id="node3" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="159,95,282,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="130,169,205,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="229,169,316,196"/>
+<area shape="rect" id="Node000001" title="mptcpd generic netlink commands." alt="" coords="100,5,255,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,88,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,48,79,88,76,84,144,43"/>
+<area shape="rect" id="Node000003" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="113,93,242,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,46,180,79,175,79,175,46"/>
+<area shape="rect" id="Node000004" href="$types_8h.html" title="mptcpd user space path manager attribute types." alt="" coords="267,93,389,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="215,43,295,84,292,89,212,48"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="237,167,312,192"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="321,121,294,157,289,154,317,117"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="337,167,423,192"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="339,117,366,154,361,157,334,121"/>
 </map>

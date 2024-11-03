@@ -1,6 +1,9 @@
 <map id="include/mptcpd/private/network_monitor.h" name="include/mptcpd/private/network_monitor.h">
-<area shape="rect" id="node1" title="mptcpd network device monitoring &#45; internal API." alt="" coords="177,5,349,47"/>
-<area shape="rect" id="node2" href="$network__monitor_8c.html" title="mptcpd network device monitoring." alt="" coords="5,95,168,121"/>
-<area shape="rect" id="node3" href="$configuration_8c.html" title="Mptcpd configuration parser implementation." alt="" coords="192,95,333,121"/>
-<area shape="rect" id="node4" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="357,95,507,121"/>
+<area shape="rect" id="Node000001" title="mptcpd network device monitoring &#45; internal API." alt="" coords="177,5,349,45"/>
+<area shape="rect" id="Node000002" href="$network__monitor_8c.html" title="mptcpd network device monitoring." alt="" coords="5,93,168,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,53,114,96,112,91,207,48"/>
+<area shape="rect" id="Node000003" href="$configuration_8c.html" title="Mptcpd configuration parser implementation." alt="" coords="192,93,333,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="265,59,265,93,260,93,260,59"/>
+<area shape="rect" id="Node000004" href="$src_2path__manager_8c.html" title="mptcpd path manager framework." alt="" coords="357,93,507,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="317,49,408,91,406,96,314,53"/>
 </map>

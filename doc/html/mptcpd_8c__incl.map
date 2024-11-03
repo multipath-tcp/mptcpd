@@ -1,11 +1,17 @@
 <map id="src/mptcpd.c" name="src/mptcpd.c">
-<area shape="rect" id="node1" title="Main mptcpd source file." alt="" coords="331,5,436,32"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,80,76,107"/>
-<area shape="rect" id="node3" title=" " alt="" coords="100,80,173,107"/>
-<area shape="rect" id="node4" title=" " alt="" coords="198,80,273,107"/>
-<area shape="rect" id="node5" title=" " alt="" coords="297,80,371,107"/>
-<area shape="rect" id="node6" title=" " alt="" coords="395,80,470,107"/>
-<area shape="rect" id="node7" title=" " alt="" coords="495,80,581,107"/>
-<area shape="rect" id="node8" href="$configuration_8h.html" title="Mptcpd configuration parser header." alt="" coords="605,80,828,107"/>
-<area shape="rect" id="node9" href="$src_2path__manager_8h.html" title="mptcpd user space path manager header file (internal)." alt="" coords="852,80,979,107"/>
+<area shape="rect" id="Node000001" title="Main mptcpd source file." alt="" coords="231,5,336,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,76,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,33,90,79,88,73,244,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="100,79,173,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="261,33,174,75,172,70,259,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="198,79,273,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="278,33,253,69,248,66,273,30"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="297,79,368,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="294,29,319,66,315,69,289,33"/>
+<area shape="rect" id="Node000006" href="$configuration_8h.html" title="Mptcpd configuration parser header." alt="" coords="392,79,615,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="319,28,456,72,454,77,318,33"/>
+<area shape="rect" id="Node000008" href="$src_2path__manager_8h.html" title="mptcpd user space path manager header file (internal)." alt="" coords="639,79,765,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="337,26,625,74,624,80,336,31"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="468,152,539,177"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="506,104,506,138,501,138,501,104"/>
 </map>

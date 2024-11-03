@@ -1,5 +1,7 @@
 <map id="include/mptcpd/types.h" name="include/mptcpd/types.h">
-<area shape="rect" id="node1" title="mptcpd user space path manager attribute types." alt="" coords="7,5,182,32"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,80,80,107"/>
-<area shape="rect" id="node3" title=" " alt="" coords="105,80,191,107"/>
+<area shape="rect" id="Node000001" title="mptcpd user space path manager attribute types." alt="" coords="7,5,182,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,80,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,33,61,69,57,66,84,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="105,79,191,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="106,29,133,66,129,69,101,33"/>
 </map>

@@ -1,7 +1,11 @@
 <map id="include/mptcpd/private/murmur_hash.h" name="include/mptcpd/private/murmur_hash.h">
-<area shape="rect" id="node1" title=" " alt="" coords="241,5,413,47"/>
-<area shape="rect" id="node2" href="$hash__sockaddr_8c.html" title="struct sockaddr hash related functions." alt="" coords="5,95,153,121"/>
-<area shape="rect" id="node3" href="$id__manager_8c.html" title="Map of network address to MPTCP address ID." alt="" coords="177,95,307,121"/>
-<area shape="rect" id="node4" href="$listener__manager_8c.html" title="Map of MPTCP local address ID to listener." alt="" coords="331,95,497,121"/>
-<area shape="rect" id="node5" href="$murmur__hash_8c.html" title=" " alt="" coords="521,95,664,121"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="241,5,413,45"/>
+<area shape="rect" id="Node000002" href="$hash__sockaddr_8c.html" title="struct sockaddr hash related functions." alt="" coords="5,93,153,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="256,52,116,96,115,91,254,47"/>
+<area shape="rect" id="Node000003" href="$id__manager_8c.html" title="Map of network address to MPTCP address ID." alt="" coords="177,93,307,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="298,57,257,95,253,91,295,53"/>
+<area shape="rect" id="Node000004" href="$listener__manager_8c.html" title="Map of MPTCP local address ID to listener." alt="" coords="331,93,497,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="360,53,403,91,399,95,357,57"/>
+<area shape="rect" id="Node000005" href="$murmur__hash_8c.html" title=" " alt="" coords="521,93,664,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="404,47,555,91,553,96,403,52"/>
 </map>

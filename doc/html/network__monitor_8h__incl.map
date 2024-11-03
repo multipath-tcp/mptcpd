@@ -1,6 +1,9 @@
 <map id="include/mptcpd/network_monitor.h" name="include/mptcpd/network_monitor.h">
-<area shape="rect" id="node1" title="mptcpd network device monitoring." alt="" coords="111,5,290,47"/>
-<area shape="rect" id="node2" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="5,95,135,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="159,95,242,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="266,95,333,121"/>
+<area shape="rect" id="Node000001" title="mptcpd network device monitoring." alt="" coords="111,5,290,45"/>
+<area shape="rect" id="Node000002" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="5,93,135,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,48,102,88,100,84,168,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="159,93,242,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,46,203,79,198,79,198,46"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="266,93,333,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="226,43,275,82,272,87,223,48"/>
 </map>
