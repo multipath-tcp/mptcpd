@@ -16,6 +16,13 @@ information (e.g. available remote addresses), available network
 interfaces, request new MPTCP subflows, handle requests for subflows,
 etc.
 
+## Installing `mptcpd`
+`mptcpd` is packaged in most major distributions:
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/mptcpd.svg)](https://repology.org/project/mptcpd/versions)
+
+Do not hesitate to help with the packaging.
+
 ## Building `mptcpd`
 `mptcpd` is built in much the same way most
 [Autotool](https://www.gnu.org/software/automake/manual/html_node/Autotools-Introduction.html)-enabled
