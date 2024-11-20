@@ -15,6 +15,7 @@
 #include <byteswap.h>
 
 #include <netinet/in.h>   // For in_addr_t.
+#include <linux/swab.h>   // For __constant_swab*.
 
 #include <mptcpd/export.h>
 
@@ -26,8 +27,8 @@
  */
 ///@{
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-# define MPTCPD_CONSTANT_HTONS(hs) __bswap_constant_16(hs)
-# define MPTCPD_CONSTANT_HTONL(hl) __bswap_constant_32(hl)
+# define MPTCPD_CONSTANT_HTONS(hs) __swab16(hs)
+# define MPTCPD_CONSTANT_HTONL(hl) __swab32(hl)
 #else
 // No need to swap bytes on big endian platforms.
 // host byte order == network byte order
