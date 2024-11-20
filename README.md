@@ -16,6 +16,27 @@ information (e.g. available remote addresses), available network
 interfaces, request new MPTCP subflows, handle requests for subflows,
 etc.
 
+## Behavior
+By default, this daemon will load the `addr_adv` plugin, which will
+add MPTCP endpoints with the `subflow` flag ("client" mode) for the
+default in-kernel path-manager. Note that this is something
+[NetworkManager 1.40 or newer](https://networkmanager.dev/blog/networkmanager-1-40/#mptcp-support)
+does by default. Having several daemons configuring the MPTCP
+endpoints at the same time should be avoided. This daemon is usually
+recommended when NetworkManager 1.40 or newer is not available, or
+when advanced per-connection path management is needed, using the
+userspace path-manager and a custom made
+[plugin](https://github.com/multipath-tcp/mptcpd/wiki/Plugins) using
+the [C API](https://mptcpd.mptcp.dev/doc/html/).
+
+To change this behavior, with NetworkManager, look for the
+`connection.mptcp-flags` option in the
+[settings](https://networkmanager.dev/docs/api/latest/nm-settings-nmcli.html#nm-settings-nmcli.property.connection.mptcp-flags),
+while for `mptcpd`, look at the `/etc/mptcpd/mptcpd.conf` config
+file, or disable the service if it is not needed. Make sure not to
+have both NetworkManager and `mptcpd` conflicting to configure the
+MPTCP endpoints.
+
 ## Installing `mptcpd`
 `mptcpd` is packaged in most major distributions:
 
