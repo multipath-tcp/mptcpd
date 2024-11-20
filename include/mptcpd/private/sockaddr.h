@@ -26,6 +26,16 @@
  */
 ///@{
 #if __BYTE_ORDER == __LITTLE_ENDIAN
+/* These 2 helpers come from GNU C Library, under LGPL */
+# ifndef __bswap_constant_16
+#  define __bswap_constant_16(x)				\
+    ((__uint16_t) ((((x) >> 8) & 0xff) | (((x) & 0xff) << 8)))
+# endif
+# ifndef __bswap_constant_32
+#  define __bswap_constant_32(x)				\
+    ((((x) & 0xff000000u) >> 24) | (((x) & 0x00ff0000u) >> 8)	\
+     | (((x) & 0x0000ff00u) << 8) | (((x) & 0x000000ffu) << 24))
+# endif
 # define MPTCPD_CONSTANT_HTONS(hs) __bswap_constant_16(hs)
 # define MPTCPD_CONSTANT_HTONL(hl) __bswap_constant_32(hl)
 #else
