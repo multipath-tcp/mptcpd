@@ -274,6 +274,11 @@ AC_CHECK_FUNC([l_netlink_message_new_sized],
 LIBS=$mptcpd_save_libs
 
 # ---------------------------------------------------------------
+# Checks for header files.
+# ---------------------------------------------------------------
+AC_CHECK_HEADERS([error.h])
+
+# ---------------------------------------------------------------
 # Enable additional C compiler warnings.  We do this after all
 # Autoconf tests have been run since not all autoconf macros are
 # warning free.
