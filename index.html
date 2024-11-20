@@ -19,4 +19,42 @@ layout: default
     addresses), available network interfaces, request new MPTCP
     subflows, handle requests for subflows, etc.
   </p>
+  <h2>Behavior</h2>
+  <p>
+    By default, this daemon will load the <code>addr_adv</code> plugin, which
+    will add MPTCP endpoints with the <code>subflow</code> flag ("client" mode)
+    for the default in-kernel path-manager. Note that this is something
+    <a href="https://networkmanager.dev/blog/networkmanager-1-40/#mptcp-support">
+    NetworkManager 1.40 or newer</a> does by default. Having several daemons
+    configuring the MPTCP endpoints at the same time should be avoided. This
+    daemon is usually recommended when NetworkManager 1.40 or newer is not
+    available, or when advanced per-connection path management is needed, using
+    the userspace path-manager and a custom made
+    <a href="https://github.com/multipath-tcp/mptcpd/wiki/Plugins">plugin</a>
+    using the <a href="doc/html">C API</a>.
+  </p>
+  <p>
+    To change this behavior, with NetworkManager, look for the
+    <code>connection.mptcp-flags</code> option in the
+    <a href="https://networkmanager.dev/docs/api/latest/nm-settings-nmcli.html#nm-settings-nmcli.property.connection.mptcp-flags">
+    settings</a>, while for <code>mptcpd</code>, look at the
+    <code>/etc/mptcpd/mptcpd.conf</code> config file, or disable the service if
+    it is not needed. Make sure not to have both NetworkManager and
+    <code>mptcpd</code> conflicting to configure the MPTCP endpoints.
+  </p>
+  <h2>Installation</h2>
+  <p>
+    <code>mptcpd</code> is packaged in most major distributions. If it is not
+    available on your side, or if a more recent version is required, the build
+    process is explaining in the <a href="README.html">Getting Started</a>
+    section.
+  </p>
+  <h2>Documentation</h2>
+  <p>
+    Please reference the <a href="doc/html">C API</a> for <code>mptcpd</code>
+    documentation, the
+    <a href="https://github.com/multipath-tcp/mptcpd/wiki/Plugins">Plugins</a>
+    wiki page for a higher level documentation, and <a href="https://mptcp.dev">
+    mptcp.dev</a> for the overall Multipath TCP for Linux project.
+  </p>
 </div>
