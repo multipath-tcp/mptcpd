@@ -34,7 +34,9 @@
 #define SYSTEMD_SERVICE_TAG	"[Service]"
 #define SYSTEMCTL_SHOW		"systemctl show -p FragmentPath "
 #define PRELOAD_VAR		"LD_PRELOAD="
-#define MPTCPWRAP_ENV		"LD_PRELOAD="PKGLIBDIR"/libmptcpwrap.so.0.0."LIBREVISION
+#define MPTCPWRAP_ENV		PKGLIBDIR"/libmptcpwrap.so.0.0."LIBREVISION
+#define GODEBUG_VAR		"GODEBUG="
+#define MPTCPGO_ENV		"multipathtcp=1"
 
 /* Program documentation. */
 static char args_doc[] = "CMD";
@@ -62,8 +64,9 @@ static void help(void)
 
 static int run(int argc, char *av[])
 {
-	int i, nr = 0, debug = 0;
-	char **envp, **argv;
+	int i, nr = 0, ld, go, debug = 0;
+	char **envp, **argv, *env;
+	size_t len;
 
 	if (argc > 0 && strcmp(av[0], "-d") == 0) {
 		debug = 1;
@@ -80,16 +83,23 @@ static int run(int argc, char *av[])
 	// build environment, copying the current one ...
 	while (environ[nr])
 		nr++;
-	envp = calloc(nr + 3, sizeof(char *));
+	envp = calloc(nr + 4, sizeof(char *));
 	if (!envp)
 		error(1, errno, "can't allocate env list");
 
-	// ... filtering out any 'LD_PRELOAD' ...
+	// ... filtering out any 'LD_PRELOAD' and 'GODEBUG' ...
 	nr = 0;
 	i = 0;
+	ld = -1;
+	go = -1;
 	while (environ[nr]) {
 		if (strncmp(environ[nr], PRELOAD_VAR,
-			    strlen(PRELOAD_VAR)) != 0) {
+			    strlen(PRELOAD_VAR)) == 0) {
+			ld = nr;
+		} else if (strncmp(environ[nr], GODEBUG_VAR,
+				   strlen(GODEBUG_VAR)) == 0) {
+			go = nr;
+		} else {
 			envp[i] = environ[nr];
 			i++;
 		}
@@ -97,7 +107,24 @@ static int run(int argc, char *av[])
 	}
 
 	// ... appending the mptcpwrap preload...
-	envp[i++] = MPTCPWRAP_ENV;
+	if (ld >= 0) {
+		len = strlen(environ[ld]) + strlen(MPTCPWRAP_ENV) + 2;
+		env = alloca(len);
+		snprintf(env, len, "%s:%s", environ[ld], MPTCPWRAP_ENV);
+	} else {
+		env = PRELOAD_VAR MPTCPWRAP_ENV;
+	}
+	envp[i++] = env;
+
+	// .. and GODEBUG=multipathtcp=1 ...
+	if (go >= 0) {
+		len = strlen(environ[go]) + strlen(MPTCPGO_ENV) + 2;
+		env = alloca(len);
+		snprintf(env, len, "%s,%s", environ[go], MPTCPGO_ENV);
+	} else {
+		env = GODEBUG_VAR MPTCPGO_ENV;
+	}
+	envp[i++] = env;
 
 	// ... and enable dbg if needed
 	if (debug)
@@ -204,7 +231,7 @@ static int unit_update(int argc, char *argv[], int enable)
 
 		if (append_env &&
 		    (is_env || strncmp(line, SYSTEMD_SERVICE_TAG, strlen(SYSTEMD_SERVICE_TAG)) == 0)) {
-			if (dprintf(dst, "%s%s\n", SYSTEMD_ENV_VAR, MPTCPWRAP_ENV) < 0)
+			if (dprintf(dst, "%s%s\n", SYSTEMD_ENV_VAR, PRELOAD_VAR MPTCPWRAP_ENV) < 0)
 				error(1, errno, "can't write to env string into %s", dst_path);
 			append_env = 0;
 		}
