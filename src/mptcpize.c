@@ -35,6 +35,8 @@
 #define SYSTEMCTL_SHOW		"systemctl show -p FragmentPath "
 #define PRELOAD_VAR		"LD_PRELOAD="
 #define MPTCPWRAP_ENV		PKGLIBDIR"/libmptcpwrap.so.0.0."LIBREVISION
+#define GODEBUG_VAR		"GODEBUG="
+#define MPTCPGO_ENV		"multipathtcp=1"
 
 /* Program documentation. */
 static char args_doc[] = "CMD";
@@ -62,7 +64,7 @@ static void help(void)
 
 static int run(int argc, char *av[])
 {
-	int i, nr = 0, ld, debug = 0;
+	int i, nr = 0, ld, go, debug = 0;
 	char **envp, **argv, *env;
 	size_t len;
 
@@ -81,18 +83,22 @@ static int run(int argc, char *av[])
 	// build environment, copying the current one ...
 	while (environ[nr])
 		nr++;
-	envp = calloc(nr + 3, sizeof(char *));
+	envp = calloc(nr + 4, sizeof(char *));
 	if (!envp)
 		error(1, errno, "can't allocate env list");
 
-	// ... filtering out any 'LD_PRELOAD' ...
+	// ... filtering out any 'LD_PRELOAD' and 'GODEBUG' ...
 	nr = 0;
 	i = 0;
 	ld = -1;
+	go = -1;
 	while (environ[nr]) {
 		if (strncmp(environ[nr], PRELOAD_VAR,
 			    strlen(PRELOAD_VAR)) == 0) {
 			ld = nr;
+		} else if (strncmp(environ[nr], GODEBUG_VAR,
+				   strlen(GODEBUG_VAR)) == 0) {
+			go = nr;
 		} else {
 			envp[i] = environ[nr];
 			i++;
@@ -107,6 +113,16 @@ static int run(int argc, char *av[])
 		snprintf(env, len, "%s:%s", environ[ld], MPTCPWRAP_ENV);
 	} else {
 		env = PRELOAD_VAR MPTCPWRAP_ENV;
+	}
+	envp[i++] = env;
+
+	// .. and GODEBUG=multipathtcp=1 ...
+	if (go >= 0) {
+		len = strlen(environ[go]) + strlen(MPTCPGO_ENV) + 2;
+		env = alloca(len);
+		snprintf(env, len, "%s,%s", environ[go], MPTCPGO_ENV);
+	} else {
+		env = GODEBUG_VAR MPTCPGO_ENV;
 	}
 	envp[i++] = env;
 
