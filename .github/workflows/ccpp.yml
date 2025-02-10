@@ -26,7 +26,7 @@ jobs:
     - name: make
       run: make -j$(nproc)
     - name: make check
-      run: make check
+      run: make check || { cat tests/test-suite.log; exit 1; }
     - name: make distcheck
       run: make distcheck
     - name: make install
