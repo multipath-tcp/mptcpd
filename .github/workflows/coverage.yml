@@ -10,15 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: dependencies
-      run: sudo apt-get -y install autoconf-archive lcov git
-    - name: build and install ELL
-      run: |
-        git clone git://git.kernel.org/pub/scm/libs/ell/ell.git
-        cd ell
-        git checkout 0.30
-        ./bootstrap
-        ./configure --prefix=/usr
-        sudo make -j$(nproc) install
+      run: sudo apt-get -y install autoconf-archive lcov git libell-dev
     - name: bootstrap
       run: ./bootstrap
     - name: configure

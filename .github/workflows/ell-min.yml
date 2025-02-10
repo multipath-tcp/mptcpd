@@ -1,0 +1,37 @@
+name: ELL min version
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        cc: [gcc, clang]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: dependencies
+      run: sudo apt-get -y install autoconf-archive git clang
+    - name: build and install ELL
+      run: |
+        git clone git://git.kernel.org/pub/scm/libs/ell/ell.git
+        cd ell
+        git checkout 0.30
+        ./bootstrap
+        ./configure CC=${{ matrix.cc }} --prefix=/usr
+        sudo make -j$(nproc) install
+    - name: bootstrap
+      run: ./bootstrap
+    - name: configure
+      run: ./configure CC=${{ matrix.cc }}
+    - name: make
+      run: make -j$(nproc)
+    - name: make check
+      run: make check
