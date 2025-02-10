@@ -18,7 +18,6 @@
 #include <argp.h>
 #include <dlfcn.h>
 #include <errno.h>
-#include <error.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +26,10 @@
 
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>
+#endif
+
+#ifdef HAVE_ERROR_H
+# include <error.h>
 #endif
 
 #define SYSTEMD_ENV_VAR		"Environment="
@@ -54,6 +57,20 @@ static char doc[] =
         "\t                          above launcher.\n\n"
         "\tdisable <unit>            Update the systemd <unit>, removing\n"
         "\t                          the above launcher.\n";
+
+#ifndef HAVE_ERROR_H
+# define ERROR_HELPER(status, errnum, format, ...) do {		\
+	if (errnum) {						\
+		errno = errnum;					\
+		perror(format);					\
+	} else {						\
+		fprintf(stderr, format "%s", __VA_ARGS__);	\
+	}							\
+	if (status)						\
+		exit(status);					\
+   } while(0)
+# define error(...) ERROR_HELPER(__VA_ARGS__, "\n")
+#endif
 
 static struct argp const argp = { 0, 0, args_doc, doc, 0, 0, 0 };
 
