@@ -28,12 +28,12 @@ jobs:
         git log -1 --oneline --no-decorate
         ./bootstrap
         ./configure CC=${{ matrix.cc }} --prefix=/usr
-        sudo make install
+        sudo make -j$(nproc) install
     - name: bootstrap
       run: ./bootstrap
     - name: configure
       run: ./configure CC=${{ matrix.cc }}
     - name: make
-      run: make
+      run: make -j$(nproc)
     - name: make check
       run: make check

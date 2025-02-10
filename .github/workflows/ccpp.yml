@@ -26,13 +26,13 @@ jobs:
         git checkout 0.30
         ./bootstrap
         ./configure --prefix=/usr
-        sudo make install
+        sudo make -j$(nproc) install
     - name: bootstrap
       run: ./bootstrap
     - name: configure
       run: ./configure --${{ matrix.debug }}
     - name: make
-      run: make
+      run: make -j$(nproc)
     - name: make check
       run: make check
     - name: make distcheck

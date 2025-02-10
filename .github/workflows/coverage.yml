@@ -18,13 +18,13 @@ jobs:
         git checkout 0.30
         ./bootstrap
         ./configure --prefix=/usr
-        sudo make install
+        sudo make -j$(nproc) install
     - name: bootstrap
       run: ./bootstrap
     - name: configure
       run: ./configure --enable-code-coverage
     - name: make
-      run: make
+      run: make -j$(nproc)
     - name: make check
       run: make check-code-coverage \
              CODE_COVERAGE_OUTPUT_FILE=lcov.info \

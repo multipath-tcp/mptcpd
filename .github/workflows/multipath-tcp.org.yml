@@ -22,10 +22,10 @@ jobs:
         git checkout 0.30
         ./bootstrap
         ./configure --prefix=/usr
-        sudo make install
+        sudo make -j$(nproc) install
     - name: bootstrap
       run: ./bootstrap
     - name: configure
       run: ./configure --with-kernel=multipath-tcp.org
     - name: make
-      run: make
+      run: make -j$(nproc)
