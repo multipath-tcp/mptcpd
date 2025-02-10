@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '33 6 * * 1-5'
+    - cron: '33 6 * * *'
 
 jobs:
   build:
@@ -25,6 +25,7 @@ jobs:
       run: |
         git clone git://git.kernel.org/pub/scm/libs/ell/ell.git
         cd ell
+        git log -1 --oneline --no-decorate
         ./bootstrap
         ./configure CC=${{ matrix.cc }} --prefix=/usr
         sudo make install
