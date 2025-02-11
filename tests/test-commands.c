@@ -610,11 +610,45 @@ static void handle_rtm_deladdr(int errnum,
 
 // -------------------------------------------------------------------
 
+static void test_add(const char *name,
+                     l_test_func_t function,
+                     void *test_data)
+{
+        l_info("Test: %s", name);
+        function(test_data);
+}
+
+static void exec_tests(void *user_data)
+{
+        struct test_info *const info = user_data;
+
+        // Non-command tests.
+        test_add("get_port", test_get_port, NULL);
+        test_add("get_nm",   test_get_nm,   info);
+
+        // In-kernel path manager tests.
+        test_add("add_addr - kernel",    test_add_addr_kernel,    info);
+        test_add("get_addr",             test_get_addr,           info);
+        test_add("dump_addrs",           test_dump_addrs,         info);
+        test_add("set_flags",            test_set_flags,          info);
+        test_add("remove_addr - kernel", test_remove_addr_kernel, info);
+        test_add("set_limits",           test_set_limits,         info);
+        test_add("get_limits",           test_get_limits,         info);
+        test_add("flush_addrs",          test_flush_addrs,        info);
+
+        // User space path manager tests.
+        test_add("add_addr - user",    test_add_addr_user,    info);
+        test_add("add_subflow",        test_add_subflow,      info);
+        test_add("set_backup",         test_set_backup,       info);
+        test_add("remove_subflow",     test_remove_subflow,   info);
+        test_add("remove_addr - user", test_remove_addr_user, info);
+}
+
 static void run_tests(void *user_data)
 {
         struct test_info *const t = user_data;
 
-        l_test_run();
+        exec_tests(user_data);
 
         t->tests_called = true;
 }
@@ -690,7 +724,6 @@ static void setup_tests (void *user_data)
                 "--plugin-dir",
                 TEST_PLUGIN_DIR
         };
-        static char **args = argv;
 
         static int argc = L_ARRAY_SIZE(argv);
 
@@ -704,29 +737,6 @@ static void setup_tests (void *user_data)
                 mptcpd_pm_register_ops(info->pm, &pm_ops, info);
 
         assert(registered);
-
-        l_test_init(&argc, &args);
-
-        // Non-command tests.
-        l_test_add("get_port", test_get_port, NULL);
-        l_test_add("get_nm",   test_get_nm,   info);
-
-        // In-kernel path manager tests.
-        l_test_add("add_addr - kernel",    test_add_addr_kernel,    info);
-        l_test_add("get_addr",             test_get_addr,           info);
-        l_test_add("dump_addrs",           test_dump_addrs,         info);
-        l_test_add("set_flags",            test_set_flags,          info);
-        l_test_add("remove_addr - kernel", test_remove_addr_kernel, info);
-        l_test_add("set_limits",           test_set_limits,         info);
-        l_test_add("get_limits",           test_get_limits,         info);
-        l_test_add("flush_addrs",          test_flush_addrs,        info);
-
-        // User space path manager tests.
-        l_test_add("add_addr - user",    test_add_addr_user,    info);
-        l_test_add("add_subflow",        test_add_subflow,      info);
-        l_test_add("set_backup",         test_set_backup,       info);
-        l_test_add("remove_subflow",     test_remove_subflow,   info);
-        l_test_add("remove_addr - user", test_remove_addr_user, info);
 }
 
 static void complete_address_setup(void *user_data)
@@ -863,13 +873,11 @@ static uint8_t get_prefix_len(struct sockaddr const *sa)
 
 // -------------------------------------------------------------------
 
-int main(void)
+static void test_commands(void const *data)
 {
-        // Skip this test if the kernel is not MPTCP capable.
-        tests_skip_if_no_mptcp();
+        (void) data;
 
-        if (!l_main_init())
-                return -1;
+        assert(l_main_init());
 
         l_log_set_stderr();
         l_debug_enable("*");
@@ -939,7 +947,19 @@ int main(void)
         mptcpd_pm_destroy(info.pm);
         mptcpd_config_destroy(info.config);
 
-        return l_main_exit() ? 0 : -1;
+        assert(l_main_exit());
+}
+
+int main(int argc, char *argv[])
+{
+        // Skip this test if the kernel is not MPTCP capable.
+        tests_skip_if_no_mptcp();
+
+        l_test_init(&argc, &argv);
+
+        l_test_add("commands", test_commands, NULL);
+
+        return l_test_run();
 }
 
 
