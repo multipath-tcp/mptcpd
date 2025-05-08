@@ -19,7 +19,7 @@ exit_status=0
 
 for p in $@; do
     # Access rights in human readable form (e.g. "drwxrwxr-x")
-    perms=`stat --dereference --format=%A $p`
+    perms=`stat -L -c %A $p`
 
     # The write mode for "others".
     other_write=`echo $perms | sed -e 's/.*\(.\).$/\1/'`

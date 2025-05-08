@@ -50,8 +50,13 @@
 // This should never occur!
 # error Problem configuring default log message destination.
 #endif
-/// Name of the default logging function determined at compile-time.
-#define MPTCPD_SET_LOG_FUNCTION MPTCPD_CONCAT(l_log_set_, MPTCPD_LOGGER)
+// Optimisation for C standard library not supporting the concat macros.
+#ifdef MPTCPD_LOGGER_STDERR
+# define MPTCPD_SET_LOG_FUNCTION l_log_set_stderr
+#else
+/// Name of the logging function determined at compile-time.
+# define MPTCPD_SET_LOG_FUNCTION MPTCPD_CONCAT(l_log_set_, MPTCPD_LOGGER)
+#endif
 
 /**
  * @brief Get the function that sets the log message destination.

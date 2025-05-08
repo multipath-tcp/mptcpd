@@ -108,6 +108,13 @@ AC_DEFINE_UNQUOTED([MPTCPD_LOGGER],
                    [Log message destination.])
 AC_SUBST([mptcpd_logger],[$enable_logging])
 
+AH_TEMPLATE([MPTCPD_LOGGER_STDERR],
+            [Define to 1 if the stderr logger is used.])
+AS_IF([test "x$enable_logging" = "xstderr"],
+      [AC_DEFINE([MPTCPD_LOGGER_STDERR])
+       AC_MSG_NOTICE([default logger: stderr])],
+      [AC_MSG_NOTICE([custom logger: $enable_logging])])
+
 # Allow the user to choose support for either the upstream or
 # multipath-tcp.org kernel.
 AC_ARG_WITH([kernel],
@@ -272,6 +279,11 @@ AC_CHECK_FUNC([l_netlink_message_new_sized],
                          [],
                          [ELL has l_netlink_message_new_sized()])])
 LIBS=$mptcpd_save_libs
+
+# ---------------------------------------------------------------
+# Checks for header files.
+# ---------------------------------------------------------------
+AC_CHECK_HEADERS([error.h])
 
 # ---------------------------------------------------------------
 # Enable additional C compiler warnings.  We do this after all
