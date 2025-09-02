@@ -7,6 +7,7 @@
  * Copyright (c) 2017-2022, Intel Corporation
  */
 
+#include "linux/mptcp_upstream_pm.h"
 #ifdef HAVE_CONFIG_H
 # include <mptcpd/private/config.h>
 #endif
@@ -133,6 +134,9 @@ struct pm_event_attrs
 
         /// Server side connection event (boolean)
         uint8_t const *server_side;
+
+        /// Event flags
+        uint16_t const *flags;
 };
 
 /**
@@ -196,8 +200,10 @@ static void parse_netlink_attributes(struct l_genl_msg *msg,
                 case MPTCP_ATTR_SERVER_SIDE:
                         MPTCP_GET_NL_ATTR(data, len, attrs->server_side);
                         break;
-                case MPTCP_ATTR_FAMILY:
                 case MPTCP_ATTR_FLAGS:
+                        MPTCP_GET_NL_ATTR(data, len, attrs->flags);
+                        break;
+                case MPTCP_ATTR_FAMILY:
                 case MPTCP_ATTR_TIMEOUT:
                 case MPTCP_ATTR_RESET_REASON:
                 case MPTCP_ATTR_RESET_FLAGS:
@@ -253,12 +259,16 @@ static void handle_connection_created(struct pm_event_attrs const *attrs,
         static char const *const pm_name = NULL;
         bool const server_side =
                 (attrs->server_side != NULL ? *attrs->server_side : false);
+        bool const deny_join_id0 =
+                attrs->flags != NULL &&
+                *attrs->flags & MPTCP_PM_EV_FLAG_DENY_JOIN_ID0;
 
         mptcpd_plugin_new_connection(pm_name,
                                      *attrs->token,
                                      (struct sockaddr *) &laddr,
                                      (struct sockaddr *) &raddr,
                                      server_side,
+                                     deny_join_id0,
                                      pm);
 }
 
@@ -305,11 +315,15 @@ static void handle_connection_established(struct pm_event_attrs const *attrs,
         // Assume server_side is false if event attribute is unavailable.
         bool const server_side =
                 (attrs->server_side != NULL ? *attrs->server_side : false);
+        bool const deny_join_id0 =
+                attrs->flags != NULL &&
+                *attrs->flags & MPTCP_PM_EV_FLAG_DENY_JOIN_ID0;
 
         mptcpd_plugin_connection_established(*attrs->token,
                                              (struct sockaddr *) &laddr,
                                              (struct sockaddr *) &raddr,
                                              server_side,
+                                             deny_join_id0,
                                              pm);
 }
 

@@ -29,6 +29,7 @@ void call_plugin_ops(struct plugin_call_count const *count,
                                              args->laddr,
                                              args->raddr,
                                              args->server_side,
+                                             args->deny_join_id0,
                                              args->pm);
 
         for (int i = 0; i < count->connection_established; ++i)
@@ -36,6 +37,7 @@ void call_plugin_ops(struct plugin_call_count const *count,
                                                      args->laddr,
                                                      args->raddr,
                                                      args->server_side,
+                                                     args->deny_join_id0,
                                                      args->pm);
 
         for (int i = 0; i < count->new_address; ++i)

@@ -18,7 +18,7 @@ AC_INIT([mptcpd],
 # Interfaces changed:  CURRENT++ REVISION=0
 #            added:    CURRENT++ REVISION=0 AGE++
 #            removed:  CURRENT++ REVISION=0 AGE=0
-LIB_CURRENT=4
+LIB_CURRENT=5
 LIB_REVISION=0
 LIB_AGE=1
 

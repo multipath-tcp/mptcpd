@@ -60,6 +60,7 @@ MPTCPD_API void mptcpd_plugin_unload(struct mptcpd_pm *pm);
  * @param[in] laddr       Local address information.
  * @param[in] raddr       Remote address information.
  * @param[in] server_side Server side connection flag.
+ * @param[in] deny_join_id0 No MPJ to the initial address and port.
  * @param[in] pm          Opaque pointer to mptcpd path manager object.
  */
 MPTCPD_API void mptcpd_plugin_new_connection(
@@ -68,6 +69,7 @@ MPTCPD_API void mptcpd_plugin_new_connection(
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
         bool server_side,
+        bool deny_join_id0,
         struct mptcpd_pm *pm);
 
 /**
@@ -77,6 +79,7 @@ MPTCPD_API void mptcpd_plugin_new_connection(
  * @param[in] laddr       Local address information.
  * @param[in] raddr       Remote address information.
  * @param[in] server_side Server side connection flag.
+ * @param[in] deny_join_id0 No MPJ to the initial address and port.
  * @param[in] pm          Opaque pointer to mptcpd path manager object.
  */
 MPTCPD_API void mptcpd_plugin_connection_established(
@@ -84,6 +87,7 @@ MPTCPD_API void mptcpd_plugin_connection_established(
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
         bool server_side,
+        bool deny_join_id0,
         struct mptcpd_pm *pm);
 
 /**

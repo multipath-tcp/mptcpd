@@ -145,6 +145,9 @@ struct mptcpd_plugin_ops
          * @param[in] server_side @c true if this peer was the
          *                        listener (server), @c false if this
          *                        peer initiated the connection.
+         * @param[in] deny_join_id0 @c true if the other peer requested not to
+         *                          create a new subflow to the initial IP
+         *                          address and port
          * @param[in] pm          Opaque pointer to mptcpd path
          *                        manager object.
          */
@@ -152,6 +155,7 @@ struct mptcpd_plugin_ops
                                struct sockaddr const *laddr,
                                struct sockaddr const *raddr,
                                bool server_side,
+                               bool deny_join_id0,
                                struct mptcpd_pm *pm);
 
         /**
@@ -163,6 +167,9 @@ struct mptcpd_plugin_ops
          * @param[in] server_side @c true if this peer was the
          *                        listener (server), @c false if this
          *                        peer initiated the connection.
+         * @param[in] deny_join_id0 @c true if the other peer requested not to
+         *                          create a new subflow to the initial IP
+         *                          address and port
          * @param[in] pm          Opaque pointer to mptcpd path
          *                        manager object.
          */
@@ -170,6 +177,7 @@ struct mptcpd_plugin_ops
                                        struct sockaddr const *laddr,
                                        struct sockaddr const *raddr,
                                        bool server_side,
+                                       bool deny_join_id0,
                                        struct mptcpd_pm *pm);
 
         /**

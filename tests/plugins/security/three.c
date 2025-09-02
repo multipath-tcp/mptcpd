@@ -31,12 +31,14 @@ static void plugin_three_new_connection(mptcpd_token_t token,
                                         struct sockaddr const *laddr,
                                         struct sockaddr const *raddr,
                                         bool server_side,
+                                        bool deny_join_id0,
                                         struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
         (void) server_side;
+        (void) deny_join_id0;
         (void) pm;
 
         ++call_count.new_connection;
@@ -47,12 +49,14 @@ static void plugin_three_connection_established(
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
         bool server_side,
+        bool deny_join_id0,
         struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
         (void) server_side;
+        (void) deny_join_id0;
         (void) pm;
 
         ++call_count.connection_established;
