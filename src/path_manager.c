@@ -258,7 +258,9 @@ static void handle_connection_created(struct pm_event_attrs const *attrs,
 
         static char const *const pm_name = NULL;
         bool const server_side =
-                (attrs->server_side != NULL ? *attrs->server_side : false);
+                (attrs->flags != NULL &&
+                 *attrs->flags & MPTCP_PM_EV_FLAG_SERVER_SIDE) ||
+                (attrs->server_side != NULL && *attrs->server_side);
         bool const deny_join_id0 =
                 attrs->flags != NULL &&
                 *attrs->flags & MPTCP_PM_EV_FLAG_DENY_JOIN_ID0;
@@ -314,7 +316,9 @@ static void handle_connection_established(struct pm_event_attrs const *attrs,
 
         // Assume server_side is false if event attribute is unavailable.
         bool const server_side =
-                (attrs->server_side != NULL ? *attrs->server_side : false);
+                (attrs->flags != NULL &&
+                 *attrs->flags & MPTCP_PM_EV_FLAG_SERVER_SIDE) ||
+                (attrs->server_side != NULL && *attrs->server_side);
         bool const deny_join_id0 =
                 attrs->flags != NULL &&
                 *attrs->flags & MPTCP_PM_EV_FLAG_DENY_JOIN_ID0;
