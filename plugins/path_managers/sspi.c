@@ -609,7 +609,7 @@ static void sspi_connection_established(mptcpd_token_t token,
         (void) token;
         (void) laddr;
         (void) raddr;
-        (void) server_side,
+        (void) server_side;
         (void) pm;
 
         /**
