@@ -16,14 +16,10 @@
 # include "mptcpd/private/config.h"
 #endif
 
-#ifdef HAVE_LINUX_MPTCP_H_UPSTREAM
-# include <linux/mptcp.h>
-#else
 /*
-  Platform does not have upstream MPTCP path mangement generic netlink
-  API so include local copy of the upstream <linux/mptcp.h> header.
+  Platform might have upstream MPTCP path mangement generic netlink API, but
+  always include a local copy which is synced with the supported features.
 */
-# include "linux/mptcp_upstream.h"
-#endif // HAVE_LINUX_MPTCP_H_UPSTREAM
+#include "linux/mptcp_upstream.h"
 
 #endif // MPTCPD_PRIVATE_MPTCP_UPSTREAM_H
