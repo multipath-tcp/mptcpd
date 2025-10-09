@@ -108,6 +108,17 @@ static void test_load_plugins(void const *test_data)
         RUN_CONFIG(argv);
 }
 
+static void test_addr_flags(void const *test_data)
+{
+        (void) test_data;
+
+        static char *argv[] =
+                { TEST_PROGRAM_NAME, "--addr-flags",
+                  "signal,subflow,fullmesh,backup,laminar" };
+
+        RUN_CONFIG(argv);
+}
+
 static void test_multi_arg(void const *test_data)
 {
         (void) test_data;
@@ -176,6 +187,7 @@ int main(int argc, char *argv[])
         l_test_add("plugin dir",   test_plugin_dir,   NULL);
         l_test_add("path manager", test_path_manager, NULL);
         l_test_add("load plugins", test_load_plugins, NULL);
+        l_test_add("addr flags",   test_addr_flags,   NULL);
         l_test_add("multi arg",    test_multi_arg,    NULL);
         l_test_add("config file",  test_config_file,  NULL);
         l_test_add("debug",        test_debug,        NULL);
