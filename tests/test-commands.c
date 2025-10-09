@@ -58,6 +58,9 @@ struct test_addr_info
 
         // MPTCP address ID used for add_addr and dump_addr calls.
         mptcpd_aid_t id;
+
+        // MPTCP address flags used in the endpoints
+        mptcpd_flags_t const flags;
 };
 
 struct test_info
@@ -186,6 +189,7 @@ static void get_addr_callback(struct mptcpd_addr_info const *info,
 
         assert(mptcpd_addr_info_get_id(info) == k_addr->id);
         assert(mptcpd_addr_info_get_index(info) == k_addr->ifindex);
+        assert(mptcpd_addr_info_get_flags(info) == k_addr->flags);
         assert(sockaddr_is_equal(k_addr->addr,
                                  mptcpd_addr_info_get_addr(info)));
 }
@@ -210,6 +214,7 @@ static void dump_addrs_callback(struct mptcpd_addr_info const *info,
                 return;
 
         assert(mptcpd_addr_info_get_index(info) == k_addr->ifindex);
+        assert(mptcpd_addr_info_get_flags(info) == k_addr->flags);
         assert(sockaddr_is_equal(k_addr->addr,
                                  mptcpd_addr_info_get_addr(info)));
 }
@@ -327,12 +332,10 @@ static void test_add_addr_kernel(void const *test_data)
 
         k_addr->id = mptcpd_idm_get_id(idm, k_addr->addr);
 
-        uint32_t flags = 0;
-
         int const result = mptcpd_kpm_add_addr(pm,
                                                k_addr->addr,
                                                k_addr->id,
-                                               flags,
+                                               k_addr->flags,
                                                k_addr->ifindex);
 
         assert(result == 0 || result == ENOTSUP);
@@ -911,7 +914,8 @@ static void test_commands(void const *data)
                 .k_addr = {
                         .addr        = (struct sockaddr *) &kernel_addr,
                         .ifindex     = if_nametoindex(loopback),
-                        .prefix_len  = get_prefix_len(info.k_addr.addr)
+                        .prefix_len  = get_prefix_len(info.k_addr.addr),
+                        .flags       = MPTCPD_ADDR_FLAG_SUBFLOW
                 }
         };
 

@@ -73,6 +73,9 @@ typedef uint32_t mptcpd_flags_t;
  * @note Do not use with @c MPTCPD_ADDR_FLAG_SIGNAL.
  */
 #define MPTCPD_ADDR_FLAG_FULLMESH (1U << 3)
+
+/// Use this endpoint in reaction to ADD_ADDR, but only once.
+#define MPTCPD_ADDR_FLAG_LAMINAR (1U << 5)
 ///@}
 
 /**

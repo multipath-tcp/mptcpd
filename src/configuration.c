@@ -121,6 +121,7 @@ static struct tok_entry const addr_flags_toks[] = {
         { MPTCPD_ADDR_FLAG_SIGNAL,   "signal"   },
         { MPTCPD_ADDR_FLAG_BACKUP,   "backup"   },
         { MPTCPD_ADDR_FLAG_FULLMESH, "fullmesh" },
+        { MPTCPD_ADDR_FLAG_LAMINAR,  "laminar"  },
         { 0, NULL },
 };
 
