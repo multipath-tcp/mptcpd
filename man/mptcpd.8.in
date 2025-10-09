@@ -72,8 +72,9 @@ is a comma separated list containing one or more of the flags
 .IR subflow ,
 .IR signal ,
 .IR backup ,
+.IR fullmesh ,
 and
-.I fullmesh
+.IR laminar
 that plugins that deal with the in-kernel path manager may use when
 advertising addresses, e.g.
 .B --addr-flags=subflow

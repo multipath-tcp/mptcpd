@@ -54,7 +54,8 @@ static void update_limits(struct mptcpd_pm *pm, int delta)
           If the pm creates outgoing subflows, we assume this is
           the client side, and accepts add_addrs from the server.
          */
-        if (pm->config->addr_flags & MPTCPD_ADDR_FLAG_SUBFLOW)
+        if (pm->config->addr_flags &
+            (MPTCPD_ADDR_FLAG_SUBFLOW | MPTCPD_ADDR_FLAG_LAMINAR))
                 _limits[1].limit = _limits[0].limit;
 
         int const result = mptcpd_kpm_set_limits(pm,

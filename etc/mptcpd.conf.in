@@ -37,6 +37,7 @@ path-manager=@mptcpd_default_pm@
 #   signal    (do not use with the "fullmesh" flag)
 #   backup
 #   fullmesh  (do not use with the "signal" flag)
+#   laminar
 #
 # Plugins that deal with the in-kernel path manager may use these
 # flags when advertising addresses.
