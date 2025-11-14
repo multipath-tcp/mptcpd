@@ -37,6 +37,7 @@ static void plugin_two_new_connection(mptcpd_token_t token,
                                       struct sockaddr const *laddr,
                                       struct sockaddr const *raddr,
                                       bool server_side,
+                                      bool deny_join_id0,
                                       struct mptcpd_pm *pm)
 {
         (void) pm;
@@ -47,6 +48,7 @@ static void plugin_two_new_connection(mptcpd_token_t token,
         assert(sockaddr_is_equal(laddr, local_addr));
         assert(sockaddr_is_equal(raddr, remote_addr));
         assert(server_side == test_server_side_2);
+        assert(deny_join_id0 == test_deny_join_id0_2);
 
         ++call_count.new_connection;
 }
@@ -56,6 +58,7 @@ static void plugin_two_connection_established(
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
         bool server_side,
+        bool deny_join_id0,
         struct mptcpd_pm *pm)
 {
         (void) pm;
@@ -66,6 +69,7 @@ static void plugin_two_connection_established(
         assert(sockaddr_is_equal(laddr, local_addr));
         assert(sockaddr_is_equal(raddr, remote_addr));
         assert(server_side == test_server_side_2);
+        assert(deny_join_id0 == test_deny_join_id0_2);
 
         ++call_count.connection_established;
 }

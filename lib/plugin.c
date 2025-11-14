@@ -575,6 +575,7 @@ void mptcpd_plugin_new_connection(char const *name,
                                   struct sockaddr const *laddr,
                                   struct sockaddr const *raddr,
                                   bool server_side,
+                                  bool deny_join_id0,
                                   struct mptcpd_pm *pm)
 {
         struct mptcpd_plugin_ops const *const ops = name_to_ops(name);
@@ -586,13 +587,19 @@ void mptcpd_plugin_new_connection(char const *name,
                 l_error("Unable to map connection to plugin.");
 
         if (ops && ops->new_connection)
-                ops->new_connection(token, laddr, raddr, server_side, pm);
+                ops->new_connection(token,
+                                    laddr,
+                                    raddr,
+                                    server_side,
+                                    deny_join_id0,
+                                    pm);
 }
 
 void mptcpd_plugin_connection_established(mptcpd_token_t token,
                                           struct sockaddr const *laddr,
                                           struct sockaddr const *raddr,
                                           bool server_side,
+                                          bool deny_join_id0,
                                           struct mptcpd_pm *pm)
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
@@ -602,6 +609,7 @@ void mptcpd_plugin_connection_established(mptcpd_token_t token,
                                             laddr,
                                             raddr,
                                             server_side,
+                                            deny_join_id0,
                                             pm);
 }
 

@@ -542,10 +542,12 @@ static void sspi_new_connection(mptcpd_token_t token,
                                 struct sockaddr const *laddr,
                                 struct sockaddr const *raddr,
                                 bool server_side,
+                                bool deny_join_id0,
                                 struct mptcpd_pm *pm)
 {
         (void) raddr;
         (void) server_side;
+        (void) deny_join_id0;
 
         /**
          * @note Because we directly store connection tokens in a
@@ -604,12 +606,14 @@ static void sspi_connection_established(mptcpd_token_t token,
                                         struct sockaddr const *laddr,
                                         struct sockaddr const *raddr,
                                         bool server_side,
+                                        bool deny_join_id0,
                                         struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
         (void) server_side;
+        (void) deny_join_id0;
         (void) pm;
 
         /**

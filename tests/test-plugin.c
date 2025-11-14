@@ -51,7 +51,8 @@ static bool run_plugin_load(mode_t mode, struct l_queue const *queue)
                         .laddr       = (struct sockaddr const *) &test_laddr_4,
                         .raddr       = (struct sockaddr const *) &test_raddr_4,
                         .backup      = test_backup_4,
-                        .server_side = test_server_side_4
+                        .server_side = test_server_side_4,
+                        .deny_join_id0 = test_deny_join_id0_4
                 };
 
                 call_plugin_ops(&test_count_4, &args);
@@ -181,6 +182,7 @@ static void test_nonexistent_plugins(void const *test_data)
                                      NULL,  // laddr
                                      NULL,  // raddr
                                      false, // server_side
+                                     false, // deny_join_id0
                                      NULL); // pm
 
         assert(!loaded);
@@ -213,7 +215,8 @@ static void test_plugin_dispatch(void const *test_data)
                 .laddr       = (struct sockaddr const *) &test_laddr_1,
                 .raddr       = (struct sockaddr const *) &test_raddr_1,
                 .backup      = test_backup_1,
-                .server_side = test_server_side_1
+                .server_side = test_server_side_1,
+                .deny_join_id0 = test_deny_join_id0_1
         };
 
         call_plugin_ops(&test_count_1, &args1);
@@ -225,7 +228,8 @@ static void test_plugin_dispatch(void const *test_data)
                 .laddr       = args1.laddr,
                 .raddr       = args1.raddr,
                 .backup      = args1.backup,
-                .server_side = args1.server_side
+                .server_side = args1.server_side,
+                .deny_join_id0 = args1.deny_join_id0
         };
 
         call_plugin_ops(&test_count_1, &args1_default);
@@ -238,7 +242,8 @@ static void test_plugin_dispatch(void const *test_data)
                 .laddr       = (struct sockaddr const *) &test_laddr_2,
                 .raddr       = (struct sockaddr const *) &test_raddr_2,
                 .backup      = test_backup_2,
-                .server_side = test_server_side_2
+                .server_side = test_server_side_2,
+                .deny_join_id0 = test_deny_join_id0_2
         };
 
         call_plugin_ops(&test_count_2, &args2);
@@ -262,6 +267,7 @@ static void test_plugin_dispatch(void const *test_data)
                 (struct sockaddr const *) &test_laddr_2,
                 (struct sockaddr const *) &test_raddr_2,
                 test_server_side_2,
+                test_deny_join_id0_2,
                 NULL);
 
         // Test assertions will be triggered during plugin unload.
@@ -299,11 +305,14 @@ static void test_null_plugin_ops(void const *test_data)
         static struct sockaddr const *const raddr = NULL;
         static bool backup = false;
         static bool server_side = false;
+        static bool deny_join_id0 = false;
         static struct mptcpd_interface const *const interface = NULL;
 
         // No dispatch should occur in the following calls.
-        mptcpd_plugin_new_connection(name, token, laddr, raddr, server_side, pm);
-        mptcpd_plugin_connection_established(token, laddr, raddr, server_side, pm);
+        mptcpd_plugin_new_connection(name, token, laddr, raddr, server_side,
+                                     deny_join_id0, pm);
+        mptcpd_plugin_connection_established(token, laddr, raddr, server_side,
+                                             deny_join_id0, pm);
         mptcpd_plugin_connection_closed(token, pm);
         mptcpd_plugin_new_address(token, id, raddr, pm);
         mptcpd_plugin_address_removed(token, id, pm);
