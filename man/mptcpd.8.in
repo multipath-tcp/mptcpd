@@ -118,7 +118,8 @@ related addresses are updated, e.g.
 .TP
 .BI \-\-plugin\-dir= DIR
 set plugin directory to
-.I DIR
+.IR DIR ,
+which should not be world writable for security reasons.
 
 .TP
 .BI \-\-path\-manager= PLUGIN
