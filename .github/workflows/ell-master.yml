@@ -23,7 +23,11 @@ jobs:
       run: sudo apt-get -y install autoconf-archive git clang
     - name: build and install ELL
       run: |
-        git clone git://git.kernel.org/pub/scm/libs/ell/ell.git
+        for i in $(seq 30); do
+          git clone https://kernel.googlesource.com/pub/scm/libs/ell/ell && break
+          echo "Attempt $i failed, retrying in 30 seconds..."
+          sleep 30
+        done
         cd ell
         git log -1 --oneline --no-decorate
         ./bootstrap
