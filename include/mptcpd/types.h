@@ -74,6 +74,16 @@ typedef uint32_t mptcpd_flags_t;
  */
 #define MPTCPD_ADDR_FLAG_FULLMESH (1U << 3)
 
+/**
+ * @brief Endpoint implicitly created by the kernel PM.
+ *
+ * It exists because no userspace ones correspond to the associated address
+ * and port. It can only be set by the kernel.
+ *
+ * @note Do not set from the userspace to the kernelspace.
+ */
+#define MPTCPD_ADDR_FLAG_IMPLICIT (1U << 4)
+
 /// Use this endpoint in reaction to ADD_ADDR, but only once.
 #define MPTCPD_ADDR_FLAG_LAMINAR (1U << 5)
 ///@}
