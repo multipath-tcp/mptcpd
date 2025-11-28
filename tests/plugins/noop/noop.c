@@ -91,12 +91,14 @@ static void plugin_noop_subflow_closed(mptcpd_token_t token,
                                        struct sockaddr const *laddr,
                                        struct sockaddr const *raddr,
                                        bool backup,
+                                       uint8_t error,
                                        struct mptcpd_pm *pm)
 {
         (void) token;
         (void) laddr;
         (void) raddr;
         (void) backup;
+        (void) error;
         (void) pm;
 }
 

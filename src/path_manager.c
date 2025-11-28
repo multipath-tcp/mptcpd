@@ -518,6 +518,7 @@ static void handle_subflow_closed(struct pm_event_attrs const *attrs,
                                      (struct sockaddr *) &laddr,
                                      (struct sockaddr *) &raddr,
                                      attrs->backup,
+                                     attrs->error ? *attrs->error : 0,
                                      pm);
 }
 

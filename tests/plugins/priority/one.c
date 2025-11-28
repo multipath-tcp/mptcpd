@@ -130,6 +130,7 @@ static void plugin_one_subflow_closed(mptcpd_token_t token,
                                       struct sockaddr const *laddr,
                                       struct sockaddr const *raddr,
                                       bool backup,
+                                      uint8_t error,
                                       struct mptcpd_pm *pm)
 {
         (void) pm;
@@ -138,6 +139,7 @@ static void plugin_one_subflow_closed(mptcpd_token_t token,
         assert(sockaddr_is_equal(laddr, local_addr));
         assert(sockaddr_is_equal(raddr, remote_addr));
         assert(backup == test_backup_1);
+        assert(error == test_error_1);
 
         ++call_count.subflow_closed;
 }

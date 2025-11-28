@@ -659,12 +659,13 @@ void mptcpd_plugin_subflow_closed(mptcpd_token_t token,
                                   struct sockaddr const *laddr,
                                   struct sockaddr const *raddr,
                                   bool backup,
+                                  uint8_t error,
                                   struct mptcpd_pm *pm)
 {
         struct mptcpd_plugin_ops const *const ops = token_to_ops(token);
 
         if (ops && ops->subflow_closed)
-                ops->subflow_closed(token, laddr, raddr, backup, pm);
+                ops->subflow_closed(token, laddr, raddr, backup, error, pm);
 
 }
 

@@ -729,10 +729,12 @@ static void sspi_subflow_closed(mptcpd_token_t token,
                                 struct sockaddr const *laddr,
                                 struct sockaddr const *raddr,
                                 bool backup,
+                                uint8_t error,
                                 struct mptcpd_pm *pm)
 {
         (void) raddr;
         (void) backup;
+        (void) error;
 
         /*
           1. Retrieve the subflow list associated with the local

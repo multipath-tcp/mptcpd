@@ -147,6 +147,7 @@ MPTCPD_API void mptcpd_plugin_new_subflow(
  * @param[in] laddr  Local address information.
  * @param[in] raddr  Remote address information.
  * @param[in] backup Backup priority flag.
+ * @param[in] error  Subflow related event error.
  * @param[in] pm     Opaque pointer to mptcpd path manager object.
  */
 MPTCPD_API void mptcpd_plugin_subflow_closed(
@@ -154,6 +155,7 @@ MPTCPD_API void mptcpd_plugin_subflow_closed(
         struct sockaddr const *laddr,
         struct sockaddr const *raddr,
         bool backup,
+        uint8_t error,
         struct mptcpd_pm *pm);
 
 /**

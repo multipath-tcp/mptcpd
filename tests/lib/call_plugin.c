@@ -63,6 +63,7 @@ void call_plugin_ops(struct plugin_call_count const *count,
                                              args->laddr,
                                              args->raddr,
                                              args->backup,
+                                             args->error,
                                              args->pm);
 
         for (int i = 0; i < count->subflow_priority; ++i)

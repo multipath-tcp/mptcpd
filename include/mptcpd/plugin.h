@@ -247,6 +247,7 @@ struct mptcpd_plugin_ops
          * @param[in] laddr  Local address information.
          * @param[in] raddr  Remote address information.
          * @param[in] backup Backup priority flag.
+         * @param[in] error  Subflow related event error.
          * @param[in] pm     Opaque pointer to mptcpd path manager
          *                   object.
          */
@@ -254,6 +255,7 @@ struct mptcpd_plugin_ops
                                struct sockaddr const *laddr,
                                struct sockaddr const *raddr,
                                bool backup,
+                               uint8_t error,
                                struct mptcpd_pm *pm);
 
         /**

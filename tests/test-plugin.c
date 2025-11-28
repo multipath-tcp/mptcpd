@@ -52,7 +52,8 @@ static bool run_plugin_load(mode_t mode, struct l_queue const *queue)
                         .raddr       = (struct sockaddr const *) &test_raddr_4,
                         .backup      = test_backup_4,
                         .server_side = test_server_side_4,
-                        .deny_join_id0 = test_deny_join_id0_4
+                        .deny_join_id0 = test_deny_join_id0_4,
+                        .error       = test_error_4
                 };
 
                 call_plugin_ops(&test_count_4, &args);
@@ -216,7 +217,8 @@ static void test_plugin_dispatch(void const *test_data)
                 .raddr       = (struct sockaddr const *) &test_raddr_1,
                 .backup      = test_backup_1,
                 .server_side = test_server_side_1,
-                .deny_join_id0 = test_deny_join_id0_1
+                .deny_join_id0 = test_deny_join_id0_1,
+                .error       = test_error_1
         };
 
         call_plugin_ops(&test_count_1, &args1);
@@ -229,7 +231,8 @@ static void test_plugin_dispatch(void const *test_data)
                 .raddr       = args1.raddr,
                 .backup      = args1.backup,
                 .server_side = args1.server_side,
-                .deny_join_id0 = args1.deny_join_id0
+                .deny_join_id0 = args1.deny_join_id0,
+                .error       = args1.error
         };
 
         call_plugin_ops(&test_count_1, &args1_default);
@@ -243,7 +246,8 @@ static void test_plugin_dispatch(void const *test_data)
                 .raddr       = (struct sockaddr const *) &test_raddr_2,
                 .backup      = test_backup_2,
                 .server_side = test_server_side_2,
-                .deny_join_id0 = test_deny_join_id0_2
+                .deny_join_id0 = test_deny_join_id0_2,
+                .error       = test_error_2
         };
 
         call_plugin_ops(&test_count_2, &args2);
@@ -306,6 +310,7 @@ static void test_null_plugin_ops(void const *test_data)
         static bool backup = false;
         static bool server_side = false;
         static bool deny_join_id0 = false;
+        static uint8_t error = 0;
         static struct mptcpd_interface const *const interface = NULL;
 
         // No dispatch should occur in the following calls.
@@ -317,7 +322,7 @@ static void test_null_plugin_ops(void const *test_data)
         mptcpd_plugin_new_address(token, id, raddr, pm);
         mptcpd_plugin_address_removed(token, id, pm);
         mptcpd_plugin_new_subflow(token, laddr, raddr, backup, pm);
-        mptcpd_plugin_subflow_closed(token, laddr, raddr, backup, pm);
+        mptcpd_plugin_subflow_closed(token, laddr, raddr, backup, error, pm);
         mptcpd_plugin_subflow_priority(token, laddr, raddr, backup, pm);
         mptcpd_plugin_listener_created(name, laddr, pm);
         mptcpd_plugin_listener_closed(name, laddr, pm);
