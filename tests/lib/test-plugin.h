@@ -169,7 +169,7 @@ static mptcpd_aid_t   const test_raddr_id_4    = 0x01;
 static bool           const test_backup_4      = true;
 static bool           const test_server_side_4 = false;
 static bool           const test_deny_join_id0_4 = false;
-static uint8_t        const test_error_4       = 0;
+static uint8_t        const test_error_4       = 110;
 
 // For verifying that a plugin will not be dispatched.
 static mptcpd_token_t const test_bad_token  = 0xFFFFFFFF;
