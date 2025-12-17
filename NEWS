@@ -1,3 +1,33 @@
+17 December 2025 - mptcpd 0.14
+
+- libmptcpd breaking changes:
+
+  - 'new_connection' and 'connection_established' interfaces have a new
+     parameter: deny_join_id0. It is set when the other peer requested
+     not to create new subflows to the initial IP address and port.
+     See: https://www.mptcp.dev/load-balancer.html
+
+  - 'subflow_closed' interface has a new 'error' parameter, set to a
+    non-zero errno value if the subflow has been closed due to an error
+    like a reset, a timeout, etc.
+
+- Add support for the new 'laminar' in-kernel PM endpoint, see:
+  https://www.mptcp.dev/pm.html
+
+- mptcpize: LD_PRELOAD is now appended, not overridden.
+
+- mptcpize: GODEBUG=multipathtcp=1 environment variable is also set.
+  GODEBUG is appended if it is already defined.
+
+- mptcpd now support ELL 0.72: a recent API change broke mptcpd
+  'commands' test.
+
+- Add musl libc compatibility. Note that the unit tests still require
+  GLibC.
+
+- A recommendation has been added not to have a plugin directory with
+  world writeable permissions for security reasons.
+
 3 November 2024 - mptcpd 0.13
 
 - mptcpd now supports ELL 0.68.
