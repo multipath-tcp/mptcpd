@@ -90,7 +90,6 @@ $(function() {
 <code>#include &lt;argp.h&gt;</code><br />
 <code>#include &lt;dlfcn.h&gt;</code><br />
 <code>#include &lt;errno.h&gt;</code><br />
-<code>#include &lt;error.h&gt;</code><br />
 <code>#include &lt;fcntl.h&gt;</code><br />
 <code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;stdlib.h&gt;</code><br />
@@ -101,33 +100,31 @@ Include dependency graph for mptcpize.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="mptcpize_8c__incl.png" border="0" usemap="#asrc_2mptcpize_8c" alt=""/></div>
 <map name="asrc_2mptcpize_8c" id="asrc_2mptcpize_8c">
-<area shape="rect" title="enable mptcp on existing services." alt="" coords="655,5,771,31"/>
+<area shape="rect" title="enable mptcp on existing services." alt="" coords="609,5,725,31"/>
 <area shape="rect" title=" " alt="" coords="5,79,112,104"/>
-<area shape="poly" title=" " alt="" coords="655,26,427,47,126,81,125,76,427,41,655,21"/>
+<area shape="poly" title=" " alt="" coords="609,27,400,48,126,81,125,76,399,43,608,22"/>
 <area shape="rect" title=" " alt="" coords="136,79,232,104"/>
-<area shape="poly" title=" " alt="" coords="655,28,477,49,246,81,246,76,476,44,655,23"/>
+<area shape="poly" title=" " alt="" coords="609,29,449,51,246,81,245,76,449,45,608,24"/>
 <area shape="rect" title=" " alt="" coords="256,79,341,104"/>
-<area shape="poly" title=" " alt="" coords="656,31,355,81,354,76,655,26"/>
+<area shape="poly" title=" " alt="" coords="609,33,356,81,355,76,608,27"/>
 <area shape="rect" title=" " alt="" coords="366,79,477,104"/>
-<area shape="poly" title=" " alt="" coords="667,33,482,78,481,73,666,28"/>
+<area shape="poly" title=" " alt="" coords="628,33,475,77,473,72,627,28"/>
 <area shape="rect" title=" " alt="" coords="501,79,563,104"/>
-<area shape="poly" title=" " alt="" coords="685,33,575,76,573,71,683,28"/>
+<area shape="poly" title=" " alt="" coords="646,33,567,74,565,70,644,28"/>
 <area shape="rect" title=" " alt="" coords="588,79,655,104"/>
-<area shape="poly" title=" " alt="" coords="700,33,649,72,645,68,697,29"/>
+<area shape="poly" title=" " alt="" coords="661,32,638,69,634,66,657,30"/>
 <area shape="rect" title=" " alt="" coords="679,79,747,104"/>
-<area shape="poly" title=" " alt="" coords="716,31,716,65,711,65,711,31"/>
-<area shape="rect" title=" " alt="" coords="772,79,836,104"/>
-<area shape="poly" title=" " alt="" coords="730,29,780,68,777,72,726,33"/>
-<area shape="rect" title=" " alt="" coords="861,79,923,104"/>
-<area shape="poly" title=" " alt="" coords="743,28,851,71,849,76,741,33"/>
-<area shape="rect" title=" " alt="" coords="948,79,1015,104"/>
-<area shape="poly" title=" " alt="" coords="757,28,935,75,934,80,756,33"/>
-<area shape="rect" title=" " alt="" coords="1039,79,1110,104"/>
-<area shape="poly" title=" " alt="" coords="772,27,1026,76,1025,81,771,32"/>
-<area shape="rect" title=" " alt="" coords="1134,79,1205,104"/>
-<area shape="poly" title=" " alt="" coords="772,23,926,44,1121,76,1120,81,925,49,771,29"/>
-<area shape="rect" title=" " alt="" coords="1229,79,1304,104"/>
-<area shape="poly" title=" " alt="" coords="772,21,965,41,1216,76,1216,81,965,46,771,27"/>
+<area shape="poly" title=" " alt="" coords="677,30,700,66,696,69,672,32"/>
+<area shape="rect" title=" " alt="" coords="771,79,834,104"/>
+<area shape="poly" title=" " alt="" coords="690,28,770,70,767,75,687,33"/>
+<area shape="rect" title=" " alt="" coords="859,79,925,104"/>
+<area shape="poly" title=" " alt="" coords="704,28,846,73,845,78,702,33"/>
+<area shape="rect" title=" " alt="" coords="950,79,1021,104"/>
+<area shape="poly" title=" " alt="" coords="720,28,937,76,936,81,719,33"/>
+<area shape="rect" title=" " alt="" coords="1045,79,1115,104"/>
+<area shape="poly" title=" " alt="" coords="725,25,861,45,1032,76,1031,81,860,51,724,30"/>
+<area shape="rect" title=" " alt="" coords="1140,79,1215,104"/>
+<area shape="poly" title=" " alt="" coords="725,22,901,42,1127,76,1126,81,900,48,725,28"/>
 </map>
 </div>
 </div><table class="memberdecls">
@@ -152,8 +149,19 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>PRELOAD_VAR</b>&#160;&#160;&#160;&quot;LD_PRELOAD=&quot;</td></tr>
 <tr class="separator:a3660b34c0a4846db5b6b04b65f782ccd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad03996d9207e481ac473edd9bc553f5f" id="r_ad03996d9207e481ac473edd9bc553f5f"><td class="memItemLeft" align="right" valign="top"><a id="ad03996d9207e481ac473edd9bc553f5f" name="ad03996d9207e481ac473edd9bc553f5f"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>MPTCPWRAP_ENV</b>&#160;&#160;&#160;&quot;LD_PRELOAD=&quot;PKGLIBDIR&quot;/libmptcpwrap.so.0.0.&quot;LIBREVISION</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MPTCPWRAP_ENV</b>&#160;&#160;&#160;PKGLIBDIR&quot;/libmptcpwrap.so.0.0.&quot;LIBREVISION</td></tr>
 <tr class="separator:ad03996d9207e481ac473edd9bc553f5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77d2f903b8517e80ce522694d81bc09a" id="r_a77d2f903b8517e80ce522694d81bc09a"><td class="memItemLeft" align="right" valign="top"><a id="a77d2f903b8517e80ce522694d81bc09a" name="a77d2f903b8517e80ce522694d81bc09a"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>GODEBUG_VAR</b>&#160;&#160;&#160;&quot;GODEBUG=&quot;</td></tr>
+<tr class="separator:a77d2f903b8517e80ce522694d81bc09a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af34824e1f2f0cafcbf58de37d0f4c44e" id="r_af34824e1f2f0cafcbf58de37d0f4c44e"><td class="memItemLeft" align="right" valign="top"><a id="af34824e1f2f0cafcbf58de37d0f4c44e" name="af34824e1f2f0cafcbf58de37d0f4c44e"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MPTCPGO_ENV</b>&#160;&#160;&#160;&quot;multipathtcp=1&quot;</td></tr>
+<tr class="separator:af34824e1f2f0cafcbf58de37d0f4c44e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af90dcb14f5c005a0cff16076f8dcfb30" id="r_af90dcb14f5c005a0cff16076f8dcfb30"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mptcpize_8c.html#af90dcb14f5c005a0cff16076f8dcfb30">ERROR_HELPER</a>(status,  errnum,  format, ...)</td></tr>
+<tr class="separator:af90dcb14f5c005a0cff16076f8dcfb30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a259aac00ed43fd7ac58196b770963525" id="r_a259aac00ed43fd7ac58196b770963525"><td class="memItemLeft" align="right" valign="top"><a id="a259aac00ed43fd7ac58196b770963525" name="a259aac00ed43fd7ac58196b770963525"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>error</b>(...)&#160;&#160;&#160;ERROR_HELPER(__VA_ARGS__, &quot;\n&quot;)</td></tr>
+<tr class="separator:a259aac00ed43fd7ac58196b770963525"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -164,7 +172,58 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>main</b> (int argc, ch
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>enable mptcp on existing services. </p>
 <p>Copyright (c) 2021, Red Hat, Inc. </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="af90dcb14f5c005a0cff16076f8dcfb30" name="af90dcb14f5c005a0cff16076f8dcfb30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af90dcb14f5c005a0cff16076f8dcfb30">&#9670;&#160;</a></span>ERROR_HELPER</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ERROR_HELPER</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">status, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">errnum, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">format, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">        <span class="keywordflow">do</span> {            \</div>
+<div class="line">        if (errnum) {                                           \</div>
+<div class="line">                errno = errnum;                                 \</div>
+<div class="line">                perror(format);                                 \</div>
+<div class="line">        } <span class="keywordflow">else</span> {                                                \</div>
+<div class="line">                fprintf(stderr, format <span class="stringliteral">&quot;%s&quot;</span>, __VA_ARGS__);      \</div>
+<div class="line">        }                                                       \</div>
+<div class="line">        if (status)                                             \</div>
+<div class="line">                exit(status);                                   \</div>
+<div class="line">   } <span class="keywordflow">while</span>(0)</div>
+</div><!-- fragment -->
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

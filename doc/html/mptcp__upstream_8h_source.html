@@ -90,17 +90,13 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor"># include &quot;mptcpd/private/config.h&quot;</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#ifdef HAVE_LINUX_MPTCP_H_UPSTREAM</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor"># include &lt;linux/mptcp.h&gt;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">/*</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">  Platform does not have upstream MPTCP path mangement generic netlink</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">  API so include local copy of the upstream &lt;linux/mptcp.h&gt; header.</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">*/</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor"># include &quot;linux/mptcp_upstream.h&quot;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#endif </span><span class="comment">// HAVE_LINUX_MPTCP_H_UPSTREAM</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#endif </span><span class="comment">// MPTCPD_PRIVATE_MPTCP_UPSTREAM_H</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">  Platform might have upstream MPTCP path mangement generic netlink API, but</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">  always include a local copy which is synced with the supported features.</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">*/</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;linux/mptcp_upstream.h&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#endif </span><span class="comment">// MPTCPD_PRIVATE_MPTCP_UPSTREAM_H</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

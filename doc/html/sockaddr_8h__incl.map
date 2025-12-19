@@ -1,13 +1,15 @@
 <map id="include/mptcpd/private/sockaddr.h" name="include/mptcpd/private/sockaddr.h">
-<area shape="rect" id="Node000001" title="mptcpd struct sockaddr related utility functions." alt="" coords="178,5,350,45"/>
+<area shape="rect" id="Node000001" title="mptcpd struct sockaddr related utility functions." alt="" coords="238,5,410,45"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,93,88,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,48,92,91,91,86,211,43"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="258,48,101,92,100,87,257,43"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="113,93,191,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,48,181,87,178,83,235,43"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="284,48,191,90,189,85,282,43"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="215,93,313,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="267,46,267,79,261,79,261,46"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="312,47,283,84,279,81,307,44"/>
 <area shape="rect" id="Node000005" title=" " alt="" coords="337,93,433,119"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="295,43,357,84,355,88,292,48"/>
-<area shape="rect" id="Node000006" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="458,93,587,119"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="327,43,473,87,471,92,325,48"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="341,44,370,81,366,84,337,47"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="457,93,561,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="369,43,471,85,469,90,367,48"/>
+<area shape="rect" id="Node000007" href="$export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="586,93,715,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="403,43,590,88,589,93,402,48"/>
 </map>

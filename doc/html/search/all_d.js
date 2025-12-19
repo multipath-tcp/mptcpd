@@ -9,7 +9,7 @@ var searchData=
   ['network_5fmonitor_2ec_6',['network_monitor.c',['../network__monitor_8c.html',1,'']]],
   ['network_5fmonitor_2eh_7',['network_monitor.h',['../network__monitor_8h.html',1,'(Global Namespace)'],['../private_2network__monitor_8h.html',1,'(Global Namespace)']]],
   ['new_5faddress_8',['new_address',['../structmptcpd__nm__ops.html#a89289081eee96d8a569a15900d0b0bf2',1,'mptcpd_nm_ops::new_address'],['../structmptcpd__plugin__ops.html#adeb25c178d7968563030995f2a49f24a',1,'mptcpd_plugin_ops::new_address']]],
-  ['new_5fconnection_9',['new_connection',['../structmptcpd__plugin__ops.html#ac3bd6c90cdf26977213cdbf0d8fe118f',1,'mptcpd_plugin_ops']]],
+  ['new_5fconnection_9',['new_connection',['../structmptcpd__plugin__ops.html#a6c29739c95bfb2de7b516c73a76662c5',1,'mptcpd_plugin_ops']]],
   ['new_5finterface_10',['new_interface',['../structmptcpd__nm__ops.html#a62f7f8eb40c7441cdd9ad440e5542a3c',1,'mptcpd_nm_ops::new_interface'],['../structmptcpd__plugin__ops.html#aed2f5075636825ec1c757788022020c7',1,'mptcpd_plugin_ops::new_interface']]],
   ['new_5flocal_5faddress_11',['new_local_address',['../structmptcpd__plugin__ops.html#a0bd4b6f0055f2ad74be0532fe57cb89c',1,'mptcpd_plugin_ops']]],
   ['new_5fsubflow_12',['new_subflow',['../structmptcpd__plugin__ops.html#a91a004e67a0139b047a7f5daec764ca6',1,'mptcpd_plugin_ops']]],

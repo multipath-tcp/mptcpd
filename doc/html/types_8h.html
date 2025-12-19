@@ -235,6 +235,13 @@ Enumerations</h2></td></tr>
 <tr class="memitem:a9a37fd17d270255fd27069fa5aa63c39" id="r_a9a37fd17d270255fd27069fa5aa63c39"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="types_8h.html#a9a37fd17d270255fd27069fa5aa63c39">MPTCPD_ADDR_FLAG_FULLMESH</a>&#160;&#160;&#160;(1U &lt;&lt; 3)</td></tr>
 <tr class="memdesc:a9a37fd17d270255fd27069fa5aa63c39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add local address to in-kernel fullmesh path management.  <br /></td></tr>
 <tr class="separator:a9a37fd17d270255fd27069fa5aa63c39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17713fa2fb8f31a235f0e5689aa37689" id="r_a17713fa2fb8f31a235f0e5689aa37689"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="types_8h.html#a17713fa2fb8f31a235f0e5689aa37689">MPTCPD_ADDR_FLAG_IMPLICIT</a>&#160;&#160;&#160;(1U &lt;&lt; 4)</td></tr>
+<tr class="memdesc:a17713fa2fb8f31a235f0e5689aa37689"><td class="mdescLeft">&#160;</td><td class="mdescRight">Endpoint implicitly created by the kernel PM.  <br /></td></tr>
+<tr class="separator:a17713fa2fb8f31a235f0e5689aa37689"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55f0714c5452aa6949cfc770d14900e5" id="r_a55f0714c5452aa6949cfc770d14900e5"><td class="memItemLeft" align="right" valign="top"><a id="a55f0714c5452aa6949cfc770d14900e5" name="a55f0714c5452aa6949cfc770d14900e5"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MPTCPD_ADDR_FLAG_LAMINAR</b>&#160;&#160;&#160;(1U &lt;&lt; 5)</td></tr>
+<tr class="memdesc:a55f0714c5452aa6949cfc770d14900e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use this endpoint in reaction to ADD_ADDR, but only once. <br /></td></tr>
+<tr class="separator:a55f0714c5452aa6949cfc770d14900e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ffe8fd7255be40d0a26c4e13cd0a225" id="r_a4ffe8fd7255be40d0a26c4e13cd0a225"><td class="memItemLeft" align="right" valign="top">typedef uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="types_8h.html#a4ffe8fd7255be40d0a26c4e13cd0a225">mptcpd_flags_t</a></td></tr>
 <tr class="memdesc:a4ffe8fd7255be40d0a26c4e13cd0a225"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPTCP flags type.  <br /></td></tr>
 <tr class="separator:a4ffe8fd7255be40d0a26c4e13cd0a225"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -258,6 +265,24 @@ Enumerations</h2></td></tr>
 <p>Add local address to in-kernel fullmesh path management. </p>
 <p>If this flag is set, create a subflow connection to each known remote address, originating from this local address. The total number of subflows is subject to the configured limits.</p>
 <dl class="section note"><dt>Note</dt><dd>Do not use with <code>MPTCPD_ADDR_FLAG_SIGNAL</code>. </dd></dl>
+
+</div>
+</div>
+<a id="a17713fa2fb8f31a235f0e5689aa37689" name="a17713fa2fb8f31a235f0e5689aa37689"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17713fa2fb8f31a235f0e5689aa37689">&#9670;&#160;</a></span>MPTCPD_ADDR_FLAG_IMPLICIT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MPTCPD_ADDR_FLAG_IMPLICIT&#160;&#160;&#160;(1U &lt;&lt; 4)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Endpoint implicitly created by the kernel PM. </p>
+<p>It exists because no userspace ones correspond to the associated address and port. It can only be set by the kernel.</p>
+<dl class="section note"><dt>Note</dt><dd>Do not set from the userspace to the kernelspace. </dd></dl>
 
 </div>
 </div>

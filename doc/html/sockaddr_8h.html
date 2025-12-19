@@ -86,23 +86,26 @@ $(function() {
 <code>#include &lt;endian.h&gt;</code><br />
 <code>#include &lt;byteswap.h&gt;</code><br />
 <code>#include &lt;netinet/in.h&gt;</code><br />
+<code>#include &lt;linux/swab.h&gt;</code><br />
 <code>#include &lt;<a class="el" href="export_8h_source.html">mptcpd/export.h</a>&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for sockaddr.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="sockaddr_8h__incl.png" border="0" usemap="#ainclude_2mptcpd_2private_2sockaddr_8h" alt=""/></div>
 <map name="ainclude_2mptcpd_2private_2sockaddr_8h" id="ainclude_2mptcpd_2private_2sockaddr_8h">
-<area shape="rect" title="mptcpd struct sockaddr related utility functions." alt="" coords="178,5,350,45"/>
+<area shape="rect" title="mptcpd struct sockaddr related utility functions." alt="" coords="238,5,410,45"/>
 <area shape="rect" title=" " alt="" coords="5,93,88,119"/>
-<area shape="poly" title=" " alt="" coords="213,48,92,91,91,86,211,43"/>
+<area shape="poly" title=" " alt="" coords="258,48,101,92,100,87,257,43"/>
 <area shape="rect" title=" " alt="" coords="113,93,191,119"/>
-<area shape="poly" title=" " alt="" coords="238,48,181,87,178,83,235,43"/>
+<area shape="poly" title=" " alt="" coords="284,48,191,90,189,85,282,43"/>
 <area shape="rect" title=" " alt="" coords="215,93,313,119"/>
-<area shape="poly" title=" " alt="" coords="267,46,267,79,261,79,261,46"/>
+<area shape="poly" title=" " alt="" coords="312,47,283,84,279,81,307,44"/>
 <area shape="rect" title=" " alt="" coords="337,93,433,119"/>
-<area shape="poly" title=" " alt="" coords="295,43,357,84,355,88,292,48"/>
-<area shape="rect" href="export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="458,93,587,119"/>
-<area shape="poly" title=" " alt="" coords="327,43,473,87,471,92,325,48"/>
+<area shape="poly" title=" " alt="" coords="341,44,370,81,366,84,337,47"/>
+<area shape="rect" title=" " alt="" coords="457,93,561,119"/>
+<area shape="poly" title=" " alt="" coords="369,43,471,85,469,90,367,48"/>
+<area shape="rect" href="export_8h.html" title="mptcpd shared library symbol export/import macros." alt="" coords="586,93,715,119"/>
+<area shape="poly" title=" " alt="" coords="403,43,590,88,589,93,402,48"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -132,10 +135,10 @@ Macros</h2></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>These macros may be used in place of <code>htons()</code> or <code>htonl()</code> when initializing an IPv4 address or TCP port constant at compile-time. </p>
 </div></td></tr>
 <tr class="memitem:ab757c5b26bea03c4da0ac357cfde466e" id="r_ab757c5b26bea03c4da0ac357cfde466e"><td class="memItemLeft" align="right" valign="top"><a id="ab757c5b26bea03c4da0ac357cfde466e" name="ab757c5b26bea03c4da0ac357cfde466e"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>MPTCPD_CONSTANT_HTONS</b>(hs)&#160;&#160;&#160;__bswap_constant_16(hs)</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MPTCPD_CONSTANT_HTONS</b>(hs)&#160;&#160;&#160;__swab16(hs)</td></tr>
 <tr class="separator:ab757c5b26bea03c4da0ac357cfde466e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e0cdd683af5aab43068b019994d8f4c" id="r_a3e0cdd683af5aab43068b019994d8f4c"><td class="memItemLeft" align="right" valign="top"><a id="a3e0cdd683af5aab43068b019994d8f4c" name="a3e0cdd683af5aab43068b019994d8f4c"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>MPTCPD_CONSTANT_HTONL</b>(hl)&#160;&#160;&#160;__bswap_constant_32(hl)</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MPTCPD_CONSTANT_HTONL</b>(hl)&#160;&#160;&#160;__swab32(hl)</td></tr>
 <tr class="separator:a3e0cdd683af5aab43068b019994d8f4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
