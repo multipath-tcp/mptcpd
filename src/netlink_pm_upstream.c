@@ -552,14 +552,23 @@ static int upstream_set_backup(struct mptcpd_pm *pm,
 /**
  * @struct get_addr_user_callback
  *
- * @brief Convenience struct for passing addr to user callback.
+ * @brief Convenience struct for passing addr to a get_addr/dump_addrs
+ *        user callback.
+ *
+ * @note Shared by the in-kernel (@c mptcpd_kpm_get_addr /
+ *       @c mptcpd_kpm_dump_addrs) and userspace
+ *       (@c mptcpd_pm_get_addr / @c mptcpd_pm_dump_addrs) path manager
+ *       implementations.  @c mptcpd_pm_get_addr_cb_t is
+ *       signature-compatible with @c mptcpd_kpm_get_addr_cb_t, so a
+ *       single wrapper type (and a single set of genl reply/free
+ *       callbacks) covers both.
  */
 struct get_addr_user_callback
 {
         /// User supplied get_addr/dump_addrs callback.
         mptcpd_kpm_get_addr_cb_t get_addr;
 
-        /// User data to be passed to one of the above callback.
+        /// User data to be passed to the above callback.
         void *data;
 
         /**
@@ -982,6 +991,104 @@ static int upstream_dump_addrs(struct mptcpd_pm *pm,
                 get_addr_user_callback_free  /* destroy */) == 0;
 }
 
+static int upstream_pm_get_addr(struct mptcpd_pm *pm,
+                                mptcpd_token_t token,
+                                mptcpd_aid_t address_id,
+                                mptcpd_pm_get_addr_cb_t callback,
+                                void *data,
+                                mptcpd_complete_func_t complete)
+{
+        /*
+          Payload (nested):
+              Local address ID
+              Token
+         */
+
+        size_t const payload_size =
+                MPTCPD_NLA_ALIGN(address_id)
+                + MPTCPD_NLA_ALIGN(token);
+
+        struct l_genl_msg *const msg =
+                l_genl_msg_new_sized(MPTCP_PM_CMD_GET_ADDR,
+                                     payload_size);
+
+        bool const appended =
+                l_genl_msg_enter_nested(msg,
+                                        NLA_F_NESTED | MPTCP_PM_ATTR_ADDR)
+                && l_genl_msg_append_attr(msg,
+                                          MPTCP_PM_ADDR_ATTR_ID,
+                                          sizeof(address_id),
+                                          &address_id)
+                && l_genl_msg_leave_nested(msg)
+                && l_genl_msg_append_attr(msg,
+                                          MPTCP_PM_ATTR_TOKEN,
+                                          sizeof(token),
+                                          &token);
+
+        if (!appended) {
+                l_genl_msg_unref(msg);
+
+                return ENOMEM;
+        }
+
+        struct get_addr_user_callback *const cb =
+                l_new(struct get_addr_user_callback, 1);
+
+        cb->get_addr = callback;
+        cb->data     = data;
+        cb->complete = complete;
+        cb->dump     = false;
+
+        return l_genl_family_send(
+                pm->family,
+                msg,
+                get_addr_callback,
+                cb,     /* user data */
+                get_addr_user_callback_free  /* destroy */) == 0;
+}
+
+static int upstream_pm_dump_addrs(struct mptcpd_pm *pm,
+                                  mptcpd_token_t token,
+                                  mptcpd_pm_get_addr_cb_t callback,
+                                  void *data,
+                                  mptcpd_complete_func_t complete)
+{
+        /*
+          Payload:
+              Token
+         */
+
+        size_t const payload_size = MPTCPD_NLA_ALIGN(token);
+
+        struct l_genl_msg *const msg =
+                l_genl_msg_new_sized(MPTCP_PM_CMD_GET_ADDR,
+                                     payload_size);
+
+        if (!l_genl_msg_append_attr(msg,
+                                     MPTCP_PM_ATTR_TOKEN,
+                                     sizeof(token),
+                                     &token)) {
+                l_genl_msg_unref(msg);
+
+                return ENOMEM;
+        }
+
+        struct get_addr_user_callback *const cb =
+                l_new(struct get_addr_user_callback, 1);
+
+        cb->get_addr = callback;
+        cb->data     = data;
+        cb->complete = complete;
+        cb->dump     = true;
+
+        return l_genl_family_dump(
+                pm->family,
+                msg,
+                get_addr_callback,
+                cb,     /* user data */
+                get_addr_user_callback_free  /* destroy */) == 0;
+}
+
 static int upstream_flush_addrs(struct mptcpd_pm *pm)
 {
         /*
@@ -1122,6 +1229,8 @@ static struct mptcpd_pm_cmd_ops const cmd_ops =
         .add_subflow    = upstream_add_subflow,
         .remove_subflow = upstream_remove_subflow,
         .set_backup     = upstream_set_backup,
+        .get_addr       = upstream_pm_get_addr,
+        .dump_addrs     = upstream_pm_dump_addrs,
 };
 
 static struct mptcpd_kpm_cmd_ops const kcmd_ops =

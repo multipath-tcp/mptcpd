@@ -232,6 +232,49 @@ MPTCPD_API int mptcpd_pm_remove_subflow(
         mptcpd_token_t token,
         struct sockaddr const *local_addr,
         struct sockaddr const *remote_addr);
+
+/**
+ * @brief Get network address corresponding to an address ID.
+ *
+ * @param[in] pm       The mptcpd path manager object.
+ * @param[in] token    MPTCP connection token.
+ * @param[in] id       MPTCP local address ID.
+ * @param[in] callback Function to be called when the network address
+ *                     corresponding to the given MPTCP address @a id
+ *                     has been retrieved.
+ * @param[in] data     Data to be passed to the @a callback function.
+ * @param[in] complete Function called when the asynchronous
+ *                     @c get_addr call completes.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
+                                  mptcpd_token_t token,
+                                  mptcpd_aid_t id,
+                                  mptcpd_pm_get_addr_cb_t callback,
+                                  void *data,
+                                  mptcpd_complete_func_t complete);
+
+/**
+ * @brief Get list of MPTCP network addresses for a connection.
+ *
+ * @param[in] pm       The mptcpd path manager object.
+ * @param[in] token    MPTCP connection token.
+ * @param[in] callback Function to be called when a network address
+ *                     has been retrieved.  This function will be
+ *                     called when each address dump is available, or
+ *                     possibly not at all.
+ * @param[in] data     Data to be passed to the @a callback function.
+ * @param[in] complete Function called when the asynchronous
+ *                     @c dump_addrs call completes.
+ *
+ * @return @c 0 if operation was successful. -1 or @c errno otherwise.
+ */
+MPTCPD_API int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
+                                    mptcpd_token_t token,
+                                    mptcpd_pm_get_addr_cb_t callback,
+                                    void *data,
+                                    mptcpd_complete_func_t complete);
 ///@}
 
 /**
