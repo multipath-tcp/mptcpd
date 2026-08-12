@@ -544,6 +544,64 @@ void test_remove_subflow(void const *test_data)
         assert(result == 0 || result == ENOTSUP);
 }
 
+// -----------------------------------------------------------------------
+// User space (client-oriented) path manager address query commands.
+// -----------------------------------------------------------------------
+
+/*
+  Reply callback for the userspace PM get_addr/dump_addrs tests.
+
+  The query is keyed by the connection token, and the token used below
+  (u_addr->token) does not correspond to a real MPTCP connection, so the
+  kernel returns no address and this callback is not expected to be
+  invoked.  It is provided to exercise the reply path without crashing
+  should the kernel return a result.
+*/
+static void pm_get_addr_cb(struct mptcpd_addr_info const *info,
+                           void *user_data)
+{
+        (void) user_data;
+
+        if (info != NULL)
+                l_info("userspace PM addr query: id=%u",
+                       mptcpd_addr_info_get_id(info));
+}
+
+static void test_get_addr_user(void const *test_data)
+{
+        struct test_info  *const info = (struct test_info *) test_data;
+        struct mptcpd_pm  *const pm   = info->pm;
+
+        struct test_addr_info const *const u_addr = &info->u_addr;
+
+        int const result =
+                mptcpd_pm_get_addr(pm,
+                                   u_addr->token,
+                                   u_addr->id,
+                                   pm_get_addr_cb,
+                                   info,
+                                   NULL);
+
+        assert(result == 0 || result == ENOTSUP);
+}
+
+static void test_dump_addrs_user(void const *test_data)
+{
+        struct test_info  *const info = (struct test_info *) test_data;
+        struct mptcpd_pm  *const pm   = info->pm;
+
+        struct test_addr_info const *const u_addr = &info->u_addr;
+
+        int const result =
+                mptcpd_pm_dump_addrs(pm,
+                                     u_addr->token,
+                                     pm_get_addr_cb,
+                                     info,
+                                     NULL);
+
+        assert(result == 0 || result == ENOTSUP);
+}
+
 // -------------------------------------------------------------------
 
 
@@ -645,6 +703,8 @@ static void exec_tests(void *user_data)
         test_add("set_backup",         test_set_backup,       info);
         test_add("remove_subflow",     test_remove_subflow,   info);
         test_add("remove_addr - user", test_remove_addr_user, info);
+        test_add("get_addr - user",    test_get_addr_user,    info);
+        test_add("dump_addrs - user",  test_dump_addrs_user,  info);
 }
 
 static void run_tests(void *user_data)

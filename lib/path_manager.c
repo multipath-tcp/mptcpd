@@ -370,6 +370,49 @@ int mptcpd_pm_remove_subflow(struct mptcpd_pm *pm,
                                    remote_addr);
 }
 
+int mptcpd_pm_get_addr(struct mptcpd_pm *pm,
+                       mptcpd_token_t token,
+                       mptcpd_aid_t id,
+                       mptcpd_pm_get_addr_cb_t callback,
+                       void *data,
+                       mptcpd_complete_func_t complete)
+{
+        if (pm == NULL || token == 0 || id == 0 || callback == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
+
+        if (ops == NULL || ops->get_addr == NULL)
+                return ENOTSUP;
+
+        return ops->get_addr(pm, token, id, callback, data, complete);
+}
+
+int mptcpd_pm_dump_addrs(struct mptcpd_pm *pm,
+                         mptcpd_token_t token,
+                         mptcpd_pm_get_addr_cb_t callback,
+                         void *data,
+                         mptcpd_complete_func_t complete)
+{
+        if (pm == NULL || token == 0 || callback == NULL)
+                return EINVAL;
+
+        if (!is_pm_ready(pm, __func__))
+                return EAGAIN;
+
+        struct mptcpd_pm_cmd_ops const *const ops =
+                pm->netlink_pm->cmd_ops;
+
+        if (ops == NULL || ops->dump_addrs == NULL)
+                return ENOTSUP;
+
+        return ops->dump_addrs(pm, token, callback, data, complete);
+}
+
 // -------------------------------------------------------------------
 
 struct mptcpd_nm const * mptcpd_pm_get_nm(struct mptcpd_pm const *pm)
