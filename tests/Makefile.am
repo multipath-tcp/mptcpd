@@ -33,7 +33,7 @@ check_PROGRAMS =		\
 	test-addr-info		\
 	test-murmur-hash
 
-noinst_PROGRAMS = mptcpwrap-tester
+noinst_PROGRAMS = mptcpwrap-tester mptcp-conn
 
 dist_check_SCRIPTS =		\
 	test-bad-log-empty	\
@@ -43,7 +43,11 @@ dist_check_SCRIPTS =		\
 	test-bad-path-manager	\
 	test-bad-plugin-dir	\
 	test-start-stop		\
-	test-mptcpwrap
+	test-mptcpwrap		\
+	test-addr-adv		\
+	test-sspi
+
+EXTRA_DIST = pm_lib.sh
 
 test_plugin_SOURCES = test-plugin.c
 test_plugin_CPPFLAGS =							\
@@ -132,6 +136,9 @@ test_murmur_hash_LDADD =			\
 mptcpwrap_tester_SOURCES = mptcpwrap-tester.c
 mptcpwrap_tester_LDADD   = $(CODE_COVERAGE_LIBS)
 
+mptcp_conn_SOURCES = mptcp-conn.c
+mptcp_conn_CFLAGS  = $(AM_CFLAGS)
+
 if HAVE_CXX
 check_PROGRAMS += test-cxx-build
 test_cxx_build_SOURCES  = test-cxx-build.cpp
@@ -147,6 +154,10 @@ test_cxx_build_LDADD =				\
 endif
 
 AM_TESTS_ENVIRONMENT = TEST_PLUGIN_DIR=$(TEST_PLUGIN_DIR_NOOP)
+AM_TESTS_ENVIRONMENT += MPTCPD_BIN=$(top_builddir)/src/mptcpd
+AM_TESTS_ENVIRONMENT += CONN_BIN=$(builddir)/mptcp-conn
+AM_TESTS_ENVIRONMENT += PLUGIN_DIR=$(top_builddir)/plugins/path_managers/.libs
+
 TESTS = $(check_PROGRAMS) $(dist_check_SCRIPTS)
 
 # Clean up code coverage related generated files.

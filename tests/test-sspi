@@ -1,0 +1,20 @@
+#!/bin/bash
+. "${srcdir:-$(dirname "$0")}/pm_lib.sh"
+
+pm_test_sspi() {
+	ip netns exec "$PM_NS1" sysctl -qw net.mptcp.pm_type=1
+	ip netns exec "$PM_NS2" sysctl -qw net.mptcp.pm_type=1
+
+	pm_start_mptcpd $PM_NS1 "sspi"
+	pm_start_mptcpd $PM_NS2 "sspi"
+
+	ip netns exec "$PM_NS1" ip mptcp endpoint
+	ip netns exec "$PM_NS2" ip mptcp endpoint
+	pm_do_conn "10.0.1.1" "5001"
+
+	#todo: check the subflows when sspi can create subflows
+}
+
+pm_check_prereqs
+pm_setup_env
+pm_test_sspi
