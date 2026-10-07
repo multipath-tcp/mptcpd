@@ -37,13 +37,15 @@ when a TCP socket is forced to use MPTCP.
 .BI enable\  unit
 Update the systemd
 .I unit
-file, forcing the given service to run under the above launcher.
+configuration, forcing the given service to run under the above launcher by
+adding a new file (mptcpize.conf) in the service drop-in directory, e.g.
+foo.service.d.
 
 .SS
 .BI disable\  unit
 Update the systemd
 .I unit
-file, removing the above launcher.
+configuration, removing the above launcher.
 
 
 .SH OPTIONS
