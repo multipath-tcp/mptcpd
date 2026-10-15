@@ -136,6 +136,24 @@ typedef void (*mptcpd_kpm_get_addr_cb_t)(
         void *callback_data);
 
 /**
+ * @brief Type of function called when a userspace PM address is
+ *        available.
+ *
+ * The mptcpd path manager will call a function of this type when the
+ * result of calling @c mptcpd_pm_get_addr() or
+ * @c mptcpd_pm_dump_addrs() is available.
+ *
+ * @param[in]     info          Network address information.  @c NULL
+ *                              on error.
+ * @param[in,out] callback_data Data provided by the caller of
+ *                              @c mptcpd_pm_get_addr() or
+ *                              @c mptcpd_pm_dump_addrs().
+ */
+typedef void (*mptcpd_pm_get_addr_cb_t)(
+        struct mptcpd_addr_info const *info,
+        void *callback_data);
+
+/**
  * @brief Type of function called on asynchronous call completion.
  *
  * The mptcpd path manager API has several functions that complete
