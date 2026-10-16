@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-26.04
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: dependencies
       run: sudo apt-get -y install autoconf-archive lcov git libell-dev
     - name: bootstrap
