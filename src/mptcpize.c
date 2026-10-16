@@ -13,7 +13,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/sendfile.h>
 
 #include <argp.h>
 #include <dlfcn.h>
@@ -33,6 +32,7 @@
 #endif
 
 #define SYSTEMD_ENV_VAR		"Environment="
+#define SYSTEMD_OVERRIDE_FILE	"mptcpize.conf"
 #define SYSTEMD_UNIT_VAR	"FragmentPath="
 #define SYSTEMD_SERVICE_TAG	"[Service]"
 #define SYSTEMCTL_SHOW		"systemctl show -p FragmentPath "
@@ -52,11 +52,13 @@ static char doc[] =
         "\t                          instead of TCP.  If the '-d' argument\n"
         "\t                          is provided, dump messages on stderr\n"
         "\t                          when a TCP socket is forced to MPTCP.\n\n"
-        "\tenable <unit>             Update the systemd <unit>, forcing\n"
-        "\t                          the given service to run under the\n"
-        "\t                          above launcher.\n\n"
-        "\tdisable <unit>            Update the systemd <unit>, removing\n"
-        "\t                          the above launcher.\n";
+        "\tenable <unit>             Update the systemd <unit> configuration,\n"
+        "\t                          forcing the given service to run under\n"
+        "\t                          the above launcher by adding a new file\n"
+        "\t                          (mptcpize.conf) in the service drop-in\n"
+        "\t                          directory, e.g. foo.service.d.\n\n"
+        "\tdisable <unit>            Update the systemd <unit> configuration,\n"
+        "\t                          removing the above launcher.\n";
 
 #ifndef HAVE_ERROR_H
 # define ERROR_HELPER(status, errnum, format, ...) do {		\
@@ -205,15 +207,9 @@ static char *locate_unit(const char *name)
 
 static int unit_update(int argc, char *argv[], int enable)
 {
-	char *unit, *line = NULL;
-	int append_env = enable;
-	char dst_path[PATH_MAX];
-	off_t bytes_copied = 0;
-	struct stat fileinfo;
-	int dst, unit_fd;
-	size_t len = 0;
-	ssize_t read;
-	FILE *src;
+	char dir_path[PATH_MAX], conf_path[PATH_MAX];
+	char *unit;
+	FILE *conf;
 
 	if (argc < 1) {
 		fprintf(stderr, "missing unit argument\n");
@@ -222,64 +218,39 @@ static int unit_update(int argc, char *argv[], int enable)
 	}
 
 	unit = locate_unit(argv[0]);
-	src = fopen(unit, "r");
-	if (!src)
-		error(1, errno, "can't open file %s", unit);
 
-	strcpy(dst_path, "/tmp/unit_XXXXXX");
-	dst = mkstemp(dst_path);
-	if (dst < 0)
-		error(1, errno, "can't create tmp file");
+	/* systemd drop-in: <unit>.d/mptcpize.conf */
+	if (snprintf(dir_path, sizeof(dir_path), "%s.d", unit) >= (int)sizeof(dir_path) ||
+	    snprintf(conf_path, sizeof(conf_path), "%s/" SYSTEMD_OVERRIDE_FILE,
+		     dir_path) >= (int)sizeof(conf_path))
+		error(1, 0, "path too long for unit %s", unit);
 
-	// reset any prior error, to allow later check on errno
-	errno = 0;
+	if (enable) {
+		if (mkdir(dir_path, 0755) < 0 && errno != EEXIST)
+			error(1, errno, "can't create directory %s", dir_path);
 
-	/**
-	 * systemd does not allow Environment property update via a command,
-	 * we have to copy the existing unit file to a tmp one
-	 */
-	while ((read = getline(&line, &len, src)) != -1) {
-		int is_env = strncmp(line, SYSTEMD_ENV_VAR, strlen(SYSTEMD_ENV_VAR)) == 0;
+		conf = fopen(conf_path, "w");
+		if (!conf)
+			error(1, errno, "can't open %s for writing", conf_path);
 
-		if (!is_env) {
-			if (write(dst, line, read) < 0)
-				error(1, errno, "can't write '%s' into %s", line, dst_path);
-		}
+		if (fprintf(conf, "%s\n%s%s\n", SYSTEMD_SERVICE_TAG,
+			    SYSTEMD_ENV_VAR, PRELOAD_VAR MPTCPWRAP_ENV) < 0)
+			error(1, errno, "can't write to %s", conf_path);
+		if (fclose(conf) != 0)
+			error(1, errno, "can't write to %s", conf_path);
+	} else {
+		if (unlink(conf_path) < 0 && errno != ENOENT)
+			error(1, errno, "can't remove %s", conf_path);
 
-		if (append_env &&
-		    (is_env || strncmp(line, SYSTEMD_SERVICE_TAG, strlen(SYSTEMD_SERVICE_TAG)) == 0)) {
-			if (dprintf(dst, "%s%s\n", SYSTEMD_ENV_VAR, PRELOAD_VAR MPTCPWRAP_ENV) < 0)
-				error(1, errno, "can't write to env string into %s", dst_path);
-			append_env = 0;
-		}
+		/* best effort: only succeeds if the directory is empty */
+		rmdir(dir_path);
 	}
-	if (errno != 0)
-		error(1, errno, "can't read from %s", unit);
-	free(line);
-	fclose(src);
 
-	// copy back the modified file into the original unit
-	// note: avoid using rename, as it fails across filesystems
-	if (fstat(dst, &fileinfo) < 0)
-		error(1, errno, "can't stat %s", dst_path);
-
-	// re-open the unit file for writing
-	// mkstemp already opened the temporary file for R/W so we don't need
-	// to touch that file descriptor.
-	unit_fd = open(unit, O_TRUNC | O_RDWR);
-	if (unit_fd < 0)
-		error(1, errno, "can't open %s for writing", unit);
-
-	while (bytes_copied < fileinfo.st_size)
-		if (sendfile(unit_fd, dst, &bytes_copied, fileinfo.st_size - bytes_copied) < 0)
-			error(1, errno, "can't copy from %s to %s", dst_path, unit);
-
-	close(dst);
 	if (system("systemctl daemon-reload") != 0)
 		error(1, errno, "can't reload unit, manual 'systemctl daemon-reload' is required");
 
 	printf("mptcp successfully %s on unit %s\n",
-	       enable ? "enabled" : "disabled", unit);
+	       enable ? "enabled" : "disabled", conf_path);
 	free(unit);
 	return 0;
 }
