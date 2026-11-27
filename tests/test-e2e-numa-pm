@@ -1,0 +1,157 @@
+#! /bin/bash
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# End-to-end test for the numa_pm path manager plugin.
+#
+# A single connection is established through a pair of network
+# namespaces with the plugin running on the client side.  The test
+# verifies the plugin mechanism without assuming any NUMA topology:
+# it pins itself to CPU 0 so the probed node is deterministically
+# node 0, the engineered subflow source port must be taken from that
+# node's conf pool, the original subflow must be set to backup, and
+# both subflows must be established.
+
+. "${srcdir:-$(dirname "${0}")}/pm_lib.sh"
+
+NUMA_PM_CONF="${NUMA_PM_CONF:-$(cd "$(dirname "${0}")" && pwd)/numa_pm_test.conf}"
+export NUMA_PM_CONF
+MPTCPD_LOG=
+
+# Re-exec under taskset(1) to pin every process of this test to CPU 0,
+# so the probed NUMA node is deterministically node 0 on any machine
+# and the test configuration only needs a pool for node 0.
+if [ -z "${NUMA_PM_PINNED:-}" ]; then
+	command -v taskset >/dev/null 2>&1 || \
+		pm_skip "taskset(1) is required to pin the client to NUMA node 0"
+
+	NUMA_PM_PINNED=1 exec taskset -c 0 "${0}" "${@}"
+fi
+
+cleanup_numa() {
+	[ -n "${MPTCPD_LOG}" ] && rm -f "${MPTCPD_LOG}"
+	cleanup
+}
+
+start_numa_mptcpd() {
+	ip netns exec "${PM_NS2}" sysctl -w net.mptcp.pm_type=1 >/dev/null
+	# Keep the ephemeral port range disjoint from the test port pools
+	# so that the original subflow can never collide with an
+	# engineered source port.
+	ip netns exec "${PM_NS2}" \
+		sysctl -w net.ipv4.ip_local_port_range="32768 40000" >/dev/null
+
+	ip netns exec "${PM_NS2}" "${MPTCPD_BIN}" \
+		--plugin-dir="${PLUGIN_DIR}" \
+		--path-manager=numa_pm \
+		--load-plugins=numa_pm \
+		--notify-flags=existing >"${MPTCPD_LOG}" 2>&1 &
+}
+
+wait_log_line() {
+	local i
+
+	for i in $(seq 50); do
+		grep -qE "${1}" "${MPTCPD_LOG}" 2>/dev/null && return 0
+		sleep 0.1
+	done
+
+	return 1
+}
+
+# pool_ports <node>: print the ports of the given conf pool section.
+pool_ports() {
+	awk -v n="${1}" '
+		$1 == "---" && $2 == "node" { cur = $3; next }
+		cur == n && $1 ~ /^port=/ { sub(/^port=/, "", $1); print $1 }
+	' "${NUMA_PM_CONF}"
+}
+
+# wait_numa_subflows <dst_port> <cand>: wait until two subflows are
+# established and one of them carries the engineered source port.
+wait_numa_subflows() {
+	local dst_port="${1}"
+	local cand="${2}"
+	local i out n
+
+	for i in $(seq 50); do
+		out=$(ip netns exec "${PM_NS2}" ss -H -t state established \
+		      "( dport = :${dst_port} )" 2>/dev/null)
+		n=$(printf '%s\n' "${out}" | grep -c .)
+
+		if [ "${n}" -ge 2 ] && \
+		   printf '%s\n' "${out}" | grep -qE ":${cand}[[:space:]]"; then
+			SUBFLOWS="${n}"
+			return 0
+		fi
+
+		sleep 0.1
+	done
+
+	SUBFLOWS=$(printf '%s\n' "${out}" | grep -c .)
+	echo "timed out waiting for the engineered subflow (port ${cand})"
+	return 1
+}
+
+pm_test_numa_pm() {
+	pm_check_prereqs
+
+	command -v ss >/dev/null 2>&1 || \
+		pm_skip "ss(8) is required for subflow counting"
+
+	[ -f "${NUMA_PM_CONF}" ] || \
+		pm_skip "numa_pm test configuration missing"
+
+	pm_setup_env
+	trap cleanup_numa EXIT
+
+	MPTCPD_LOG="$(mktemp "${TMPDIR:-/tmp}/numa-pm-e2e.XXXXXX")"
+
+	start_numa_mptcpd
+
+	if ! wait_log_line "numa_pm init OK"; then
+		pm_fail "numa_pm plugin did not initialize"
+		return
+	fi
+
+	pm_do_conn "0.0.0.0" "10.0.1.1" "5001" || return
+
+	if ! wait_log_line "add_subflow rc=0"; then
+		pm_fail "plugin did not add an engineered subflow"
+		return
+	fi
+
+	local line node cand
+	line="$(grep -E "add_subflow rc=0" "${MPTCPD_LOG}" | head -n 1)"
+	node="$(printf '%s\n' "${line}" | sed -n "s/.*node=\([0-9][0-9]*\).*/\1/p")"
+	cand="$(printf '%s\n' "${line}" | sed -n "s/.*cand=\([0-9][0-9]*\).*/\1/p")"
+
+	if [ -z "${node}" ] || [ -z "${cand}" ]; then
+		pm_fail "cannot parse node/cand from plugin log"
+		return
+	fi
+
+	if [ "${node}" != "0" ]; then
+		pm_fail "probed node ${node}, expected node 0 (CPU pinning failed)"
+		return
+	fi
+
+	if ! pool_ports "${node}" | grep -qx "${cand}"; then
+		pm_fail "engineered port ${cand} not in node ${node} pool"
+		return
+	fi
+
+	if ! wait_log_line "set_backup\(f1=[0-9][0-9]*\) OK"; then
+		pm_fail "original subflow not set to backup"
+		return
+	fi
+
+	if ! wait_numa_subflows 5001 "${cand}"; then
+		pm_fail "expected 2 established subflows, got ${SUBFLOWS:-0}"
+		return
+	fi
+
+	pm_pass "numa_pm: engineered subflow port ${cand} from node ${node} pool, backup OK"
+}
+
+pm_test_numa_pm
+exit "${PM_RET}"

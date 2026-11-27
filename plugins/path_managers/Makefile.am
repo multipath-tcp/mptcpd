@@ -7,7 +7,7 @@ include $(top_srcdir)/aminclude_static.am
 MPTCPD_PLUGIN_CPPFLAGS = \
 	-I$(top_srcdir)/include -I$(top_builddir)/include
 
-pkglib_LTLIBRARIES = addr_adv.la sspi.la
+pkglib_LTLIBRARIES = addr_adv.la sspi.la numa_pm.la
 
 sspi_la_SOURCES	 = sspi.c
 sspi_la_CPPFLAGS = $(MPTCPD_PLUGIN_CPPFLAGS) $(CODE_COVERAGE_CPPFLAGS)
@@ -36,6 +36,21 @@ addr_adv_la_LDFLAGS  =	\
 	-avoid-version	\
 	$(ELL_LIBS)
 addr_adv_la_LIBADD   =			 \
+	$(top_builddir)/lib/libmptcpd.la \
+	$(CODE_COVERAGE_LIBS)
+
+numa_pm_la_SOURCES  = numa_pm.c
+numa_pm_la_CPPFLAGS = $(MPTCPD_PLUGIN_CPPFLAGS) $(CODE_COVERAGE_CPPFLAGS)
+numa_pm_la_CFLAGS   =	\
+	$(ELL_CFLAGS)		\
+	$(MPTCPD_PLUGIN_CFLAGS)	\
+	$(CODE_COVERAGE_CFLAGS)
+numa_pm_la_LDFLAGS  =	\
+	-no-undefined	\
+	-module			\
+	-avoid-version		\
+	$(ELL_LIBS)
+numa_pm_la_LIBADD   =			 \
 	$(top_builddir)/lib/libmptcpd.la \
 	$(CODE_COVERAGE_LIBS)
 
