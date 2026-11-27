@@ -44,9 +44,10 @@ dist_check_SCRIPTS =		\
 	test-bad-plugin-dir	\
 	test-start-stop		\
 	test-mptcpwrap		\
-	test-e2e-addr-adv
+	test-e2e-addr-adv	\
+	test-e2e-numa-pm
 
-EXTRA_DIST = pm_lib.sh
+EXTRA_DIST = pm_lib.sh numa_pm_test.conf
 
 test_plugin_SOURCES = test-plugin.c
 test_plugin_CPPFLAGS =							\
